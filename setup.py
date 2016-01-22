@@ -5,7 +5,7 @@ import os
 version = os.environ.get("MODULEVER", "0.0")
 
 setup(
-    install_requires=['numpy == 1.7.0', 'dill == 0.2.4'],
+    install_requires=['numpy >= 1.7.0', 'dill >= 0.2.4'],
     # We also require OpenCV but it's already in dls-python's `sys.path`.
     name='dls_imagematch', version=version,
     description='Image registration for VMXi',

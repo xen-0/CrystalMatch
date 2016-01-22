@@ -1,4 +1,4 @@
-from functools import partial
+from functools import partial, reduce
 from itertools import product
 from copy import deepcopy
 from operator import add
@@ -6,9 +6,9 @@ from operator import add
 import cv2
 import numpy as np
 
-import transforms as tlib  # Contains `Transform` class.
-from parallelmap import parallel_map
-from setutils import agreeing_subset_indices
+import dls_imagematch.transforms as tlib  # Contains `Transform` class.
+from .parallelmap import parallel_map
+from .setutils import agreeing_subset_indices
 
 
 def pick_freqs(coarseness_range, working_size_factor, img):
@@ -103,7 +103,7 @@ def find_tr(
         # Set up a metric function which takes just a transform matrix.
         metric_fn = lambda tr_mat: \
             cv2.absdiff(*get_comparison_regions(
-                crop_amounts, (sc_ref_img, sc_img), translation_only, tr_mat))
+                crop_amounts, sc_ref_img, sc_img, translation_only, tr_mat))
 
         # Choose the transform candidates for this working size.
         trs = [tlib.Transform.identity()]
@@ -130,8 +130,8 @@ def find_tr(
                 for fresh_tr in fresh_trs]
 
             # Evaluate the metric for each transform.
-            metric_imgs = map(metric_fn, net_tr_mats)
-            metrics = map(np.sum, metric_imgs)
+            metric_imgs = list(map(metric_fn, net_tr_mats))
+            metrics = list(map(np.sum, metric_imgs))
 
             # Choose the net transform which minimises the metric.
             best = np.argmin(metrics)
@@ -139,7 +139,7 @@ def find_tr(
             net_tr_mat = net_tr_mats[best]
 
             if debug:
-                print '(wsf:'+str(wsf)+')', metrics
+                print('(wsf:{}) {}'.format(wsf,metrics))
                 cv2.imshow(
                     'progress',
                     cv2.resize(
@@ -151,7 +151,7 @@ def find_tr(
     return net_tr
 
 
-def get_comparison_regions(crop, (ref, img), px_translation, transform):
+def get_comparison_regions(crop, ref, img, px_translation, transform):
     """Return cropped images, a transform having been applied to the latter.
 
     `crop` is a list of proportions to discard from the top, bottom, left and
@@ -208,7 +208,7 @@ def find_consensus_tr(n_processes, ref, img, **kwargs):
     (no rot/scale).
     """
     # TODO: Add meta-guess.
-    guesses = map(lambda (x, y): tlib.Transform.translation(*(x, y)),
+    guesses = map(lambda x, y: tlib.Transform.translation(*(x, y)),
                   product((-0.06, 0.06), (-0.1, -0.03, 0.03, 0.1)))
 
     # Construct a list of argument tuples to pass to `parallel_map`.
@@ -237,7 +237,7 @@ def find_consensus_tr(n_processes, ref, img, **kwargs):
     # Choose an arbitrary transform from the consensus group.
     best = list(translation_sets[consensus])[0]
 
-    print 'Confidence:', str(set_lengths[consensus])+'/'+str(len(guesses))
+    print('Confidence:', str(set_lengths[consensus])+'/'+str(len(guesses)))
 
     return trs[best]
 

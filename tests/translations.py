@@ -5,7 +5,7 @@ assert __name__ == '__main__'  # Don't let anyone import us.
 from pkg_resources import require;  require('numpy', 'dill')
 
 from os import path
-from functools import partial
+from functools import partial, reduce
 
 import cv2
 
@@ -34,6 +34,8 @@ N_PROCESSES = 8  # How many CPU cores to use (sort of).
 TEST_SET = 'B'  # Test set B is more interesting than A.
 CROP_AMOUNTS = [0.12]*4
 
+INPUT_DIR_ROOT = "../test-images/old/"
+
 
 # Real image dimensions, in microns... of the reference?
 # (These dimensions are for test set A.)
@@ -41,7 +43,7 @@ image_physical_width, image_physical_height = map(float, (2498, 2004))
 
 
 if TEST_SET == 'A':
-    input_dir = 'C:\\PROJECTS_WORKSPACE\\8815 Diamond\\imagematch\\python\\imageMatch\\translate-test-A'
+    input_dir = INPUT_DIR_ROOT + 'translate-test-A'
     indices = [
         (1, [1, 2, 3, 4]),
         (2, [1, 2]),
@@ -52,8 +54,8 @@ if TEST_SET == 'A':
         (7, [1, 2, 3, 4]),  # Last one is a crazy GIMP edit...
     ]
 elif TEST_SET == 'B':
-    input_dir = 'C:\\PROJECTS_WORKSPACE\\8815 Diamond\\imagematch\\python\\imageMatch\\translate-test-B'
-    indices = [(i, [1, 2]) for i in xrange(1, 8)]
+    input_dir = INPUT_DIR_ROOT + 'translate-test-B'
+    indices = [(i, [1, 2]) for i in range(1, 8)]
 
 
 def make_gray(img):
@@ -98,7 +100,7 @@ for sample in indices:
         ref, trans = map(cv2.imread, (ref_file, trans_file))
         ref, trans = map(make_gray, (ref, trans))
 
-        print str(samp_num)+'_'+str(trans_num)+'.png\n---'
+        print(str(samp_num)+'_'+str(trans_num)+'.png\n---')
 
         net_transform = find_tr_fn(
             ref, trans,
@@ -110,9 +112,9 @@ for sample in indices:
         delta_x = -t[0, 2]*image_physical_width/image_width
         delta_y = +t[1, 2]*image_physical_height/image_height
 
-        print '---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---'
-        print t
-        print '==='
+        print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
+        print(t)
+        print('===')
 
         if TRANSLATIONS_OUTPUT_FILE is not None:
             with open(TRANSLATIONS_OUTPUT_FILE, 'a') as f:
@@ -139,4 +141,4 @@ if PROFILING:
     s = StringIO.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
     ps.print_stats()
-    print s.getvalue()
+    print(s.getvalue())

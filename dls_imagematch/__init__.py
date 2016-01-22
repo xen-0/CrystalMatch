@@ -1,4 +1,4 @@
 """Image registration for VMXi.
 """
 
-from imagematch import *
+from dls_imagematch.imagematch import *
