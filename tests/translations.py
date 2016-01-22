@@ -14,6 +14,8 @@ from dls_imagematch import (
     find_consensus_tr, find_tr, apply_tr, get_size, grain_extract)
 
 
+
+
 # Note non-reference images SHOULD NOT have features near their edges.
 # TODO: Could blur the reference image ahead-of-time.
 # TODO: Deduplication of scale preprocessing?
@@ -39,7 +41,7 @@ image_physical_width, image_physical_height = map(float, (2498, 2004))
 
 
 if TEST_SET == 'A':
-    input_dir = '/home/ecw19626/imageMatch/translate-test-A'
+    input_dir = 'C:\\PROJECTS_WORKSPACE\\8815 Diamond\\imagematch\\python\\imageMatch\\translate-test-A'
     indices = [
         (1, [1, 2, 3, 4]),
         (2, [1, 2]),
@@ -50,7 +52,7 @@ if TEST_SET == 'A':
         (7, [1, 2, 3, 4]),  # Last one is a crazy GIMP edit...
     ]
 elif TEST_SET == 'B':
-    input_dir = '/home/ecw19626/imageMatch/translate-test-B'
+    input_dir = 'C:\\PROJECTS_WORKSPACE\\8815 Diamond\\imagematch\\python\\imageMatch\\translate-test-B'
     indices = [(i, [1, 2]) for i in xrange(1, 8)]
 
 
