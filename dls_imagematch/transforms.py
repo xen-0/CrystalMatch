@@ -33,6 +33,10 @@ class Transform(object):
         self.zoom = zoom
         self.rot = rot
 
+    def __str__(self):
+        return "Horizontal: {:.4f}; Vertical: {:.4f}; Zoom: {:.4f}; Rotation: {:.4f}"\
+            .format(self.horiz, self.vert, self.zoom, self.rot)
+
     # Alternative constructors...
     @classmethod
     def identity(cls):

@@ -96,7 +96,7 @@ for sample in indices:
             input_dir, str(samp_num)+'_'+str(ref_num)+'.png')
         trans_file = path.join(
             input_dir, str(samp_num)+'_'+str(trans_num)+'.png')
-
+        print(ref_file, trans_file)
         ref, trans = map(cv2.imread, (ref_file, trans_file))
         ref, trans = map(make_gray, (ref, trans))
 
