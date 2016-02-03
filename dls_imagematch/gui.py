@@ -1,17 +1,21 @@
 import sys
 import os
+from os import path
 from functools import partial, reduce
 import cv2
+import numpy as np
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 from PyQt4.QtCore import (Qt, SIGNAL)
 
-from dls_imagematch import (find_consensus_tr, find_tr, apply_tr, get_size, grain_extract)
+from dls_imagematch import (find_consensus_tr, find_tr, apply_tr, get_size)
 
 
-INPUT_DIR_ROOT = "../test-images/old/"
+INPUT_DIR_ROOT = "../test-images/"
+
+OUTPUT_DIRECTORY = "../test-output/"
 
 
 class ImageMatcher(QMainWindow):
@@ -31,8 +35,18 @@ class ImageMatcher(QMainWindow):
 
         self._init_ui()
 
+        filepath = INPUT_DIR_ROOT + "old/translate-test-B/3_1.png"
+        self._display_image(self._selection_A_frame, filepath)
+        self._set_filename_label(self._selection_A_label, filepath)
+        self._selection_A = filepath
+
+        filepath = INPUT_DIR_ROOT + "old/translate-test-B/3_2.png"
+        self._display_image(self._selection_B_frame, filepath)
+        self._set_filename_label(self._selection_B_label, filepath)
+        self._selection_B = filepath
+
     def _init_ui(self):
-        self.setGeometry(100, 100, 1500, 650)
+        self.setGeometry(100, 100, 1200, 650)
         self.setWindowTitle('Diamond VMXi Image Matching')
         self.setWindowIcon(QIcon('web.png'))
 
@@ -206,7 +220,6 @@ class ImageMatcher(QMainWindow):
         PROFILING = False
         DISPLAY_PROGRESS = True
         DISPLAY_RESULTS = False
-        OUTPUT_DIRECTORY = None
         TRANSLATIONS_OUTPUT_FILE = None
         CONSENSUS = False  # If True, cannot display progress.
         N_PROCESSES = 8  # How many CPU cores to use (sort of).
@@ -217,50 +230,45 @@ class ImageMatcher(QMainWindow):
         # (These dimensions are for test set A.)
         image_physical_width, image_physical_height = map(float, (2498, 2004))
 
+        # Read the selected images and convert to grayscale
         ref_file = self._selection_A
         trans_file = self._selection_B
 
-        print(ref_file, trans_file)
+        ref_col, trans_col = map(cv2.imread, (ref_file, trans_file))
+        ref, trans = map(make_gray, (ref_col, trans_col))
 
-        ref, trans = map(cv2.imread, (ref_file, trans_file))
-        ref, trans = map(make_gray, (ref, trans))
-
+        # Select the appropariate solution method (using consensus algorithm or not)
         find_tr_fn = partial(find_consensus_tr, N_PROCESSES) if CONSENSUS else find_tr
 
+        # Find the transformation that maps the two images
         net_transform = find_tr_fn(
             ref, trans,
             debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
 
+        # Determine transformation in real units (um)
         image_width, image_height = get_size(ref)
         t = net_transform((image_width, image_height))
 
         delta_x = -t[0, 2]*image_physical_width/image_width
         delta_y = +t[1, 2]*image_physical_height/image_height
 
+        # Print results
         print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
         print(t)
         print('===')
 
-        '''
-        if TRANSLATIONS_OUTPUT_FILE is not None:
-            with open(TRANSLATIONS_OUTPUT_FILE, 'a') as f:
-                f.write(table_line((str(samp_num), str(trans_num),
-                                    str(-t[0, 2]), str(t[1, 2]),
-                                    str(delta_x), str(delta_y))))
-
         if DISPLAY_RESULTS:
             cv2.imshow(
-                'sample'+str(samp_num)+' comparison'+str(trans_num),
+                'result',
                 cv2.absdiff(ref, apply_tr(net_transform, trans)))
             cv2.waitKey(0)
 
         if OUTPUT_DIRECTORY is not None:
+            grain_extract = np.subtract(ref, apply_tr(net_transform, trans)) + 128
             cv2.imwrite(
-                path.join(
-                    OUTPUT_DIRECTORY,
-                    str(samp_num)+'_'+str(ref_num)+'_'+str(trans_num)+'.jpg'),
-                grain_extract(ref, apply_tr(net_transform, trans)))
-        '''
+                path.join(OUTPUT_DIRECTORY, 'match_output_test.jpg'),
+                grain_extract)
+
 
 
 def make_gray(img):

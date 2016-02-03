@@ -10,26 +10,12 @@ import dls_imagematch.transforms as tlib  # Contains `Transform` class.
 from .parallelmap import parallel_map
 from .setutils import agreeing_subset_indices
 
-
-def pick_freqs(coarseness_range, working_size_factor, img):
-    """Copy an image, discarding all but a range of frequency components.
-
-    E.g. for a coarseness range of (1, 50), only features with sizes between 1
-    and 50 pixels are retained (providing `working_size_factor == 1`).
-
-    `1.0/working_size_factor` is used as a prefactor to the coarseness range
-    bounds. This is useful for the purposes of the implementation of
-    `find_tr()`. (A full-sized `img` should be passed in, regardless of whether
-    `working_size_factor == 1`.)
-    """
-    (c_lo, c_hi), wsf = coarseness_range, working_size_factor
-    return freq_range(img, int(c_lo/wsf), int(c_hi/wsf))
-
+from .image import Image
 
 def find_tr(
-        ref_img, img,  # Reference and translated images.
+        img_ref, img_mov,  # Reference and translated images.
         translation_only=True,  # Consider only translations (no rot/scale)?
-        scale_preprocess=partial(pick_freqs, (1, 50)),  # Scale-dep. preproc..
+        freq_range=(1, 50),  # Scale-dep. preproc..
         guess=tlib.Transform.identity(),  # Expected transform.
         wsfs=(0.125, 0.25, 0.5, 1),  # Working size factors.
         crop_amounts=[0.1]*4,  # Edge regions to exclude from metric.
@@ -77,10 +63,13 @@ def find_tr(
     matrix forms.
     """
 
+    # DEBUG
+    img_ref, img_mov = Image(img_ref), Image(img_mov)
+
     # What return value do we expect? (Speed up the program by guessing well.)
     net_tr = guess
 
-    orig_size = get_size(img)
+    orig_size = img_mov.size()
 
     for wsf in wsfs:  # Working size factors.
         new_size = tuple(map(int, map(lambda x: x*wsf, orig_size)))
@@ -92,18 +81,17 @@ def find_tr(
         # Do the scale factor-dependent preprocessing step. In our case, we'll
         # pick out frequency ranges somewhat coarser than 1 px. Do it for both
         # images.
-        sc_p = partial(scale_preprocess, wsf)
-        p_ref_img, p_img = map(sc_p, (ref_img, img))
+        freq_img_ref = img_ref.pick_frequency_range(freq_range, wsf)
+        freq_img_mov = img_mov.pick_frequency_range(freq_range, wsf)
 
         # Do the rescaling of the images.
-        sc_ref_img, sc_img = map(
-            partial(lambda size, im: cv2.resize(im, size), new_size),
-            (p_ref_img, p_img))
+        scale_img_ref = freq_img_ref.resize(new_size)
+        scale_img_mov = freq_img_mov.resize(new_size)
 
         # Set up a metric function which takes just a transform matrix.
         metric_fn = lambda tr_mat: \
             cv2.absdiff(*get_comparison_regions(
-                crop_amounts, sc_ref_img, sc_img, translation_only, tr_mat))
+                crop_amounts, scale_img_ref.img, scale_img_mov.img, translation_only, tr_mat))
 
         # Choose the transform candidates for this working size.
         trs = [tlib.Transform.identity()]
@@ -140,12 +128,14 @@ def find_tr(
 
             if debug:
                 print('(wsf:{}) {}'.format(wsf,metrics))
+
                 cv2.imshow(
                     'progress',
                     cv2.resize(
                         metric_imgs[best]/float(np.max(metric_imgs[best])),
                         (0, 0), fx=1/wsf, fy=1/wsf))
                 cv2.waitKey(0)
+
 
     # TODO: Return a weighted average of the best transforms (i.e. subpixel).
     return net_tr
@@ -271,15 +261,6 @@ def apply_tr(transform, img):
 
     return cv2.warpAffine(img, transform, working_size)
 
-
-def grain_extract(img_a, img_b):
-    return np.subtract(img_a, img_b) + 128
-
-
-def freq_range(img, lower, upper):
-    a = cv2.blur(img, (lower, lower))
-    b = cv2.blur(img, (upper, upper))
-    return grain_extract(a, b)
 
 
 def _floatify_args(fn):  # A decorator.
