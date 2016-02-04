@@ -11,7 +11,7 @@ from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButt
 from PyQt4.QtCore import (Qt, SIGNAL)
 
 from dls_imagematch import (find_consensus_tr, find_tr, get_size)
-from dls_imagematch.imagemetric import apply_tr
+from dls_imagematch.metric import apply_tr
 
 
 INPUT_DIR_ROOT = "../test-images/"

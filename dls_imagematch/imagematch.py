@@ -11,7 +11,8 @@ from .parallelmap import parallel_map
 from .setutils import agreeing_subset_indices
 
 from .image import Image
-from .imagemetric import ImageMetric
+from .metric import OverlapMetric
+from .trials import TrialTransforms
 
 def find_tr(
         img_ref, img_mov,  # Reference and translated images.
@@ -68,75 +69,53 @@ def find_tr(
     img_ref, img_mov = Image(img_ref), Image(img_mov)
 
     # What return value do we expect? (Speed up the program by guessing well.)
-    net_tr = guess
+    net_transform = guess
 
     orig_size = img_mov.size()
 
-    for wsf in wsfs:  # Working size factors.
-        new_size = tuple(map(int, map(lambda x: x*wsf, orig_size)))
+    for scale in wsfs:  # Working size factors.
+        new_size = tuple(map(int, map(lambda x: x*scale, orig_size)))
         # Refresh the net transform matrix for the new working size.
         # (Remember that the matrix representation of a given `Transform`
         # object depends on the working size.)
-        net_tr_mat = net_tr(new_size)
+        net_transform_matrix = net_transform(new_size)
 
         # Do the scale factor-dependent preprocessing step. In our case, we'll
         # pick out frequency ranges somewhat coarser than 1 px.
-        freq_img_ref = img_ref.pick_frequency_range(freq_range, wsf)
-        freq_img_mov = img_mov.pick_frequency_range(freq_range, wsf)
+        freq_img_ref = img_ref.pick_frequency_range(freq_range, scale)
+        freq_img_mov = img_mov.pick_frequency_range(freq_range, scale)
 
         # Rescale the preprocessed images
         scale_img_ref = freq_img_ref.resize(new_size)
         scale_img_mov = freq_img_mov.resize(new_size)
 
         # Metric calculator which determines how goof of a match a given transformation is
-        metric_calc = ImageMetric(scale_img_ref, scale_img_mov, crop_amounts, translation_only)
+        metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
+                                    crop_amounts, translation_only)
 
         # Choose the transform candidates for this working size.
-        trs = [tlib.Transform.identity()]
-        trs.extend(_king_trs(1, wsf, orig_size))
-        trs.extend(_king_trs(2, wsf, orig_size))
+        trial_transforms = TrialTransforms(orig_size)
+        trial_transforms.add_kings(1, scale)
+        trial_transforms.add_kings(2, scale)
+
         if not translation_only:
             pass  # TODO: Add some zoom, rot transforms here.
 
-        best = None  # Which fresh transform candidate minimises the metric?
-        while 0 != best:  # While it's not the identity transform...
+        # TODO: replace this with an actual minimisation routine - 2 variables for translation only, 4 for general
+        min_reached = False
+        while not min_reached:  # While it's not the identity transform...
 
-            # Randomize the random transforms (if any -- none presently).
-            fresh_trs = [tr() if isinstance(tr, tlib.RandomTransformer)
-                         else tr for tr in trs]
-
-            # Compose the new transform candidates with the old net transform.
-            net_trs = [fresh_tr * net_tr for fresh_tr in fresh_trs]
-
-            # Do the work of turning the new `Transform`s into matrices here.
-            # Else it would be left to `apply_tr` to do expensively.
-            net_tr_mats = [
-                tlib.Transform._compose_matrix_forms(
-                    fresh_tr(new_size), net_tr_mat)
-                for fresh_tr in fresh_trs]
-
-            # Evaluate the metric for each transform.
-            metric_imgs = list(map(metric_calc.get_absdiff_metric_image, net_tr_mats))
-            metrics = list(map(np.sum, metric_imgs))
-
-            # Choose the net transform which minimises the metric.
-            best = np.argmin(metrics)
-            net_tr = net_trs[best]
-            net_tr_mat = net_tr_mats[best]
+            net_transform, best_img, min_reached = \
+                metric_calc.best_transform(trial_transforms, new_size, net_transform)
 
             if debug:
-                print('(wsf:{}) {}'.format(wsf,metrics))
-
-                cv2.imshow(
-                    'progress',
-                    cv2.resize(
-                        metric_imgs[best]/float(np.max(metric_imgs[best])),
-                        (0, 0), fx=1/wsf, fy=1/wsf))
+                print('(wsf:{})'.format(scale))
+                img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
+                cv2.imshow('progress', img)
                 cv2.waitKey(0)
 
-
     # TODO: Return a weighted average of the best transforms (i.e. subpixel).
-    return net_tr
+    return net_transform
 
 
 def find_consensus_tr(n_processes, ref, img, **kwargs):
@@ -195,63 +174,6 @@ def get_size(img):
         assert img.ndim == 2  # Greyscale
         working_size = img.shape[::-1]
     return working_size
-
-
-def _floatify_args(fn):  # A decorator.
-    def wrapper(*args):
-        floatified_args = []
-        for arg in args:
-            try:
-                arg = float(arg)
-            except TypeError:
-                pass
-            floatified_args.append(arg)
-        return fn(*floatified_args)
-    return wrapper
-
-
-@_floatify_args
-def _king_trs(distance, wsf, orig_working_size):
-    # (Moves available to a King on a chess board.)
-    # `distance` is the desired distance in actual pixels at the given wsf.
-    d, f, (o_w, o_h) = distance, wsf, orig_working_size
-    dx = d/(f*o_w);  dy = d/(f*o_h)
-    return [
-        # Horizontal/vertical moves.
-        tlib.Transform(+dx, 0, 1, 0),
-        tlib.Transform(-dx, 0, 1, 0),
-        tlib.Transform(0, +dy, 1, 0),
-        tlib.Transform(0, -dy, 1, 0),
-
-        # Diagonal moves.
-        tlib.Transform(+dx, +dy, 1, 0),
-        tlib.Transform(-dx, +dy, 1, 0),
-        tlib.Transform(+dx, -dy, 1, 0),
-        tlib.Transform(-dx, -dy, 1, 0),
-    ]
-
-
-@_floatify_args
-def _rot_trs(distance, wsf, orig_working_size):
-    # For `distance == 1` we should rotate such that the sides of the image are
-    # shifted by one pixel. I.e. theta = 1px/(width/2).
-    theta = distance*(180/3.14159)/(wsf*orig_working_size[0]/2)
-    return [
-        tlib.Transform(0, 0, 1, +theta),
-        tlib.Transform(0, 0, 1, -theta),
-    ]
-
-
-@_floatify_args
-def _zoom_trs(distance, wsf, orig_working_size):
-    # For `distance == 1` we should zoom such that the sides of the image are
-    # shifted by one pixel. I.e. factor = (width + 2)/width.
-    width = wsf*orig_working_size[0]
-    factor = distance*(width + 2)/width
-    return [
-        tlib.Transform(0, 0, factor, 0),
-        tlib.Transform(0, 0, 1/factor, 0),
-    ]
 
 
 def distance(point_a, point_b):

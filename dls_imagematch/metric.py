@@ -1,8 +1,9 @@
 import cv2
+import numpy as np
 
 import dls_imagematch.transforms as tlib  # Contains `Transform` class.
 
-class ImageMetric:
+class OverlapMetric:
 
     def __init__(self, img_a, img_b, crop_amounts, translation_only):
         self.img_a = img_a
@@ -10,6 +11,31 @@ class ImageMetric:
         self.crop_amounts = crop_amounts
         self.translation_only = translation_only
         pass
+
+    def best_transform(self, trial_transforms, new_size, net_transform):
+        """ For a TrialTransforms object, return the transform which has the
+        minimum metric value.
+        """
+        net_transforms = trial_transforms.compose_with(net_transform)
+
+        imgs = []
+        metrics = []
+
+        for tr in net_transforms:
+            matrix = tr(new_size)
+            img = self.get_absdiff_metric_image(matrix)
+
+            imgs.append(img)
+            metrics.append(np.sum(img))
+
+        best = np.argmin(metrics)
+        best_transform = net_transforms[best]
+        best_img = imgs[best]
+
+        is_identity = best == 0
+
+        return best_transform, best_img, is_identity
+
 
     def get_absdiff_metric_image(self, transformation):
         cr1, cr2 = self._get_comparison_regions(transformation)

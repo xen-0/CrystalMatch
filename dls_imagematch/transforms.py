@@ -37,6 +37,10 @@ class Transform(object):
         return "Horizontal: {:.4f}; Vertical: {:.4f}; Zoom: {:.4f}; Rotation: {:.4f}"\
             .format(self.horiz, self.vert, self.zoom, self.rot)
 
+    def is_identity(self):
+        return self.horiz == 0 and self.vert == 0 \
+               and self.zoom == 1 and self.rot == 0
+
     # Alternative constructors...
     @classmethod
     def identity(cls):
@@ -78,6 +82,9 @@ class Transform(object):
         return np.linalg.inv(
             np.append(tr_matrix, [[0, 0, 1]], axis=0)
         )[0:2, :]
+
+    def matrix(self, working_size):
+        return self.__call__(working_size)
 
     def __call__(self, working_size):
         """Get a matrix representation.
