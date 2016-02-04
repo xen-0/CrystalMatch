@@ -33,12 +33,15 @@ class Image:
         return Image(grain_extract)
 
     def resize(self, new_size):
+        """ Return a new Image that is a resized version of this one
+        """
         resized_img = cv2.resize(self.img, new_size)
         return Image(resized_img)
 
 
     def size(self):
-        """Return the size of an image in pixels in the format [width, height]."""
+        """Return the size of an image in pixels in the format [width, height].
+        """
         if self.img.ndim == 3:  # Colour
             working_size = self.img.shape[::-1][1:3]
         else:

@@ -11,6 +11,7 @@ from .parallelmap import parallel_map
 from .setutils import agreeing_subset_indices
 
 from .image import Image
+from .imagemetric import ImageMetric
 
 def find_tr(
         img_ref, img_mov,  # Reference and translated images.
@@ -79,19 +80,16 @@ def find_tr(
         net_tr_mat = net_tr(new_size)
 
         # Do the scale factor-dependent preprocessing step. In our case, we'll
-        # pick out frequency ranges somewhat coarser than 1 px. Do it for both
-        # images.
+        # pick out frequency ranges somewhat coarser than 1 px.
         freq_img_ref = img_ref.pick_frequency_range(freq_range, wsf)
         freq_img_mov = img_mov.pick_frequency_range(freq_range, wsf)
 
-        # Do the rescaling of the images.
+        # Rescale the preprocessed images
         scale_img_ref = freq_img_ref.resize(new_size)
         scale_img_mov = freq_img_mov.resize(new_size)
 
-        # Set up a metric function which takes just a transform matrix.
-        metric_fn = lambda tr_mat: \
-            cv2.absdiff(*get_comparison_regions(
-                crop_amounts, scale_img_ref.img, scale_img_mov.img, translation_only, tr_mat))
+        # Metric calculator which determines how goof of a match a given transformation is
+        metric_calc = ImageMetric(scale_img_ref, scale_img_mov, crop_amounts, translation_only)
 
         # Choose the transform candidates for this working size.
         trs = [tlib.Transform.identity()]
@@ -118,7 +116,7 @@ def find_tr(
                 for fresh_tr in fresh_trs]
 
             # Evaluate the metric for each transform.
-            metric_imgs = list(map(metric_fn, net_tr_mats))
+            metric_imgs = list(map(metric_calc.get_absdiff_metric_image, net_tr_mats))
             metrics = list(map(np.sum, metric_imgs))
 
             # Choose the net transform which minimises the metric.
@@ -139,53 +137,6 @@ def find_tr(
 
     # TODO: Return a weighted average of the best transforms (i.e. subpixel).
     return net_tr
-
-
-def get_comparison_regions(crop, ref, img, px_translation, transform):
-    """Return cropped images, a transform having been applied to the latter.
-
-    `crop` is a list of proportions to discard from the top, bottom, left and
-    right (respectively) of both images before returning.
-
-    If `px_translation` is `True` then only translational components of the
-    transform are applied, which is a very cheap operation. Otherwise a full
-    affine transform is applied.
-    """
-    working_size = get_size(img)
-    t, b, l, r = crop;  w, h = working_size
-
-    # Turn proportions into absolute amounts.
-    t, b, l, r = map(int, [t*h, b*h, l*w, r*w])
-
-    ref = ref[t:-b, l:-r]  # Crop the reference.
-    # (Slicing numpy arrays like this is cheap.)
-
-    if not px_translation:  # We must do a "proper" affine transform.
-        img = apply_tr(transform, img)[t:-b, l:-r]
-
-    else:  # Work with img in-place (no deep copy).
-        if isinstance(transform, tlib.Transform):  # We need a matrix.
-            transform = transform(working_size)
-
-        # Extract translation distances from the matrix.
-        x, y = map(int, get_translation_amounts(transform))
-
-        # Find the desired overlap region.
-        # TODO: Document this better.
-        if x >= 0 and y >= 0:
-            x = min(x, l);  y = min(y, t)  # img must cover region of interest!
-            img = img[:h-y, :w-x][t-y:h-y-b, l-x:w-x-r]
-        elif y >= 0:
-            x = max(x, -r);  y = min(y, t)
-            img = img[:h-y, -x:][t-y:h-y-b, l:w-r]
-        elif x >= 0:
-            x = min(x, l);  y = max(y, -b)
-            img = img[-y:, :w-x][t:h-b, l-x:w-x-r]
-        else:
-            x = max(x, -r);  y = max(y, -b)
-            img = img[-y:, -x:][t:h-b, l:w-r]
-
-    return ref, img
 
 
 def find_consensus_tr(n_processes, ref, img, **kwargs):
@@ -244,23 +195,6 @@ def get_size(img):
         assert img.ndim == 2  # Greyscale
         working_size = img.shape[::-1]
     return working_size
-
-
-def apply_tr(transform, img):
-    """Apply an affine transform to an image and return the result.
-
-    `transform` can be an affine transform matrix or a Transform object.
-    `img` can be colour or greyscale.
-
-    This function is expensive and its use should be avoided if possible.
-    """
-    working_size = get_size(img)
-
-    if hasattr(transform, '__call__'):  # We need a matrix.
-        transform = transform(working_size)
-
-    return cv2.warpAffine(img, transform, working_size)
-
 
 
 def _floatify_args(fn):  # A decorator.
