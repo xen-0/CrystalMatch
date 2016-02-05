@@ -14,144 +14,169 @@ from dls_imagematch.util.parallelmap import parallel_map
 from dls_imagematch.util.setutils import agreeing_subset_indices
 
 
-def match(
-        img_ref, img_mov,  # Reference and translated images.
-        translation_only=True,  # Consider only translations (no rot/scale)?
-        freq_range=(1, 50),  # Scale-dep. preproc..
-        guess=tlib.Transform.identity(),  # Expected transform.
-        scale_factors=(0.125, 0.25, 0.5, 1),  # Working size factors.
-        crop_amounts=[0.1]*4,  # Edge regions to exclude from metric.
-        debug=False,  # Display progress?
-    ):
-    """Return (hopefully) the `Transform` which maps `img` onto `ref_img`.
+class ImageMatcher:
+    # Edge regions to exclude from metric.
+    DEFAULT_CROP = [0.1] * 4
 
-    How does this function work? Answer:
+    def __init__(self):
+        # Scale factor for earlier matching iterations
+        self._scale_factors = (0.125, 0.25, 0.5, 1)
+        # Scale-dependent range of frequencies to pick out in preprocessing step
+        self._freq_range = (1, 50)
+        # Consider only translations (no rot/scale)?
+        self._translation_only = True
+        # Use consensus algorithm
+        self._use_consensus = False
+        # Number of separate process to use in consensus matching
+        self._num_processes = 8
+        # Display debug data and progress images during run
+        self._debug = False
 
-    It tries applying a bunch of slightly different affine transforms to the
-    overlaid image and keeps the one which minimises a metric. It repeats
-    this process until it has found a local minimum in the metric.
+    def set_debug(self, debug=True):
+        self._debug = debug
 
-    That's not the whole story. For the first iterations, the two images are
-    scaled down by a factor of 8. The function proceeds as usual until it
-    finds a local minimum to the nearest pixel in x and y. At this point, the
-    two images are blown up by a factor of two (to a net scale factor of 1/4)
-    and again the function finds a local minimum to the nearest pixel in x
-    and y. This process is repeated at scale factors 1/2 and finally 1.
+    def set_consensus(self, consensus):
+        self._use_consensus = consensus
 
-    By taking this approach (starting coarse and gradually getting finer) the
-    function runs quicker than if it worked at scale factor 1 the whole time.
-    This is because the cost of computing the metric scales with image area.
-    Furthermore, a preprocessing operation may be invoked on the images at
-    each rescaling, which can pick out coarser or finer image features at
-    a given scale factor. This might work better than using all image
-    features at every stage. In practice, it does seem that this is an
-    important feature of the algorithm. Most importantly, when doing the
-    precision matching at scale factor 1, picking out a set of high-frequency
-    components ignores low-frequency variation between the images --
-    typically the result of differences in lighting conditions.
-
-    At each scale factor the function uses a different set of candidate
-    transforms. Typically, transform amounts should correspond to
-    translations of a single pixel at the given scale factor.
-
-    Optionally, the function could work to a greater precision than "nearest-
-    pixel", since OpenCV uses anti-aliasing when applying affine transforms.
-    This might also allow for speed improvements.
-
-    For performance reasons, this function uses implementation details of the
-    `Transform` class. It's cheaper to manually keep track of the matrix
-    forms of affine transforms, than to compose many `Transform` objects with
-    `__mul__` and then execute `__call__` every time we want to obtain their
-    matrix forms.
-    """
-    img_ref, img_mov = Image(img_ref), Image(img_mov)
-
-    # What return value do we expect? (Speed up the program by guessing well.)
-    net_transform = guess
-
-    original_size = img_mov.size()
-
-    for scale in scale_factors:
-        new_size = tuple(map(int, map(lambda x: x*scale, original_size)))
-
-        # Do the scale factor-dependent preprocessing step. In our case, we'll
-        # pick out frequency ranges somewhat coarser than 1 px.
-        freq_img_ref = img_ref.pick_frequency_range(freq_range, scale)
-        freq_img_mov = img_mov.pick_frequency_range(freq_range, scale)
-
-        # Rescale the preprocessed images
-        scale_img_ref = freq_img_ref.resize(new_size)
-        scale_img_mov = freq_img_mov.resize(new_size)
-
-        # Metric calculator which determines how goof of a match a given transformation is
-        metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
-                                    crop_amounts, translation_only)
-
-        # Choose the transform candidates for this working size.
-        trial_transforms = TrialTransforms(original_size)
-        trial_transforms.add_kings(1, scale)
-        trial_transforms.add_kings(2, scale)
-
-        if not translation_only:
-            pass  # TODO: Add some zoom, rot transforms here.
-
-        min_reached = False
-        while not min_reached:
-            net_transform, best_img, min_reached = \
-                metric_calc.best_transform(trial_transforms, new_size, net_transform)
-
-            if debug:
-                print('(wsf:{})'.format(scale))
-                img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
-                cv2.imshow('progress', img)
-                cv2.waitKey(0)
-
-    # TODO: Return a weighted average of the best transforms (i.e. subpixel).
-    return net_transform
+    def match(self, reference_img, move_img, crop_amounts=DEFAULT_CROP):
+        if self._use_consensus:
+            return self._match_consensus(reference_img, move_img)
+        else:
+            guess = tlib.Transform.identity()
+            return self._match_single(reference_img, move_img, crop_amounts, guess)
 
 
-def consensus_match(n_processes, ref, img, **kwargs):
-    """Apply `find_tr` with few guesses and return the consensus `Transform`.
+    def _match_single(self, img_ref, img_mov, crop_amounts, guess):
+        """Return (hopefully) the `Transform` which maps `img` onto `ref_img`.
 
-    `kwargs` are passed directly to `find_tr`, apart from `guess` and `debug`
-    which are overridden.
+        How does this function work? Answer:
 
-    Currently, consensus finding is only implemented for translations
-    (no rot/scale).
-    """
-    # TODO: Add meta-guess.
-    guesses = map(lambda x, y: tlib.Transform.translation(*(x, y)),
-                  product((-0.06, 0.06), (-0.1, -0.03, 0.03, 0.1)))
+        It tries applying a bunch of slightly different affine transforms to the
+        overlaid image and keeps the one which minimises a metric. It repeats
+        this process until it has found a local minimum in the metric.
 
-    # Construct a list of argument tuples to pass to `parallel_map`.
-    arg_list = (((ref, img), updated(kwargs, {'guess': guess, 'debug': False}))
-                for guess in guesses)
+        That's not the whole story. For the first iterations, the two images are
+        scaled down by a factor of 8. The function proceeds as usual until it
+        finds a local minimum to the nearest pixel in x and y. At this point, the
+        two images are blown up by a factor of two (to a net scale factor of 1/4)
+        and again the function finds a local minimum to the nearest pixel in x
+        and y. This process is repeated at scale factors 1/2 and finally 1.
 
-    # Dispatch `find_tr` to multiple cores and collect the results.
-    trs = parallel_map(n_processes, match, arg_list)
+        By taking this approach (starting coarse and gradually getting finer) the
+        function runs quicker than if it worked at scale factor 1 the whole time.
+        This is because the cost of computing the metric scales with image area.
+        Furthermore, a preprocessing operation may be invoked on the images at
+        each rescaling, which can pick out coarser or finer image features at
+        a given scale factor. This might work better than using all image
+        features at every stage. In practice, it does seem that this is an
+        important feature of the algorithm. Most importantly, when doing the
+        precision matching at scale factor 1, picking out a set of high-frequency
+        components ignores low-frequency variation between the images --
+        typically the result of differences in lighting conditions.
 
-    # Get information from transforms for purposes of consensus finding.
-    tr_mats = map(lambda tr: tr(get_size(ref)), trs)
-    translations = map(get_translation_amounts, tr_mats)
+        At each scale factor the function uses a different set of candidate
+        transforms. Typically, transform amounts should correspond to
+        translations of a single pixel at the given scale factor.
 
-    # How similar must points be to "agree"?
-    consensus_distance = 2  # Pixels.
+        Optionally, the function could work to a greater precision than "nearest-
+        pixel", since OpenCV uses anti-aliasing when applying affine transforms.
+        This might also allow for speed improvements.
 
-    # Find internally agreeing sets of translations.
-    translation_sets = list(agreeing_subset_indices(
-        translations,
-        lambda p, o: distance(p, o) < consensus_distance))
+        For performance reasons, this function uses implementation details of the
+        `Transform` class. It's cheaper to manually keep track of the matrix
+        forms of affine transforms, than to compose many `Transform` objects with
+        `__mul__` and then execute `__call__` every time we want to obtain their
+        matrix forms.
+        """
+        img_ref, img_mov = Image(img_ref), Image(img_mov)
 
-    # Which internally agreeing set has the most members?
-    set_lengths = map(len, translation_sets)
-    consensus = np.argmax(set_lengths)  # TODO: Check if tied for longest.
+        # What return value do we expect? (Speed up the program by guessing well.)
+        net_transform = guess
 
-    # Choose an arbitrary transform from the consensus group.
-    best = list(translation_sets[consensus])[0]
+        original_size = img_mov.size()
 
-    print('Confidence:', str(set_lengths[consensus])+'/'+str(len(guesses)))
+        for scale in self._scale_factors:
+            new_size = tuple(map(int, map(lambda x: x*scale, original_size)))
 
-    return trs[best]
+            # Do the scale factor-dependent preprocessing step. In our case, we'll
+            # pick out frequency ranges somewhat coarser than 1 px.
+            freq_img_ref = img_ref.pick_frequency_range(self._freq_range, scale)
+            freq_img_mov = img_mov.pick_frequency_range(self._freq_range, scale)
+
+            # Rescale the preprocessed images
+            scale_img_ref = freq_img_ref.resize(new_size)
+            scale_img_mov = freq_img_mov.resize(new_size)
+
+            # Metric calculator which determines how goof of a match a given transformation is
+            metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
+                                        crop_amounts, self._translation_only)
+
+            # Choose the transform candidates for this working size.
+            trial_transforms = TrialTransforms(original_size)
+            trial_transforms.add_kings(1, scale)
+            trial_transforms.add_kings(2, scale)
+
+            if not self._translation_only:
+                pass  # TODO: Add some zoom, rot transforms here.
+
+            # Perform the metric minimisation
+            min_reached = False
+            while not min_reached:
+                net_transform, best_img, min_reached = \
+                    metric_calc.best_transform(trial_transforms, new_size, net_transform)
+
+                if self._debug:
+                    print('(wsf:{})'.format(scale))
+                    img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
+                    cv2.imshow('progress', img)
+                    cv2.waitKey(0)
+
+        # TODO: Return a weighted average of the best transforms (i.e. subpixel).
+        return net_transform
+
+
+    def _match_consensus(self, ref, img, **kwargs):
+        """Apply `find_tr` with few guesses and return the consensus `Transform`.
+
+        `kwargs` are passed directly to `find_tr`, apart from `guess` and `debug`
+        which are overridden.
+
+        Currently, consensus finding is only implemented for translations
+        (no rot/scale).
+        """
+        # TODO: Add meta-guess.
+        guesses = map(lambda x, y: tlib.Transform.translation(*(x, y)),
+                      product((-0.06, 0.06), (-0.1, -0.03, 0.03, 0.1)))
+
+        # Construct a list of argument tuples to pass to `parallel_map`.
+        arg_list = (((ref, img), updated(kwargs, {'guess': guess, 'debug': False}))
+                    for guess in guesses)
+
+        # Dispatch `find_tr` to multiple cores and collect the results.
+        trs = parallel_map(self._num_processes, self._match_single, arg_list)
+
+        # Get information from transforms for purposes of consensus finding.
+        tr_mats = map(lambda tr: tr(get_size(ref)), trs)
+        translations = map(get_translation_amounts, tr_mats)
+
+        # How similar must points be to "agree"?
+        consensus_distance = 2  # Pixels.
+
+        # Find internally agreeing sets of translations.
+        translation_sets = list(agreeing_subset_indices(
+            translations,
+            lambda p, o: distance(p, o) < consensus_distance))
+
+        # Which internally agreeing set has the most members?
+        set_lengths = map(len, translation_sets)
+        consensus = np.argmax(set_lengths)  # TODO: Check if tied for longest.
+
+        # Choose an arbitrary transform from the consensus group.
+        best = list(translation_sets[consensus])[0]
+
+        print('Confidence:', str(set_lengths[consensus])+'/'+str(len(guesses)))
+
+        return trs[best]
 
 
 def get_translation_amounts(tr_mat):

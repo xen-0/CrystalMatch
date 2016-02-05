@@ -9,7 +9,7 @@ from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 
-from dls_imagematch import (consensus_match, match, get_size)
+from dls_imagematch import ImageMatcher, get_size
 from dls_imagematch.match.metric import apply_tr
 
 INPUT_DIR_ROOT = "../test-images/"
@@ -17,9 +17,9 @@ INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
 
 
-class ImageMatcher(QMainWindow):
+class ImageMatcherGui(QMainWindow):
     def __init__(self):
-        super(ImageMatcher, self).__init__()
+        super(ImageMatcherGui, self).__init__()
 
         self._fileTreeView = None
         self.model = None
@@ -216,10 +216,8 @@ class ImageMatcher(QMainWindow):
         if self._selection_A == self._selection_B:
             return
 
-        DISPLAY_PROGRESS = True
         DISPLAY_RESULTS = False
         CONSENSUS = False  # If True, cannot display progress.
-        N_PROCESSES = 8  # How many CPU cores to use (sort of).
         CROP_AMOUNTS = [0.12]*4
 
         # Real image dimensions, in microns... of the reference?
@@ -233,13 +231,11 @@ class ImageMatcher(QMainWindow):
         ref_img, mov_img = map(cv2.imread, (ref_file, trans_file))
         ref_gray_img, mov_gray_img = map(make_gray, (ref_img, mov_img))
 
+        matcher = ImageMatcher()
+        matcher.set_debug(True)
+        matcher.set_consensus(CONSENSUS)
 
-        if CONSENSUS:
-            net_transform = consensus_match(N_PROCESSES, ref_gray_img, mov_gray_img,
-                                       debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
-        else:
-            net_transform = match(ref_gray_img, mov_gray_img,
-                                  debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
+        net_transform = matcher.match(ref_gray_img, mov_gray_img, crop_amounts=CROP_AMOUNTS)
 
 
         # Determine transformation in real units (um)
@@ -278,7 +274,7 @@ def make_gray(img):
 
 def main():
     app = QApplication(sys.argv)
-    ex = ImageMatcher()
+    ex = ImageMatcherGui()
     sys.exit(app.exec_())
 
 
