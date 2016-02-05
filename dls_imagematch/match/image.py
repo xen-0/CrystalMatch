@@ -5,13 +5,31 @@ OUTPUT_DIRECTORY = "../test-output/"
 
 
 class Image:
-    def __init__(self, img):
+    def __init__(self, img, real_size):
         self.img = img
 
-    def D_SAVE(self, filename):
+        # The size of the image in number of pixels
+        self.size = self._size()
+
+        # The real size represented by the image
+        self.real_size = real_size
+
+        # The real size represented by a single pixel in the image
+        self.pixel_size = self.real_size[0] / self.size[0]
+
+    def save(self, filename):
         cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
 
-    def pick_frequency_range(self, coarseness_range, scale_factor):
+    def make_gray(self):
+        """ Return a greyscale version of the image
+        """
+        if len(self.img.shape) in (3, 4):
+            gray_img = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+            return Image(gray_img, self.real_size)
+        else:
+            return Image(self.img, self.real_size)
+
+    def freq_range(self, coarseness_range, scale_factor):
         """Copy an image, discarding all but a range of frequency components.
 
         E.g. for a coarseness range of (1, 50), only features with sizes between 1
@@ -31,16 +49,23 @@ class Image:
 
         grain_extract = np.subtract(a, b) + 128
 
-        return Image(grain_extract)
+        return Image(grain_extract, self.real_size)
+
+    def rescale(self, factor):
+        """ Return a new Image that is a version of this image, resized to the specified scale
+        """
+        scaled_size = (int(self.size[0] * factor), int(self.size[1] * factor))
+        return self.resize(scaled_size)
+
 
     def resize(self, new_size):
         """ Return a new Image that is a resized version of this one
         """
         resized_img = cv2.resize(self.img, new_size)
-        return Image(resized_img)
+        return Image(resized_img, self.real_size)
 
 
-    def size(self):
+    def _size(self):
         """Return the size of an image in pixels in the format [width, height].
         """
         if self.img.ndim == 3:  # Colour
@@ -49,3 +74,9 @@ class Image:
             assert self.img.ndim == 2  # Greyscale
             working_size = self.img.shape[::-1]
         return working_size
+
+
+    @staticmethod
+    def from_file(filename, real_size):
+        img = cv2.imread(filename)
+        return Image(img, real_size)

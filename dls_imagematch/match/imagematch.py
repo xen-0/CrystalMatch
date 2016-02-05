@@ -88,24 +88,21 @@ class ImageMatcher:
         `__mul__` and then execute `__call__` every time we want to obtain their
         matrix forms.
         """
-        img_ref, img_mov = Image(img_ref), Image(img_mov)
-
         # What return value do we expect? (Speed up the program by guessing well.)
         net_transform = guess
 
-        original_size = img_mov.size()
+        # TODO: this assumes that both images are the same size - not true!
+        original_size = img_mov._size()
 
         for scale in self._scale_factors:
-            new_size = tuple(map(int, map(lambda x: x*scale, original_size)))
+            # TODO: this assumes that both images are the same size - not true!
+            new_size = (original_size[0] * scale, original_size[1] * scale)
 
             # Do the scale factor-dependent preprocessing step. In our case, we'll
-            # pick out frequency ranges somewhat coarser than 1 px.
-            freq_img_ref = img_ref.pick_frequency_range(self._freq_range, scale)
-            freq_img_mov = img_mov.pick_frequency_range(self._freq_range, scale)
-
-            # Rescale the preprocessed images
-            scale_img_ref = freq_img_ref.resize(new_size)
-            scale_img_mov = freq_img_mov.resize(new_size)
+            # pick out frequency ranges somewhat coarser than 1 px. Then resize the
+            # image to the correct scale
+            scale_img_ref = img_ref.freq_range(self._freq_range, scale).rescale(scale)
+            scale_img_mov = img_mov.freq_range(self._freq_range, scale).rescale(scale)
 
             # Metric calculator which determines how goof of a match a given transformation is
             metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,

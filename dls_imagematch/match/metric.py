@@ -58,7 +58,7 @@ class OverlapMetric:
         img = self.img_b.img
 
         t, b, l, r = self.crop_amounts
-        working_size = self.img_b.size()
+        working_size = self.img_b._size()
         w, h = working_size
 
         # Turn proportions into absolute amounts.

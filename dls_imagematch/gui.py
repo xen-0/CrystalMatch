@@ -9,6 +9,7 @@ from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 
+from dls_imagematch.match.image import Image
 from dls_imagematch import ImageMatcher, get_size
 from dls_imagematch.match.metric import apply_tr
 
@@ -222,28 +223,30 @@ class ImageMatcherGui(QMainWindow):
 
         # Real image dimensions, in microns... of the reference?
         # (These dimensions are for test set A.)
-        image_physical_width, image_physical_height = map(float, (2498, 2004))
+        real_dimensions = (2498.0, 2004.0)
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
         trans_file = self._selection_B
 
-        ref_img, mov_img = map(cv2.imread, (ref_file, trans_file))
-        ref_gray_img, mov_gray_img = map(make_gray, (ref_img, mov_img))
+        # Get greyscale versions of the selected images
+        ref_gray_img = Image.from_file(ref_file, real_dimensions).make_gray()
+        mov_gray_img = Image.from_file(trans_file, real_dimensions).make_gray()
 
+        # Create image matcher object to perform the matching
         matcher = ImageMatcher()
         matcher.set_debug(True)
         matcher.set_consensus(CONSENSUS)
 
+        # Perform the matching operation to determine the transformation that maps image B to image A
         net_transform = matcher.match(ref_gray_img, mov_gray_img, crop_amounts=CROP_AMOUNTS)
 
-
         # Determine transformation in real units (um)
-        image_width, image_height = get_size(ref_gray_img)
+        image_width, image_height = ref_gray_img.size
         t = net_transform((image_width, image_height))
 
-        delta_x = -t[0, 2]*image_physical_width/image_width
-        delta_y = +t[1, 2]*image_physical_height/image_height
+        delta_x = -t[0, 2]*real_dimensions[0]/image_width
+        delta_y = +t[1, 2]*real_dimensions[1]/image_height
 
         # Print results
         print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
@@ -257,19 +260,10 @@ class ImageMatcherGui(QMainWindow):
             cv2.waitKey(0)
 
         if OUTPUT_DIRECTORY is not None:
-            grain_extract = np.subtract(ref_gray_img, apply_tr(net_transform, mov_gray_img)) + 128
+            grain_extract = np.subtract(ref_gray_img.img, apply_tr(net_transform, mov_gray_img.img)) + 128
             cv2.imwrite(
                 path.join(OUTPUT_DIRECTORY, 'match_output_test.jpg'),
                 grain_extract)
-
-
-
-def make_gray(img):
-    if len(img.shape) in (3, 4):
-        return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    else:
-        return img
-
 
 
 def main():
