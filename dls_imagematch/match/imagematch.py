@@ -1,25 +1,25 @@
-from functools import partial, reduce
-from itertools import product
 from copy import deepcopy
+from functools import reduce
+from itertools import product
 from operator import add
 
 import cv2
 import numpy as np
 
-import dls_imagematch.transforms as tlib  # Contains `Transform` class.
-from .parallelmap import parallel_map
-from .setutils import agreeing_subset_indices
+import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
+from dls_imagematch.match.image import Image
+from dls_imagematch.match.metric import OverlapMetric
+from dls_imagematch.match.trials import TrialTransforms
+from dls_imagematch.util.parallelmap import parallel_map
+from dls_imagematch.util.setutils import agreeing_subset_indices
 
-from .image import Image
-from .metric import OverlapMetric
-from .trials import TrialTransforms
 
-def find_tr(
+def match(
         img_ref, img_mov,  # Reference and translated images.
         translation_only=True,  # Consider only translations (no rot/scale)?
         freq_range=(1, 50),  # Scale-dep. preproc..
         guess=tlib.Transform.identity(),  # Expected transform.
-        wsfs=(0.125, 0.25, 0.5, 1),  # Working size factors.
+        scale_factors=(0.125, 0.25, 0.5, 1),  # Working size factors.
         crop_amounts=[0.1]*4,  # Edge regions to exclude from metric.
         debug=False,  # Display progress?
     ):
@@ -64,21 +64,15 @@ def find_tr(
     `__mul__` and then execute `__call__` every time we want to obtain their
     matrix forms.
     """
-
-    # DEBUG
     img_ref, img_mov = Image(img_ref), Image(img_mov)
 
     # What return value do we expect? (Speed up the program by guessing well.)
     net_transform = guess
 
-    orig_size = img_mov.size()
+    original_size = img_mov.size()
 
-    for scale in wsfs:  # Working size factors.
-        new_size = tuple(map(int, map(lambda x: x*scale, orig_size)))
-        # Refresh the net transform matrix for the new working size.
-        # (Remember that the matrix representation of a given `Transform`
-        # object depends on the working size.)
-        net_transform_matrix = net_transform(new_size)
+    for scale in scale_factors:
+        new_size = tuple(map(int, map(lambda x: x*scale, original_size)))
 
         # Do the scale factor-dependent preprocessing step. In our case, we'll
         # pick out frequency ranges somewhat coarser than 1 px.
@@ -94,17 +88,15 @@ def find_tr(
                                     crop_amounts, translation_only)
 
         # Choose the transform candidates for this working size.
-        trial_transforms = TrialTransforms(orig_size)
+        trial_transforms = TrialTransforms(original_size)
         trial_transforms.add_kings(1, scale)
         trial_transforms.add_kings(2, scale)
 
         if not translation_only:
             pass  # TODO: Add some zoom, rot transforms here.
 
-        # TODO: replace this with an actual minimisation routine - 2 variables for translation only, 4 for general
         min_reached = False
-        while not min_reached:  # While it's not the identity transform...
-
+        while not min_reached:
             net_transform, best_img, min_reached = \
                 metric_calc.best_transform(trial_transforms, new_size, net_transform)
 
@@ -118,7 +110,7 @@ def find_tr(
     return net_transform
 
 
-def find_consensus_tr(n_processes, ref, img, **kwargs):
+def consensus_match(n_processes, ref, img, **kwargs):
     """Apply `find_tr` with few guesses and return the consensus `Transform`.
 
     `kwargs` are passed directly to `find_tr`, apart from `guess` and `debug`
@@ -136,7 +128,7 @@ def find_consensus_tr(n_processes, ref, img, **kwargs):
                 for guess in guesses)
 
     # Dispatch `find_tr` to multiple cores and collect the results.
-    trs = parallel_map(n_processes, find_tr, arg_list)
+    trs = parallel_map(n_processes, match, arg_list)
 
     # Get information from transforms for purposes of consensus finding.
     tr_mats = map(lambda tr: tr(get_size(ref)), trs)

@@ -1,4 +1,4 @@
-import dls_imagematch.transforms as tlib  # Contains `Transform` class.
+import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
 
 
 class TrialTransforms:

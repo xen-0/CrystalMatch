@@ -1,18 +1,16 @@
-import sys
 import os
+import sys
 from os import path
-from functools import partial, reduce
+
 import cv2
 import numpy as np
-
 from PyQt4 import QtGui
+from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
-from PyQt4.QtCore import (Qt, SIGNAL)
 
-from dls_imagematch import (find_consensus_tr, find_tr, get_size)
-from dls_imagematch.metric import apply_tr
-
+from dls_imagematch import (consensus_match, match, get_size)
+from dls_imagematch.match.metric import apply_tr
 
 INPUT_DIR_ROOT = "../test-images/"
 
@@ -218,13 +216,10 @@ class ImageMatcher(QMainWindow):
         if self._selection_A == self._selection_B:
             return
 
-        PROFILING = False
         DISPLAY_PROGRESS = True
         DISPLAY_RESULTS = False
-        TRANSLATIONS_OUTPUT_FILE = None
         CONSENSUS = False  # If True, cannot display progress.
         N_PROCESSES = 8  # How many CPU cores to use (sort of).
-        TEST_SET = 'B'  # Test set B is more interesting than A.
         CROP_AMOUNTS = [0.12]*4
 
         # Real image dimensions, in microns... of the reference?
@@ -235,19 +230,20 @@ class ImageMatcher(QMainWindow):
         ref_file = self._selection_A
         trans_file = self._selection_B
 
-        ref_col, trans_col = map(cv2.imread, (ref_file, trans_file))
-        ref, trans = map(make_gray, (ref_col, trans_col))
+        ref_img, mov_img = map(cv2.imread, (ref_file, trans_file))
+        ref_gray_img, mov_gray_img = map(make_gray, (ref_img, mov_img))
 
-        # Select the appropariate solution method (using consensus algorithm or not)
-        find_tr_fn = partial(find_consensus_tr, N_PROCESSES) if CONSENSUS else find_tr
 
-        # Find the transformation that maps the two images
-        net_transform = find_tr_fn(
-            ref, trans,
-            debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
+        if CONSENSUS:
+            net_transform = consensus_match(N_PROCESSES, ref_gray_img, mov_gray_img,
+                                       debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
+        else:
+            net_transform = match(ref_gray_img, mov_gray_img,
+                                  debug=DISPLAY_PROGRESS, crop_amounts=CROP_AMOUNTS)
+
 
         # Determine transformation in real units (um)
-        image_width, image_height = get_size(ref)
+        image_width, image_height = get_size(ref_gray_img)
         t = net_transform((image_width, image_height))
 
         delta_x = -t[0, 2]*image_physical_width/image_width
@@ -261,11 +257,11 @@ class ImageMatcher(QMainWindow):
         if DISPLAY_RESULTS:
             cv2.imshow(
                 'result',
-                cv2.absdiff(ref, apply_tr(net_transform, trans)))
+                cv2.absdiff(ref_gray_img, apply_tr(net_transform, mov_gray_img)))
             cv2.waitKey(0)
 
         if OUTPUT_DIRECTORY is not None:
-            grain_extract = np.subtract(ref, apply_tr(net_transform, trans)) + 128
+            grain_extract = np.subtract(ref_gray_img, apply_tr(net_transform, mov_gray_img)) + 128
             cv2.imwrite(
                 path.join(OUTPUT_DIRECTORY, 'match_output_test.jpg'),
                 grain_extract)

@@ -3,6 +3,7 @@ import numpy as np
 
 OUTPUT_DIRECTORY = "../test-output/"
 
+
 class Image:
     def __init__(self, img):
         self.img = img

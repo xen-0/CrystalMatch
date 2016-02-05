@@ -11,7 +11,7 @@ import cv2
 
 import sys;  sys.path.append('..')
 from dls_imagematch import (
-    find_consensus_tr, find_tr, apply_tr, get_size, grain_extract)
+    consensus_match, match, apply_tr, get_size, grain_extract)
 
 
 
@@ -85,7 +85,7 @@ if PROFILING:
     pr.enable()
 
 
-find_tr_fn = partial(find_consensus_tr, N_PROCESSES) if CONSENSUS else find_tr
+find_tr_fn = partial(consensus_match, N_PROCESSES) if CONSENSUS else match
 
 
 for sample in indices:

@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 
-import dls_imagematch.transforms as tlib  # Contains `Transform` class.
+import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
+
 
 class OverlapMetric:
 
@@ -11,6 +12,7 @@ class OverlapMetric:
         self.crop_amounts = crop_amounts
         self.translation_only = translation_only
         pass
+
 
     def best_transform(self, trial_transforms, new_size, net_transform):
         """ For a TrialTransforms object, return the transform which has the
