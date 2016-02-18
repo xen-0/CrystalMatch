@@ -91,12 +91,10 @@ class ImageMatcher:
         # What return value do we expect? (Speed up the program by guessing well.)
         net_transform = guess
 
-        # TODO: this assumes that both images are the same size - not true!
-        original_size = img_mov._size()
-
         for scale in self._scale_factors:
-            # TODO: this assumes that both images are the same size - not true!
-            new_size = (original_size[0] * scale, original_size[1] * scale)
+            # The transformations applied must be made relative to the current scale factor
+            mov_original_size = img_mov.size
+            mov_scaled_size = (mov_original_size[0] * scale, mov_original_size[1] * scale)
 
             # Do the scale factor-dependent preprocessing step. In our case, we'll
             # pick out frequency ranges somewhat coarser than 1 px. Then resize the
@@ -109,18 +107,18 @@ class ImageMatcher:
                                         crop_amounts, self._translation_only)
 
             # Choose the transform candidates for this working size.
-            trial_transforms = TrialTransforms(original_size)
+            trial_transforms = TrialTransforms(mov_original_size)
             trial_transforms.add_kings(1, scale)
             trial_transforms.add_kings(2, scale)
 
             if not self._translation_only:
-                pass  # TODO: Add some zoom, rot transforms here.
+                pass #trial_transforms.a
 
             # Perform the metric minimisation
             min_reached = False
             while not min_reached:
                 net_transform, best_img, min_reached = \
-                    metric_calc.best_transform(trial_transforms, new_size, net_transform)
+                    metric_calc.best_transform(trial_transforms, mov_scaled_size, net_transform)
 
                 if self._debug:
                     print('(wsf:{})'.format(scale))

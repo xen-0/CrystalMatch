@@ -219,19 +219,38 @@ class ImageMatcherGui(QMainWindow):
 
         DISPLAY_RESULTS = False
         CONSENSUS = False  # If True, cannot display progress.
-        CROP_AMOUNTS = [0.12]*4
+
 
         # Real image dimensions, in microns... of the reference?
         # (These dimensions are for test set A.)
-        real_dimensions = (2498.0, 2004.0)
+        CROP_AMOUNTS = [0.12]*4
+        real_dimensions_A = real_dimensions_B = (2498.0, 2004.0)
+
+        # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
+        '''
+        real_dimensions_A = (5000.0, 3750.0)
+        real_dimensions_B = (1509.62, 1210.21)
+        CROP_AMOUNTS = [0.29,0.24,0.125,0.52]
+        '''
+
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
         trans_file = self._selection_B
 
         # Get greyscale versions of the selected images
-        ref_gray_img = Image.from_file(ref_file, real_dimensions).make_gray()
-        mov_gray_img = Image.from_file(trans_file, real_dimensions).make_gray()
+        ref_gray_img = Image.from_file(ref_file, real_dimensions_A).make_gray()
+        mov_gray_img = Image.from_file(trans_file, real_dimensions_B).make_gray()
+
+        #DEBUG
+        # Resize the mov image so it has the same size per pixel as the ref image
+        '''
+        print("ref " + str(ref_gray_img.pixel_size))
+        print("mov" + str(mov_gray_img.pixel_size))
+        mov_gray_img = mov_gray_img.rescale(mov_gray_img.pixel_size / ref_gray_img.pixel_size)
+        print("mov" + str(mov_gray_img.pixel_size))
+        mov_gray_img.save("resized_bubble")
+        '''
 
         # Create image matcher object to perform the matching
         matcher = ImageMatcher()
@@ -245,8 +264,8 @@ class ImageMatcherGui(QMainWindow):
         image_width, image_height = ref_gray_img.size
         t = net_transform((image_width, image_height))
 
-        delta_x = -t[0, 2]*real_dimensions[0]/image_width
-        delta_y = +t[1, 2]*real_dimensions[1]/image_height
+        delta_x = -t[0, 2]*real_dimensions_A[0]/image_width
+        delta_y = +t[1, 2]*real_dimensions_A[1]/image_height
 
         # Print results
         print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')

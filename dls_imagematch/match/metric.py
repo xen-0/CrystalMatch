@@ -11,10 +11,13 @@ class OverlapMetric:
         self.img_b = img_b
         self.crop_amounts = crop_amounts
         self.translation_only = translation_only
-        pass
+
+        #DEBUG
+        img_a.save("img_a")
+        img_b.save("img_b")
 
 
-    def best_transform(self, trial_transforms, new_size, net_transform):
+    def best_transform(self, trial_transforms, scaled_size, net_transform):
         """ For a TrialTransforms object, return the transform which has the
         minimum metric value.
         """
@@ -24,7 +27,7 @@ class OverlapMetric:
         metrics = []
 
         for tr in net_transforms:
-            matrix = tr(new_size)
+            matrix = tr(scaled_size)
             img = self.get_absdiff_metric_image(matrix)
 
             imgs.append(img)
@@ -41,6 +44,12 @@ class OverlapMetric:
 
     def get_absdiff_metric_image(self, transformation):
         cr1, cr2 = self._get_comparison_regions(transformation)
+
+        #DEBUG
+        from dls_imagematch.match.image import Image
+        Image(cr1, self.img_a.real_size).save("cr1")
+        Image(cr2, self.img_a.real_size).save("cr2")
+
         return cv2.absdiff(cr1, cr2)
 
 
@@ -55,7 +64,7 @@ class OverlapMetric:
         affine transform is applied.
         """
         ref_img = self.img_a.img
-        img = self.img_b.img
+        mov_img = self.img_b.img
 
         t, b, l, r = self.crop_amounts
         working_size = self.img_b._size()
@@ -67,9 +76,12 @@ class OverlapMetric:
         ref_img = ref_img[t:-b, l:-r]  # Crop the reference.
         # (Slicing numpy arrays like this is cheap.)
 
-
         if not self.translation_only:  # We must do a "proper" affine transform.
-            img = apply_tr(transform, img)[t:-b, l:-r]
+            #DEBUG
+            from dls_imagematch.match.image import Image
+            Image(apply_tr(transform, mov_img), self.img_b.real_size).save("mov_trans")
+
+            mov_img = apply_tr(transform, mov_img)[t:-b, l:-r]
 
         else:  # Work with img in-place (no deep copy).
             if isinstance(transform, tlib.Transform):  # We need a matrix.
@@ -82,18 +94,18 @@ class OverlapMetric:
             # TODO: Document this better.
             if x >= 0 and y >= 0:
                 x = min(x, l);  y = min(y, t)  # img must cover region of interest!
-                img = img[:h-y, :w-x][t-y:h-y-b, l-x:w-x-r]
+                mov_img = mov_img[:h-y, :w-x][t-y:h-y-b, l-x:w-x-r]
             elif y >= 0:
                 x = max(x, -r);  y = min(y, t)
-                img = img[:h-y, -x:][t-y:h-y-b, l:w-r]
+                mov_img = mov_img[:h-y, -x:][t-y:h-y-b, l:w-r]
             elif x >= 0:
                 x = min(x, l);  y = max(y, -b)
-                img = img[-y:, :w-x][t:h-b, l-x:w-x-r]
+                mov_img = mov_img[-y:, :w-x][t:h-b, l-x:w-x-r]
             else:
                 x = max(x, -r);  y = max(y, -b)
-                img = img[-y:, -x:][t:h-b, l:w-r]
+                mov_img = mov_img[-y:, -x:][t:h-b, l:w-r]
 
-        return ref_img, img
+        return ref_img, mov_img
 
 
 def get_translation_amounts(tr_mat):
