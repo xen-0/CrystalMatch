@@ -30,10 +30,10 @@ class ImageMatcher:
         # Number of separate process to use in consensus matching
         self._num_processes = 8
         # Display debug data and progress images during run
-        self._debug = False
+        self.DEBUG = False
 
     def set_debug(self, debug=True):
-        self._debug = debug
+        self.DEBUG = debug
 
     def set_consensus(self, consensus):
         self._use_consensus = consensus
@@ -105,6 +105,7 @@ class ImageMatcher:
             # Metric calculator which determines how goof of a match a given transformation is
             metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
                                         crop_amounts, self._translation_only)
+            metric_calc.DEBUG = self.DEBUG
 
             # Choose the transform candidates for this working size.
             trial_transforms = TrialTransforms(mov_original_size)
@@ -120,7 +121,7 @@ class ImageMatcher:
                 net_transform, best_img, min_reached = \
                     metric_calc.best_transform(trial_transforms, mov_scaled_size, net_transform)
 
-                if self._debug:
+                if self.DEBUG:
                     print('(wsf:{})'.format(scale))
                     img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
                     cv2.imshow('progress', img)

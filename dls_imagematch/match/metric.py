@@ -12,9 +12,11 @@ class OverlapMetric:
         self.crop_amounts = crop_amounts
         self.translation_only = translation_only
 
+        self.DEBUG = False
+
         #DEBUG
-        img_a.save("img_a")
-        img_b.save("img_b")
+        img_a.save("Cropped_Image_A")
+        img_b.save("Cropped_Image_B")
 
 
     def best_transform(self, trial_transforms, scaled_size, net_transform):
@@ -45,10 +47,10 @@ class OverlapMetric:
     def get_absdiff_metric_image(self, transformation):
         cr1, cr2 = self._get_comparison_regions(transformation)
 
-        #DEBUG
-        from dls_imagematch.match.image import Image
-        Image(cr1, self.img_a.real_size).save("cr1")
-        Image(cr2, self.img_a.real_size).save("cr2")
+        if self.DEBUG:
+            from dls_imagematch.match.image import Image
+            Image(cr1, self.img_a.real_size).save("Comparison_Region_A")
+            Image(cr2, self.img_a.real_size).save("Comparison_Region_B")
 
         return cv2.absdiff(cr1, cr2)
 
@@ -77,9 +79,9 @@ class OverlapMetric:
         # (Slicing numpy arrays like this is cheap.)
 
         if not self.translation_only:  # We must do a "proper" affine transform.
-            #DEBUG
-            from dls_imagematch.match.image import Image
-            Image(apply_tr(transform, mov_img), self.img_b.real_size).save("mov_trans")
+            if self.DEBUG:
+                from dls_imagematch.match.image import Image
+                Image(apply_tr(transform, mov_img), self.img_b.real_size).save("mov_trans")
 
             mov_img = apply_tr(transform, mov_img)[t:-b, l:-r]
 

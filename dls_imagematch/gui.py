@@ -217,9 +217,8 @@ class ImageMatcherGui(QMainWindow):
         if self._selection_A == self._selection_B:
             return
 
-        DISPLAY_RESULTS = False
+        DEBUG_MODE = True
         CONSENSUS = False  # If True, cannot display progress.
-
 
         # Real image dimensions, in microns... of the reference?
         # (These dimensions are for test set A.)
@@ -227,12 +226,9 @@ class ImageMatcherGui(QMainWindow):
         real_dimensions_A = real_dimensions_B = (2498.0, 2004.0)
 
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
-        '''
-        real_dimensions_A = (5000.0, 3750.0)
+        '''real_dimensions_A = (5000.0, 3750.0)
         real_dimensions_B = (1509.62, 1210.21)
-        CROP_AMOUNTS = [0.29,0.24,0.125,0.52]
-        '''
-
+        CROP_AMOUNTS = [0.29,0.24,0.125,0.52]'''
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
@@ -242,19 +238,20 @@ class ImageMatcherGui(QMainWindow):
         ref_gray_img = Image.from_file(ref_file, real_dimensions_A).make_gray()
         mov_gray_img = Image.from_file(trans_file, real_dimensions_B).make_gray()
 
-        #DEBUG
         # Resize the mov image so it has the same size per pixel as the ref image
-        '''
-        print("ref " + str(ref_gray_img.pixel_size))
-        print("mov" + str(mov_gray_img.pixel_size))
+        if DEBUG_MODE:
+            print("ref " + str(ref_gray_img.pixel_size))
+            print("mov " + str(mov_gray_img.pixel_size))
+
         mov_gray_img = mov_gray_img.rescale(mov_gray_img.pixel_size / ref_gray_img.pixel_size)
-        print("mov" + str(mov_gray_img.pixel_size))
-        mov_gray_img.save("resized_bubble")
-        '''
+
+        if DEBUG_MODE:
+            print("mov " + str(mov_gray_img.pixel_size))
+            mov_gray_img.save("resized_bubble")
 
         # Create image matcher object to perform the matching
         matcher = ImageMatcher()
-        matcher.set_debug(True)
+        matcher.set_debug(DEBUG_MODE)
         matcher.set_consensus(CONSENSUS)
 
         # Perform the matching operation to determine the transformation that maps image B to image A
@@ -272,16 +269,16 @@ class ImageMatcherGui(QMainWindow):
         print(t)
         print('===')
 
-        if DISPLAY_RESULTS:
+        if DEBUG_MODE:
             cv2.imshow(
                 'result',
                 cv2.absdiff(ref_gray_img, apply_tr(net_transform, mov_gray_img)))
             cv2.waitKey(0)
 
-        if OUTPUT_DIRECTORY is not None:
+        if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
             grain_extract = np.subtract(ref_gray_img.img, apply_tr(net_transform, mov_gray_img.img)) + 128
             cv2.imwrite(
-                path.join(OUTPUT_DIRECTORY, 'match_output_test.jpg'),
+                path.join(OUTPUT_DIRECTORY, 'Match_Overlay_Results.jpg'),
                 grain_extract)
 
 
