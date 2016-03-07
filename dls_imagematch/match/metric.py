@@ -17,6 +17,8 @@ class OverlapMetric:
         #DEBUG
         img_a.save("Cropped_Image_A")
         img_b.save("Cropped_Image_B")
+        print(img_a.size)
+        print(img_b.size)
 
 
     def best_transform(self, trial_transforms, scaled_size, net_transform):
@@ -28,9 +30,8 @@ class OverlapMetric:
         imgs = []
         metrics = []
 
-        for tr in net_transforms:
-            matrix = tr(scaled_size)
-            img = self.get_absdiff_metric_image(matrix)
+        for transform in net_transforms:
+            img = self.get_absdiff_metric_image(transform)
 
             imgs.append(img)
             metrics.append(np.sum(img))
@@ -49,8 +50,8 @@ class OverlapMetric:
 
         if self.DEBUG:
             from dls_imagematch.match.image import Image
-            Image(cr1, self.img_a.real_size).save("Comparison_Region_A")
-            Image(cr2, self.img_a.real_size).save("Comparison_Region_B")
+            Image(cr1, self.img_a.real_size[0]).save("Comparison_Region_A")
+            Image(cr2, self.img_a.real_size[0]).save("Comparison_Region_B")
 
         return cv2.absdiff(cr1, cr2)
 
@@ -78,19 +79,18 @@ class OverlapMetric:
         ref_img = ref_img[t:-b, l:-r]  # Crop the reference.
         # (Slicing numpy arrays like this is cheap.)
 
+        tr_matrix = transform(working_size)
+
         if not self.translation_only:  # We must do a "proper" affine transform.
             if self.DEBUG:
                 from dls_imagematch.match.image import Image
-                Image(apply_tr(transform, mov_img), self.img_b.real_size).save("mov_trans")
+                Image(apply_tr(tr_matrix, mov_img), self.img_b.real_size).save("mov_trans")
 
-            mov_img = apply_tr(transform, mov_img)[t:-b, l:-r]
+            mov_img = apply_tr(tr_matrix, mov_img)[t:-b, l:-r]
 
         else:  # Work with img in-place (no deep copy).
-            if isinstance(transform, tlib.Transform):  # We need a matrix.
-                transform = transform(working_size)
-
             # Extract translation distances from the matrix.
-            x, y = map(int, get_translation_amounts(transform))
+            x, y = map(int, get_translation_amounts(tr_matrix))
 
             # Find the desired overlap region.
             # TODO: Document this better.
@@ -121,12 +121,12 @@ def apply_tr(transform, img):
 
     This function is expensive and its use should be avoided if possible.
     """
-    working_size = get_size(img)
+    working_size = get_size(img.img)
 
     if hasattr(transform, '__call__'):  # We need a matrix.
         transform = transform(working_size)
 
-    return cv2.warpAffine(img, transform, working_size)
+    return cv2.warpAffine(img.img, transform, working_size)
 
 def get_size(img):
     """Return the size of an image in pixels in the format [width, height]."""

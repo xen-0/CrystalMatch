@@ -102,7 +102,7 @@ class ImageMatcher:
             scale_img_ref = img_ref.freq_range(self._freq_range, scale).rescale(scale)
             scale_img_mov = img_mov.freq_range(self._freq_range, scale).rescale(scale)
 
-            # Metric calculator which determines how goof of a match a given transformation is
+            # Metric calculator which determines how good of a match a given transformation is
             metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
                                         crop_amounts, self._translation_only)
             metric_calc.DEBUG = self.DEBUG
