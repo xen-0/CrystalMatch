@@ -15,12 +15,10 @@ from dls_imagematch.util.setutils import agreeing_subset_indices
 
 
 class ImageMatcher:
-    # Edge regions to exclude from metric.
-    DEFAULT_CROP = [0.1] * 4
 
     def __init__(self):
         # Scale factor for earlier matching iterations
-        self._scale_factors = (0.25, 0.5, 1)
+        self._scale_factors = (0.25, 0.5, 1) # Used to include 0.125
         # Scale-dependent range of frequencies to pick out in preprocessing step
         self._freq_range = (1, 50)
         # Consider only translations (no rot/scale)?
@@ -38,15 +36,15 @@ class ImageMatcher:
     def set_consensus(self, consensus):
         self._use_consensus = consensus
 
-    def match(self, reference_img, move_img, crop_amounts=DEFAULT_CROP):
+    def match(self, reference_img, move_img):
         if self._use_consensus:
             return self._match_consensus(reference_img, move_img)
         else:
             guess = tlib.Transform(0.5,-1,1,0) #tlib.Transform.identity()
-            return self._match_single(reference_img, move_img, crop_amounts, guess)
+            return self._match_single(reference_img, move_img, guess)
 
 
-    def _match_single(self, img_ref, img_mov, crop_amounts, guess):
+    def _match_single(self, img_ref, img_mov, guess):
         """Return (hopefully) the `Transform` which maps `img` onto `ref_img`.
 
         How does this function work? Answer:
@@ -103,8 +101,7 @@ class ImageMatcher:
             scale_img_mov = img_mov.freq_range(self._freq_range, scale).rescale(scale)
 
             # Metric calculator which determines how good of a match a given transformation is
-            metric_calc = OverlapMetric(scale_img_ref, scale_img_mov,
-                                        crop_amounts, self._translation_only)
+            metric_calc = OverlapMetric(scale_img_ref, scale_img_mov, self._translation_only)
             metric_calc.DEBUG = self.DEBUG
 
             # Choose the transform candidates for this working size.

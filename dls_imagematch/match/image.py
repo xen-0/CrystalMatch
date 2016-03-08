@@ -5,19 +5,17 @@ OUTPUT_DIRECTORY = "../test-output/"
 
 
 class Image:
-    def __init__(self, img, real_width):
+    def __init__(self, img, pixel_size):
         self.img = img
 
         # The size of the image in number of pixels
         self.size = self._size()
 
         # The real size represented by a single pixel in the image
-        self.pixel_size = real_width / self.size[0]
+        self.pixel_size = pixel_size
 
         # The real size represented by the image
-        real_height = self.size[1] / self.pixel_size
-        self.real_size = (real_width, real_height)
-
+        self.real_size = (self.size[0] * self.pixel_size, self.size[1] * self.pixel_size)
 
     def save(self, filename):
         cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
@@ -25,22 +23,22 @@ class Image:
     def copy(self):
         """ Return an Image object which is a deep copy of this one.
         """
-        return Image(self.img.copy(), self.real_size[0])
+        return Image(self.img.copy(), self.pixel_size)
 
     def make_gray(self):
         """ Return a greyscale version of the image
         """
         if len(self.img.shape) in (3, 4):
             gray_img = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
-            return Image(gray_img, self.real_size[0])
+            return Image(gray_img, self.pixel_size)
         else:
-            return Image(self.img, self.real_size[0])
+            return Image(self.img, self.pixel_size)
 
     def make_color(self):
         """Convert the image into a 3 channel BGR image
         """
         color = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
-        return Image(img=color, real_width=self.real_size[0])
+        return Image(img=color, pixel_size=self.pixel_size)
 
 
     def freq_range(self, coarseness_range, scale_factor):
@@ -63,20 +61,27 @@ class Image:
 
         grain_extract = np.subtract(a, b) + 128
 
-        return Image(grain_extract, self.real_size[0])
+        return Image(grain_extract, self.pixel_size)
 
     def rescale(self, factor):
         """ Return a new Image that is a version of this image, resized to the specified scale
         """
         scaled_size = (int(self.size[0] * factor), int(self.size[1] * factor))
-        return self.resize(scaled_size)
+        resized_img = cv2.resize(self.img, scaled_size)
 
+        # Because the image must be an integer number of pixels, we must corect the
+        # factor to calculate the pixel size properly.
+        corrected_factor = scaled_size[0] / self.size[0]
+        pixel_size = self.pixel_size / corrected_factor
+        return Image(resized_img, pixel_size)
 
+    '''
     def resize(self, new_size):
         """ Return a new Image that is a resized version of this one
         """
         resized_img = cv2.resize(self.img, new_size)
-        return Image(resized_img, self.real_size[0])
+        return Image(resized_img, self.pixel_size)
+    '''
 
     def draw_rectangle(self, roi, thickness=1):
         """ Draw the specified rectangle on the image (in place) """
@@ -128,6 +133,6 @@ class Image:
 
 
     @staticmethod
-    def from_file(filename, real_size):
+    def from_file(filename, pixel_size):
         img = cv2.imread(filename)
-        return Image(img, real_size)
+        return Image(img, pixel_size)

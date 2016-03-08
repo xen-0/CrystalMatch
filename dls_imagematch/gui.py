@@ -229,32 +229,32 @@ class ImageMatcherGui(QMainWindow):
 
         # Real image dimensions, in microns... of the reference?
         # (These dimensions are for test set A.)
-        CROP_AMOUNTS = [0.12]*4
-        real_width_A = real_width_B = 2498.0
+        pixel_size_A = pixel_size_B = 2.17217391
 
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
         if USE_SET_441350000072:
-            real_width_A = 5000.0
-            real_width_B = 1509.62
-            CROP_AMOUNTS = [0.29,0.24,0.125,0.52]
+            # Made up but approx correct ratio for well #A1
+            pixel_size_A = 3.90625
+            pixel_size_B = 0.548553779
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
         trans_file = self._selection_B
 
         # Get greyscale versions of the selected images
-        ref_gray_img = Image.from_file(ref_file, real_width_A).make_gray()
-        mov_gray_img = Image.from_file(trans_file, real_width_B).make_gray()
+        ref_gray_img = Image.from_file(ref_file, pixel_size_A).make_gray()
+        mov_gray_img = Image.from_file(trans_file, pixel_size_B).make_gray()
 
         if DEBUG_MODE:
-            print("ref " + str(ref_gray_img.pixel_size))
-            print("mov " + str(mov_gray_img.pixel_size))
+            print("ref pix " + str(ref_gray_img.pixel_size))
+            print("mov pix " + str(mov_gray_img.pixel_size))
 
         # Resize the mov image so it has the same size per pixel as the ref image
-        mov_gray_img = mov_gray_img.rescale(mov_gray_img.pixel_size / ref_gray_img.pixel_size)
+        factor = mov_gray_img.pixel_size / ref_gray_img.pixel_size
+        mov_gray_img = mov_gray_img.rescale(factor)
 
         if DEBUG_MODE:
-            print("mov " + str(mov_gray_img.pixel_size))
+            print("resized pix " + str(mov_gray_img.pixel_size))
             mov_gray_img.save("resized_bubble")
 
         # Create image matcher object to perform the matching
@@ -263,7 +263,7 @@ class ImageMatcherGui(QMainWindow):
         matcher.set_consensus(CONSENSUS)
 
         # Perform the matching operation to determine the transformation that maps image B to image A
-        net_transform = matcher.match(ref_gray_img, mov_gray_img, crop_amounts=CROP_AMOUNTS)
+        net_transform = matcher.match(ref_gray_img, mov_gray_img)
 
         # Determine transformation in real units (um)
         image_width, image_height = ref_gray_img.size

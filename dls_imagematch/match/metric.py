@@ -7,19 +7,13 @@ from dls_imagematch.match.image import Image
 
 class OverlapMetric:
 
-    def __init__(self, img_a, img_b, crop_amounts, translation_only):
+    def __init__(self, img_a, img_b, translation_only):
         self.img_a = img_a
         self.img_b = img_b
-        self.crop_amounts = crop_amounts
+        self.crop_amounts = None
         self.translation_only = translation_only
 
         self.DEBUG = False
-
-        #DEBUG
-        img_a.save("Cropped_Image_A")
-        img_b.save("Cropped_Image_B")
-        print(img_a.size)
-        print(img_b.size)
 
 
     def best_transform(self, trial_transforms, scaled_size, net_transform):
