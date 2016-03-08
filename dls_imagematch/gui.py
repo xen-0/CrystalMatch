@@ -17,7 +17,7 @@ INPUT_DIR_ROOT = "../test-images/"
 
 OUTPUT_DIRECTORY = "../test-output/"
 
-USE_SET_441350000072 = False
+USE_SET_441350000072 = True
 
 
 class ImageMatcherGui(QMainWindow):

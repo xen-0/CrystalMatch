@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
+from dls_imagematch.match.image import Image
 
 
 class OverlapMetric:
@@ -40,20 +41,58 @@ class OverlapMetric:
         best_transform = net_transforms[best]
         best_img = imgs[best]
 
-        is_identity = best == 0
+        is_identity = (best == 0)
+
+        # Paste the abs_diff img onto the ref image and highlight the area
+        if self.DEBUG:
+            ref = self.img_a.copy()
+            working_size = self.img_b._size()
+            w, h = working_size
+            tr_matrix = best_transform(working_size)
+            x, y = map(int, get_translation_amounts(tr_matrix))
+            roi = (x, y, x+w, y+h)
+            ref.paste(Image(best_img, 1000), xOff=x, yOff=y)
+            ref.draw_rectangle(roi)
+            ref.save("rect")
 
         return best_transform, best_img, is_identity
 
 
     def get_absdiff_metric_image(self, transformation):
-        cr1, cr2 = self._get_comparison_regions(transformation)
+        #cr1, cr2 = self._get_comparison_regions(transformation)
+        cr1, cr2 = self._get_comparison_regions_NEW(transformation)
 
         if self.DEBUG:
-            from dls_imagematch.match.image import Image
             Image(cr1, self.img_a.real_size[0]).save("Comparison_Region_A")
             Image(cr2, self.img_a.real_size[0]).save("Comparison_Region_B")
 
         return cv2.absdiff(cr1, cr2)
+
+
+    def _get_comparison_regions_NEW(self, transform):
+        """ Assumes that the region shown in the 'mov_img' is completely contained within the reference image
+
+        """
+        ref_img = self.img_a.img
+        mov_img = self.img_b.img
+
+        working_size = self.img_b._size()
+        w, h = working_size
+
+        tr_matrix = transform(working_size)
+        print(tr_matrix)
+
+        if not self.translation_only:
+            pass
+
+        else:
+            x, y = map(int, get_translation_amounts(tr_matrix))
+
+            #if x < 0 or y < 0: raise Exception("Translation outside reference frame")
+
+            ref_img = ref_img[y:h+y, x:w+x]
+
+        return ref_img, mov_img
 
 
     def _get_comparison_regions(self, transform):
@@ -84,7 +123,7 @@ class OverlapMetric:
         if not self.translation_only:  # We must do a "proper" affine transform.
             if self.DEBUG:
                 from dls_imagematch.match.image import Image
-                Image(apply_tr(tr_matrix, mov_img), self.img_b.real_size).save("mov_trans")
+                Image(apply_tr(tr_matrix, mov_img), self.img_b.real_size[0]).save("mov_trans")
 
             mov_img = apply_tr(tr_matrix, mov_img)[t:-b, l:-r]
 
@@ -94,6 +133,8 @@ class OverlapMetric:
 
             # Find the desired overlap region.
             # TODO: Document this better.
+            #krw: the double slice notation: arr[a:b, c:d][e:f, g:h] is equivalent to (arr[a:b, c:d])[e:f, g:h].
+            # i.e. we are taking a slice of the 2D array and then taking a slice of the array that results
             if x >= 0 and y >= 0:
                 x = min(x, l);  y = min(y, t)  # img must cover region of interest!
                 mov_img = mov_img[:h-y, :w-x][t-y:h-y-b, l-x:w-x-r]

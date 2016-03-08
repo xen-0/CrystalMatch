@@ -20,7 +20,7 @@ class ImageMatcher:
 
     def __init__(self):
         # Scale factor for earlier matching iterations
-        self._scale_factors = (0.125, 0.25, 0.5, 1)
+        self._scale_factors = (0.25, 0.5, 1)
         # Scale-dependent range of frequencies to pick out in preprocessing step
         self._freq_range = (1, 50)
         # Consider only translations (no rot/scale)?
@@ -42,7 +42,7 @@ class ImageMatcher:
         if self._use_consensus:
             return self._match_consensus(reference_img, move_img)
         else:
-            guess = tlib.Transform.identity()
+            guess = tlib.Transform(0.5,-1,1,0) #tlib.Transform.identity()
             return self._match_single(reference_img, move_img, crop_amounts, guess)
 
 

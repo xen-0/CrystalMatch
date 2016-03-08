@@ -19,9 +19,13 @@ class Image:
         self.real_size = (real_width, real_height)
 
 
-
     def save(self, filename):
         cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
+
+    def copy(self):
+        """ Return an Image object which is a deep copy of this one.
+        """
+        return Image(self.img.copy(), self.real_size[0])
 
     def make_gray(self):
         """ Return a greyscale version of the image
@@ -31,6 +35,13 @@ class Image:
             return Image(gray_img, self.real_size[0])
         else:
             return Image(self.img, self.real_size[0])
+
+    def make_color(self):
+        """Convert the image into a 3 channel BGR image
+        """
+        color = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
+        return Image(img=color, real_width=self.real_size[0])
+
 
     def freq_range(self, coarseness_range, scale_factor):
         """Copy an image, discarding all but a range of frequency components.
@@ -67,6 +78,13 @@ class Image:
         resized_img = cv2.resize(self.img, new_size)
         return Image(resized_img, self.real_size[0])
 
+    def draw_rectangle(self, roi, thickness=1):
+        """ Draw the specified rectangle on the image (in place) """
+        top_left = (int(roi[0]), int(roi[1]))
+        bottom_right = (int(roi[2]), int(roi[3]))
+        color = (255,255,255,255)
+        cv2.rectangle(self.img, top_left, bottom_right, color, thickness=thickness)
+
 
     def _size(self):
         """Return the size of an image in pixels in the format [width, height].
@@ -77,6 +95,36 @@ class Image:
             assert self.img.ndim == 2  # Greyscale
             working_size = self.img.shape[::-1]
         return working_size
+
+    def paste(self, src, xOff, yOff):
+        """ Paste the source image onto the target one at the specified position.
+        If any of the source is outside the bounds of this image, it will be
+        lost.
+        """
+        xOff, yOff = int(xOff), int(yOff)
+
+        # Overlap rectangle in target image coordinates
+        width, height = src.size[0], src.size[1]
+        x1 = max(xOff, 0)
+        y1 = max(yOff, 0)
+        x2 = min(xOff+width, self.size[0])
+        y2 = min(yOff+height, self.size[1])
+
+        # Paste location is totally outside image
+        if x1 > x2 or y1 > y2:
+            return
+
+        # Overlap rectangle in source image coordinates
+        sx1 = x1 - xOff
+        sy1 = y1 - yOff
+        sx2 = x2 - xOff
+        sy2 = y2 - yOff
+
+        # Perform paste
+        target = self.img
+        source = src.img
+
+        target[y1:y2, x1:x2] = source[sy1:sy2, sx1:sx2]
 
 
     @staticmethod
