@@ -87,7 +87,7 @@ class Image:
         """ Draw the specified rectangle on the image (in place) """
         top_left = (int(roi[0]), int(roi[1]))
         bottom_right = (int(roi[2]), int(roi[3]))
-        color = (255,255,255,255)
+        color = (0,0,0,255)
         cv2.rectangle(self.img, top_left, bottom_right, color, thickness=thickness)
 
 
@@ -130,6 +130,21 @@ class Image:
         source = src.img
 
         target[y1:y2, x1:x2] = source[sy1:sy2, sx1:sx2]
+
+    def apply_tr(self, transform):
+        """Apply an affine transform to an image and return the result.
+
+        `transform` can be an affine transform matrix or a Transform object.
+        `img` can be colour or greyscale.
+
+        This function is expensive and its use should be avoided if possible.
+        """
+        working_size = self.size
+
+        if hasattr(transform, '__call__'):  # We need a matrix.
+            transform = transform(working_size)
+
+        return cv2.warpAffine(self.img, transform, working_size)
 
 
     @staticmethod

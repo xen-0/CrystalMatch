@@ -15,7 +15,6 @@ class OverlapMetric:
 
         self.DEBUG = False
 
-
     def best_transform(self, trial_transforms, scaled_size, net_transform):
         """ For a TrialTransforms object, return the transform which has the
         minimum metric value.
@@ -26,11 +25,11 @@ class OverlapMetric:
         metrics = []
 
         for transform in net_transforms:
-            img = self.get_absdiff_metric_image(transform)
-
-            imgs.append(img)
-            # avg abs diff per pixel
-            metrics.append(np.sum(img) / img.size)
+            tr_matrix = transform(self.img_b.size)
+            offset = map(int, get_translation_amounts(tr_matrix))
+            metric, absdiff_img = self.calculate_overlap_metric(self.img_a, self.img_b, offset)
+            imgs.append(absdiff_img)
+            metrics.append(metric)
 
         best = np.argmin(metrics)
         best_transform = net_transforms[best]
@@ -47,145 +46,78 @@ class OverlapMetric:
             x, y = map(int, get_translation_amounts(tr_matrix))
             roi = (x, y, x+w, y+h)
             overlay = Image(best_img, self.img_b.pixel_size)
-            #ref.paste(overlay, xOff=x+(w-overlay.size[0]), yOff=y+(h-overlay.size[1]))
             ref.paste(overlay, xOff=max(x,0), yOff=max(y,0))
             ref.draw_rectangle(roi)
             ref.save("rect")
 
-        #return best_transform, best_img, is_identity
         return best_transform, ref.img, is_identity
 
 
+    @staticmethod
+    def calculate_overlap_metric(imgA, imgB, offset):
+        """ For two images, A and B, where B is offset relative to A, calculate the average
+        per pixel absolute difference of the region of overlap of the two images.
 
-    def get_absdiff_metric_image(self, transformation):
-        #cr1, cr2 = self._get_comparison_regions(transformation)
-        cr1, cr2 = self._get_comparison_regions_NEW(transformation)
-
-        if self.DEBUG:
-            Image(cr1, self.img_a.real_size[0]).save("Comparison_Region_A")
-            Image(cr2, self.img_a.real_size[0]).save("Comparison_Region_B")
-
-        return cv2.absdiff(cr1, cr2)
-
-
-    def _get_comparison_regions_NEW(self, transform):
-        """ Assumes that the region shown in the 'mov_img' is completely contained within the reference image
+        Return the value of this metric as well as an image showing the per pixel absolute
+        differences. In the returned image, darker areas indicate greater differences in the
+        overlap whereas lighter areas indeicate more similarity.
         """
-        ref_img = self.img_a.img
-        mov_img = self.img_b.img
+        xOffset, yOffset = offset
+        cr1, cr2 = OverlapMetric.get_overlap_regions(imgA, imgB, xOffset, yOffset)
 
-        r_width, r_height = self.img_a._size()
-        m_width, m_height = self.img_b._size()
+        # DEBUG printouts
+        Image(cr1, imgA.pixel_size).save("Comparison_Region_A")
+        Image(cr2, imgB.pixel_size).save("Comparison_Region_B")
 
-        if not self.translation_only:
-            raise NotImplementedError
+        absdiff_img = cv2.absdiff(cr1, cr2)
+        metric = np.sum(absdiff_img) / absdiff_img.size
 
-        else:
-            tr_matrix = transform(self.img_b._size())
-            xOff, yOff = map(int, get_translation_amounts(tr_matrix))
+        # Invert image so that similarities are light and differences are dark.
+        inverted = 255-absdiff_img
 
-            rx1 = max(xOff, 0)
-            ry1 = max(yOff, 0)
-            rx2 = min(xOff+m_width, r_width)
-            ry2 = min(yOff+m_height, r_height)
-
-            # Paste location is totally outside image
-            if rx1 > rx2 or ry1 > ry2:
-                raise Exception("mov_img outside ref_img area")
-
-            # Overlap rectangle in source image coordinates
-            sx1 = rx1 - xOff
-            sy1 = ry1 - yOff
-            sx2 = rx2 - xOff
-            sy2 = ry2 - yOff
-
-            ref_img = ref_img[ry1:ry2, rx1:rx2]
-            mov_img = mov_img[sy1:sy2, sx1:sx2]
-
-            #ref_img = ref_img[y:h+y, x:w+x]
-
-        # TODO: if the move image is more than X% outside the reference image, fail the trial
-        return ref_img, mov_img
+        return metric, inverted
 
 
-    def _get_comparison_regions(self, transform):
-        """Return cropped images, a transform having been applied to the latter.
+    @staticmethod
+    def get_overlap_regions(imgA, imgB, xOff, yOff):
+        """ For the two images, A and B, where the position of B is offset from that of A,
+        return two new images that are the overlapping segments of the original images.
 
-        `crop` is a list of proportions to discard from the top, bottom, left and
-        right (respectively) of both images before returning.
+        As a simple example, if image B is smaller than A and it is completely contained
+        within the borders of the image A, then we will simply return the whole of image B,
+        and the section of image A that it overlaps. e.g., if A is 100x100 pixels, B is
+        14x14 pixels, and the offset is (x=20, y=30), then the returned section of A will
+        be (20:34, 30:44).
 
-        If `px_translation` is `True` then only translational components of the
-        transform are applied, which is a very cheap operation. Otherwise a full
-        affine transform is applied.
+        If image B only partially overlaps image A, only the overlapping sections of each
+        are returned.
         """
-        ref_img = self.img_a.img
-        mov_img = self.img_b.img
+        # Determine size of images
+        width_a, height_a = imgA.size
+        width_b, height_b = imgB.size
 
-        t, b, l, r = self.crop_amounts
-        working_size = self.img_b._size()
-        w, h = working_size
+        # Corners (top-left, bottom-right) of the overlap rectangle for image A
+        x1_a = max(xOff, 0)
+        y1_a = max(yOff, 0)
+        x2_a = min(xOff+width_b, width_a)
+        y2_a = min(yOff+height_b, height_a)
 
-        # Turn proportions into absolute amounts.
-        t, b, l, r = map(int, [t*h, b*h, l*w, r*w])
+        # Corners of the overlap rectangle for image B
+        x1_b = x1_a - xOff
+        y1_b = y1_a - yOff
+        x2_b = x2_a - xOff
+        y2_b = y2_a - yOff
 
-        ref_img = ref_img[t:-b, l:-r]  # Crop the reference.
-        # (Slicing numpy arrays like this is cheap.)
+        # TODO: if the mov_img is more than X% outside the reference image, fail the trial
+        # Error if paste location is totally outside image
+        if x1_a > x2_a or y1_a > y2_a:
+            raise Exception("mov_img outside ref_img area")
 
-        tr_matrix = transform(working_size)
+        # Get overlap sections of each image
+        overlap_a = imgA.img[y1_a:y2_a, x1_a:x2_a]
+        overlap_b = imgB.img[y1_b:y2_b, x1_b:x2_b]
 
-        if not self.translation_only:  # We must do a "proper" affine transform.
-            if self.DEBUG:
-                Image(apply_tr(tr_matrix, mov_img), self.img_b.real_size[0]).save("mov_trans")
-
-            mov_img = apply_tr(tr_matrix, mov_img)[t:-b, l:-r]
-
-        else:  # Work with img in-place (no deep copy).
-            # Extract translation distances from the matrix.
-            x, y = map(int, get_translation_amounts(tr_matrix))
-
-            # Find the desired overlap region.
-            # TODO: Document this better.
-            #krw: the double slice notation: arr[a:b, c:d][e:f, g:h] is equivalent to (arr[a:b, c:d])[e:f, g:h].
-            # i.e. we are taking a slice of the 2D array and then taking a slice of the array that results
-            if x >= 0 and y >= 0:
-                x = min(x, l);  y = min(y, t)  # img must cover region of interest!
-                mov_img = mov_img[:h-y, :w-x][t-y:h-y-b, l-x:w-x-r]
-            elif y >= 0:
-                x = max(x, -r);  y = min(y, t)
-                mov_img = mov_img[:h-y, -x:][t-y:h-y-b, l:w-r]
-            elif x >= 0:
-                x = min(x, l);  y = max(y, -b)
-                mov_img = mov_img[-y:, :w-x][t:h-b, l-x:w-x-r]
-            else:
-                x = max(x, -r);  y = max(y, -b)
-                mov_img = mov_img[-y:, -x:][t:h-b, l:w-r]
-
-        return ref_img, mov_img
-
+        return overlap_a, overlap_b
 
 def get_translation_amounts(tr_mat):
     return map(lambda i: tr_mat[i, 2], (0, 1))
-
-def apply_tr(transform, img):
-    """Apply an affine transform to an image and return the result.
-
-    `transform` can be an affine transform matrix or a Transform object.
-    `img` can be colour or greyscale.
-
-    This function is expensive and its use should be avoided if possible.
-    """
-    working_size = get_size(img.img)
-
-    if hasattr(transform, '__call__'):  # We need a matrix.
-        transform = transform(working_size)
-
-    return cv2.warpAffine(img.img, transform, working_size)
-
-def get_size(img):
-    """Return the size of an image in pixels in the format [width, height]."""
-    if img.ndim == 3:  # Colour
-        working_size = img.shape[::-1][1:3]
-    else:
-        assert img.ndim == 2  # Greyscale
-        working_size = img.shape[::-1]
-    return working_size
