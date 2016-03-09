@@ -29,7 +29,8 @@ class OverlapMetric:
             img = self.get_absdiff_metric_image(transform)
 
             imgs.append(img)
-            metrics.append(np.sum(img))
+            # avg abs diff per pixel
+            metrics.append(np.sum(img) / img.size)
 
         best = np.argmin(metrics)
         best_transform = net_transforms[best]
@@ -45,11 +46,15 @@ class OverlapMetric:
             tr_matrix = best_transform(working_size)
             x, y = map(int, get_translation_amounts(tr_matrix))
             roi = (x, y, x+w, y+h)
-            ref.paste(Image(best_img, 1000), xOff=x, yOff=y)
+            overlay = Image(best_img, self.img_b.pixel_size)
+            #ref.paste(overlay, xOff=x+(w-overlay.size[0]), yOff=y+(h-overlay.size[1]))
+            ref.paste(overlay, xOff=max(x,0), yOff=max(y,0))
             ref.draw_rectangle(roi)
             ref.save("rect")
 
-        return best_transform, best_img, is_identity
+        #return best_transform, best_img, is_identity
+        return best_transform, ref.img, is_identity
+
 
 
     def get_absdiff_metric_image(self, transformation):
@@ -65,27 +70,41 @@ class OverlapMetric:
 
     def _get_comparison_regions_NEW(self, transform):
         """ Assumes that the region shown in the 'mov_img' is completely contained within the reference image
-
         """
         ref_img = self.img_a.img
         mov_img = self.img_b.img
 
-        working_size = self.img_b._size()
-        w, h = working_size
-
-        tr_matrix = transform(working_size)
-        print(tr_matrix)
+        r_width, r_height = self.img_a._size()
+        m_width, m_height = self.img_b._size()
 
         if not self.translation_only:
-            pass
+            raise NotImplementedError
 
         else:
-            x, y = map(int, get_translation_amounts(tr_matrix))
+            tr_matrix = transform(self.img_b._size())
+            xOff, yOff = map(int, get_translation_amounts(tr_matrix))
 
-            #if x < 0 or y < 0: raise Exception("Translation outside reference frame")
+            rx1 = max(xOff, 0)
+            ry1 = max(yOff, 0)
+            rx2 = min(xOff+m_width, r_width)
+            ry2 = min(yOff+m_height, r_height)
 
-            ref_img = ref_img[y:h+y, x:w+x]
+            # Paste location is totally outside image
+            if rx1 > rx2 or ry1 > ry2:
+                raise Exception("mov_img outside ref_img area")
 
+            # Overlap rectangle in source image coordinates
+            sx1 = rx1 - xOff
+            sy1 = ry1 - yOff
+            sx2 = rx2 - xOff
+            sy2 = ry2 - yOff
+
+            ref_img = ref_img[ry1:ry2, rx1:rx2]
+            mov_img = mov_img[sy1:sy2, sx1:sx2]
+
+            #ref_img = ref_img[y:h+y, x:w+x]
+
+        # TODO: if the move image is more than X% outside the reference image, fail the trial
         return ref_img, mov_img
 
 
@@ -116,7 +135,6 @@ class OverlapMetric:
 
         if not self.translation_only:  # We must do a "proper" affine transform.
             if self.DEBUG:
-                from dls_imagematch.match.image import Image
                 Image(apply_tr(tr_matrix, mov_img), self.img_b.real_size[0]).save("mov_trans")
 
             mov_img = apply_tr(tr_matrix, mov_img)[t:-b, l:-r]

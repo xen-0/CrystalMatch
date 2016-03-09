@@ -36,11 +36,10 @@ class ImageMatcher:
     def set_consensus(self, consensus):
         self._use_consensus = consensus
 
-    def match(self, reference_img, move_img):
+    def match(self, reference_img, move_img, guess):
         if self._use_consensus:
             return self._match_consensus(reference_img, move_img)
         else:
-            guess = tlib.Transform(0.5,-1,1,0) #tlib.Transform.identity()
             return self._match_single(reference_img, move_img, guess)
 
 
@@ -120,7 +119,8 @@ class ImageMatcher:
 
                 if self.DEBUG:
                     print('(wsf:{})'.format(scale))
-                    img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
+                    #img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
+                    img = cv2.resize(best_img, (0, 0), fx=1/scale, fy=1/scale)
                     cv2.imshow('progress', img)
                     cv2.waitKey(0)
 

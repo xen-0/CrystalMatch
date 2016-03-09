@@ -9,6 +9,7 @@ from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 
+import dls_imagematch.util.transforms as tlib
 from dls_imagematch.match.image import Image
 from dls_imagematch import ImageMatcher, get_size
 from dls_imagematch.match.metric import apply_tr
@@ -17,7 +18,7 @@ INPUT_DIR_ROOT = "../test-images/"
 
 OUTPUT_DIRECTORY = "../test-output/"
 
-USE_SET_441350000072 = True
+USE_SET_441350000072 = False
 
 
 class ImageMatcherGui(QMainWindow):
@@ -37,14 +38,14 @@ class ImageMatcherGui(QMainWindow):
 
         self._init_ui()
 
-        filepath = INPUT_DIR_ROOT + "old/translate-test-B/3_1.png"
+        filepath = INPUT_DIR_ROOT + "old/translate-test-B/1_1.png"
         if USE_SET_441350000072:
             filepath = INPUT_DIR_ROOT + "441350000072/A01_0.jpg"
         self._display_image(self._selection_A_frame, filepath)
         self._set_filename_label(self._selection_A_label, filepath)
         self._selection_A = filepath
 
-        filepath = INPUT_DIR_ROOT + "old/translate-test-B/3_2.png"
+        filepath = INPUT_DIR_ROOT + "old/translate-test-B/1_2_cropped.png"
         if USE_SET_441350000072:
             filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_A1.png"
         self._display_image(self._selection_B_frame, filepath)
@@ -103,7 +104,7 @@ class ImageMatcherGui(QMainWindow):
         self._selection_A_frame.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
         self._selection_A_frame.setFixedWidth(250)
         self._selection_A_frame.setFixedHeight(250)
-        self._selection_A_frame.setText("No Image Selectede")
+        self._selection_A_frame.setText("No Image Selected")
         self._selection_A_frame.setAlignment(Qt.AlignCenter)
 
         self._selection_B_frame = QLabel()
@@ -227,15 +228,16 @@ class ImageMatcherGui(QMainWindow):
         CONSENSUS = False  # If True, cannot display progress.
 
 
-        # Real image dimensions, in microns... of the reference?
-        # (These dimensions are for test set A.)
-        pixel_size_A = pixel_size_B = 2.17217391
-
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
         if USE_SET_441350000072:
             # Made up but approx correct ratio for well #A1
             pixel_size_A = 3.90625
             pixel_size_B = 0.548553779
+            guess = tlib.Transform(0.2,-0.5,1,0)
+        else:
+            # (These dimensions are for test set A.)
+            pixel_size_A = pixel_size_B = 2.17217391
+            guess = tlib.Transform(0.2,-0.1,1,0)
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
@@ -263,7 +265,7 @@ class ImageMatcherGui(QMainWindow):
         matcher.set_consensus(CONSENSUS)
 
         # Perform the matching operation to determine the transformation that maps image B to image A
-        net_transform = matcher.match(ref_gray_img, mov_gray_img)
+        net_transform = matcher.match(ref_gray_img, mov_gray_img, guess)
 
         # Determine transformation in real units (um)
         image_width, image_height = ref_gray_img.size
@@ -278,11 +280,13 @@ class ImageMatcherGui(QMainWindow):
         print(t)
         print('===')
 
+        '''
         if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
             grain_extract = np.subtract(ref_gray_img.img, apply_tr(net_transform, mov_gray_img)) + 128
             cv2.imwrite(
                 path.join(OUTPUT_DIRECTORY, 'Match_Overlay_Results.jpg'),
                 grain_extract)
+        '''
 
 
 def main():
