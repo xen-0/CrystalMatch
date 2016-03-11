@@ -1,9 +1,6 @@
 import os
 import sys
-from os import path
 
-import cv2
-import numpy as np
 from PyQt4 import QtGui
 from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
@@ -14,7 +11,6 @@ from dls_imagematch.match.image import Image
 from dls_imagematch import ImageMatcher
 
 INPUT_DIR_ROOT = "../test-images/"
-
 OUTPUT_DIRECTORY = "../test-output/"
 
 USE_SET_441350000072 = True
@@ -39,14 +35,14 @@ class ImageMatcherGui(QMainWindow):
 
         filepath = INPUT_DIR_ROOT + "old/translate-test-B/1_1.png"
         if USE_SET_441350000072:
-            filepath = INPUT_DIR_ROOT + "441350000072/H12_13.jpg"
+            filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
         self._display_image(self._selection_A_frame, filepath)
         self._set_filename_label(self._selection_A_label, filepath)
         self._selection_A = filepath
 
         filepath = INPUT_DIR_ROOT + "old/translate-test-B/1_2_cropped.png"
         if USE_SET_441350000072:
-            filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_H12.png"
+            filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_A1.png"
         self._display_image(self._selection_B_frame, filepath)
         self._set_filename_label(self._selection_B_label, filepath)
         self._selection_B = filepath
@@ -275,8 +271,7 @@ class ImageMatcherGui(QMainWindow):
 
         # Print results
         print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
-        print(t)
-        print('===')
+
 
         '''
         if DEBUG_MODE and OUTPUT_DIRECTORY is not None:

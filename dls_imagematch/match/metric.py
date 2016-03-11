@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
 from dls_imagematch.match.image import Image
 
 
@@ -12,8 +11,6 @@ class OverlapMetric:
         self.img_b = img_b
         self.crop_amounts = None
         self.translation_only = translation_only
-
-        self.DEBUG = False
 
     def best_transform(self, trial_transforms, scaled_size, net_transform):
         """ For a TrialTransforms object, return the transform which has the
@@ -31,26 +28,41 @@ class OverlapMetric:
             imgs.append(absdiff_img)
             metrics.append(metric)
 
+        # Extract the best transformation (and associated abs_diff image)
         best = np.argmin(metrics)
         best_transform = net_transforms[best]
         best_img = imgs[best]
 
+        # Whether or not the best transform candidate is actually the identity (i.e. no change)
         is_identity = (best == 0)
 
         # Paste the abs_diff img onto the ref image and highlight the area
-        if self.DEBUG:
-            ref = self.img_a.copy()
-            working_size = self.img_b._size()
-            w, h = working_size
-            tr_matrix = best_transform(working_size)
-            x, y = map(int, get_translation_amounts(tr_matrix))
-            roi = (x, y, x+w, y+h)
-            overlay = Image(best_img, self.img_b.pixel_size)
-            ref.paste(overlay, xOff=max(x,0), yOff=max(y,0))
-            ref.draw_rectangle(roi)
-            ref.save("rect")
+        overlay = self.create_overlay_image(best_img, best_transform)
+        overlay.save("rect")
 
-        return best_transform, ref.img, is_identity
+        return best_transform, overlay.img, is_identity
+
+    def create_overlay_image(self, overlay_img, transform):
+        # Make a copy of A, the background image
+        background = self.img_a.copy()
+
+        # Determine size of B, which is the size of the overlay image area.
+        working_size = self.img_b._size()
+        w, h = working_size
+
+        # Determine offset amount
+        tr_matrix = transform(working_size)
+        x, y = map(lambda i: int(tr_matrix[i, 2]), (0, 1))
+
+        # Define the rectangle that will be pasted to in the background image
+        roi = (x, y, x+w, y+h)
+
+        # Paste the overlay image to the background and draw a rectangle around it
+        overlay = Image(overlay_img, self.img_b.pixel_size)
+        background.paste(overlay, xOff=max(x,0), yOff=max(y,0))
+        background.draw_rectangle(roi)
+
+        return background
 
 
     @staticmethod
@@ -60,7 +72,7 @@ class OverlapMetric:
 
         Return the value of this metric as well as an image showing the per pixel absolute
         differences. In the returned image, darker areas indicate greater differences in the
-        overlap whereas lighter areas indeicate more similarity.
+        overlap whereas lighter areas indicate more similarity.
         """
         xOffset, yOffset = offset
         cr1, cr2 = OverlapMetric.get_overlap_regions(imgA, imgB, xOffset, yOffset)
