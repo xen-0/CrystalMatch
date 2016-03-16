@@ -7,7 +7,6 @@ import cv2
 import numpy as np
 
 import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
-from dls_imagematch.match.image import Image
 from dls_imagematch.match.metric import OverlapMetric
 from dls_imagematch.match.trials import TrialTransforms
 from dls_imagematch.util.parallelmap import parallel_map
@@ -101,7 +100,6 @@ class ImageMatcher:
 
             # Metric calculator which determines how good of a match a given transformation is
             metric_calc = OverlapMetric(scale_img_ref, scale_img_mov, self._translation_only)
-            metric_calc.DEBUG = self.DEBUG
 
             # Choose the transform candidates for this working size.
             trial_transforms = TrialTransforms(mov_original_size)
@@ -119,7 +117,6 @@ class ImageMatcher:
 
                 if self.DEBUG:
                     print('(wsf:{})'.format(scale))
-                    #img = cv2.resize(best_img/float(np.max(best_img)), (0, 0), fx=1/scale, fy=1/scale)
                     img = cv2.resize(best_img, (0, 0), fx=1/scale, fy=1/scale)
                     cv2.imshow('progress', img)
                     cv2.waitKey(0)

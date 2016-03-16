@@ -6,17 +6,17 @@ from dls_imagematch.match.image import Image
 
 class OverlapMetric:
 
-    def __init__(self, img_a, img_b, translation_only):
+    def __init__(self, img_a, img_b, trial_transforms):
         self.img_a = img_a
         self.img_b = img_b
-        self.crop_amounts = None
-        self.translation_only = translation_only
+        self.trial_transforms = trial_transforms
+        self.translation_only = False
 
-    def best_transform(self, trial_transforms, scaled_size, net_transform):
+    def best_transform(self, net_transform):
         """ For a TrialTransforms object, return the transform which has the
         minimum metric value.
         """
-        net_transforms = trial_transforms.compose_with(net_transform)
+        net_transforms = self.trial_transforms.compose_with(net_transform)
 
         imgs = []
         metrics = []

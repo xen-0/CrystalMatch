@@ -8,7 +8,7 @@ from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButt
 
 import dls_imagematch.util.transforms as tlib
 from dls_imagematch.match.image import Image
-from dls_imagematch import ImageMatcher
+from dls_imagematch import RegionMatcher
 
 INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
@@ -253,13 +253,9 @@ class ImageMatcherGui(QMainWindow):
             print("resized pix " + str(mov_gray_img.pixel_size))
             mov_gray_img.save("resized_bubble")
 
-        # Create image matcher object to perform the matching
-        matcher = ImageMatcher()
-        matcher.set_debug(DEBUG_MODE)
-        matcher.set_consensus(CONSENSUS)
-
         # Perform the matching operation to determine the transformation that maps image B to image A
-        net_transform = matcher.match(ref_gray_img, mov_gray_img, guess)
+        matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
+        net_transform = matcher.skip_to_end()
 
         # Determine transformation in real units (um)
         image_width, image_height = ref_gray_img.size
