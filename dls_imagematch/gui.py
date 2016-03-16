@@ -1,7 +1,7 @@
 import os
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
@@ -20,12 +20,12 @@ class ImageMatcherGui(QMainWindow):
     def __init__(self):
         super(ImageMatcherGui, self).__init__()
 
-        self._fileTreeView = None
-        self.model = None
+        self._region_matcher = None
+
         self._selection_A = None
         self._selection_B = None
 
-        self._main_frame = None
+        self._result_frame = None
         self._selection_A_frame = None
         self._selection_A_label = None
         self._selection_B_frame = None
@@ -33,6 +33,7 @@ class ImageMatcherGui(QMainWindow):
 
         self._init_ui()
 
+        # Select and Display the default images
         filepath = INPUT_DIR_ROOT + "old/translate-test-B/1_1.png"
         if USE_SET_441350000072:
             filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
@@ -54,35 +55,16 @@ class ImageMatcherGui(QMainWindow):
 
         self.init_menu_bar()
 
-        # Create view and model for file explorer - selecting an image displays it in the main frame
-        self.model = QFileSystemModel()
-        self.model.setRootPath(INPUT_DIR_ROOT)
-
-        self._fileTreeView = QTreeView()
-        self._fileTreeView.setModel(self.model)
-        self._fileTreeView.setRootIndex(self.model.index(INPUT_DIR_ROOT))
-        self._fileTreeView.setFixedWidth(300)
-        self._fileTreeView.setFixedHeight(600)
-
-        self._fileTreeView.setColumnWidth(0, 175)
-        self._fileTreeView.setColumnWidth(1, 25)
-        self._fileTreeView.hideColumn(3)
-        self._fileTreeView.hideColumn(2)
-
-        self._fileTreeView.connect(self._fileTreeView.selectionModel(),
-                                   SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),
-                                   self.new_file_selected)
-
         # Image frame - displays the image currently selected in the file tree
-        self._main_frame = QLabel()
-        self._main_frame.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
-        self._main_frame.setFixedWidth(600)
-        self._main_frame.setFixedHeight(600)
+        self._result_frame = QLabel()
+        self._result_frame.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
+        self._result_frame.setFixedWidth(850)
+        self._result_frame.setFixedHeight(850)
 
         # Selection buttons - make selection of currently displayed image as A or B
-        self._select_A_button = QPushButton("Select A")
+        self._select_A_button = QPushButton("Select Reference Image")
         self._select_A_button.clicked.connect(self._select_A_pushed)
-        self._select_B_button = QPushButton("Select B")
+        self._select_B_button = QPushButton("Select Matching Image")
         self._select_B_button.clicked.connect(self._select_B_pushed)
 
         # Selection filename - displays filename of selected images (A and B)
@@ -97,31 +79,32 @@ class ImageMatcherGui(QMainWindow):
         # Selection Image Frames - displays smaller versions of currently selected images (A and B)
         self._selection_A_frame = QLabel()
         self._selection_A_frame.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self._selection_A_frame.setFixedWidth(250)
-        self._selection_A_frame.setFixedHeight(250)
+        self._selection_A_frame.setFixedWidth(400)
+        self._selection_A_frame.setFixedHeight(400)
         self._selection_A_frame.setText("No Image Selected")
         self._selection_A_frame.setAlignment(Qt.AlignCenter)
 
         self._selection_B_frame = QLabel()
         self._selection_B_frame.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self._selection_B_frame.setFixedWidth(250)
-        self._selection_B_frame.setFixedHeight(250)
+        self._selection_B_frame.setFixedWidth(400)
+        self._selection_B_frame.setFixedHeight(400)
         self._selection_B_frame.setText("No Image Selected")
         self._selection_B_frame.setAlignment(Qt.AlignCenter)
 
-        # Create layout
-        hbox = QHBoxLayout()
-        hbox.setSpacing(10)
-        hbox.addWidget(self._fileTreeView)
-        hbox.addWidget(self._main_frame)
+        next_frame_button = QPushButton("Next Frame >>")
+        next_frame_button.clicked.connect(self._next_frame_pushed)
+        next_scale_button = QPushButton("Next Scale >>")
+        next_scale_button.clicked.connect(self._next_scale_pushed)
+        end_match_button = QPushButton("Skip To End >>")
+        end_match_button.clicked.connect(self._skip_to_end_pushed)
 
+        # Create layout
         hbox_A = QHBoxLayout()
         hbox_A.addWidget(self._select_A_button)
         hbox_A.addWidget(self._selection_A_label)
         vbox_A = QVBoxLayout()
         vbox_A.addLayout(hbox_A)
         vbox_A.addWidget(self._selection_A_frame)
-        vbox_A.addStretch(1)
 
         hbox_B = QHBoxLayout()
         hbox_B.addWidget(self._select_B_button)
@@ -129,15 +112,24 @@ class ImageMatcherGui(QMainWindow):
         vbox_B = QVBoxLayout()
         vbox_B.addLayout(hbox_B)
         vbox_B.addWidget(self._selection_B_frame)
-        vbox_B.addStretch(1)
-
 
         vbox = QVBoxLayout()
         vbox.addLayout(vbox_A)
         vbox.addLayout(vbox_B)
-        #vbox.addStretch(1)
+        vbox.addStretch(1)
 
+        vbox_buttons = QVBoxLayout()
+        vbox_buttons.addStretch(1)
+        vbox_buttons.addWidget(next_frame_button)
+        vbox_buttons.addWidget(next_scale_button)
+        vbox_buttons.addWidget(end_match_button)
+        vbox_buttons.addStretch(1)
+
+        hbox = QHBoxLayout()
+        hbox.setSpacing(10)
         hbox.addLayout(vbox)
+        hbox.addWidget(self._result_frame)
+        hbox.addLayout(vbox_buttons)
         hbox.addStretch(1)
 
         main_widget = QWidget()
@@ -170,28 +162,65 @@ class ImageMatcherGui(QMainWindow):
 
     def new_file_selected(self, selected, deselected):
         filepath = self._get_selected_filepath()
-        self._display_image(self._main_frame, filepath)
+        self._display_image(self._result_frame, filepath)
 
     def _select_A_pushed(self):
-        filepath = self._get_selected_filepath()
-        self._display_image(self._selection_A_frame, filepath)
-        self._set_filename_label(self._selection_A_label, filepath)
-        self._selection_A = filepath
+        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
+        if filepath:
+            self._display_image(self._selection_A_frame, filepath)
+            self._set_filename_label(self._selection_A_label, filepath)
+            self._selection_A = filepath
 
     def _select_B_pushed(self):
-        filepath = self._get_selected_filepath()
-        self._display_image(self._selection_B_frame, filepath)
-        self._set_filename_label(self._selection_B_label, filepath)
-        self._selection_B = filepath
+        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
+        if filepath:
+            self._display_image(self._selection_B_frame, filepath)
+            self._set_filename_label(self._selection_B_label, filepath)
+            self._selection_B = filepath
 
-    def _get_selected_filepath(self):
-        indexes = self._fileTreeView.selectedIndexes()
-        if indexes:
-            index = indexes[0]
-            filepath = self.model.filePath(index)
-            return filepath
-        else:
-            return None
+    def _next_frame_pushed(self):
+        if self._region_matcher is not None:
+            self._region_matcher.next_frame()
+            self._display_match_results()
+
+    def _next_scale_pushed(self):
+        if self._region_matcher is not None:
+            self._region_matcher.skip_to_next_scale()
+            self._display_match_results()
+
+    def _skip_to_end_pushed(self):
+        if self._region_matcher is not None:
+            self._region_matcher.skip_to_end()
+            self._display_match_results()
+
+    def _display_match_results(self):
+        frame = self._result_frame
+        pixmap = self._region_matcher.match_img.make_color().to_qt_pixmap()
+        frame.setPixmap(pixmap.scaled(frame.size(),
+                                      Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+        if self._region_matcher.match_complete:
+            matcher = self._region_matcher
+
+           # Determine transformation in real units (um)
+            image_width, image_height = matcher.stat_img.size
+            net_transform = matcher.net_transform
+            t = net_transform((image_width, image_height))
+
+            pixel_size = matcher.stat_img.pixel_size
+            delta_x = -t[0, 2] * pixel_size
+            delta_y = +t[1, 2] * pixel_size
+
+            # Print results
+            print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
+
+            '''
+            if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
+                grain_extract = np.subtract(ref_gray_img.img, apply_tr(net_transform, mov_gray_img)) + 128
+                cv2.imwrite(
+                    path.join(OUTPUT_DIRECTORY, 'Match_Overlay_Results.jpg'),
+                    grain_extract)
+            '''
 
     def _display_image(self, frame, filename):
         frame.clear()
@@ -219,7 +248,6 @@ class ImageMatcherGui(QMainWindow):
             return
 
         DEBUG_MODE = True
-        CONSENSUS = False  # If True, cannot display progress.
 
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
         if USE_SET_441350000072:
@@ -254,28 +282,8 @@ class ImageMatcherGui(QMainWindow):
             mov_gray_img.save("resized_bubble")
 
         # Perform the matching operation to determine the transformation that maps image B to image A
-        matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
-        net_transform = matcher.skip_to_end()
-
-        # Determine transformation in real units (um)
-        image_width, image_height = ref_gray_img.size
-        t = net_transform((image_width, image_height))
-
-        pixel_size = ref_gray_img.pixel_size
-        delta_x = -t[0, 2] * pixel_size
-        delta_y = +t[1, 2] * pixel_size
-
-        # Print results
-        print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
-
-
-        '''
-        if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
-            grain_extract = np.subtract(ref_gray_img.img, apply_tr(net_transform, mov_gray_img)) + 128
-            cv2.imwrite(
-                path.join(OUTPUT_DIRECTORY, 'Match_Overlay_Results.jpg'),
-                grain_extract)
-        '''
+        self._region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
+        self._next_frame_pushed()
 
 
 def main():

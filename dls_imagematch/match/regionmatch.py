@@ -1,5 +1,6 @@
 import cv2
 
+from dls_imagematch.match.image import Image
 from dls_imagematch.match.metric import OverlapMetric
 from dls_imagematch.match.trials import TrialTransforms
 
@@ -26,7 +27,8 @@ class RegionMatcher:
         self._next_scale_factor()
 
     def next_frame(self):
-        self._next_iteration()
+        if not self.match_complete:
+            self._next_iteration()
 
         return self.net_transform
 
@@ -72,12 +74,16 @@ class RegionMatcher:
     def _next_iteration(self):
         self._iteration += 1
 
-        self.net_transform, self.match_img, min_reached = \
+        self.net_transform, match_img, min_reached = \
             self._metric_calc.best_transform(self.net_transform)
 
-        img = cv2.resize(self.match_img, (0, 0), fx=1 / self._scale, fy=1 / self._scale)
+        self.match_img = Image(match_img, pixel_size=1000)
+
+        '''
+        img = cv2.resize(match_img, (0, 0), fx=1 / self._scale, fy=1 / self._scale)
         cv2.imshow('progress', img)
         cv2.waitKey(0)
+        '''
 
         if min_reached:
             self._next_scale_factor()

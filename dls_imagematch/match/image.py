@@ -1,4 +1,5 @@
 import cv2
+from PyQt4.QtGui import QImage, QPixmap
 import numpy as np
 
 OUTPUT_DIRECTORY = "../test-output/"
@@ -24,6 +25,12 @@ class Image:
         """ Return an Image object which is a deep copy of this one.
         """
         return Image(self.img.copy(), self.pixel_size)
+
+    def to_qt_pixmap(self):
+        width, height = self.size
+        bytesPerLine = 3 *width
+        qImg = QImage(self.img.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        return QPixmap.fromImage( qImg )
 
     def make_gray(self):
         """ Return a greyscale version of the image
