@@ -38,7 +38,7 @@ class OverlapMetric:
 
         # Paste the abs_diff img onto the ref image and highlight the area
         overlay = self.create_overlay_image(best_img, best_transform)
-        overlay.save("rect")
+        #overlay.save("rect")
 
         return best_transform, overlay.img, is_identity
 
@@ -78,8 +78,8 @@ class OverlapMetric:
         cr1, cr2 = OverlapMetric.get_overlap_regions(imgA, imgB, xOffset, yOffset)
 
         # DEBUG printouts
-        Image(cr1, imgA.pixel_size).save("Comparison_Region_A")
-        Image(cr2, imgB.pixel_size).save("Comparison_Region_B")
+        #Image(cr1, imgA.pixel_size).save("Comparison_Region_A")
+        #Image(cr2, imgB.pixel_size).save("Comparison_Region_B")
 
         absdiff_img = cv2.absdiff(cr1, cr2)
         metric = np.sum(absdiff_img) / absdiff_img.size

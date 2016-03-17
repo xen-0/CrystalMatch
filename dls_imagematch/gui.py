@@ -48,6 +48,25 @@ class ImageMatcherGui(QMainWindow):
         self._set_filename_label(self._selection_B_label, filepath)
         self._selection_B = filepath
 
+        '''
+        for c in range(ord('A'), ord('H')+1):
+            row = chr(c)
+            for col in range(1,13):
+                ref, mov = self._get_441350000072_files(row, col)
+                self._display_image(self._selection_A_frame, ref)
+                self._display_image(self._selection_B_frame, mov)
+                self._set_filename_label(self._selection_A_label, ref)
+                self._set_filename_label(self._selection_B_label, mov)
+                self._selection_A = ref
+                self._selection_B = mov
+                self._perform_image_matching()
+                self._skip_to_end_pushed()
+
+                out_file = "441350000072/" + str(row) + "_" + str(col)
+                self._region_matcher.match_img.save(out_file)
+        '''
+
+
     def _init_ui(self):
         self.setGeometry(100, 100, 1200, 650)
         self.setWindowTitle('Diamond VMXi Image Matching')
@@ -247,7 +266,7 @@ class ImageMatcherGui(QMainWindow):
         if self._selection_A == self._selection_B:
             return
 
-        DEBUG_MODE = True
+        DEBUG_MODE = False
 
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
         if USE_SET_441350000072:
@@ -284,6 +303,16 @@ class ImageMatcherGui(QMainWindow):
         # Perform the matching operation to determine the transformation that maps image B to image A
         self._region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
         self._next_frame_pushed()
+
+    def _get_441350000072_files(self, row, col):
+        mov_filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_" + row + str(col) + ".png"
+
+        if col < 10:
+            col = '0' + str(col)
+
+        ref_filepath = INPUT_DIR_ROOT + "441350000072/" + row + str(col) + "_13.jpg"
+
+        return ref_filepath, mov_filepath
 
 
 def main():
