@@ -9,6 +9,7 @@ from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButt
 import dls_imagematch.util.transforms as tlib
 from dls_imagematch.match.image import Image
 from dls_imagematch import RegionMatcher
+from dls_imagematch.regionselect import RegionSelectDialog
 
 INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
@@ -21,6 +22,7 @@ class ImageMatcherGui(QMainWindow):
         super(ImageMatcherGui, self).__init__()
 
         self._region_matcher = None
+        self.mov_img_scale_factor = 1
 
         self._selection_A = None
         self._selection_B = None
@@ -110,12 +112,22 @@ class ImageMatcherGui(QMainWindow):
         self._selection_B_frame.setText("No Image Selected")
         self._selection_B_frame.setAlignment(Qt.AlignCenter)
 
-        next_frame_button = QPushButton("Next Frame >>")
-        next_frame_button.clicked.connect(self._next_frame_pushed)
-        next_scale_button = QPushButton("Next Scale >>")
-        next_scale_button.clicked.connect(self._next_scale_pushed)
-        end_match_button = QPushButton("Skip To End >>")
-        end_match_button.clicked.connect(self._skip_to_end_pushed)
+        self.begin_match_button = QPushButton("Begin Match")
+        self.begin_match_button.clicked.connect(self._primary_image_matching)
+        self.next_frame_button = QPushButton("Next Frame >>")
+        self.next_frame_button.clicked.connect(self._next_frame_pushed)
+        self.next_scale_button = QPushButton("Next Scale >>")
+        self.next_scale_button.clicked.connect(self._next_scale_pushed)
+        self.end_match_button = QPushButton("Skip To End >>")
+        self.end_match_button.clicked.connect(self._skip_to_end_pushed)
+        self.region_select_button = QPushButton("Select Region")
+        self.region_select_button.clicked.connect(self._select_region_pushed)
+        self.region_select_button.setEnabled(False)
+
+        self.next_frame_button.setEnabled(False)
+        self.next_scale_button.setEnabled(False)
+        self.end_match_button.setEnabled(False)
+        self.region_select_button.setEnabled(False)
 
         # Create layout
         hbox_A = QHBoxLayout()
@@ -139,9 +151,11 @@ class ImageMatcherGui(QMainWindow):
 
         vbox_buttons = QVBoxLayout()
         vbox_buttons.addStretch(1)
-        vbox_buttons.addWidget(next_frame_button)
-        vbox_buttons.addWidget(next_scale_button)
-        vbox_buttons.addWidget(end_match_button)
+        vbox_buttons.addWidget(self.begin_match_button)
+        vbox_buttons.addWidget(self.next_frame_button)
+        vbox_buttons.addWidget(self.next_scale_button)
+        vbox_buttons.addWidget(self.end_match_button)
+        vbox_buttons.addWidget(self.region_select_button)
         vbox_buttons.addStretch(1)
 
         hbox = QHBoxLayout()
@@ -169,7 +183,7 @@ class ImageMatcherGui(QMainWindow):
         match_action = QAction(QIcon('exit.png'), '&Perform Match', self)
         match_action.setShortcut('Ctrl+M')
         match_action.setStatusTip('Perform Match')
-        match_action.triggered.connect(self._perform_image_matching)
+        match_action.triggered.connect(self._primary_image_matching)
 
         # Create menu bar
         menu_bar = self.menuBar()
@@ -212,6 +226,16 @@ class ImageMatcherGui(QMainWindow):
             self._region_matcher.skip_to_end()
             self._display_match_results()
 
+    def _select_region_pushed(self):
+        filename = self._selection_A
+
+        region_image, roi = RegionSelectDialog.get_region(self, filename)
+
+        if region_image is not None:
+            imgA = Image.from_file(self._selection_B, region_image.pixel_size)
+            imgA = imgA.rescale(self.mov_img_scale_factor)
+            self._secondary_image_matching(imgA, region_image, roi)
+
     def _display_match_results(self):
         frame = self._result_frame
         pixmap = self._region_matcher.match_img.make_color().to_qt_pixmap()
@@ -221,17 +245,20 @@ class ImageMatcherGui(QMainWindow):
         if self._region_matcher.match_complete:
             matcher = self._region_matcher
 
-           # Determine transformation in real units (um)
+            # Determine transformation in real units (um)
             image_width, image_height = matcher.stat_img.size
             net_transform = matcher.net_transform
             t = net_transform((image_width, image_height))
 
             pixel_size = matcher.stat_img.pixel_size
-            delta_x = -t[0, 2] * pixel_size
-            delta_y = +t[1, 2] * pixel_size
+            delta_x = t[0, 2] * pixel_size
+            delta_y = t[1, 2] * pixel_size
 
             # Print results
             print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
+            print(t[0, 2], t[1, 2])
+            self.delta_x = delta_x / pixel_size
+            self.delta_y = delta_y / pixel_size
 
             '''
             if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
@@ -259,8 +286,7 @@ class ImageMatcherGui(QMainWindow):
         else:
             label.setText("No Image Selected")
 
-    def _perform_image_matching(self):
-
+    def _primary_image_matching(self):
         if not self._selection_A or not self._selection_B:
             return
         if self._selection_A == self._selection_B:
@@ -295,6 +321,7 @@ class ImageMatcherGui(QMainWindow):
         # Resize the mov image so it has the same size per pixel as the ref image
         factor = mov_gray_img.pixel_size / ref_gray_img.pixel_size
         mov_gray_img = mov_gray_img.rescale(factor)
+        self.mov_img_scale_factor = factor
 
         if DEBUG_MODE:
             print("resized pix " + str(mov_gray_img.pixel_size))
@@ -302,6 +329,24 @@ class ImageMatcherGui(QMainWindow):
 
         # Perform the matching operation to determine the transformation that maps image B to image A
         self._region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
+        self._next_frame_pushed()
+
+        self.next_frame_button.setEnabled(True)
+        self.next_scale_button.setEnabled(True)
+        self.end_match_button.setEnabled(True)
+        self.region_select_button.setEnabled(True)
+
+    def _secondary_image_matching(self, imgA, imgB, roi):
+        imgA_gray = imgA.make_gray()
+        imgB_gray = imgB.make_gray()
+
+        dx = (roi[0] - self.delta_x) / imgB_gray.size[0]
+        dy = (roi[1] - self.delta_y) / imgB_gray.size[1]
+        print((self.delta_x,self.delta_y),(roi[0],roi[1]) )
+        print(dx, dy)
+
+        guess = tlib.Transform(dx,-dy,1,0)
+        self._region_matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
         self._next_frame_pushed()
 
     def _get_441350000072_files(self, row, col):

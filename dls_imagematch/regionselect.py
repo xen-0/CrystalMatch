@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget, QHBoxLayout, QLabel
+from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from PyQt4.QtCore import Qt, QSize
 
 from dls_imagematch.match.image import Image
@@ -22,7 +22,8 @@ class SelectorFrame(QLabel):
         self.max_size = max_size
 
         self.start_coords = None
-        self.roi_image = None
+        self.roi = None
+        self.image_region = None
 
         # Load image from file
         self.cvimg = Image.from_file(filepath, 100)
@@ -60,12 +61,15 @@ class SelectorFrame(QLabel):
         """
         # Convert display coords to image coords
         scale = self.size_image[0] / self.display_size[0]
-        self.roi_image = list((scale*p for p in display_roi))
+        self.roi = list((scale * p for p in display_roi))
 
         # Display the image with the highlighted roi
         img_copy = self.cvimg.copy()
-        img_copy.draw_rectangle(self.roi_image)
+        img_copy.draw_rectangle(self.roi)
         self.size_display(img_copy)
+
+        # Store the selected region as a separate image
+        self.image_region = self.cvimg.sub_image(self.roi).copy()
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
@@ -94,33 +98,37 @@ class SelectorFrame(QLabel):
         self.set_roi(display_roi)
 
 
-class RegionSelectGui(QMainWindow):
-    def __init__(self):
-        super(RegionSelectGui, self).__init__()
-        self._init_ui()
+class RegionSelectDialog(QDialog):
+    def __init__(self, filename):
+        super(RegionSelectDialog, self).__init__()
+        self._init_ui(filename)
 
-    def _init_ui(self):
+    def _init_ui(self, filename):
         self.setWindowTitle('Select Region of Interest')
 
         # Image frame - displays the image currently selected in the file tree
-        filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
-        self._image_frame = SelectorFrame(1000, filepath)
+        #filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
+        self._image_frame = SelectorFrame(1200, filename)
 
-        hbox = QHBoxLayout()
-        hbox.addWidget(self._image_frame)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            Qt.Horizontal, self)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
 
-        main_widget = QWidget()
-        main_widget.setLayout(hbox)
-        self.setCentralWidget(main_widget)
+        vbox = QVBoxLayout()
+        vbox.addWidget(self._image_frame)
+        vbox.addWidget(buttons)
+
+        self.setLayout(vbox)
         self.show()
 
+    def _roi(self):
+        return self._image_frame.image_region, self._image_frame.roi
 
-
-def main():
-    app = QApplication(sys.argv)
-    ex = RegionSelectGui()
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    main()
+    @staticmethod
+    def get_region(parent, filename):
+        dialog = RegionSelectDialog(filename)
+        result = dialog.exec_()
+        region_image, roi = dialog._roi()
+        return region_image, roi

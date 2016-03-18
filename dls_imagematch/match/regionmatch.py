@@ -6,9 +6,9 @@ from dls_imagematch.match.trials import TrialTransforms
 
 
 class RegionMatcher:
-    def __init__(self, reference_img, moving_img, starting_guess):
+    def __init__(self, reference_img, moving_img, starting_guess, scales=(0.25, 0.5, 1)):
         # Scale factor for earlier matching iterations
-        self._scale_factors = (0.25, 0.5, 1) # Used to include 0.125
+        self._scale_factors = scales # Used to include 0.125
         # Scale-dependent range of frequencies to pick out in preprocessing step
         self._freq_range = (1, 50)
 

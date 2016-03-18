@@ -21,10 +21,20 @@ class Image:
     def save(self, filename):
         cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
 
+    def popup(self):
+        """Pop up a window to display an image until a key is pressed (blocking)."""
+        cv2.imshow('dbg', self.img)
+        cv2.waitKey(0)
+
     def copy(self):
         """ Return an Image object which is a deep copy of this one.
         """
         return Image(self.img.copy(), self.pixel_size)
+
+    def sub_image(self, roi):
+        x1, y1, x2, y2 = roi[0], roi[1], roi[2], roi[3]
+        sub = self.img[y1:y2, x1:x2]
+        return Image(sub,self.pixel_size)
 
     def to_qt_pixmap(self):
         width, height = self.size
@@ -153,8 +163,9 @@ class Image:
 
         return cv2.warpAffine(self.img, transform, working_size)
 
-
     @staticmethod
     def from_file(filename, pixel_size):
         img = cv2.imread(filename)
         return Image(img, pixel_size)
+
+
