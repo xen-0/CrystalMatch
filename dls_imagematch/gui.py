@@ -6,10 +6,11 @@ from PyQt4.QtCore import (Qt, SIGNAL)
 from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
                          QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 
-import dls_imagematch.util.transforms as tlib
+
 from dls_imagematch.match.image import Image
 from dls_imagematch import RegionMatcher
 from dls_imagematch.regionselect import RegionSelectDialog
+from dls_imagematch.util.translate import Translate
 
 INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
@@ -246,19 +247,16 @@ class ImageMatcherGui(QMainWindow):
             matcher = self._region_matcher
 
             # Determine transformation in real units (um)
-            image_width, image_height = matcher.stat_img.size
             net_transform = matcher.net_transform
-            t = net_transform((image_width, image_height))
+            x, y = net_transform.x, net_transform.y
 
             pixel_size = matcher.stat_img.pixel_size
-            delta_x = t[0, 2] * pixel_size
-            delta_y = t[1, 2] * pixel_size
+            delta_x = x * pixel_size
+            delta_y = y * pixel_size
 
             # Print results
-            print('---\ndelta_x is', delta_x, 'µm; delta_y is', delta_y, 'µm\n---')
-            print(t[0, 2], t[1, 2])
-            self.delta_x = delta_x / pixel_size
-            self.delta_y = delta_y / pixel_size
+            print("Image offset: x=" + str(delta_x), "µm (" + str(int(x)) + " pixels), y="
+                  + str(delta_y) + " µm (" + str(int(y)) + " pixels)")
 
             '''
             if DEBUG_MODE and OUTPUT_DIRECTORY is not None:
@@ -300,11 +298,15 @@ class ImageMatcherGui(QMainWindow):
             SET_FACTOR = 6.55
             pixel_size_A = 4.0
             pixel_size_B = pixel_size_A / SET_FACTOR
-            guess = tlib.Transform(0.2,-0.9,1,0)
+            #guess = tlib.Transform(0.2,-0.9,1,0)
+            guess_x = 0.1
+            guess_y = 0.4
         else:
             # (These dimensions are for test set A.)
             pixel_size_A = pixel_size_B = 2.17217391
-            guess = tlib.Transform(0.2,-0.1,1,0)
+            #guess = tlib.Transform(0.2,-0.1,1,0)
+            guess_x = 0.2
+            guess_y = 0.1
 
         # Read the selected images and convert to grayscale
         ref_file = self._selection_A
@@ -328,6 +330,7 @@ class ImageMatcherGui(QMainWindow):
             mov_gray_img.save("resized_bubble")
 
         # Perform the matching operation to determine the transformation that maps image B to image A
+        guess = Translate(guess_x*ref_gray_img.size[0], guess_y*ref_gray_img.size[1]); print(guess.x, guess.y)
         self._region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
         self._next_frame_pushed()
 
@@ -340,12 +343,12 @@ class ImageMatcherGui(QMainWindow):
         imgA_gray = imgA.make_gray()
         imgB_gray = imgB.make_gray()
 
-        dx = (roi[0] - self.delta_x) / imgB_gray.size[0]
-        dy = (roi[1] - self.delta_y) / imgB_gray.size[1]
-        print((self.delta_x,self.delta_y),(roi[0],roi[1]) )
-        print(dx, dy)
+        primary_transform = self._region_matcher.net_transform
+        guessX = roi[0] - primary_transform.x
+        guessY = roi[1] - primary_transform.y
+        guess = Translate(guessX-5, guessY-5)
 
-        guess = tlib.Transform(dx,-dy,1,0)
+
         self._region_matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
         self._next_frame_pushed()
 

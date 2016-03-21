@@ -63,10 +63,9 @@ class RegionMatcher:
         scale_img_mov = self.move_img.freq_range(self._freq_range, scale).rescale(scale)
 
         # Choose the transform candidates for this working size.
-        mov_original_size = self.move_img.size
-        trial_transforms = TrialTransforms(mov_original_size)
-        trial_transforms.add_kings(1, scale)
-        trial_transforms.add_kings(2, scale)
+        trial_transforms = TrialTransforms()
+        trial_transforms.add_kings(1)
+        trial_transforms.add_kings(2)
 
         # Metric calculator which determines how good of a match a given transformation is
         self._metric_calc = OverlapMetric(scale_img_ref, scale_img_mov, trial_transforms)
@@ -74,16 +73,14 @@ class RegionMatcher:
     def _next_iteration(self):
         self._iteration += 1
 
-        self.net_transform, match_img, min_reached = \
-            self._metric_calc.best_transform(self.net_transform)
+        scaled_transform = self.net_transform.scale(self._scale)
+
+        scaled_transform, match_img, min_reached = \
+            self._metric_calc.best_transform(scaled_transform)
+
+        self.net_transform = scaled_transform.scale(1/self._scale)
 
         self.match_img = Image(match_img, pixel_size=1000)
-
-        '''
-        img = cv2.resize(match_img, (0, 0), fx=1 / self._scale, fy=1 / self._scale)
-        cv2.imshow('progress', img)
-        cv2.waitKey(0)
-        '''
 
         if min_reached:
             self._next_scale_factor()

@@ -10,27 +10,25 @@ class OverlapMetric:
         self.img_a = img_a
         self.img_b = img_b
         self.trial_transforms = trial_transforms
-        self.translation_only = False
 
-    def best_transform(self, net_transform):
+    def best_transform(self, starting_transform):
         """ For a TrialTransforms object, return the transform which has the
         minimum metric value.
         """
-        net_transforms = self.trial_transforms.compose_with(net_transform)
-
         imgs = []
         metrics = []
 
-        for transform in net_transforms:
-            tr_matrix = transform(self.img_b.size)
-            offset = map(int, get_translation_amounts(tr_matrix))
+        transforms = self.trial_transforms.compose_with(starting_transform)
+
+        for transform in transforms:
+            offset = (int(transform.x), int(transform.y))
             metric, absdiff_img = self.calculate_overlap_metric(self.img_a, self.img_b, offset)
             imgs.append(absdiff_img)
             metrics.append(metric)
 
         # Extract the best transformation (and associated abs_diff image)
         best = np.argmin(metrics)
-        best_transform = net_transforms[best]
+        best_transform = transforms[best]
         best_img = imgs[best]
 
         # Whether or not the best transform candidate is actually the identity (i.e. no change)
@@ -51,8 +49,9 @@ class OverlapMetric:
         w, h = working_size
 
         # Determine offset amount
-        tr_matrix = transform(working_size)
-        x, y = map(lambda i: int(tr_matrix[i, 2]), (0, 1))
+        #tr_matrix = transform(working_size)
+        #x, y = map(lambda i: int(tr_matrix[i, 2]), (0, 1))
+        x,y = transform.x, transform.y
 
         # Define the rectangle that will be pasted to in the background image
         roi = (x, y, x+w, y+h)

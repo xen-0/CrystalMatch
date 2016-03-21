@@ -6,7 +6,7 @@ from operator import add
 import cv2
 import numpy as np
 
-import dls_imagematch.util.transforms as tlib  # Contains `Transform` class.
+import dls_imagematch.util._transforms as tlib  # Contains `Transform` class.
 from dls_imagematch.match.metric import OverlapMetric
 from dls_imagematch.match.trials import TrialTransforms
 from dls_imagematch.util.parallelmap import parallel_map
