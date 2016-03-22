@@ -2,10 +2,10 @@ import os
 import sys
 from enum import Enum
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import (Qt, SIGNAL)
-from PyQt4.QtGui import (QWidget, QFileSystemModel, QTreeView, QLabel, QPushButton,
-                         QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
+                         QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
 
 
 from dls_imagematch.match.image import Image
@@ -31,91 +31,82 @@ class ImageMatcherGui(QMainWindow):
         super(ImageMatcherGui, self).__init__()
 
         self.gui_state = None
-        self._region_matcher = None
+        self.region_matcher = None
         self.mov_img_scale_factor = 1
+        self.file_a = None
+        self.file_b = None
 
-        self._selection_A = None
-        self._selection_B = None
-
-        self._result_frame = None
-        self._selection_A_frame = None
-        self._selection_A_label = None
-        self._selection_B_frame = None
-        self._selection_B_label = None
-
-        self._init_ui()
+        self.init_ui()
 
         self.set_gui_state(GuiStates.SELECTION)
 
         # Select and Display the default images
         filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
-        self._display_image(self._selection_A_frame, filepath)
-        self._set_filename_label(self._selection_A_label, filepath)
-        self._selection_A = filepath
+        self.function_select_a(filepath)
 
         filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_A1.png"
-        self._display_image(self._selection_B_frame, filepath)
-        self._set_filename_label(self._selection_B_label, filepath)
-        self._selection_B = filepath
+        self.function_select_b(filepath)
 
         #self.iterate_over_441350000072_data_set()
 
-    def _init_ui(self):
+    def init_ui(self):
+        """ Create all elements of the user interface. """
         self.setGeometry(100, 100, 1200, 650)
         self.setWindowTitle('Diamond VMXi Image Matching')
         self.setWindowIcon(QIcon('web.png'))
 
         self.init_menu_bar()
 
-        # Image frame - displays the image currently selected in the file tree
-        self._result_frame = QLabel()
-        self._result_frame.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
-        self._result_frame.setFixedWidth(850)
-        self._result_frame.setFixedHeight(850)
-
-        # Dropdown box to select data set
-        self.data_combo1 = QtGui.QComboBox()
-        self.data_combo2 = QtGui.QComboBox()
+        # Drop-down box to select data set
+        self.cmbo_plate_row = QtGui.QComboBox()
+        self.cmbo_plate_col = QtGui.QComboBox()
         for c in range(ord('A'), ord('H')+1):
-            self.data_combo1.addItem(chr(c))
+            self.cmbo_plate_row.addItem(chr(c))
         for col in range(1,13):
-            self.data_combo2.addItem(str(col))
+            self.cmbo_plate_col.addItem(str(col))
 
-        data_button = QPushButton("Select")
-        data_button.clicked.connect(self.function_select_well)
-        data_select_label = QLabel()
-        data_select_label.setText("Select Well:")
+        self.btn_select_data = QPushButton("Select")
+        self.btn_select_data.clicked.connect(self.function_select_well)
+        self.lbl_select_data = QLabel()
+        self.lbl_select_data.setText("Select Well:")
 
         # Selection buttons - make selection of currently displayed image as A or B
-        self._select_A_button = QPushButton("Select Reference Image")
-        self._select_A_button.clicked.connect(self.function_select_A)
-        self._select_B_button = QPushButton("Select Matching Image")
-        self._select_B_button.clicked.connect(self.function_select_B)
+        self.btn_select_a = QPushButton("Select Reference Image")
+        self.btn_select_a.clicked.connect(self.function_select_a)
+        self.btn_select_b = QPushButton("Select Matching Image")
+        self.btn_select_b.clicked.connect(self.function_select_b)
 
         # Selection filename - displays filename of selected images (A and B)
-        self._selection_A_label = QLabel()
-        self._selection_A_label.setFixedWidth(300)
-        self._selection_A_label.setText("No Image Selected")
+        self.lbl_selection_a = QLabel()
+        self.lbl_selection_a.setFixedWidth(300)
+        self.lbl_selection_a.setText("No Image Selected")
 
-        self._selection_B_label = QLabel()
-        self._selection_B_label.setFixedWidth(300)
-        self._selection_B_label.setText("No Image Selected")
+        self.lbl_selection_b = QLabel()
+        self.lbl_selection_b.setFixedWidth(300)
+        self.lbl_selection_b.setText("No Image Selected")
 
         # Selection Image Frames - displays smaller versions of currently selected images (A and B)
-        self._selection_A_frame = QLabel()
-        self._selection_A_frame.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self._selection_A_frame.setFixedWidth(400)
-        self._selection_A_frame.setFixedHeight(400)
-        self._selection_A_frame.setText("No Image Selected")
-        self._selection_A_frame.setAlignment(Qt.AlignCenter)
+        self.frame_a = QLabel()
+        self.frame_a.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
+        self.frame_a.setFixedWidth(400)
+        self.frame_a.setFixedHeight(400)
+        self.frame_a.setText("No Image Selected")
+        self.frame_a.setAlignment(Qt.AlignCenter)
 
-        self._selection_B_frame = QLabel()
-        self._selection_B_frame.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self._selection_B_frame.setFixedWidth(400)
-        self._selection_B_frame.setFixedHeight(400)
-        self._selection_B_frame.setText("No Image Selected")
-        self._selection_B_frame.setAlignment(Qt.AlignCenter)
+        self.frame_b = QLabel()
+        self.frame_b.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
+        self.frame_b.setFixedWidth(400)
+        self.frame_b.setFixedHeight(400)
+        self.frame_b.setText("No Image Selected")
+        self.frame_b.setAlignment(Qt.AlignCenter)
 
+        # Main image frame - shows progress of image matching
+        self.frame_main = QLabel()
+        self.frame_main.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
+        self.frame_main.setFixedWidth(850)
+        self.frame_main.setFixedHeight(850)
+
+        # Matching function buttons
         self.btn_begin_match = QPushButton("Begin Match")
         self.btn_begin_match.clicked.connect(self.function_begin_matching)
         self.btn_next_frame = QPushButton("Next Frame >>")
@@ -129,52 +120,51 @@ class ImageMatcherGui(QMainWindow):
         self.btn_region_select.setEnabled(False)
 
         # Create layout
-        hbox_A = QHBoxLayout()
+        hbox_well_select = QHBoxLayout()
+        hbox_well_select.addWidget(self.lbl_select_data)
+        hbox_well_select.addWidget(self.cmbo_plate_row)
+        hbox_well_select.addWidget(self.cmbo_plate_col)
+        hbox_well_select.addWidget(self.btn_select_data)
+        hbox_well_select.addStretch(1)
 
-        hbox_A.addWidget(self._select_A_button)
-        hbox_A.addWidget(self._selection_A_label)
-        vbox_A = QVBoxLayout()
-        vbox_A.addLayout(hbox_A)
-        vbox_A.addWidget(self._selection_A_frame)
+        hbox_select_a = QHBoxLayout()
+        hbox_select_a.addWidget(self.btn_select_a)
+        hbox_select_a.addWidget(self.lbl_selection_a)
+        vbox_select_a = QVBoxLayout()
+        vbox_select_a.addLayout(hbox_select_a)
+        vbox_select_a.addWidget(self.frame_a)
 
-        hbox_B = QHBoxLayout()
-        hbox_B.addWidget(self._select_B_button)
-        hbox_B.addWidget(self._selection_B_label)
-        vbox_B = QVBoxLayout()
-        vbox_B.addLayout(hbox_B)
-        vbox_B.addWidget(self._selection_B_frame)
+        hbox_select_b = QHBoxLayout()
+        hbox_select_b.addWidget(self.btn_select_b)
+        hbox_select_b.addWidget(self.lbl_selection_b)
+        vbox_select_b = QVBoxLayout()
+        vbox_select_b.addLayout(hbox_select_b)
+        vbox_select_b.addWidget(self.frame_b)
 
-        hbox_C = QHBoxLayout()
-        hbox_C.addWidget(data_select_label)
-        hbox_C.addWidget(self.data_combo1)
-        hbox_C.addWidget(self.data_combo2)
-        hbox_C.addWidget(data_button)
-        hbox_C.addStretch(1)
+        vbox_img_selection = QVBoxLayout()
+        vbox_img_selection.addLayout(hbox_well_select)
+        vbox_img_selection.addLayout(vbox_select_a)
+        vbox_img_selection.addLayout(vbox_select_b)
+        vbox_img_selection.addStretch(1)
 
-        vbox = QVBoxLayout()
-        vbox.addLayout(hbox_C)
-        vbox.addLayout(vbox_A)
-        vbox.addLayout(vbox_B)
-        vbox.addStretch(1)
+        vbox_match_btns = QVBoxLayout()
+        vbox_match_btns.addStretch(1)
+        vbox_match_btns.addWidget(self.btn_begin_match)
+        vbox_match_btns.addWidget(self.btn_next_frame)
+        vbox_match_btns.addWidget(self.btn_next_scale)
+        vbox_match_btns.addWidget(self.btn_end_match)
+        vbox_match_btns.addWidget(self.btn_region_select)
+        vbox_match_btns.addStretch(1)
 
-        vbox_buttons = QVBoxLayout()
-        vbox_buttons.addStretch(1)
-        vbox_buttons.addWidget(self.btn_begin_match)
-        vbox_buttons.addWidget(self.btn_next_frame)
-        vbox_buttons.addWidget(self.btn_next_scale)
-        vbox_buttons.addWidget(self.btn_end_match)
-        vbox_buttons.addWidget(self.btn_region_select)
-        vbox_buttons.addStretch(1)
-
-        hbox = QHBoxLayout()
-        hbox.setSpacing(10)
-        hbox.addLayout(vbox)
-        hbox.addWidget(self._result_frame)
-        hbox.addLayout(vbox_buttons)
-        hbox.addStretch(1)
+        hbox_main = QHBoxLayout()
+        hbox_main.setSpacing(10)
+        hbox_main.addLayout(vbox_img_selection)
+        hbox_main.addWidget(self.frame_main)
+        hbox_main.addLayout(vbox_match_btns)
+        hbox_main.addStretch(1)
 
         main_widget = QWidget()
-        main_widget.setLayout(hbox)
+        main_widget.setLayout(hbox_main)
         self.setCentralWidget(main_widget)
         self.show()
 
@@ -206,32 +196,32 @@ class ImageMatcherGui(QMainWindow):
     def function_select_well(self):
         """ Select a well from the 441350000072 dataset to use for matching. Display the
         corresponding images in slot A and B. """
-        row = self.data_combo1.currentText()
-        col = self.data_combo2.currentText()
+        row = self.cmbo_plate_row.currentText()
+        col = self.cmbo_plate_col.currentText()
 
         fileA, fileB = self._get_441350000072_files(row, col)
-        self.function_select_A(fileA)
-        self.function_select_B(fileB)
+        self.function_select_a(fileA)
+        self.function_select_b(fileB)
 
         self.set_gui_state(GuiStates.SELECTION)
 
-    def function_select_A(self, filepath=None):
+    def function_select_a(self, filepath=None):
         """ Display open dialog for Image slot A, load the selected image. """
         if filepath is None or not filepath:
             filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
         if filepath:
-            self._display_image(self._selection_A_frame, filepath)
-            self._set_filename_label(self._selection_A_label, filepath)
-            self._selection_A = filepath
+            self._display_image(self.frame_a, filepath)
+            self._set_filename_label(self.lbl_selection_a, filepath)
+            self.file_a = filepath
 
-    def function_select_B(self, filepath=None):
+    def function_select_b(self, filepath=None):
         """ Display open dialog for Image slot A, load the selected image. """
         if filepath is None or not filepath:
             filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
         if filepath:
-            self._display_image(self._selection_B_frame, filepath)
-            self._set_filename_label(self._selection_B_label, filepath)
-            self._selection_B = filepath
+            self._display_image(self.frame_b, filepath)
+            self._set_filename_label(self.lbl_selection_b, filepath)
+            self.file_b = filepath
 
     @staticmethod
     def _display_image(frame, filename):
@@ -302,45 +292,46 @@ class ImageMatcherGui(QMainWindow):
 
     def function_next_frame(self):
         """ Advance to the next frame of the matching procedure. """
-        if self._region_matcher is not None:
-            self._region_matcher.next_frame()
+        if self.region_matcher is not None:
+            self.region_matcher.next_frame()
             self.display_match_results()
 
     def function_next_scale(self):
         """ Advance to the next scale factor of the matching procedure. """
-        if self._region_matcher is not None:
-            self._region_matcher.skip_to_next_scale()
+        if self.region_matcher is not None:
+            self.region_matcher.skip_to_next_scale()
             self.display_match_results()
 
     def function_skip_to_end(self):
         """ Advance to the end of the matching procedure (dont show any frames). """
-        if self._region_matcher is not None:
-            self._region_matcher.skip_to_end()
+        if self.region_matcher is not None:
+            self.region_matcher.skip_to_end()
             self.display_match_results()
 
     def function_select_region(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
-        filename = self._selection_A
+        filename = self.file_a
         region_image, roi = RegionSelectDialog.get_region(self, filename)
 
         if region_image is not None:
-            imgA = Image.from_file(self._selection_B, region_image.pixel_size)
-            imgA = imgA.rescale(self.mov_img_scale_factor)
-            self.secondary_image_matching(imgA, region_image, roi)
+            img_a = Image.from_file(self.file_b, region_image.pixel_size)
+            img_a = img_a.rescale(self.mov_img_scale_factor)
+            self.secondary_image_matching(img_a, region_image, roi)
             self.set_gui_state(GuiStates.MATCHING_2ND)
 
     ''' ----------------------
     IMAGE MATCHING FUNCTIONS
     ------------------------'''
     def primary_image_matching(self):
-        if not self._selection_A or not self._selection_B or self._selection_A == self._selection_B:
+        """ Begin the image matching process, attempting to map image B onto image A. """
+        if not self.file_a or not self.file_b or self.file_a == self.file_b:
             return
 
         # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
-        # Made up but approx correct ratio for well #A1
+        # Made up but approx correct ratio
         SET_FACTOR = 6.55
-        pixel_size_A = 4.0
-        pixel_size_B = pixel_size_A / SET_FACTOR
+        pixel_size_a = 4.0
+        pixel_size_b = pixel_size_a / SET_FACTOR
         guess_x = 0.1
         guess_y = 0.4
 
@@ -351,12 +342,12 @@ class ImageMatcherGui(QMainWindow):
         '''
 
         # Read the selected images and convert to grayscale
-        ref_file = self._selection_A
-        trans_file = self._selection_B
+        ref_file = self.file_a
+        trans_file = self.file_b
 
         # Get greyscale versions of the selected images
-        ref_gray_img = Image.from_file(ref_file, pixel_size_A).make_gray()
-        mov_gray_img = Image.from_file(trans_file, pixel_size_B).make_gray()
+        ref_gray_img = Image.from_file(ref_file, pixel_size_a).make_gray()
+        mov_gray_img = Image.from_file(trans_file, pixel_size_b).make_gray()
 
         # Resize the mov image so it has the same size per pixel as the ref image
         factor = mov_gray_img.pixel_size / ref_gray_img.pixel_size
@@ -365,29 +356,29 @@ class ImageMatcherGui(QMainWindow):
 
         # Perform the matching operation to determine the transformation that maps image B to image A
         guess = Translate(guess_x*ref_gray_img.size[0], guess_y*ref_gray_img.size[1]); print(guess.x, guess.y)
-        self._region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
+        self.region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
         self.function_next_frame()
 
     def secondary_image_matching(self, imgA, imgB, roi):
         imgA_gray = imgA.make_gray()
         imgB_gray = imgB.make_gray()
 
-        primary_transform = self._region_matcher.net_transform
+        primary_transform = self.region_matcher.net_transform
         guessX = roi[0] - primary_transform.x
         guessY = roi[1] - primary_transform.y
         guess = Translate(guessX, guessY)
 
-        self._region_matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
+        self.region_matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
         self.function_next_frame()
 
     def display_match_results(self):
-        frame = self._result_frame
-        pixmap = self._region_matcher.match_img.make_color().to_qt_pixmap()
+        frame = self.frame_main
+        pixmap = self.region_matcher.match_img.make_color().to_qt_pixmap()
         frame.setPixmap(pixmap.scaled(frame.size(),
                                       Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-        if self._region_matcher.match_complete:
-            matcher = self._region_matcher
+        if self.region_matcher.match_complete:
+            matcher = self.region_matcher
 
             # Determine transformation in real units (um)
             net_transform = matcher.net_transform
@@ -412,17 +403,17 @@ class ImageMatcherGui(QMainWindow):
             row = chr(c)
             for col in range(1,13):
                 ref, mov = self._get_441350000072_files(row, col)
-                self._display_image(self._selection_A_frame, ref)
-                self._display_image(self._selection_B_frame, mov)
-                self._set_filename_label(self._selection_A_label, ref)
-                self._set_filename_label(self._selection_B_label, mov)
-                self._selection_A = ref
-                self._selection_B = mov
+                self._display_image(self.frame_a, ref)
+                self._display_image(self.frame_b, mov)
+                self._set_filename_label(self.lbl_selection_a, ref)
+                self._set_filename_label(self.lbl_selection_b, mov)
+                self.file_a = ref
+                self.file_b = mov
                 self._perform_image_matching()
                 self._skip_to_end_pushed()
 
                 out_file = "441350000072/" + str(row) + "_" + str(col)
-                self._region_matcher.match_img.save(out_file)
+                self.region_matcher.match_img.save(out_file)
 
 
 
