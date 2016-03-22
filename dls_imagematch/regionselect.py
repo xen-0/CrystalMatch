@@ -1,4 +1,4 @@
-import sys
+from enum import Enum
 
 from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from PyQt4.QtCore import Qt, QSize
@@ -6,6 +6,10 @@ from PyQt4.QtCore import Qt, QSize
 from dls_imagematch.match.image import Image
 
 INPUT_DIR_ROOT = "../test-images/"
+
+class SelectorMode(Enum):
+    SINGLE_POINT = 1
+    REGION = 2
 
 
 class SelectorFrame(QLabel):
@@ -24,6 +28,9 @@ class SelectorFrame(QLabel):
         self.start_coords = None
         self.roi = None
         self.image_region = None
+
+        # Set selection mode
+        self.mode = SelectorMode.REGION
 
         # Load image from file
         self.cvimg = Image.from_file(filepath, 100)
@@ -46,8 +53,7 @@ class SelectorFrame(QLabel):
         self.size_display(self.cvimg)
 
     def size_display(self, cvimg):
-        """ Size the image appropriately and display it in the frame.
-        """
+        """ Size the image appropriately and display it in the frame. """
         width, height = self.display_size
         pixmap = cvimg.to_qt_pixmap()
         pixmap = pixmap.scaled(QSize(width, height), Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -57,8 +63,7 @@ class SelectorFrame(QLabel):
 
     def set_roi(self, display_roi):
         """ Set the selected region of interest (display it on image and store the area
-        of the image for later use by clients.
-        """
+        of the image for later use by clients. """
         # Convert display coords to image coords
         scale = self.size_image[0] / self.display_size[0]
         self.roi = list((scale * p for p in display_roi))
@@ -73,20 +78,27 @@ class SelectorFrame(QLabel):
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
-        rectangle drag.
-        """
+        rectangle drag. """
         self.start_coords = QMouseEvent.pos()
 
     def mouseReleaseEvent(self, QMouseEvent):
         """ Called when the mouse is released after having been initially clicked in the frame
         area. Completes the region selection drag and causes the rectangle to be displayed on
-        the image. This still works correctly if the drag finishes outside the bounds of the frame.
-        """
+        the image. This still works correctly if the drag finishes outside the bounds of the
+        frame. """
         end_coords = QMouseEvent.pos()
-        x1, y1 = self.start_coords.x(), self.start_coords.y()
-        x2, y2 = end_coords.x(), end_coords.y()
+
+        if self.mode == SelectorMode.REGION:
+            x1, y1 = self.start_coords.x(), self.start_coords.y()
+            x2, y2 = end_coords.x(), end_coords.y()
+        elif self.mode == SelectorMode.SINGLE_POINT:
+            roi_size = 10
+            x1, y1 = end_coords.x() - roi_size, end_coords.y() - roi_size
+            x2, y2 = end_coords.x() + roi_size, end_coords.y() + roi_size
+        else:
+            raise NotImplementedError
+
         w, h = self.size().width(), self.size().height()
-        self.start_coords = None
 
         x1, x2 = min(x1, x2), max(x1, x2)
         y1, y2 = min(y1, y2), max(y1, y2)
@@ -97,18 +109,19 @@ class SelectorFrame(QLabel):
         display_roi = (x1, y1, x2, y2)
         self.set_roi(display_roi)
 
+        self.start_coords = None
+
 
 class RegionSelectDialog(QDialog):
     def __init__(self, filename):
         super(RegionSelectDialog, self).__init__()
-        self._init_ui(filename)
+        self.init_ui(filename)
 
-    def _init_ui(self, filename):
+    def init_ui(self, filename):
         self.setWindowTitle('Select Region of Interest')
 
-        # Image frame - displays the image currently selected in the file tree
-        #filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
-        self._image_frame = SelectorFrame(1200, filename)
+        self.selector_frame = SelectorFrame(900, filename)
+        self.selector_frame.mode = SelectorMode.SINGLE_POINT
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
@@ -117,18 +130,18 @@ class RegionSelectDialog(QDialog):
         buttons.rejected.connect(self.reject)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(self._image_frame)
+        vbox.addWidget(self.selector_frame)
         vbox.addWidget(buttons)
 
         self.setLayout(vbox)
         self.show()
 
-    def _roi(self):
-        return self._image_frame.image_region, self._image_frame.roi
+    def roi(self):
+        return self.selector_frame.image_region, self.selector_frame.roi
 
     @staticmethod
     def get_region(parent, filename):
         dialog = RegionSelectDialog(filename)
         result = dialog.exec_()
-        region_image, roi = dialog._roi()
+        region_image, roi = dialog.roi()
         return region_image, roi

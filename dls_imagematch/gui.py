@@ -336,7 +336,7 @@ class ImageMatcherGui(QMainWindow):
         guess_y = 0.4
 
         '''
-        pixel_size_A = pixel_size_B = 2.17217391
+        pixel_size_a = pixel_size_b = 2.17217391
         guess_x = 0.2
         guess_y = 0.1
         '''
