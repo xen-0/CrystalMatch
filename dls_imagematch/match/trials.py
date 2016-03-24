@@ -1,3 +1,4 @@
+from __future__ import division
 from dls_imagematch.util.translate import Translate
 
 

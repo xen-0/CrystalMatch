@@ -1,8 +1,14 @@
+from __future__ import division
 import cv2
 import numpy as np
+from enum import Enum
 
 from dls_imagematch.match.image import Image
 
+class OverlapImageType(Enum):
+    NoImage = 1
+    InvAbsDiff = 2
+    Blended = 3
 
 class OverlapMetric:
 
@@ -10,6 +16,7 @@ class OverlapMetric:
         self.img_a = img_a
         self.img_b = img_b
         self.trial_transforms = trial_transforms
+        self.img_return_type = OverlapImageType.Blended
 
     def best_transform(self, starting_transform):
         """ For a TrialTransforms object, return the transform which has the
@@ -22,8 +29,8 @@ class OverlapMetric:
 
         for transform in transforms:
             offset = (int(transform.x), int(transform.y))
-            metric, absdiff_img = self.calculate_overlap_metric(self.img_a, self.img_b, offset)
-            imgs.append(absdiff_img)
+            metric, metric_img = self.calculate_overlap_metric(offset)
+            imgs.append(metric_img)
             metrics.append(metric)
 
         # Extract the best transformation (and associated abs_diff image)
@@ -35,8 +42,8 @@ class OverlapMetric:
         is_identity = (best == 0)
 
         # Paste the abs_diff img onto the ref image and highlight the area
-        overlay = self.create_overlay_image(best_img, best_transform)
-        #overlay.save("rect")
+        if best_img is not None:
+            overlay = self.create_overlay_image(best_img, best_transform)
 
         return best_transform, overlay.img, is_identity
 
@@ -64,8 +71,7 @@ class OverlapMetric:
         return background
 
 
-    @staticmethod
-    def calculate_overlap_metric(imgA, imgB, offset):
+    def calculate_overlap_metric(self, offset):
         """ For two images, A and B, where B is offset relative to A, calculate the average
         per pixel absolute difference of the region of overlap of the two images.
 
@@ -74,19 +80,20 @@ class OverlapMetric:
         overlap whereas lighter areas indicate more similarity.
         """
         xOffset, yOffset = offset
-        cr1, cr2 = OverlapMetric.get_overlap_regions(imgA, imgB, xOffset, yOffset)
-
-        # DEBUG printouts
-        #Image(cr1, imgA.pixel_size).save("Comparison_Region_A")
-        #Image(cr2, imgB.pixel_size).save("Comparison_Region_B")
+        cr1, cr2 = OverlapMetric.get_overlap_regions(self.img_a, self.img_b, xOffset, yOffset)
 
         absdiff_img = cv2.absdiff(cr1, cr2)
         metric = np.sum(absdiff_img) / absdiff_img.size
 
-        # Invert image so that similarities are light and differences are dark.
-        inverted = 255-absdiff_img
+        # Blend the two images
+        if self.img_return_type == OverlapImageType.Blended:
+            return_img = cv2.addWeighted(cr1,0.5,cr2,0.5,0)
+        elif self.img_return_type == OverlapImageType.InvAbsDiff:
+            return_img = 255-absdiff_img
+        else:
+            return_img = None
 
-        return metric, inverted
+        return metric, return_img
 
 
     @staticmethod

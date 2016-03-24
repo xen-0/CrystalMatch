@@ -1,3 +1,4 @@
+from __future__ import division
 import os
 import sys
 from enum import Enum
@@ -180,7 +181,7 @@ class ImageMatcherGui(QMainWindow):
         match_action = QAction(QIcon('exit.png'), '&Perform Match', self)
         match_action.setShortcut('Ctrl+M')
         match_action.setStatusTip('Perform Match')
-        match_action.triggered.connect(self.primary_image_matching)
+        match_action.triggered.connect(self.function_begin_matching)
 
         # Create menu bar
         menu_bar = self.menuBar()
@@ -248,12 +249,13 @@ class ImageMatcherGui(QMainWindow):
     @staticmethod
     def _get_441350000072_files(row, col):
         """ Get the full paths of the files for the specified well of the 441350000072 data set. """
-        mov_filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_" + row + str(col) + ".png"
+        mov_filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
         col = int(col)
         if col < 10:
             col = '0' + str(col)
 
-        ref_filepath = INPUT_DIR_ROOT + "441350000072/" + row + str(col) + "_13.jpg"
+        ref_filepath = INPUT_DIR_ROOT + "441350000072/" + str(row) + str(col) + "_13.jpg"
+
         return ref_filepath, mov_filepath
 
     ''' ----------------------
@@ -389,8 +391,8 @@ class ImageMatcherGui(QMainWindow):
             delta_y = y * pixel_size
 
             # Print results
-            print("Image offset: x=" + str(delta_x), "µm (" + str(int(x)) + " pixels), y="
-                  + str(delta_y) + " µm (" + str(int(y)) + " pixels)")
+            print("Image offset: x=" + str(delta_x), "um (" + str(int(x)) + " pixels), y="
+                  + str(delta_y) + " um (" + str(int(y)) + " pixels)")
 
             if self.gui_state == GuiStates.MATCHING:
                 self.set_gui_state(GuiStates.MATCHING_COMPLETE)

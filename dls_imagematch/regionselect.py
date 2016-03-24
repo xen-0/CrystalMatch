@@ -1,6 +1,7 @@
+from __future__ import division
 from enum import Enum
 
-from PyQt4.QtGui import QApplication, QMainWindow, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
+from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from PyQt4.QtCore import Qt, QSize
 
 from dls_imagematch.match.image import Image

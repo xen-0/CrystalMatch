@@ -1,4 +1,4 @@
-import cv2
+from __future__ import division
 
 from dls_imagematch.match.image import Image
 from dls_imagematch.match.metric import OverlapMetric
