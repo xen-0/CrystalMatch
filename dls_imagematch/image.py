@@ -7,7 +7,7 @@ OUTPUT_DIRECTORY = "../test-output/"
 
 
 class Image:
-    def __init__(self, img, pixel_size):
+    def __init__(self, img, pixel_size=0):
         self.img = img
 
         # The size of the image in number of pixels
