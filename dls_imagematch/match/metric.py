@@ -1,9 +1,11 @@
 from __future__ import division
+
 import cv2
 import numpy as np
 from enum import Enum
 
-from dls_imagematch.match.image import Image
+from dls_imagematch.image import Image
+
 
 class OverlapImageType(Enum):
     NoImage = 1

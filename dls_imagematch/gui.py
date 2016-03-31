@@ -1,16 +1,16 @@
 from __future__ import division
+
 import os
 import sys
-from enum import Enum
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
                          QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
+from enum import Enum
 
-
-from dls_imagematch.match.image import Image
 from dls_imagematch import RegionMatcher
+from dls_imagematch.image import Image
 from dls_imagematch.regionselect import RegionSelectDialog
 from dls_imagematch.util.translate import Translate
 
@@ -399,7 +399,7 @@ class ImageMatcherGui(QMainWindow):
         self.mov_img_scale_factor = factor
 
         # Perform the matching operation to determine the transformation that maps image B to image A
-        guess = Translate(guess_x*ref_gray_img.size[0], guess_y*ref_gray_img.size[1]); print(guess.x, guess.y)
+        guess = Translate(guess_x*ref_gray_img.size[0], guess_y*ref_gray_img.size[1])
         self.region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
         self.function_next_frame()
 

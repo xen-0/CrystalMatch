@@ -1,10 +1,10 @@
 from __future__ import division
+
+from PyQt4.QtCore import Qt, QSize
+from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from enum import Enum
 
-from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
-from PyQt4.QtCore import Qt, QSize
-
-from dls_imagematch.match.image import Image
+from dls_imagematch.image import Image
 
 INPUT_DIR_ROOT = "../test-images/"
 
