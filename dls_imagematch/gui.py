@@ -42,11 +42,7 @@ class ImageMatcherGui(QMainWindow):
         self.set_gui_state(GuiStates.SELECTION)
 
         # Select and Display the default images
-        filepath = INPUT_DIR_ROOT + "441350000072/A01_13.jpg"
-        self.function_select_a(filepath)
-
-        filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_A1.png"
-        self.function_select_b(filepath)
+        self.function_select_well()
 
         #self.iterate_over_441350000072_data_set()
 
@@ -58,6 +54,10 @@ class ImageMatcherGui(QMainWindow):
 
         self.init_menu_bar()
 
+        gpBox_well_select = QtGui.QGroupBox("Select Well")
+        gpBox_select_a = QtGui.QGroupBox("Select Image A")
+        gpBox_select_b = QtGui.QGroupBox("Select Image B")
+
         # Drop-down box to select data set
         self.cmbo_plate_row = QtGui.QComboBox()
         self.cmbo_plate_col = QtGui.QComboBox()
@@ -68,37 +68,42 @@ class ImageMatcherGui(QMainWindow):
 
         self.btn_select_data = QPushButton("Select")
         self.btn_select_data.clicked.connect(self.function_select_well)
-        self.lbl_select_data = QLabel()
-        self.lbl_select_data.setText("Select Well:")
 
         # Selection buttons - make selection of currently displayed image as A or B
-        self.btn_select_a = QPushButton("Select Reference Image")
+        self.btn_select_a = QPushButton("Load Image")
         self.btn_select_a.clicked.connect(self.function_select_a)
-        self.btn_select_b = QPushButton("Select Matching Image")
+        self.btn_select_b = QPushButton("Load Image")
         self.btn_select_b.clicked.connect(self.function_select_b)
 
         # Selection filename - displays filename of selected images (A and B)
-        self.lbl_selection_a = QLabel()
-        self.lbl_selection_a.setFixedWidth(300)
-        self.lbl_selection_a.setText("No Image Selected")
+        self.lbl_selection_a = QLabel("No Image Selected")
+        self.lbl_selection_a.setFixedWidth(250)
 
-        self.lbl_selection_b = QLabel()
-        self.lbl_selection_b.setFixedWidth(300)
-        self.lbl_selection_b.setText("No Image Selected")
+        self.lbl_selection_b = QLabel("No Image Selected")
+        self.lbl_selection_b.setFixedWidth(250)
+
+        # Selection pixel size
+        self.lbl_pixelsize_a = QLabel("Size per pixel:")
+        self.txt_pixelsize_a = QtGui.QLineEdit()
+        self.txt_pixelsize_a.setFixedWidth(60)
+        self.lbl_um_a = QLabel("um")
+
+        self.lbl_pixelsize_b = QLabel("Size per pixel:")
+        self.txt_pixelsize_b = QtGui.QLineEdit()
+        self.txt_pixelsize_b.setFixedWidth(60)
+        self.lbl_um_b = QLabel("um")
 
         # Selection Image Frames - displays smaller versions of currently selected images (A and B)
-        self.frame_a = QLabel()
+        self.frame_a = QLabel("No Image Selected")
         self.frame_a.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self.frame_a.setFixedWidth(400)
-        self.frame_a.setFixedHeight(400)
-        self.frame_a.setText("No Image Selected")
+        self.frame_a.setFixedWidth(350)
+        self.frame_a.setFixedHeight(350)
         self.frame_a.setAlignment(Qt.AlignCenter)
 
-        self.frame_b = QLabel()
+        self.frame_b = QLabel("No Image Selected")
         self.frame_b.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
-        self.frame_b.setFixedWidth(400)
-        self.frame_b.setFixedHeight(400)
-        self.frame_b.setText("No Image Selected")
+        self.frame_b.setFixedWidth(350)
+        self.frame_b.setFixedHeight(350)
         self.frame_b.setAlignment(Qt.AlignCenter)
 
         # Main image frame - shows progress of image matching
@@ -122,30 +127,44 @@ class ImageMatcherGui(QMainWindow):
 
         # Create layout
         hbox_well_select = QHBoxLayout()
-        hbox_well_select.addWidget(self.lbl_select_data)
         hbox_well_select.addWidget(self.cmbo_plate_row)
         hbox_well_select.addWidget(self.cmbo_plate_col)
         hbox_well_select.addWidget(self.btn_select_data)
         hbox_well_select.addStretch(1)
+        gpBox_well_select.setLayout(hbox_well_select)
 
         hbox_select_a = QHBoxLayout()
         hbox_select_a.addWidget(self.btn_select_a)
         hbox_select_a.addWidget(self.lbl_selection_a)
+        hbox_select_a2 = QHBoxLayout()
+        hbox_select_a2.addWidget(self.lbl_pixelsize_a)
+        hbox_select_a2.addWidget(self.txt_pixelsize_a)
+        hbox_select_a2.addWidget(self.lbl_um_a)
+        hbox_select_a2.addStretch(1)
         vbox_select_a = QVBoxLayout()
         vbox_select_a.addLayout(hbox_select_a)
         vbox_select_a.addWidget(self.frame_a)
+        vbox_select_a.addLayout(hbox_select_a2)
+        gpBox_select_a.setLayout(vbox_select_a)
 
         hbox_select_b = QHBoxLayout()
         hbox_select_b.addWidget(self.btn_select_b)
         hbox_select_b.addWidget(self.lbl_selection_b)
+        hbox_select_b2 = QHBoxLayout()
+        hbox_select_b2.addWidget(self.lbl_pixelsize_b)
+        hbox_select_b2.addWidget(self.txt_pixelsize_b)
+        hbox_select_b2.addWidget(self.lbl_um_b)
+        hbox_select_b2.addStretch(1)
         vbox_select_b = QVBoxLayout()
         vbox_select_b.addLayout(hbox_select_b)
         vbox_select_b.addWidget(self.frame_b)
+        vbox_select_b.addLayout(hbox_select_b2)
+        gpBox_select_b.setLayout(vbox_select_b)
 
         vbox_img_selection = QVBoxLayout()
-        vbox_img_selection.addLayout(hbox_well_select)
-        vbox_img_selection.addLayout(vbox_select_a)
-        vbox_img_selection.addLayout(vbox_select_b)
+        vbox_img_selection.addWidget(gpBox_well_select)
+        vbox_img_selection.addWidget(gpBox_select_a)
+        vbox_img_selection.addWidget(gpBox_select_b)
         vbox_img_selection.addStretch(1)
 
         vbox_match_btns = QVBoxLayout()
@@ -203,6 +222,13 @@ class ImageMatcherGui(QMainWindow):
         fileA, fileB = self._get_441350000072_files(row, col)
         self.function_select_a(fileA)
         self.function_select_b(fileB)
+
+        # Set pixel sizes
+        SET_FACTOR = 6.55
+        pixel_size_a = 4.0
+        pixel_size_b = pixel_size_a / SET_FACTOR
+        self.txt_pixelsize_a.setText("{0:.5f}".format(pixel_size_a))
+        self.txt_pixelsize_b.setText("{0:.5f}".format(pixel_size_b))
 
         self.set_gui_state(GuiStates.SELECTION)
 
@@ -329,19 +355,13 @@ class ImageMatcherGui(QMainWindow):
         if not self.file_a or not self.file_b or self.file_a == self.file_b:
             return
 
-        # For the 441350000072 test set - approximate, we are assuming the well width is about 5mm
-        # Made up but approx correct ratio
-        SET_FACTOR = 6.55
-        pixel_size_a = 4.0
-        pixel_size_b = pixel_size_a / SET_FACTOR
+        pixel_size_a = float(self.txt_pixelsize_a.text())
+        pixel_size_b = float(self.txt_pixelsize_b.text())
+
+        # For the 441350000072 test set
         guess_x = 0.1
         guess_y = 0.4
-
-        '''
-        pixel_size_a = pixel_size_b = 2.17217391
-        guess_x = 0.2
-        guess_y = 0.1
-        '''
+        #guess_x = 0.2;  guess_y = 0.1
 
         # Read the selected images and convert to grayscale
         ref_file = self.file_a
@@ -391,7 +411,7 @@ class ImageMatcherGui(QMainWindow):
             delta_y = y * pixel_size
 
             # Print results
-            print("Image offset: x=" + str(delta_x), "um (" + str(int(x)) + " pixels), y="
+            print("Image offset: x=" + str(delta_x) + " um (" + str(int(x)) + " pixels), y="
                   + str(delta_y) + " um (" + str(int(y)) + " pixels)")
 
             if self.gui_state == GuiStates.MATCHING:
