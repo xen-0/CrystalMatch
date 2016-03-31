@@ -54,11 +54,9 @@ class ImageMatcherGui(QMainWindow):
 
         self.init_menu_bar()
 
-        gpBox_well_select = QtGui.QGroupBox("Select Well")
-        gpBox_select_a = QtGui.QGroupBox("Select Image A")
-        gpBox_select_b = QtGui.QGroupBox("Select Image B")
-
         # Drop-down box to select data set
+        gpBox_well_select = QtGui.QGroupBox("Select Well")
+
         self.cmbo_plate_row = QtGui.QComboBox()
         self.cmbo_plate_col = QtGui.QComboBox()
         for c in range(ord('A'), ord('H')+1):
@@ -69,6 +67,10 @@ class ImageMatcherGui(QMainWindow):
         self.btn_select_data = QPushButton("Select")
         self.btn_select_data.clicked.connect(self.function_select_well)
 
+        # Selection group boxes
+        gpBox_select_a = QtGui.QGroupBox("Select Image A")
+        gpBox_select_b = QtGui.QGroupBox("Select Image B")
+
         # Selection buttons - make selection of currently displayed image as A or B
         self.btn_select_a = QPushButton("Load Image")
         self.btn_select_a.clicked.connect(self.function_select_a)
@@ -78,20 +80,14 @@ class ImageMatcherGui(QMainWindow):
         # Selection filename - displays filename of selected images (A and B)
         self.lbl_selection_a = QLabel("No Image Selected")
         self.lbl_selection_a.setFixedWidth(250)
-
         self.lbl_selection_b = QLabel("No Image Selected")
         self.lbl_selection_b.setFixedWidth(250)
 
         # Selection pixel size
-        self.lbl_pixelsize_a = QLabel("Size per pixel:")
         self.txt_pixelsize_a = QtGui.QLineEdit()
         self.txt_pixelsize_a.setFixedWidth(60)
-        self.lbl_um_a = QLabel("um")
-
-        self.lbl_pixelsize_b = QLabel("Size per pixel:")
         self.txt_pixelsize_b = QtGui.QLineEdit()
         self.txt_pixelsize_b.setFixedWidth(60)
-        self.lbl_um_b = QLabel("um")
 
         # Selection Image Frames - displays smaller versions of currently selected images (A and B)
         self.frame_a = QLabel("No Image Selected")
@@ -106,11 +102,12 @@ class ImageMatcherGui(QMainWindow):
         self.frame_b.setFixedHeight(350)
         self.frame_b.setAlignment(Qt.AlignCenter)
 
-        # Main image frame - shows progress of image matching
-        self.frame_main = QLabel()
-        self.frame_main.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
-        self.frame_main.setFixedWidth(850)
-        self.frame_main.setFixedHeight(850)
+        # Matching guess
+        gpBox_match_guess = QtGui.QGroupBox("Starting Guess")
+        self.txt_guess_x = QtGui.QLineEdit()
+        self.txt_guess_x.setFixedWidth(40)
+        self.txt_guess_y = QtGui.QLineEdit()
+        self.txt_guess_y.setFixedWidth(40)
 
         # Matching function buttons
         self.btn_begin_match = QPushButton("Begin Match")
@@ -125,6 +122,13 @@ class ImageMatcherGui(QMainWindow):
         self.btn_region_select.clicked.connect(self.function_select_region)
         self.btn_region_select.setEnabled(False)
 
+        # Main image frame - shows progress of image matching
+        gpBox_results = QtGui.QGroupBox("Results")
+        self.frame_main = QLabel()
+        self.frame_main.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
+        self.frame_main.setFixedWidth(828)
+        self.frame_main.setFixedHeight(828)
+
         # Create layout
         hbox_well_select = QHBoxLayout()
         hbox_well_select.addWidget(self.cmbo_plate_row)
@@ -137,9 +141,9 @@ class ImageMatcherGui(QMainWindow):
         hbox_select_a.addWidget(self.btn_select_a)
         hbox_select_a.addWidget(self.lbl_selection_a)
         hbox_select_a2 = QHBoxLayout()
-        hbox_select_a2.addWidget(self.lbl_pixelsize_a)
+        hbox_select_a2.addWidget(QLabel("Size per pixel:"))
         hbox_select_a2.addWidget(self.txt_pixelsize_a)
-        hbox_select_a2.addWidget(self.lbl_um_a)
+        hbox_select_a2.addWidget(QLabel("um"))
         hbox_select_a2.addStretch(1)
         vbox_select_a = QVBoxLayout()
         vbox_select_a.addLayout(hbox_select_a)
@@ -151,9 +155,9 @@ class ImageMatcherGui(QMainWindow):
         hbox_select_b.addWidget(self.btn_select_b)
         hbox_select_b.addWidget(self.lbl_selection_b)
         hbox_select_b2 = QHBoxLayout()
-        hbox_select_b2.addWidget(self.lbl_pixelsize_b)
+        hbox_select_b2.addWidget(QLabel("Size per pixel:"))
         hbox_select_b2.addWidget(self.txt_pixelsize_b)
-        hbox_select_b2.addWidget(self.lbl_um_b)
+        hbox_select_b2.addWidget(QLabel("um"))
         hbox_select_b2.addStretch(1)
         vbox_select_b = QVBoxLayout()
         vbox_select_b.addLayout(hbox_select_b)
@@ -167,20 +171,36 @@ class ImageMatcherGui(QMainWindow):
         vbox_img_selection.addWidget(gpBox_select_b)
         vbox_img_selection.addStretch(1)
 
-        vbox_match_btns = QVBoxLayout()
-        vbox_match_btns.addStretch(1)
-        vbox_match_btns.addWidget(self.btn_begin_match)
-        vbox_match_btns.addWidget(self.btn_next_frame)
-        vbox_match_btns.addWidget(self.btn_next_scale)
-        vbox_match_btns.addWidget(self.btn_end_match)
-        vbox_match_btns.addWidget(self.btn_region_select)
-        vbox_match_btns.addStretch(1)
+        hbox_match_guess = QHBoxLayout()
+        hbox_match_guess.addWidget(QLabel("X:"))
+        hbox_match_guess.addWidget(self.txt_guess_x)
+        hbox_match_guess.addWidget(QLabel("Y:"))
+        hbox_match_guess.addWidget(self.txt_guess_y)
+        hbox_match_guess.addStretch(1)
+        gpBox_match_guess.setLayout(hbox_match_guess)
+
+        hbox_match_btns = QHBoxLayout()
+        hbox_match_btns.addWidget(self.btn_begin_match)
+        hbox_match_btns.addWidget(self.btn_next_frame)
+        hbox_match_btns.addWidget(self.btn_next_scale)
+        hbox_match_btns.addWidget(self.btn_end_match)
+        hbox_match_btns.addWidget(self.btn_region_select)
+        hbox_match_btns.addStretch(1)
+
+        vbox_match_results = QVBoxLayout()
+        vbox_match_results.addLayout(hbox_match_btns)
+        vbox_match_results.addWidget(self.frame_main)
+        gpBox_results.setLayout(vbox_match_results)
+
+        vbox_matching = QVBoxLayout()
+        vbox_matching.addWidget(gpBox_match_guess)
+        vbox_matching.addWidget(gpBox_results)
+        vbox_matching.addStretch(1)
 
         hbox_main = QHBoxLayout()
         hbox_main.setSpacing(10)
         hbox_main.addLayout(vbox_img_selection)
-        hbox_main.addWidget(self.frame_main)
-        hbox_main.addLayout(vbox_match_btns)
+        hbox_main.addLayout(vbox_matching)
         hbox_main.addStretch(1)
 
         main_widget = QWidget()
@@ -229,6 +249,10 @@ class ImageMatcherGui(QMainWindow):
         pixel_size_b = pixel_size_a / SET_FACTOR
         self.txt_pixelsize_a.setText("{0:.5f}".format(pixel_size_a))
         self.txt_pixelsize_b.setText("{0:.5f}".format(pixel_size_b))
+
+        # Set starting guess
+        self.txt_guess_x.setText("0.1")
+        self.txt_guess_y.setText("0.4")
 
         self.set_gui_state(GuiStates.SELECTION)
 
@@ -355,13 +379,11 @@ class ImageMatcherGui(QMainWindow):
         if not self.file_a or not self.file_b or self.file_a == self.file_b:
             return
 
+        # Get pixel sizes and starting guess position
         pixel_size_a = float(self.txt_pixelsize_a.text())
         pixel_size_b = float(self.txt_pixelsize_b.text())
-
-        # For the 441350000072 test set
-        guess_x = 0.1
-        guess_y = 0.4
-        #guess_x = 0.2;  guess_y = 0.1
+        guess_x = float(self.txt_guess_x.text())
+        guess_y = float(self.txt_guess_y.text())
 
         # Read the selected images and convert to grayscale
         ref_file = self.file_a
