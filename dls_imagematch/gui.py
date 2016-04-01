@@ -10,6 +10,7 @@ from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
 from enum import Enum
 
 from dls_imagematch import RegionMatcher
+from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.image import Image
 from dls_imagematch.regionselect import RegionSelectDialog
 from dls_imagematch.util.translate import Translate
@@ -216,11 +217,17 @@ class ImageMatcherGui(QMainWindow):
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(QtGui.qApp.quit)
 
-        # Match Action
-        match_action = QAction(QIcon('exit.png'), '&Perform Match', self)
-        match_action.setShortcut('Ctrl+M')
-        match_action.setStatusTip('Perform Match')
-        match_action.triggered.connect(self.function_begin_matching)
+        # Region Match Action
+        region_match_action = QAction(QIcon('exit.png'), '&Region Match', self)
+        region_match_action.setShortcut('Ctrl+M')
+        region_match_action.setStatusTip('Perform Region Match')
+        region_match_action.triggered.connect(self.function_begin_matching)
+
+        # Region Match Action
+        feature_match_action = QAction(QIcon('exit.png'), '&Feature Match', self)
+        feature_match_action.setShortcut('Ctrl+F')
+        feature_match_action.setStatusTip('Perform Feature Match')
+        feature_match_action.triggered.connect(self.feature_matching)
 
         # Create menu bar
         menu_bar = self.menuBar()
@@ -228,7 +235,8 @@ class ImageMatcherGui(QMainWindow):
         file_menu.addAction(exit_action)
 
         match_menu = menu_bar.addMenu('&Match')
-        match_menu.addAction(match_action)
+        match_menu.addAction(region_match_action)
+        match_menu.addAction(feature_match_action)
 
     ''' ----------------------
     IMAGE SELECTION FUNCTIONS
@@ -339,7 +347,7 @@ class ImageMatcherGui(QMainWindow):
 
     def function_begin_matching(self):
         """ Begin the matching procedure using the two selected images. """
-        self.primary_image_matching()
+        self.region_matching_primary()
         self.set_gui_state(GuiStates.MATCHING)
 
     def function_next_frame(self):
@@ -368,42 +376,45 @@ class ImageMatcherGui(QMainWindow):
         if region_image is not None:
             img_a = Image.from_file(self.file_b, region_image.pixel_size)
             img_a = img_a.rescale(self.mov_img_scale_factor)
-            self.secondary_image_matching(img_a, region_image, roi)
+            self.region_matching_secondary(img_a, region_image, roi)
             self.set_gui_state(GuiStates.MATCHING_2ND)
 
     ''' ----------------------
     IMAGE MATCHING FUNCTIONS
     ------------------------'''
-    def primary_image_matching(self):
-        """ Begin the image matching process, attempting to map image B onto image A. """
+    def feature_matching(self):
+        img_a, img_b = self.prepare_match_images()
+        FeatureMatcher.perform_match(img_a, img_b)
+
+    def region_matching_primary(self):
+        img_a, img_b = self.prepare_match_images()
+
+        guess_x = float(self.txt_guess_x.text())
+        guess_y = float(self.txt_guess_y.text())
+        guess = Translate(guess_x*img_a.size[0], guess_y*img_a.size[1])
+        self.region_matcher = RegionMatcher(img_a, img_b, guess)
+        self.function_next_frame()
+
+    def prepare_match_images(self):
         if not self.file_a or not self.file_b or self.file_a == self.file_b:
-            return
+            return None, None
 
         # Get pixel sizes and starting guess position
         pixel_size_a = float(self.txt_pixelsize_a.text())
         pixel_size_b = float(self.txt_pixelsize_b.text())
-        guess_x = float(self.txt_guess_x.text())
-        guess_y = float(self.txt_guess_y.text())
-
-        # Read the selected images and convert to grayscale
-        ref_file = self.file_a
-        trans_file = self.file_b
 
         # Get greyscale versions of the selected images
-        ref_gray_img = Image.from_file(ref_file, pixel_size_a).make_gray()
-        mov_gray_img = Image.from_file(trans_file, pixel_size_b).make_gray()
+        img_a = Image.from_file(self.file_a, pixel_size_a).make_gray()
+        img_b = Image.from_file(self.file_b, pixel_size_b).make_gray()
 
         # Resize the mov image so it has the same size per pixel as the ref image
-        factor = mov_gray_img.pixel_size / ref_gray_img.pixel_size
-        mov_gray_img = mov_gray_img.rescale(factor)
+        factor = img_b.pixel_size / img_a.pixel_size
+        img_b = img_b.rescale(factor)
         self.mov_img_scale_factor = factor
 
-        # Perform the matching operation to determine the transformation that maps image B to image A
-        guess = Translate(guess_x*ref_gray_img.size[0], guess_y*ref_gray_img.size[1])
-        self.region_matcher = RegionMatcher(ref_gray_img, mov_gray_img, guess)
-        self.function_next_frame()
+        return img_a, img_b
 
-    def secondary_image_matching(self, imgA, imgB, roi):
+    def region_matching_secondary(self, imgA, imgB, roi):
         imgA_gray = imgA.make_gray()
         imgB_gray = imgB.make_gray()
 

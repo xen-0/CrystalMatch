@@ -165,7 +165,7 @@ class Image:
         return cv2.warpAffine(self.img, transform, working_size)
 
     @staticmethod
-    def from_file(filename, pixel_size):
+    def from_file(filename, pixel_size=0):
         img = cv2.imread(filename)
         return Image(img, pixel_size)
 

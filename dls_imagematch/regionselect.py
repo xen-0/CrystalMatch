@@ -8,6 +8,7 @@ from dls_imagematch.image import Image
 
 INPUT_DIR_ROOT = "../test-images/"
 
+
 class SelectorMode(Enum):
     SINGLE_POINT = 1
     REGION = 2
@@ -34,7 +35,7 @@ class SelectorFrame(QLabel):
         self.mode = SelectorMode.REGION
 
         # Load image from file
-        self.cvimg = Image.from_file(filepath, 100)
+        self.cvimg = Image.from_file(filepath)
         self.size_image = self.cvimg.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
