@@ -3,7 +3,7 @@ from __future__ import division
 import os
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
                          QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
@@ -12,13 +12,13 @@ from enum import Enum
 from dls_imagematch import RegionMatcher
 from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.image import Image
+from dls_imagematch.imageframe import ImageFrame
 from dls_imagematch.match.overlay import Overlayer
 from dls_imagematch.regionselect import RegionSelectDialog
 from dls_imagematch.util.translate import Translate
 
 INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
-
 
 class GuiStates(Enum):
     SELECTION = 1
@@ -107,7 +107,7 @@ class ImageMatcherGui(QMainWindow):
         self.frame_b.setAlignment(Qt.AlignCenter)
 
         # Matching guess
-        gpBox_match_guess = QtGui.QGroupBox("Starting Guess")
+        gpBox_match_guess = QtGui.QGroupBox("Region Matching")
         self.txt_guess_x = QtGui.QLineEdit()
         self.txt_guess_x.setFixedWidth(40)
         self.txt_guess_y = QtGui.QLineEdit()
@@ -126,12 +126,16 @@ class ImageMatcherGui(QMainWindow):
         self.btn_region_select.clicked.connect(self.function_select_region)
         self.btn_region_select.setEnabled(False)
 
+        # Image frame cursor position
+        self.lbl_cursor = QLabel()
+
         # Main image frame - shows progress of image matching
         gpBox_results = QtGui.QGroupBox("Results")
-        self.frame_main = QLabel()
+        self.frame_main = ImageFrame()
         self.frame_main.setStyleSheet("color: red; font-size: 30pt; text-align: center; border:1px solid black")
         self.frame_main.setFixedWidth(828)
         self.frame_main.setFixedHeight(828)
+        self.frame_main.coord_change.connect(self.update_mouse_coords)
 
         # Create layout
         hbox_well_select = QHBoxLayout()
@@ -175,14 +179,6 @@ class ImageMatcherGui(QMainWindow):
         vbox_img_selection.addWidget(gpBox_select_b)
         vbox_img_selection.addStretch(1)
 
-        hbox_match_guess = QHBoxLayout()
-        hbox_match_guess.addWidget(QLabel("X:"))
-        hbox_match_guess.addWidget(self.txt_guess_x)
-        hbox_match_guess.addWidget(QLabel("Y:"))
-        hbox_match_guess.addWidget(self.txt_guess_y)
-        hbox_match_guess.addStretch(1)
-        gpBox_match_guess.setLayout(hbox_match_guess)
-
         hbox_match_btns = QHBoxLayout()
         hbox_match_btns.addWidget(self.btn_begin_match)
         hbox_match_btns.addWidget(self.btn_next_frame)
@@ -191,8 +187,18 @@ class ImageMatcherGui(QMainWindow):
         hbox_match_btns.addWidget(self.btn_region_select)
         hbox_match_btns.addStretch(1)
 
+        hbox_match_guess = QHBoxLayout()
+        hbox_match_guess.addWidget(QLabel("X:"))
+        hbox_match_guess.addWidget(self.txt_guess_x)
+        hbox_match_guess.addWidget(QLabel("Y:"))
+        hbox_match_guess.addWidget(self.txt_guess_y)
+        hbox_match_guess.addStretch(1)
+        hbox_match_guess.addLayout(hbox_match_btns)
+        hbox_match_guess.addStretch(3)
+        gpBox_match_guess.setLayout(hbox_match_guess)
+
         vbox_match_results = QVBoxLayout()
-        vbox_match_results.addLayout(hbox_match_btns)
+        vbox_match_results.addWidget(self.lbl_cursor)
         vbox_match_results.addWidget(self.frame_main)
         gpBox_results.setLayout(vbox_match_results)
 
@@ -401,7 +407,7 @@ class ImageMatcherGui(QMainWindow):
         self.function_next_frame()
 
     def prepare_match_images(self):
-        if not self.file_a or not self.file_b or self.file_a == self.file_b:
+        if not self.file_a or not self.file_b:
             return None, None
 
         # Get pixel sizes and starting guess position
@@ -438,11 +444,7 @@ class ImageMatcherGui(QMainWindow):
 
         # Create image of B overlaid on A
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
-        pixmap = img.to_qt_pixmap()
-
-        # Display overlaid image in main frame
-        frame = self.frame_main
-        frame.setPixmap(pixmap.scaled(frame.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.frame_main.display_image(img)
 
         if self.matcher.match_complete:
             # Determine transformation in real units (um)
@@ -460,6 +462,10 @@ class ImageMatcherGui(QMainWindow):
                 self.set_gui_state(GuiStates.MATCHING_COMPLETE)
             elif self.gui_state == GuiStates.MATCHING_2ND:
                 self.set_gui_state(GuiStates.MATCHING_2ND_COMPLETE)
+
+    def update_mouse_coords(self):
+        message = self.frame_main.position_txt
+        self.lbl_cursor.setText(message)
 
     def iterate_over_441350000072_data_set(self):
         """ Perform primary match for every image in the data set. """
