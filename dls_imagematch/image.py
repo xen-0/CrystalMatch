@@ -54,8 +54,9 @@ class Image:
 
     def to_qt_pixmap(self):
         width, height = self.size
-        bytesPerLine = 3 *width
-        qImg = QImage(self.img.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        bytesPerLine = 3 * width
+        rgb = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
+        qImg = QImage(rgb.data, width, height, bytesPerLine, QImage.Format_RGB888)
         return QPixmap.fromImage( qImg )
 
     def make_gray(self):

@@ -17,7 +17,6 @@ class RegionMatcher:
         self.net_transform = starting_guess
 
         self.match_complete = False
-        self.match_img = None
 
         self._iteration = -1
         self._scale = 0
@@ -75,12 +74,10 @@ class RegionMatcher:
 
         scaled_transform = self.net_transform.scale(self._scale)
 
-        scaled_transform, match_img, min_reached = \
+        scaled_transform, min_reached = \
             self._metric_calc.best_transform(scaled_transform)
 
         self.net_transform = scaled_transform.scale(1/self._scale)
-
-        self.match_img = match_img #Image(match_img, pixel_size=1000)
 
         if min_reached:
             self._next_scale_factor()

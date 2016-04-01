@@ -2,7 +2,6 @@ from __future__ import division
 
 import cv2
 import numpy as np
-from enum import Enum
 
 from dls_imagematch.image import Image
 from dls_imagematch.match.overlay import Overlayer
@@ -35,10 +34,7 @@ class OverlapMetric:
         # Whether or not the best transform candidate is actually the identity (i.e. no change)
         is_identity = (best == 0)
 
-        # Generate overlay image
-        overlay = Overlayer.create_overlay_image(self.img_a, self.img_b, best_transform)
-
-        return best_transform, overlay, is_identity
+        return best_transform, is_identity
 
     def create_overlay_image(self, overlay_img, transform):
         # Make a copy of A, the background image

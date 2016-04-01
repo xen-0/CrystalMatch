@@ -17,7 +17,6 @@ class FeatureMatcher:
 
         self.match_complete = False
         self.net_transform = None
-        self.match_img = None
 
     @staticmethod
     def _draw_matches(img1, kp1, img2, kp2, matches):
@@ -122,19 +121,18 @@ class FeatureMatcher:
             # y - rows
             (x1,y1) = kp1[img1_idx].pt
             (x2,y2) = kp2[img2_idx].pt
-            print("del: " + str(x2-x1) + ", " + str(y2-y1))
+            #print("del: " + str(x2-x1) + ", " + str(y2-y1))
             xs.append(x2-x1)
             ys.append(y2-y1)
 
         # Draw matches.
         x = -np.median(xs)
         y = -np.median(ys)
-        print(x, y)
+        #print(x, y)
 
         # Draw the best 75% of matches
         num = int(len(matches) * 0.55)
         img3 = FeatureMatcher._draw_matches(img1.img, kp1, img2.img, kp2, matches[:num])
 
         self.net_transform = Translate(x,y)
-        self.match_img = Overlayer.create_overlay_image(img1, img2, self.net_transform)
         self.match_complete = True

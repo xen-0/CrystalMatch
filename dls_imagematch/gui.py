@@ -12,6 +12,7 @@ from enum import Enum
 from dls_imagematch import RegionMatcher
 from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.image import Image
+from dls_imagematch.match.overlay import Overlayer
 from dls_imagematch.regionselect import RegionSelectDialog
 from dls_imagematch.util.translate import Translate
 
@@ -37,6 +38,8 @@ class ImageMatcherGui(QMainWindow):
         self.mov_img_scale_factor = 1
         self.file_a = None
         self.file_b = None
+        self.img_a = None
+        self.img_b = None
 
         self.init_ui()
 
@@ -92,13 +95,13 @@ class ImageMatcherGui(QMainWindow):
 
         # Selection Image Frames - displays smaller versions of currently selected images (A and B)
         self.frame_a = QLabel("No Image Selected")
-        self.frame_a.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
+        self.frame_a.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
         self.frame_a.setFixedWidth(350)
         self.frame_a.setFixedHeight(350)
         self.frame_a.setAlignment(Qt.AlignCenter)
 
         self.frame_b = QLabel("No Image Selected")
-        self.frame_b.setStyleSheet("background-color: black; color: red; font-size: 20pt; text-align: center")
+        self.frame_b.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
         self.frame_b.setFixedWidth(350)
         self.frame_b.setFixedHeight(350)
         self.frame_b.setAlignment(Qt.AlignCenter)
@@ -126,7 +129,7 @@ class ImageMatcherGui(QMainWindow):
         # Main image frame - shows progress of image matching
         gpBox_results = QtGui.QGroupBox("Results")
         self.frame_main = QLabel()
-        self.frame_main.setStyleSheet("background-color: black; color: red; font-size: 30pt; text-align: center")
+        self.frame_main.setStyleSheet("color: red; font-size: 30pt; text-align: center; border:1px solid black")
         self.frame_main.setFixedWidth(828)
         self.frame_main.setFixedHeight(828)
 
@@ -406,17 +409,19 @@ class ImageMatcherGui(QMainWindow):
         pixel_size_b = float(self.txt_pixelsize_b.text())
 
         # Get greyscale versions of the selected images
-        img_a = Image.from_file(self.file_a, pixel_size_a).make_gray()
-        img_b = Image.from_file(self.file_b, pixel_size_b).make_gray()
+        self.img_a = Image.from_file(self.file_a, pixel_size_a)
+        img_b = Image.from_file(self.file_b, pixel_size_b)
 
         # Resize the mov image so it has the same size per pixel as the ref image
-        factor = img_b.pixel_size / img_a.pixel_size
-        img_b = img_b.rescale(factor)
+        factor = img_b.pixel_size / self.img_a.pixel_size
+        self.img_b = img_b.rescale(factor)
         self.mov_img_scale_factor = factor
 
-        return img_a, img_b
+        return self.img_a.make_gray(), self.img_b.make_gray()
 
     def region_matching_secondary(self, imgA, imgB, roi):
+        self.img_a = imgA
+        self.img_b = imgB
         imgA_gray = imgA.make_gray()
         imgB_gray = imgB.make_gray()
 
@@ -429,21 +434,23 @@ class ImageMatcherGui(QMainWindow):
         self.function_next_frame()
 
     def display_match_results(self):
+        transform = self.matcher.net_transform
+
+        # Create image of B overlaid on A
+        img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
+        pixmap = img.to_qt_pixmap()
+
+        # Display overlaid image in main frame
         frame = self.frame_main
-        pixmap = self.matcher.match_img.make_color().to_qt_pixmap()
-        frame.setPixmap(pixmap.scaled(frame.size(),
-                                      Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        frame.setPixmap(pixmap.scaled(frame.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         if self.matcher.match_complete:
-            matcher = self.matcher
-
             # Determine transformation in real units (um)
-            net_transform = matcher.net_transform
-            x, y = net_transform.x, net_transform.y
+            x, y = transform.x, transform.y
 
-            pixel_size = matcher.img_a.pixel_size
-            delta_x = x * pixel_size
-            delta_y = y * pixel_size
+            pixel_size = self.img_a.pixel_size
+            delta_x = "{0:.2f}".format(x * pixel_size)
+            delta_y = "{0:.2f}".format(y * pixel_size)
 
             # Print results
             print("Image offset: x=" + str(delta_x) + " um (" + str(int(x)) + " pixels), y="
