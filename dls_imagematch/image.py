@@ -19,6 +19,21 @@ class Image:
         # The real size represented by the image
         self.real_size = (self.size[0] * self.pixel_size, self.size[1] * self.pixel_size)
 
+    def _size(self):
+        """Return the size of an image in pixels in the format [width, height].
+        """
+        if self.img.ndim == 3:  # Colour
+            working_size = self.img.shape[::-1][1:3]
+        else:
+            assert self.img.ndim == 2  # Greyscale
+            working_size = self.img.shape[::-1]
+        return working_size
+
+    @staticmethod
+    def from_file(filename, pixel_size=0):
+        img = cv2.imread(filename)
+        return Image(img, pixel_size)
+
     def save(self, filename):
         cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
 
@@ -58,7 +73,6 @@ class Image:
         color = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
         return Image(img=color, pixel_size=self.pixel_size)
 
-
     def freq_range(self, coarseness_range, scale_factor):
         """Copy an image, discarding all but a range of frequency components.
 
@@ -93,31 +107,12 @@ class Image:
         pixel_size = self.pixel_size / corrected_factor
         return Image(resized_img, pixel_size)
 
-    '''
-    def resize(self, new_size):
-        """ Return a new Image that is a resized version of this one
-        """
-        resized_img = cv2.resize(self.img, new_size)
-        return Image(resized_img, self.pixel_size)
-    '''
-
     def draw_rectangle(self, roi, thickness=1):
         """ Draw the specified rectangle on the image (in place) """
         top_left = (int(roi[0]), int(roi[1]))
         bottom_right = (int(roi[2]), int(roi[3]))
         color = (0,0,0,255)
         cv2.rectangle(self.img, top_left, bottom_right, color, thickness=thickness)
-
-
-    def _size(self):
-        """Return the size of an image in pixels in the format [width, height].
-        """
-        if self.img.ndim == 3:  # Colour
-            working_size = self.img.shape[::-1][1:3]
-        else:
-            assert self.img.ndim == 2  # Greyscale
-            working_size = self.img.shape[::-1]
-        return working_size
 
     def paste(self, src, xOff, yOff):
         """ Paste the source image onto the target one at the specified position.
@@ -149,24 +144,8 @@ class Image:
 
         target[y1:y2, x1:x2] = source[sy1:sy2, sx1:sx2]
 
-    def apply_tr(self, transform):
-        """Apply an affine transform to an image and return the result.
+    def paste_blend(self):
+        pass
 
-        `transform` can be an affine transform matrix or a Transform object.
-        `img` can be colour or greyscale.
-
-        This function is expensive and its use should be avoided if possible.
-        """
-        working_size = self.size
-
-        if hasattr(transform, '__call__'):  # We need a matrix.
-            transform = transform(working_size)
-
-        return cv2.warpAffine(self.img, transform, working_size)
-
-    @staticmethod
-    def from_file(filename, pixel_size=0):
-        img = cv2.imread(filename)
-        return Image(img, pixel_size)
 
 

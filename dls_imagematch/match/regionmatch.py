@@ -80,7 +80,7 @@ class RegionMatcher:
 
         self.net_transform = scaled_transform.scale(1/self._scale)
 
-        self.match_img = Image(match_img, pixel_size=1000)
+        self.match_img = match_img #Image(match_img, pixel_size=1000)
 
         if min_reached:
             self._next_scale_factor()
