@@ -33,7 +33,7 @@ class ImageMatcherGui(QMainWindow):
         super(ImageMatcherGui, self).__init__()
 
         self.gui_state = None
-        self.region_matcher = None
+        self.matcher = None
         self.mov_img_scale_factor = 1
         self.file_a = None
         self.file_b = None
@@ -352,20 +352,20 @@ class ImageMatcherGui(QMainWindow):
 
     def function_next_frame(self):
         """ Advance to the next frame of the matching procedure. """
-        if self.region_matcher is not None:
-            self.region_matcher.next_frame()
+        if self.matcher is not None:
+            self.matcher.next_frame()
             self.display_match_results()
 
     def function_next_scale(self):
         """ Advance to the next scale factor of the matching procedure. """
-        if self.region_matcher is not None:
-            self.region_matcher.skip_to_next_scale()
+        if self.matcher is not None:
+            self.matcher.skip_to_next_scale()
             self.display_match_results()
 
     def function_skip_to_end(self):
         """ Advance to the end of the matching procedure (dont show any frames). """
-        if self.region_matcher is not None:
-            self.region_matcher.skip_to_end()
+        if self.matcher is not None:
+            self.matcher.skip_to_end()
             self.display_match_results()
 
     def function_select_region(self):
@@ -384,7 +384,9 @@ class ImageMatcherGui(QMainWindow):
     ------------------------'''
     def feature_matching(self):
         img_a, img_b = self.prepare_match_images()
-        FeatureMatcher.perform_match(img_a, img_b)
+        self.matcher = FeatureMatcher(img_a, img_b)
+        self.matcher.perform_match()
+        self.display_match_results()
 
     def region_matching_primary(self):
         img_a, img_b = self.prepare_match_images()
@@ -392,7 +394,7 @@ class ImageMatcherGui(QMainWindow):
         guess_x = float(self.txt_guess_x.text())
         guess_y = float(self.txt_guess_y.text())
         guess = Translate(guess_x*img_a.size[0], guess_y*img_a.size[1])
-        self.region_matcher = RegionMatcher(img_a, img_b, guess)
+        self.matcher = RegionMatcher(img_a, img_b, guess)
         self.function_next_frame()
 
     def prepare_match_images(self):
@@ -418,28 +420,28 @@ class ImageMatcherGui(QMainWindow):
         imgA_gray = imgA.make_gray()
         imgB_gray = imgB.make_gray()
 
-        primary_transform = self.region_matcher.net_transform
+        primary_transform = self.matcher.net_transform
         guessX = roi[0] - primary_transform.x
         guessY = roi[1] - primary_transform.y
         guess = Translate(guessX, guessY)
 
-        self.region_matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
+        self.matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
         self.function_next_frame()
 
     def display_match_results(self):
         frame = self.frame_main
-        pixmap = self.region_matcher.match_img.make_color().to_qt_pixmap()
+        pixmap = self.matcher.match_img.make_color().to_qt_pixmap()
         frame.setPixmap(pixmap.scaled(frame.size(),
                                       Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-        if self.region_matcher.match_complete:
-            matcher = self.region_matcher
+        if self.matcher.match_complete:
+            matcher = self.matcher
 
             # Determine transformation in real units (um)
             net_transform = matcher.net_transform
             x, y = net_transform.x, net_transform.y
 
-            pixel_size = matcher.stat_img.pixel_size
+            pixel_size = matcher.img_a.pixel_size
             delta_x = x * pixel_size
             delta_y = y * pixel_size
 
@@ -468,8 +470,7 @@ class ImageMatcherGui(QMainWindow):
                 self._skip_to_end_pushed()
 
                 out_file = "441350000072/" + str(row) + "_" + str(col)
-                self.region_matcher.match_img.save(out_file)
-
+                self.matcher.match_img.save(out_file)
 
 
 def main():

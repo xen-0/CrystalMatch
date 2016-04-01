@@ -10,7 +10,7 @@ class Overlayer:
         background = img_a.copy()
 
         # Determine offset amount
-        x,y = transform.x, transform.y
+        x,y = int(transform.x), int(transform.y)
 
         # Get overlapping regions of images
         overlap_a, overlap_b = Overlayer.get_overlap_regions(img_a, img_b, (x,y))

@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from dls_imagematch.match.overlay import Overlayer
+from dls_imagematch.util.translate import Translate
 
 class FeatureMatcher:
     """
@@ -9,6 +11,13 @@ class FeatureMatcher:
     raises an exception. This is a widely known and reported problem but it
     doesn't seem to have been fixed yet.
     """
+    def __init__(self, img_a, img_b):
+        self.img_a = img_a
+        self.img_b = img_b
+
+        self.match_complete = False
+        self.net_transform = None
+        self.match_img = None
 
     @staticmethod
     def _draw_matches(img1, kp1, img2, kp2, matches):
@@ -82,8 +91,10 @@ class FeatureMatcher:
         # Also return the image if you'd like a copy
         return out
 
-    @staticmethod
-    def perform_match(img1, img2):
+    def perform_match(self):
+        img1 = self.img_a
+        img2 = self.img_b
+
         # Initiate SIFT detector
         orb = cv2.ORB()
 
@@ -116,8 +127,14 @@ class FeatureMatcher:
             ys.append(y2-y1)
 
         # Draw matches.
-        print(np.median(xs), np.median(ys))
+        x = -np.median(xs)
+        y = -np.median(ys)
+        print(x, y)
 
         # Draw the best 75% of matches
         num = int(len(matches) * 0.55)
         img3 = FeatureMatcher._draw_matches(img1.img, kp1, img2.img, kp2, matches[:num])
+
+        self.net_transform = Translate(x,y)
+        self.match_img = Overlayer.create_overlay_image(img1, img2, self.net_transform)
+        self.match_complete = True
