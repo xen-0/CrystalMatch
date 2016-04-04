@@ -383,8 +383,10 @@ class ImageMatcherGui(QMainWindow):
         region_image, roi = RegionSelectDialog.get_region(self, filename)
 
         if region_image is not None:
-            img_a = Image.from_file(self.file_b, region_image.pixel_size)
+            pixel_size = self.img_b.pixel_size * self.mov_img_scale_factor
+            img_a = Image.from_file(self.file_b, pixel_size)
             img_a = img_a.rescale(self.mov_img_scale_factor)
+            print(img_a.pixel_size)
             self.region_matching_secondary(img_a, region_image, roi)
             self.set_gui_state(GuiStates.MATCHING_2ND)
 

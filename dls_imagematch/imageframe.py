@@ -47,7 +47,7 @@ class ImageFrame(QLabel):
 
             if 0 <= real_x_pixels <= real_size[0] and 0 <= real_y_pixels <= real_size[1]:
                 self.position_txt = str(real_x_pixels) + " px, " + str(real_y_pixels) + " px (" + \
-                    str(real_x_um) + " um, " + str(real_y_um) + " um)"
+                    "{0:.2f}".format(real_x_um) + " um, " + "{0:.2f}".format(real_y_um) + " um)"
             else:
                 self.position_txt = ""
 
