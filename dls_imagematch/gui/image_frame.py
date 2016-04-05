@@ -34,6 +34,12 @@ class ImageFrame(QGroupBox):
 
         self.setLayout(vbox)
 
+    def clear(self):
+        self.image = None
+        self.scaled_size = (0,0)
+        self.offset = (0,0)
+        self.frame.clear()
+
     def display_image(self, image):
         self.image = image
         frame_size = self.frame.size()
@@ -49,9 +55,10 @@ class ImageFrame(QGroupBox):
         self.offset = (xOff, yOff)
 
     def eventFilter(self, source, event):
-        if (event.type() == QEvent.MouseMove and source is self.frame):
+        if event.type() == QEvent.MouseMove and source is self.frame:
             self.mouseMoveEvent(event)
             return False
+
         return QWidget.eventFilter(self, source, event)
 
     def mouseMoveEvent(self, QMouseEvent):

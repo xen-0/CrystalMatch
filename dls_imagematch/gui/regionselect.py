@@ -23,7 +23,7 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    def __init__(self, max_size, filepath):
+    def __init__(self, max_size, image):
         super(SelectorFrame, self).__init__()
         self.max_size = max_size
 
@@ -35,7 +35,7 @@ class SelectorFrame(QLabel):
         self.mode = SelectorMode.REGION
 
         # Load image from file
-        self.cvimg = Image.from_file(filepath)
+        self.cvimg = image
         self.size_image = self.cvimg.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
@@ -115,14 +115,14 @@ class SelectorFrame(QLabel):
 
 
 class RegionSelectDialog(QDialog):
-    def __init__(self, filename):
+    def __init__(self, image):
         super(RegionSelectDialog, self).__init__()
-        self.init_ui(filename)
+        self.init_ui(image)
 
-    def init_ui(self, filename):
+    def init_ui(self, image):
         self.setWindowTitle('Select Region of Interest')
 
-        self.selector_frame = SelectorFrame(900, filename)
+        self.selector_frame = SelectorFrame(900, image)
         self.selector_frame.mode = SelectorMode.SINGLE_POINT
 
         buttons = QDialogButtonBox(
