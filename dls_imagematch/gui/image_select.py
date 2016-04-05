@@ -7,7 +7,7 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit)
 
 
-class ImageSelector(Qt.QGroupBox):
+class ImageSelector(QtGui.QGroupBox):
     """ Widget that allows the user to select and view an image and to specify a
     corresponding real pixel size in micrometers (um).
     """
