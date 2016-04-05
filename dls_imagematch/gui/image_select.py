@@ -6,6 +6,8 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit)
 
+from dls_imagematch.gui import INPUT_DIR_ROOT
+
 
 class ImageSelector(QtGui.QGroupBox):
     """ Widget that allows the user to select and view an image and to specify a
@@ -79,7 +81,7 @@ class ImageSelector(QtGui.QGroupBox):
 
     def _open_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
-        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file'))
+        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
         if filepath:
             self.setFile(filepath)
 

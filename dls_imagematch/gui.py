@@ -1,19 +1,17 @@
 from __future__ import division
 
-import os
 import sys
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
+from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
-                         QHBoxLayout, QVBoxLayout, QPixmap, QApplication, QAction)
+                         QHBoxLayout, QVBoxLayout, QApplication, QAction)
 from enum import Enum
 
 from dls_imagematch import RegionMatcher
-from dls_imagematch.gui import ImageSelector
-from dls_imagematch.match import FeatureMatcher
+from dls_imagematch.gui import ImageSelector, WellSelector
+from dls_imagematch.gui.imageframe import ImageFrame
 from dls_imagematch.image import Image
-from dls_imagematch.imageframe import ImageFrame
+from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.match.overlay import Overlayer
 from dls_imagematch.regionselect import RegionSelectDialog
 from dls_imagematch.util.translate import Translate
@@ -47,7 +45,7 @@ class ImageMatcherGui(QMainWindow):
         self.set_gui_state(GuiStates.SELECTION)
 
         # Select and Display the default images
-        self.function_select_well()
+        self.well_selector._select_well()
 
         #self.iterate_over_441350000072_data_set()
 
@@ -59,27 +57,16 @@ class ImageMatcherGui(QMainWindow):
 
         self.init_menu_bar()
 
-        # Drop-down box to select data set
-        gpBox_well_select = QtGui.QGroupBox("Select Well (441350000072)")
-
-        self.cmbo_plate_row = QtGui.QComboBox()
-        self.cmbo_plate_col = QtGui.QComboBox()
-        for c in range(ord('A'), ord('H')+1):
-            self.cmbo_plate_row.addItem(chr(c))
-        for col in range(1,13):
-            self.cmbo_plate_col.addItem(str(col))
-
-        self.btn_select_data = QPushButton("Select")
-        self.btn_select_data.clicked.connect(self.function_select_well)
-
         self.selector_a = ImageSelector("Select Image A")
         self.selector_b = ImageSelector("Select Image B")
 
+        self.well_selector = WellSelector(self.selector_a, self.selector_b)
+
         # Matching guess
         gpBox_match_guess = QtGui.QGroupBox("Region Matching")
-        self.txt_guess_x = QtGui.QLineEdit()
+        self.txt_guess_x = QtGui.QLineEdit("0.1")
         self.txt_guess_x.setFixedWidth(40)
-        self.txt_guess_y = QtGui.QLineEdit()
+        self.txt_guess_y = QtGui.QLineEdit("0.4")
         self.txt_guess_y.setFixedWidth(40)
 
         # Matching function buttons
@@ -107,15 +94,8 @@ class ImageMatcherGui(QMainWindow):
         self.frame_main.coord_change.connect(self.update_mouse_coords)
 
         # Create layout
-        hbox_well_select = QHBoxLayout()
-        hbox_well_select.addWidget(self.cmbo_plate_row)
-        hbox_well_select.addWidget(self.cmbo_plate_col)
-        hbox_well_select.addWidget(self.btn_select_data)
-        hbox_well_select.addStretch(1)
-        gpBox_well_select.setLayout(hbox_well_select)
-
         vbox_img_selection = QVBoxLayout()
-        vbox_img_selection.addWidget(gpBox_well_select)
+        vbox_img_selection.addWidget(self.well_selector)
         vbox_img_selection.addWidget(self.selector_a)
         vbox_img_selection.addWidget(self.selector_b)
         vbox_img_selection.addStretch(1)
@@ -188,43 +168,6 @@ class ImageMatcherGui(QMainWindow):
         match_menu.addAction(region_match_action)
         match_menu.addAction(feature_match_action)
 
-    ''' ----------------------
-    IMAGE SELECTION FUNCTIONS
-    ------------------------'''
-    def function_select_well(self):
-        """ Select a well from the 441350000072 dataset to use for matching. Display the
-        corresponding images in slot A and B. """
-        row = self.cmbo_plate_row.currentText()
-        col = self.cmbo_plate_col.currentText()
-
-        fileA, fileB = self._get_441350000072_files(row, col)
-        self.selector_a.setFile(fileA)
-        self.selector_b.setFile(fileB)
-
-        # Set pixel sizes
-        SET_FACTOR = 6.55
-        pixel_size_a = 4.0
-        pixel_size_b = pixel_size_a / SET_FACTOR
-        self.selector_a.setPixelSize(pixel_size_a)
-        self.selector_b.setPixelSize(pixel_size_b)
-
-        # Set starting guess
-        self.txt_guess_x.setText("0.1")
-        self.txt_guess_y.setText("0.4")
-
-        self.set_gui_state(GuiStates.SELECTION)
-
-    @staticmethod
-    def _get_441350000072_files(row, col):
-        """ Get the full paths of the files for the specified well of the 441350000072 data set. """
-        mov_filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
-        col = int(col)
-        if col < 10:
-            col = '0' + str(col)
-
-        ref_filepath = INPUT_DIR_ROOT + "441350000072/" + str(row) + str(col) + "_13.jpg"
-
-        return ref_filepath, mov_filepath
 
     ''' ----------------------
     BUTTON FUNCTIONS
@@ -287,7 +230,6 @@ class ImageMatcherGui(QMainWindow):
             pixel_size = self.img_b.pixel_size * self.mov_img_scale_factor
             img_a = Image.from_file(self.file_b, pixel_size)
             img_a = img_a.rescale(self.mov_img_scale_factor)
-            print(img_a.pixel_size)
             self.region_matching_secondary(img_a, region_image, roi)
             self.set_gui_state(GuiStates.MATCHING_2ND)
 
@@ -320,7 +262,6 @@ class ImageMatcherGui(QMainWindow):
         pixel_size_b = self.selector_b.pixelSize()
 
         # Get greyscale versions of the selected images
-        print(pixel_size_a, pixel_size_b)
         self.img_a = Image.from_file(self.file_a, pixel_size_a)
         img_b = Image.from_file(self.file_b, pixel_size_b)
 
@@ -378,7 +319,7 @@ class ImageMatcherGui(QMainWindow):
         for c in range(ord('A'), ord('H')+1):
             row = chr(c)
             for col in range(1,13):
-                ref, mov = self._get_441350000072_files(row, col)
+                ref, mov = WellSelector._get_441350000072_files(row, col)
                 self._display_image(self.frame_a, ref)
                 self._display_image(self.frame_b, mov)
                 self._set_filename_label(self.lbl_selection_a, ref)
