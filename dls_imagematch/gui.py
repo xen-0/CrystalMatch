@@ -8,8 +8,8 @@ from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
 from enum import Enum
 
 from dls_imagematch import RegionMatcher
-from dls_imagematch.gui import ImageSelector, WellSelector
-from dls_imagematch.gui.imageframe import ImageFrame
+from dls_imagematch.gui import ImageSelector, WellSelector, ImageFrame
+from dls_imagematch.gui.image_frame import ImageFrame
 from dls_imagematch.image import Image
 from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.match.overlay import Overlayer
@@ -57,9 +57,11 @@ class ImageMatcherGui(QMainWindow):
 
         self.init_menu_bar()
 
+        # Image selectors
         self.selector_a = ImageSelector("Select Image A")
         self.selector_b = ImageSelector("Select Image B")
 
+        # Plate well selector (example data set)
         self.well_selector = WellSelector(self.selector_a, self.selector_b)
 
         # Matching guess
@@ -82,16 +84,8 @@ class ImageMatcherGui(QMainWindow):
         self.btn_region_select.clicked.connect(self.function_select_region)
         self.btn_region_select.setEnabled(False)
 
-        # Image frame status and cursor position labels
-        self.lbl_cursor = QLabel()
-
         # Main image frame - shows progress of image matching
-        gpBox_results = QtGui.QGroupBox("Results")
-        self.frame_main = ImageFrame()
-        self.frame_main.setStyleSheet("color: red; font-size: 30pt; text-align: center; border:1px solid black")
-        self.frame_main.setFixedWidth(828)
-        self.frame_main.setFixedHeight(828)
-        self.frame_main.coord_change.connect(self.update_mouse_coords)
+        self.image_frame = ImageFrame()
 
         # Create layout
         vbox_img_selection = QVBoxLayout()
@@ -118,14 +112,9 @@ class ImageMatcherGui(QMainWindow):
         hbox_match_guess.addStretch(3)
         gpBox_match_guess.setLayout(hbox_match_guess)
 
-        vbox_match_results = QVBoxLayout()
-        vbox_match_results.addWidget(self.lbl_cursor)
-        vbox_match_results.addWidget(self.frame_main)
-        gpBox_results.setLayout(vbox_match_results)
-
         vbox_matching = QVBoxLayout()
         vbox_matching.addWidget(gpBox_match_guess)
-        vbox_matching.addWidget(gpBox_results)
+        vbox_matching.addWidget(self.image_frame)
         vbox_matching.addStretch(1)
 
         hbox_main = QHBoxLayout()
@@ -291,7 +280,7 @@ class ImageMatcherGui(QMainWindow):
 
         # Create image of B overlaid on A
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
-        self.frame_main.display_image(img)
+        self.image_frame.display_image(img)
 
         if self.matcher.match_complete:
             # Determine transformation in real units (um)
@@ -309,10 +298,6 @@ class ImageMatcherGui(QMainWindow):
                 self.set_gui_state(GuiStates.MATCHING_COMPLETE)
             elif self.gui_state == GuiStates.MATCHING_2ND:
                 self.set_gui_state(GuiStates.MATCHING_2ND_COMPLETE)
-
-    def update_mouse_coords(self):
-        message = self.frame_main.position_txt
-        self.lbl_cursor.setText(message)
 
     def iterate_over_441350000072_data_set(self):
         """ Perform primary match for every image in the data set. """
