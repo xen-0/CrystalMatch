@@ -10,6 +10,7 @@ from PyQt4.QtGui import (QWidget, QLabel, QPushButton, QMainWindow, QIcon,
 from enum import Enum
 
 from dls_imagematch import RegionMatcher
+from dls_imagematch.gui import ImageSelector
 from dls_imagematch.match import FeatureMatcher
 from dls_imagematch.image import Image
 from dls_imagematch.imageframe import ImageFrame
@@ -59,7 +60,7 @@ class ImageMatcherGui(QMainWindow):
         self.init_menu_bar()
 
         # Drop-down box to select data set
-        gpBox_well_select = QtGui.QGroupBox("Select Well")
+        gpBox_well_select = QtGui.QGroupBox("Select Well (441350000072)")
 
         self.cmbo_plate_row = QtGui.QComboBox()
         self.cmbo_plate_col = QtGui.QComboBox()
@@ -71,40 +72,8 @@ class ImageMatcherGui(QMainWindow):
         self.btn_select_data = QPushButton("Select")
         self.btn_select_data.clicked.connect(self.function_select_well)
 
-        # Selection group boxes
-        gpBox_select_a = QtGui.QGroupBox("Select Image A")
-        gpBox_select_b = QtGui.QGroupBox("Select Image B")
-
-        # Selection buttons - make selection of currently displayed image as A or B
-        self.btn_select_a = QPushButton("Load Image")
-        self.btn_select_a.clicked.connect(self.function_select_a)
-        self.btn_select_b = QPushButton("Load Image")
-        self.btn_select_b.clicked.connect(self.function_select_b)
-
-        # Selection filename - displays filename of selected images (A and B)
-        self.lbl_selection_a = QLabel("No Image Selected")
-        self.lbl_selection_a.setFixedWidth(250)
-        self.lbl_selection_b = QLabel("No Image Selected")
-        self.lbl_selection_b.setFixedWidth(250)
-
-        # Selection pixel size
-        self.txt_pixelsize_a = QtGui.QLineEdit()
-        self.txt_pixelsize_a.setFixedWidth(60)
-        self.txt_pixelsize_b = QtGui.QLineEdit()
-        self.txt_pixelsize_b.setFixedWidth(60)
-
-        # Selection Image Frames - displays smaller versions of currently selected images (A and B)
-        self.frame_a = QLabel("No Image Selected")
-        self.frame_a.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
-        self.frame_a.setFixedWidth(350)
-        self.frame_a.setFixedHeight(350)
-        self.frame_a.setAlignment(Qt.AlignCenter)
-
-        self.frame_b = QLabel("No Image Selected")
-        self.frame_b.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
-        self.frame_b.setFixedWidth(350)
-        self.frame_b.setFixedHeight(350)
-        self.frame_b.setAlignment(Qt.AlignCenter)
+        self.selector_a = ImageSelector("Select Image A")
+        self.selector_b = ImageSelector("Select Image B")
 
         # Matching guess
         gpBox_match_guess = QtGui.QGroupBox("Region Matching")
@@ -126,7 +95,7 @@ class ImageMatcherGui(QMainWindow):
         self.btn_region_select.clicked.connect(self.function_select_region)
         self.btn_region_select.setEnabled(False)
 
-        # Image frame cursor position
+        # Image frame status and cursor position labels
         self.lbl_cursor = QLabel()
 
         # Main image frame - shows progress of image matching
@@ -145,38 +114,10 @@ class ImageMatcherGui(QMainWindow):
         hbox_well_select.addStretch(1)
         gpBox_well_select.setLayout(hbox_well_select)
 
-        hbox_select_a = QHBoxLayout()
-        hbox_select_a.addWidget(self.btn_select_a)
-        hbox_select_a.addWidget(self.lbl_selection_a)
-        hbox_select_a2 = QHBoxLayout()
-        hbox_select_a2.addWidget(QLabel("Size per pixel:"))
-        hbox_select_a2.addWidget(self.txt_pixelsize_a)
-        hbox_select_a2.addWidget(QLabel("um"))
-        hbox_select_a2.addStretch(1)
-        vbox_select_a = QVBoxLayout()
-        vbox_select_a.addLayout(hbox_select_a)
-        vbox_select_a.addWidget(self.frame_a)
-        vbox_select_a.addLayout(hbox_select_a2)
-        gpBox_select_a.setLayout(vbox_select_a)
-
-        hbox_select_b = QHBoxLayout()
-        hbox_select_b.addWidget(self.btn_select_b)
-        hbox_select_b.addWidget(self.lbl_selection_b)
-        hbox_select_b2 = QHBoxLayout()
-        hbox_select_b2.addWidget(QLabel("Size per pixel:"))
-        hbox_select_b2.addWidget(self.txt_pixelsize_b)
-        hbox_select_b2.addWidget(QLabel("um"))
-        hbox_select_b2.addStretch(1)
-        vbox_select_b = QVBoxLayout()
-        vbox_select_b.addLayout(hbox_select_b)
-        vbox_select_b.addWidget(self.frame_b)
-        vbox_select_b.addLayout(hbox_select_b2)
-        gpBox_select_b.setLayout(vbox_select_b)
-
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(gpBox_well_select)
-        vbox_img_selection.addWidget(gpBox_select_a)
-        vbox_img_selection.addWidget(gpBox_select_b)
+        vbox_img_selection.addWidget(self.selector_a)
+        vbox_img_selection.addWidget(self.selector_b)
         vbox_img_selection.addStretch(1)
 
         hbox_match_btns = QHBoxLayout()
@@ -257,61 +198,21 @@ class ImageMatcherGui(QMainWindow):
         col = self.cmbo_plate_col.currentText()
 
         fileA, fileB = self._get_441350000072_files(row, col)
-        self.function_select_a(fileA)
-        self.function_select_b(fileB)
+        self.selector_a.setFile(fileA)
+        self.selector_b.setFile(fileB)
 
         # Set pixel sizes
         SET_FACTOR = 6.55
         pixel_size_a = 4.0
         pixel_size_b = pixel_size_a / SET_FACTOR
-        self.txt_pixelsize_a.setText("{0:.5f}".format(pixel_size_a))
-        self.txt_pixelsize_b.setText("{0:.5f}".format(pixel_size_b))
+        self.selector_a.setPixelSize(pixel_size_a)
+        self.selector_b.setPixelSize(pixel_size_b)
 
         # Set starting guess
         self.txt_guess_x.setText("0.1")
         self.txt_guess_y.setText("0.4")
 
         self.set_gui_state(GuiStates.SELECTION)
-
-    def function_select_a(self, filepath=None):
-        """ Display open dialog for Image slot A, load the selected image. """
-        if filepath is None or not filepath:
-            filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
-        if filepath:
-            self._display_image(self.frame_a, filepath)
-            self._set_filename_label(self.lbl_selection_a, filepath)
-            self.file_a = filepath
-
-    def function_select_b(self, filepath=None):
-        """ Display open dialog for Image slot A, load the selected image. """
-        if filepath is None or not filepath:
-            filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
-        if filepath:
-            self._display_image(self.frame_b, filepath)
-            self._set_filename_label(self.lbl_selection_b, filepath)
-            self.file_b = filepath
-
-    @staticmethod
-    def _display_image(frame, filename):
-        """ Display the selected image in the specified frame. """
-        frame.clear()
-        frame.setAlignment(Qt.AlignCenter)
-
-        if filename is None:
-            frame.setText("No Image Selected")
-        elif os.path.isfile(filename):
-            pixmap = QPixmap(filename)
-            frame.setPixmap(pixmap.scaled(frame.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        else:
-            frame.setText("Image Not Found")
-
-    @staticmethod
-    def _set_filename_label(label, filepath):
-        """ Display the filename in the specified label. """
-        if filepath and filepath != "":
-            label.setText(filepath.split('/')[-1])
-        else:
-            label.setText("No Image Selected")
 
     @staticmethod
     def _get_441350000072_files(row, col):
@@ -409,14 +310,17 @@ class ImageMatcherGui(QMainWindow):
         self.function_next_frame()
 
     def prepare_match_images(self):
+        self.file_a = self.selector_a.file()
+        self.file_b = self.selector_b.file()
         if not self.file_a or not self.file_b:
             return None, None
 
         # Get pixel sizes and starting guess position
-        pixel_size_a = float(self.txt_pixelsize_a.text())
-        pixel_size_b = float(self.txt_pixelsize_b.text())
+        pixel_size_a = self.selector_a.pixelSize()
+        pixel_size_b = self.selector_b.pixelSize()
 
         # Get greyscale versions of the selected images
+        print(pixel_size_a, pixel_size_b)
         self.img_a = Image.from_file(self.file_a, pixel_size_a)
         img_b = Image.from_file(self.file_b, pixel_size_b)
 
