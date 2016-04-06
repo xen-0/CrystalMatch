@@ -8,13 +8,10 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon,
 
 from dls_imagematch.gui import ImageSelector, WellSelector, RegionMatchControl, ImageFrame, FeatureMatchControl
 
-INPUT_DIR_ROOT = "../test-images/"
-OUTPUT_DIRECTORY = "../test-output/"
 
-
-class ImageMatcherGui(QMainWindow):
+class VMXiCrystalMatcher(QMainWindow):
     def __init__(self):
-        super(ImageMatcherGui, self).__init__()
+        super(VMXiCrystalMatcher, self).__init__()
 
         self.gui_state = None
         self.matcher = None
@@ -23,8 +20,6 @@ class ImageMatcherGui(QMainWindow):
 
         # Select and Display the default images
         self.well_selector._select_well()
-
-        #self.iterate_over_441350000072_data_set()
 
     def init_ui(self):
         """ Create all elements of the user interface. """
@@ -35,32 +30,32 @@ class ImageMatcherGui(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        self.selector_a = ImageSelector("Select Image A")
-        self.selector_b = ImageSelector("Select Image B")
+        selector_a = ImageSelector("Select Image A")
+        selector_b = ImageSelector("Select Image B")
 
         # Plate well selector (example data set)
-        self.well_selector = WellSelector(self.selector_a, self.selector_b)
+        well_selector = WellSelector(selector_a, selector_b)
 
         # Main image frame - shows progress of image matching
-        self.image_frame = ImageFrame()
+        image_frame = ImageFrame()
 
         # Region Matching Control
-        self.region_match = RegionMatchControl(self.selector_a, self.selector_b, self.image_frame)
+        region_match = RegionMatchControl(selector_a, selector_b, image_frame)
 
         # Feature Matching Control
-        self.feature_match = FeatureMatchControl(self.selector_a, self.selector_b, self.image_frame)
+        feature_match = FeatureMatchControl(selector_a, selector_b, image_frame)
 
         # Create layout
         vbox_img_selection = QVBoxLayout()
-        vbox_img_selection.addWidget(self.well_selector)
-        vbox_img_selection.addWidget(self.selector_a)
-        vbox_img_selection.addWidget(self.selector_b)
+        vbox_img_selection.addWidget(well_selector)
+        vbox_img_selection.addWidget(selector_a)
+        vbox_img_selection.addWidget(selector_b)
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
-        vbox_matching.addWidget(self.feature_match)
-        vbox_matching.addWidget(self.region_match)
-        vbox_matching.addWidget(self.image_frame)
+        vbox_matching.addWidget(feature_match)
+        vbox_matching.addWidget(region_match)
+        vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)
 
         hbox_main = QHBoxLayout()
@@ -88,7 +83,7 @@ class ImageMatcherGui(QMainWindow):
         region_match_action.setStatusTip('Perform Region Match')
         region_match_action.triggered.connect(self._fn_region_match)
 
-        # Region Match Action
+        # Feature Match Action
         feature_match_action = QAction(QIcon('exit.png'), '&Feature Match', self)
         feature_match_action.setShortcut('Ctrl+F')
         feature_match_action.setStatusTip('Perform Feature Match')
@@ -103,38 +98,16 @@ class ImageMatcherGui(QMainWindow):
         match_menu.addAction(region_match_action)
         match_menu.addAction(feature_match_action)
 
-
-    ''' ----------------------
-    IMAGE MATCHING FUNCTIONS
-    ------------------------'''
     def _fn_region_match(self):
         self.region_match.match()
 
     def _fn_feature_match(self):
         self.feature_match.match()
 
-    def iterate_over_441350000072_data_set(self):
-        """ Perform primary match for every image in the data set. """
-        for c in range(ord('A'), ord('H')+1):
-            row = chr(c)
-            for col in range(1,13):
-                ref, mov = WellSelector._get_441350000072_files(row, col)
-                self._display_image(self.frame_a, ref)
-                self._display_image(self.frame_b, mov)
-                self._set_filename_label(self.lbl_selection_a, ref)
-                self._set_filename_label(self.lbl_selection_b, mov)
-                self.file_a = ref
-                self.file_b = mov
-                self._perform_image_matching()
-                self._skip_to_end_pushed()
-
-                out_file = "441350000072/" + str(row) + "_" + str(col)
-                self.matcher.match_img.save(out_file)
-
 
 def main():
     app = QApplication(sys.argv)
-    ex = ImageMatcherGui()
+    ex = VMXiCrystalMatcher()
     sys.exit(app.exec_())
 
 
