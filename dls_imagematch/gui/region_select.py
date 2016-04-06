@@ -4,10 +4,6 @@ from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from enum import Enum
 
-from dls_imagematch.image import Image
-
-INPUT_DIR_ROOT = "../test-images/"
-
 
 class SelectorMode(Enum):
     SINGLE_POINT = 1
@@ -117,9 +113,9 @@ class SelectorFrame(QLabel):
 class RegionSelectDialog(QDialog):
     def __init__(self, image):
         super(RegionSelectDialog, self).__init__()
-        self.init_ui(image)
+        self._init_ui(image)
 
-    def init_ui(self, image):
+    def _init_ui(self, image):
         self.setWindowTitle('Select Region of Interest')
 
         self.selector_frame = SelectorFrame(900, image)
