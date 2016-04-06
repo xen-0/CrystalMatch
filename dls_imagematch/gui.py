@@ -6,8 +6,7 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon,
                          QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
-from dls_imagematch.gui import ImageSelector, WellSelector, RegionMatchControl, ImageFrame
-from dls_imagematch.match import FeatureMatcher, Overlayer
+from dls_imagematch.gui import ImageSelector, WellSelector, RegionMatchControl, ImageFrame, FeatureMatchControl
 
 INPUT_DIR_ROOT = "../test-images/"
 OUTPUT_DIRECTORY = "../test-output/"
@@ -48,6 +47,9 @@ class ImageMatcherGui(QMainWindow):
         # Region Matching Control
         self.region_match = RegionMatchControl(self.selector_a, self.selector_b, self.image_frame)
 
+        # Feature Matching Control
+        self.feature_match = FeatureMatchControl(self.selector_a, self.selector_b, self.image_frame)
+
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(self.well_selector)
@@ -56,6 +58,7 @@ class ImageMatcherGui(QMainWindow):
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
+        vbox_matching.addWidget(self.feature_match)
         vbox_matching.addWidget(self.region_match)
         vbox_matching.addWidget(self.image_frame)
         vbox_matching.addStretch(1)
@@ -108,34 +111,7 @@ class ImageMatcherGui(QMainWindow):
         self.region_match.match()
 
     def _fn_feature_match(self):
-        self.feature_matching()
-
-    def feature_matching(self):
-        img_a, img_b = self.prepare_match_images()
-        self.matcher = FeatureMatcher(img_a, img_b)
-        self.matcher.perform_match()
-        self.display_match_results()
-
-    def prepare_match_images(self):
-        # Get the selected images
-        self.img_a = self.selector_a.image()
-        self.img_b = self.selector_b.image()
-
-        # Resize the mov image so it has the same size per pixel as the ref image
-        factor = self.img_b.pixel_size / self.img_a.pixel_size
-        self.img_b = self.img_b.rescale(factor)
-        self.mov_img_scale_factor = factor
-
-        return self.img_a.make_gray(), self.img_b.make_gray()
-
-    def _display_results(self):
-        """ Display the results of the matching process (display overlaid image
-        and print the offset. """
-        transform = self.matcher.net_transform
-
-        # Create image of B overlaid on A
-        img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
-        self.image_frame.display_image(img)
+        self.feature_match.match()
 
     def iterate_over_441350000072_data_set(self):
         """ Perform primary match for every image in the data set. """
