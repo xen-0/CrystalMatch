@@ -21,6 +21,7 @@ class ImageFrame(QGroupBox):
         self.frame.setMouseTracking(True)
         self.frame.installEventFilter(self)
         self.frame.setStyleSheet("border:1px solid black")
+        self.frame.setAlignment(Qt.AlignCenter)
         self.frame.setFixedWidth(828)
         self.frame.setFixedHeight(828)
 
