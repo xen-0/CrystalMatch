@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 
-from dls_imagematch.match.overlay import Overlayer
-from dls_imagematch.util.translate import Translate
+from dls_imagematch.util import Translate
 
 class FeatureMatcher:
     """

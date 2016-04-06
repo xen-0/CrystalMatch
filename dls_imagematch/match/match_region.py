@@ -1,7 +1,6 @@
 from __future__ import division
 
-from dls_imagematch.image import Image
-from dls_imagematch.match.metric import OverlapMetric
+from dls_imagematch.match.metric_overlap import OverlapMetric
 from dls_imagematch.match.trials import TrialTransforms
 
 

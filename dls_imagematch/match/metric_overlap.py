@@ -3,8 +3,8 @@ from __future__ import division
 import cv2
 import numpy as np
 
-from dls_imagematch.image import Image
 from dls_imagematch.match.overlay import Overlayer
+from dls_imagematch.util.image import Image
 
 
 class OverlapMetric:

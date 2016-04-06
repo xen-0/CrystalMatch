@@ -1,9 +1,7 @@
 from __future__ import division
 import cv2
-from PyQt4.QtGui import QImage, QPixmap
 import numpy as np
-
-OUTPUT_DIRECTORY = "../test-output/"
+from PyQt4.QtGui import QImage, QPixmap
 
 
 class Image:
@@ -35,7 +33,7 @@ class Image:
         return Image(img, pixel_size)
 
     def save(self, filename):
-        cv2.imwrite(OUTPUT_DIRECTORY + filename + ".png", self.img)
+        cv2.imwrite(filename, self.img)
 
     def popup(self):
         """Pop up a window to display an image until a key is pressed (blocking)."""

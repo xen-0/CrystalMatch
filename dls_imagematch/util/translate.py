@@ -1,4 +1,4 @@
-
+from __future__ import division
 
 class Translate:
     def __init__(self, x, y):

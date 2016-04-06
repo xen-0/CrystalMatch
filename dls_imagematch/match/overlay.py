@@ -1,9 +1,8 @@
 import cv2
 
-from dls_imagematch.image import Image
+from dls_imagematch.util.image import Image
 
 class Overlayer:
-
     @staticmethod
     def create_overlay_image(img_a, img_b, transform):
         # Make a copy of A, the background image

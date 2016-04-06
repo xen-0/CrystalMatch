@@ -1,8 +1,8 @@
 from __future__ import division
 
-from dls_imagematch.match import FeatureMatcher, Overlayer
-
 from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout)
+
+from dls_imagematch.match import FeatureMatcher, Overlayer
 
 
 class FeatureMatchControl(QGroupBox):

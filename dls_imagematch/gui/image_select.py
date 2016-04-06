@@ -7,7 +7,7 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit)
 
 from dls_imagematch.gui import INPUT_DIR_ROOT
-from dls_imagematch.image import Image
+from dls_imagematch.util import Image
 
 
 class ImageSelector(QtGui.QGroupBox):

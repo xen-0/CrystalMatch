@@ -3,10 +3,9 @@ from enum import Enum
 
 from PyQt4.QtGui import (QPushButton, QLineEdit, QLabel, QGroupBox, QHBoxLayout)
 
-from dls_imagematch import RegionMatcher
 from dls_imagematch.gui import RegionSelectDialog
-from dls_imagematch.match import Overlayer
-from dls_imagematch.util.translate import Translate
+from dls_imagematch.match import Overlayer, RegionMatcher
+from dls_imagematch.util import Translate
 
 
 class MatchStates(Enum):

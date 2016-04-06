@@ -3,10 +3,9 @@ from __future__ import division
 import sys
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon,
-                         QHBoxLayout, QVBoxLayout, QApplication, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
-from dls_imagematch.gui import ImageSelector, WellSelector, RegionMatchControl, ImageFrame, FeatureMatchControl
+from dls_imagematch.gui import *
 
 
 class VMXiCrystalMatcher(QMainWindow):
@@ -17,9 +16,6 @@ class VMXiCrystalMatcher(QMainWindow):
         self.matcher = None
 
         self.init_ui()
-
-        # Select and Display the default images
-        self.well_selector._select_well()
 
     def init_ui(self):
         """ Create all elements of the user interface. """
@@ -68,6 +64,9 @@ class VMXiCrystalMatcher(QMainWindow):
         main_widget.setLayout(hbox_main)
         self.setCentralWidget(main_widget)
         self.show()
+
+        # Select and Display the default images
+        well_selector._select_well()
 
     def init_menu_bar(self):
         """Create and populate the menu bar. """

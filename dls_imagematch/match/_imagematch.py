@@ -7,10 +7,10 @@ import cv2
 import numpy as np
 
 import dls_imagematch.util._transforms as tlib  # Contains `Transform` class.
-from dls_imagematch.match.metric import OverlapMetric
+from dls_imagematch.match.metric_overlap import OverlapMetric
 from dls_imagematch.match.trials import TrialTransforms
-from dls_imagematch.util.parallelmap import parallel_map
-from dls_imagematch.util.setutils import agreeing_subset_indices
+from dls_imagematch.util._parallelmap import parallel_map
+from dls_imagematch.util._setutils import agreeing_subset_indices
 
 
 class ImageMatcher:
