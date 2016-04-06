@@ -5,6 +5,8 @@ import sys
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
+sys.path.append("..")
+
 from dls_imagematch.gui import *
 
 
@@ -76,32 +78,10 @@ class VMXiCrystalMatcher(QMainWindow):
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(QtGui.qApp.quit)
 
-        # Region Match Action
-        region_match_action = QAction(QIcon('exit.png'), '&Region Match', self)
-        region_match_action.setShortcut('Ctrl+M')
-        region_match_action.setStatusTip('Perform Region Match')
-        region_match_action.triggered.connect(self._fn_region_match)
-
-        # Feature Match Action
-        feature_match_action = QAction(QIcon('exit.png'), '&Feature Match', self)
-        feature_match_action.setShortcut('Ctrl+F')
-        feature_match_action.setStatusTip('Perform Feature Match')
-        feature_match_action.triggered.connect(self._fn_feature_match)
-
         # Create menu bar
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu('&File')
         file_menu.addAction(exit_action)
-
-        match_menu = menu_bar.addMenu('&Match')
-        match_menu.addAction(region_match_action)
-        match_menu.addAction(feature_match_action)
-
-    def _fn_region_match(self):
-        self.region_match.match()
-
-    def _fn_feature_match(self):
-        self.feature_match.match()
 
 
 def main():
