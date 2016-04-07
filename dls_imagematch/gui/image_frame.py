@@ -22,20 +22,22 @@ class ImageFrame(QGroupBox):
         self.frame.installEventFilter(self)
         self.frame.setStyleSheet("border:1px solid black")
         self.frame.setAlignment(Qt.AlignCenter)
-        self.frame.setFixedWidth(800)
-        self.frame.setFixedHeight(800)
+        self.frame.setFixedWidth(900)
+        self.frame.setFixedHeight(600)
 
         # Image frame status and cursor position labels
-        self.lbl_status = QLabel("Status goes here")
+        self.lbl_status1 = QLabel("")
+        self.lbl_status2 = QLabel("")
         self.lbl_cursor = QLabel()
 
         hbox = QHBoxLayout()
-        hbox.addWidget(self.lbl_status)
+        hbox.addWidget(self.lbl_status2)
         hbox.addStretch(1)
         hbox.addWidget(self.lbl_cursor)
 
         # Widget layout
         vbox = QVBoxLayout()
+        vbox.addWidget(self.lbl_status1)
         vbox.addLayout(hbox)
         vbox.addWidget(self.frame)
 
@@ -45,10 +47,13 @@ class ImageFrame(QGroupBox):
         self.image = None
         self.scaled_size = (0,0)
         self.offset = (0,0)
+        self.setStatusMessage("")
+        self.lbl_cursor.setText("")
         self.frame.clear()
 
-    def setStatusMessage(self, message):
-        self.lbl_status.setText(message)
+    def setStatusMessage(self, line1, line2=""):
+        self.lbl_status1.setText(line1)
+        self.lbl_status2.setText(line2)
 
     def display_image(self, image):
         self.image = image

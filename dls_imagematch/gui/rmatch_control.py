@@ -223,13 +223,13 @@ class RegionMatchControl(QGroupBox):
 
         if self.matcher.match_complete:
             # Print results
-            status = "Region match complete: " + offset_msg
-            self.image_frame.setStatusMessage(status)
+            status = "Region match (primary) complete!"
+            self.image_frame.setStatusMessage(status, offset_msg)
 
             if self.gui_state == MatchStates.MATCHING:
                 self._set_state(MatchStates.MATCHING_COMPLETE)
             elif self.gui_state == MatchStates.MATCHING_2ND:
                 self._set_state(MatchStates.MATCHING_2ND_COMPLETE)
         else:
-            status = "Region match in progress: " + offset_msg
-            self.image_frame.setStatusMessage(status)
+            status = "Region match (primary) in progress"
+            self.image_frame.setStatusMessage(status, offset_msg)
