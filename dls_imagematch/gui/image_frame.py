@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QWidget
+from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QEvent
 
 
@@ -22,15 +22,21 @@ class ImageFrame(QGroupBox):
         self.frame.installEventFilter(self)
         self.frame.setStyleSheet("border:1px solid black")
         self.frame.setAlignment(Qt.AlignCenter)
-        self.frame.setFixedWidth(828)
-        self.frame.setFixedHeight(828)
+        self.frame.setFixedWidth(800)
+        self.frame.setFixedHeight(800)
 
         # Image frame status and cursor position labels
+        self.lbl_status = QLabel("Status goes here")
         self.lbl_cursor = QLabel()
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.lbl_status)
+        hbox.addStretch(1)
+        hbox.addWidget(self.lbl_cursor)
 
         # Widget layout
         vbox = QVBoxLayout()
-        vbox.addWidget(self.lbl_cursor)
+        vbox.addLayout(hbox)
         vbox.addWidget(self.frame)
 
         self.setLayout(vbox)
@@ -40,6 +46,9 @@ class ImageFrame(QGroupBox):
         self.scaled_size = (0,0)
         self.offset = (0,0)
         self.frame.clear()
+
+    def setStatusMessage(self, message):
+        self.lbl_status.setText(message)
 
     def display_image(self, image):
         self.image = image

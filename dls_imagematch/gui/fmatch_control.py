@@ -72,13 +72,11 @@ class FeatureMatchControl(QGroupBox):
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
         self.image_frame.display_image(img)
 
-        # Determine transformation in real units (um)
-        x, y = transform.x, transform.y
-
+        # Determine current transformation in real units (um)
+        x, y = int(transform.x), int(transform.y)
         pixel_size = self.img_a.pixel_size
-        delta_x = "{0:.2f}".format(x * pixel_size)
-        delta_y = "{0:.2f}".format(y * pixel_size)
+        x_um, y_um = int(x * pixel_size), int(y * pixel_size)
+        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
 
-        # Print results
-        print("Image offset: x=" + str(delta_x) + " um (" + str(int(x)) + " pixels), y="
-              + str(delta_y) + " um (" + str(int(y)) + " pixels)")
+        status = "Feature match complete: " + offset_msg
+        self.image_frame.setStatusMessage(status)
