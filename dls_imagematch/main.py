@@ -33,6 +33,7 @@ class VMXiCrystalMatcher(QMainWindow):
 
         # Plate well selector (example data set)
         well_selector = WellSelector(selector_a, selector_b)
+        well_selector2 = WellSelector2(selector_a, selector_b)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame()
@@ -46,6 +47,7 @@ class VMXiCrystalMatcher(QMainWindow):
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(well_selector)
+        vbox_img_selection.addWidget(well_selector2)
         vbox_img_selection.addWidget(selector_a)
         vbox_img_selection.addWidget(selector_b)
         vbox_img_selection.addStretch(1)

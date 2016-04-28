@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
 
-from dls_imagematch.gui import INPUT_DIR_ROOT
+from dls_imagematch.gui import SAMPLES_DIR
 
 
 class WellSelector(QGroupBox):
@@ -63,11 +63,11 @@ class WellSelector(QGroupBox):
     @staticmethod
     def _get_441350000072_files(row, col):
         """ Get the full paths of the files for the specified well of the 441350000072 data set. """
-        mov_filepath = INPUT_DIR_ROOT + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
+        mov_filepath = SAMPLES_DIR + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
         col = int(col)
         if col < 10:
             col = '0' + str(col)
 
-        ref_filepath = INPUT_DIR_ROOT + "441350000072/" + str(row) + str(col) + "_13.jpg"
+        ref_filepath = SAMPLES_DIR + "441350000072/" + str(row) + str(col) + "_13.jpg"
 
         return ref_filepath, mov_filepath
