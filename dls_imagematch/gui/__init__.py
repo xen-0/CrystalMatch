@@ -6,5 +6,6 @@ from .well_select2 import WellSelector2
 from .image_frame import ImageFrame
 from .rmatch_control import RegionMatchControl
 from .fmatch_control import FeatureMatchControl
+from .cmatch_control import ConsensusMatchControl
 
 

@@ -52,9 +52,8 @@ class RegionMatcher:
             self._scale = self._scale_factors[self._scale_index]
             self._initialize_scale_factor(self._scale)
 
-
     def _initialize_scale_factor(self, scale):
-        # Do the scale factor-dependent preprocessing step. In our case, we'll
+        # Do the scale factor-dependent pre-processing step. In our case, we'll
         # pick out frequency ranges somewhat coarser than 1 px. Then resize the
         # image to the correct scale
         scale_img_ref = self.img_a.freq_range(self._freq_range, scale).rescale(scale)

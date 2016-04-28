@@ -5,6 +5,9 @@ class Translate:
         self.x = x
         self.y = y
 
+    def __str__(self):
+        return "x: {:.4f}; y: {:.4f}".format(self.x, self.y)
+
     def scale(self, factor):
         return Translate(self.x*factor, self.y*factor)
 

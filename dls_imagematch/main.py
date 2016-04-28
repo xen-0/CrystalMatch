@@ -41,6 +41,9 @@ class VMXiCrystalMatcher(QMainWindow):
         # Region Matching Control
         region_match = RegionMatchControl(selector_a, selector_b, image_frame)
 
+        # Consensus Match
+        consensus_match = ConsensusMatchControl(selector_a, selector_b, image_frame)
+
         # Feature Matching Control
         feature_match = FeatureMatchControl(selector_a, selector_b, image_frame)
 
@@ -52,8 +55,12 @@ class VMXiCrystalMatcher(QMainWindow):
         vbox_img_selection.addWidget(selector_b)
         vbox_img_selection.addStretch(1)
 
+        hbox_matching = QHBoxLayout()
+        hbox_matching.addWidget(consensus_match)
+        hbox_matching.addWidget(feature_match)
+
         vbox_matching = QVBoxLayout()
-        vbox_matching.addWidget(feature_match)
+        vbox_matching.addLayout(hbox_matching)
         vbox_matching.addWidget(region_match)
         vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)
