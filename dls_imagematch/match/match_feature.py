@@ -5,6 +5,13 @@ import numpy as np
 
 from dls_imagematch.util import Translate, Image
 
+
+class OpenCvVersionError(Exception):
+    def __init__(self, message):
+        super(OpenCvVersionError, self).__init__(message)
+        self.message = message
+
+
 class FeatureMatcher:
     """
     Note this only works correctly under OpenCV v2. Under v3, the function
@@ -97,7 +104,16 @@ class FeatureMatcher:
         # Also return the image if you'd like a copy
         return out
 
-    def perform_match(self):
+    def match(self):
+        try:
+            self._perform_match()
+        except AttributeError as e:
+            msg = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
+                  "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
+                  "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
+            raise OpenCvVersionError(msg)
+
+    def _perform_match(self):
         img1 = self.img_a
         img2 = self.img_b
 

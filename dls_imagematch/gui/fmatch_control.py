@@ -3,6 +3,7 @@ from __future__ import division
 from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout, QMessageBox)
 
 from dls_imagematch.match import FeatureMatcher, Overlayer
+from dls_imagematch.match import OpenCvVersionError
 
 
 class FeatureMatchControl(QGroupBox):
@@ -42,13 +43,10 @@ class FeatureMatchControl(QGroupBox):
         img_a, img_b = self._prepare_images()
         self.matcher = FeatureMatcher(img_a, img_b)
         try:
-            self.matcher.perform_match()
+            self.matcher.match()
             self._display_results()
-        except AttributeError as e:
-            msg = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
-                  "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
-                  "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
-            QMessageBox.critical(self, "OpenCV Error", msg, QMessageBox.Ok)
+        except OpenCvVersionError as e:
+            QMessageBox.critical(self, "OpenCV Error", e.message, QMessageBox.Ok)
 
     def _prepare_images(self):
         """ Load the selected images to be matched, scale them appropriately and
