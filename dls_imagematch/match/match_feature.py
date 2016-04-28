@@ -1,7 +1,9 @@
+from __future__ import division
+
 import cv2
 import numpy as np
 
-from dls_imagematch.util import Translate
+from dls_imagematch.util import Translate, Image
 
 class FeatureMatcher:
     """
@@ -80,6 +82,12 @@ class FeatureMatcher:
             # thickness = 1
             # colour blue
             cv2.line(out, (int(x1),int(y1)), (int(x2)+cols1,int(y2)), (255, 0, 0), 1)
+
+        # Resize so that it fits on the screen
+        img = Image(out)
+        factor = 1800 / img.size[0]
+        print(factor)
+        out = Image(out).rescale(factor).img
 
         # Show the image
         cv2.imshow('Matched Features', out)
