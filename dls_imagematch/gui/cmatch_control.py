@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QLineEdit, QLabel)
+from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout, QLineEdit, QLabel)
 
 from dls_imagematch.match import ConsensusMatcher, Overlayer
 from dls_imagematch.util import Translate
@@ -12,6 +12,7 @@ class ConsensusMatchControl(QGroupBox):
 
     DEFAULT_X = "0.1"
     DEFAULT_Y = "0.4"
+    DEFAULT_GRID = "0.05"
 
     def __init__(self, selector_a, selector_b, image_frame):
         super(ConsensusMatchControl, self).__init__()
@@ -33,6 +34,8 @@ class ConsensusMatchControl(QGroupBox):
         self.txt_guess_x.setFixedWidth(40)
         self.txt_guess_y = QLineEdit(self.DEFAULT_Y)
         self.txt_guess_y.setFixedWidth(40)
+        self.txt_grid = QLineEdit(self.DEFAULT_GRID)
+        self.txt_grid.setFixedWidth(40)
 
         # Matching function buttons
         self.btn_perform = QPushButton("Perform Match")
@@ -44,6 +47,8 @@ class ConsensusMatchControl(QGroupBox):
         hbox_guess.addWidget(self.txt_guess_x)
         hbox_guess.addWidget(QLabel("Y:"))
         hbox_guess.addWidget(self.txt_guess_y)
+        hbox_guess.addWidget(QLabel("Grid:"))
+        hbox_guess.addWidget(self.txt_grid)
         hbox_guess.addStretch(1)
         hbox_guess.addWidget(self.btn_perform)
         hbox_guess.addStretch(3)
@@ -62,9 +67,14 @@ class ConsensusMatchControl(QGroupBox):
         guess_y = float(self.txt_guess_y.text())
         guess = Translate(guess_x*img_a.size[0], guess_y*img_a.size[1])
 
-        self.matcher = ConsensusMatcher(img_a, img_b, guess)
+        # Set grid spacing
+        grid = float(self.txt_grid.text())
+        spacing = grid * img_a.size[0]
 
-        self.matcher.perform_match()
+        # Perform matching
+        self.matcher = ConsensusMatcher(img_a, img_b)
+        self.matcher.match(guess, spacing)
+
         self._display_results()
 
     def _prepare_images(self):
@@ -83,7 +93,7 @@ class ConsensusMatchControl(QGroupBox):
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self.matcher.net_transform
+        transform = self.matcher.match_transform
 
         # Create image of B overlaid on A
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
