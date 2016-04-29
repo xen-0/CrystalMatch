@@ -46,7 +46,7 @@ class Image:
         return Image(self.img.copy(), self.pixel_size)
 
     def sub_image(self, roi):
-        x1, y1, x2, y2 = roi[0], roi[1], roi[2], roi[3]
+        x1, y1, x2, y2 = int(roi[0]), int(roi[1]), int(roi[2]), int(roi[3])
         sub = self.img[y1:y2, x1:x2]
         return Image(sub,self.pixel_size)
 

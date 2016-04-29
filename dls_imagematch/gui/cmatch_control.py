@@ -7,7 +7,7 @@ from dls_imagematch.util import Translate
 
 
 class ConsensusMatchControl(QGroupBox):
-    """ Widget that allows control of the Feature Matching process.
+    """ Widget that allows control of the Consensus Matching process.
     """
 
     DEFAULT_X = "0.1"
@@ -59,7 +59,7 @@ class ConsensusMatchControl(QGroupBox):
         self._fn_begin_matching()
 
     def _fn_begin_matching(self):
-        """ Being the feature matching process for the two selected images. """
+        """ Being the consensus matching process for the two selected images. """
         img_a, img_b = self._prepare_images()
 
         # Prepare initial guess
@@ -106,4 +106,4 @@ class ConsensusMatchControl(QGroupBox):
         offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
 
         status = "Consensus match complete"
-        self.image_frame.setStatusMessage(status, offset_msg)
+        self.image_frame.set_status_message(status, offset_msg)

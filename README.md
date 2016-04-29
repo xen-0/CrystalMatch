@@ -9,4 +9,4 @@ Contents
  1. [Code Use Instructions](docs/setup.md)
  2. [The VMXi Beamline](docs/vmxi.md)
  3. [The Problem of Feature Tracking](docs/tracking.md)
- 4. The Solution
+ 4. [The Solution](docs/solution.md)

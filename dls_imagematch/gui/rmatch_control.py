@@ -157,7 +157,7 @@ class RegionMatchControl(QGroupBox):
 
     def _fn_select_region(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
-        region_image, roi = RegionSelectDialog.get_region(self, self.img_a)
+        region_image, roi = RegionSelectDialog.get_region(self.img_a)
 
         if region_image is not None:
             self._matching_secondary(self.img_b, region_image, roi)
@@ -167,7 +167,7 @@ class RegionMatchControl(QGroupBox):
     MATCHING FUNCTIONS
     ------------------------'''
     def _matching_primary(self):
-        """ Vebing the primary matching procedure. """
+        """ Begin the primary matching procedure. """
         img_a, img_b = self._prepare_images()
 
         guess_x = float(self.txt_guess_x.text())
@@ -177,19 +177,19 @@ class RegionMatchControl(QGroupBox):
         self.matcher = RegionMatcher(img_a, img_b, guess)
         self._fn_next_frame()
 
-    def _matching_secondary(self, imgA, imgB, roi):
+    def _matching_secondary(self, img_a, img_b, roi):
         """ Begin secondary matching procedure (matching sub-regions from image B. """
-        self.img_a = imgA
-        self.img_b = imgB
-        imgA_gray = imgA.make_gray()
-        imgB_gray = imgB.make_gray()
+        self.img_a = img_a
+        self.img_b = img_b
+        img_a_gray = img_a.make_gray()
+        img_b_gray = img_b.make_gray()
 
         primary_transform = self.matcher.net_transform
-        guessX = roi[0] - primary_transform.x
-        guessY = roi[1] - primary_transform.y
-        guess = Translate(guessX, guessY)
+        guess_x = roi[0] - primary_transform.x
+        guess_y = roi[1] - primary_transform.y
+        guess = Translate(guess_x, guess_y)
 
-        self.matcher = RegionMatcher(imgA_gray, imgB_gray, guess, scales=(1,))
+        self.matcher = RegionMatcher(img_a_gray, img_b_gray, guess, scales=(1,))
         self._fn_next_frame()
 
     def _prepare_images(self):
@@ -219,12 +219,12 @@ class RegionMatchControl(QGroupBox):
         x, y = int(transform.x), int(transform.y)
         pixel_size = self.img_a.pixel_size
         x_um, y_um = int(x * pixel_size), int(y * pixel_size)
-        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
+        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um, y_um, x, y)
 
         if self.matcher.match_complete:
             # Print results
             status = "Region match (primary) complete!"
-            self.image_frame.setStatusMessage(status, offset_msg)
+            self.image_frame.set_status_message(status, offset_msg)
 
             if self.gui_state == MatchStates.MATCHING:
                 self._set_state(MatchStates.MATCHING_COMPLETE)
@@ -232,4 +232,4 @@ class RegionMatchControl(QGroupBox):
                 self._set_state(MatchStates.MATCHING_2ND_COMPLETE)
         else:
             status = "Region match (primary) in progress"
-            self.image_frame.setStatusMessage(status, offset_msg)
+            self.image_frame.set_status_message(status, offset_msg)

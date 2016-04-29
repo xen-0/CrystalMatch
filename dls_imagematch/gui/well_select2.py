@@ -7,8 +7,11 @@ from dls_imagematch.util import File
 
 
 class WellSelector2(QGroupBox):
-    """ Widget that allows the user to select a particular well from a
-    sample test plate.
+    """ Widget that allows the user to select well images to use for matching. The data set for a plate has
+    multiple image batches for which each well is imaged. The user can select a plate, a specific well on the
+    plate, and two batches for image comparison.
+
+    The path of an image is expected to be: plate_xxx/batch_yy/well_zz_profile_1.jpg
     """
     def __init__(self, selector_a, selector_b):
         super(WellSelector2, self).__init__()
@@ -25,14 +28,14 @@ class WellSelector2(QGroupBox):
     def _init_ui(self):
         """ Create all the display elements of the widget. """
         # Get list of plate directories
-        plate_dirs = File.get_sub_dirs(SAMPLES_DIR, startswith="plate_")
+        plate_folders = File.get_sub_dirs(SAMPLES_DIR, startswith="plate_")
 
         # Row dropdown box
         self._cmbo_plate = QComboBox()
         self._cmbo_plate.activated[str].connect(self._plate_selected)
-        for dir in plate_dirs:
-            dir = dir.split("/")[-1]
-            self._cmbo_plate.addItem(dir)
+        for folder in plate_folders:
+            folder = folder.split("/")[-1]
+            self._cmbo_plate.addItem(folder)
 
         # Column dropdown box
         self._cmbo_batch1 = QComboBox()
@@ -57,31 +60,36 @@ class WellSelector2(QGroupBox):
         self.setLayout(hbox_well_select)
 
     def _plate_selected(self):
+        """ Called when a plate is selected in the plate dropdown; displays a list of the available batches
+        in the batch dropdowns. """
         self._cmbo_batch1.clear()
         self._cmbo_batch2.clear()
 
         plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
-        batch_dirs = File.get_sub_dirs(str(plate_dir), startswith="batch_")
+        batch_folders = File.get_sub_dirs(str(plate_dir), startswith="batch_")
 
-        for dir in batch_dirs:
-            dir = dir.split("\\")[-1]
-            self._cmbo_batch1.addItem(dir)
-            self._cmbo_batch2.addItem(dir)
+        for folder in batch_folders:
+            folder = folder.split("\\")[-1]
+            self._cmbo_batch1.addItem(folder)
+            self._cmbo_batch2.addItem(folder)
 
         self._cmbo_batch1.setCurrentIndex(0)
         self._cmbo_batch2.setCurrentIndex(self._cmbo_batch2.count()-1)
 
     def _batch_selected(self):
+        """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
+        wells in the well dropdown. """
         self._cmbo_well.clear()
 
         plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
 
+        # Get the list of well images.
+        # TODO: currently assumes that all the wells available in batch 1 are also available in batch 2
         files = File.get_files(str(batch_dir1))
         for f in files:
             f = f.split("/")[-1]
             num = f[:7]
-
             self._cmbo_well.addItem(num)
 
     def _select_well(self):

@@ -111,6 +111,9 @@ class SelectorFrame(QLabel):
 
 
 class RegionSelectDialog(QDialog):
+    """ Dialog that displays the Region Selector Frame and stores the result so that it may be
+    retrieved by the caller.
+    """
     def __init__(self, image):
         super(RegionSelectDialog, self).__init__()
         self._init_ui(image)
@@ -134,12 +137,15 @@ class RegionSelectDialog(QDialog):
         self.setLayout(vbox)
         self.show()
 
-    def roi(self):
+    def region_of_interest(self):
+        """ The selected section of the image and the rectangle (x1, y1, x2, y2) that was drawn on
+        the selector frame. """
         return self.selector_frame.image_region, self.selector_frame.roi
 
     @staticmethod
-    def get_region(parent, filename):
+    def get_region(filename):
+        """ Display a dialog and return the result to the caller. """
         dialog = RegionSelectDialog(filename)
-        result = dialog.exec_()
-        region_image, roi = dialog.roi()
-        return region_image, roi
+        _ = dialog.exec_()
+        region_image, rectangle = dialog.region_of_interest()
+        return region_image, rectangle

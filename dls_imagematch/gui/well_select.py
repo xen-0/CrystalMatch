@@ -9,6 +9,8 @@ class WellSelector(QGroupBox):
     """ Widget that allows the user to select a particular well from a
     sample test plate.
     """
+    SET_FACTOR = 6.55
+
     def __init__(self, selector_a, selector_b):
         super(WellSelector, self).__init__()
 
@@ -49,14 +51,13 @@ class WellSelector(QGroupBox):
         row = self._cmbo_row.currentText()
         col = self._cmbo_col.currentText()
 
-        fileA, fileB = self._get_441350000072_files(row, col)
-        self.selector_a.setFile(fileA)
-        self.selector_b.setFile(fileB)
+        file_a, file_b = self._get_441350000072_files(row, col)
+        self.selector_a.setFile(file_a)
+        self.selector_b.setFile(file_b)
 
         # Set pixel sizes
-        SET_FACTOR = 6.55
         pixel_size_a = 4.0
-        pixel_size_b = pixel_size_a / SET_FACTOR
+        pixel_size_b = pixel_size_a / WellSelector.SET_FACTOR
         self.selector_a.setPixelSize(pixel_size_a)
         self.selector_b.setPixelSize(pixel_size_b)
 

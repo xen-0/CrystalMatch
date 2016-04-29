@@ -5,18 +5,21 @@ from PyQt4.QtCore import Qt, QEvent
 
 
 class ImageFrame(QGroupBox):
-
+    """ Widget that displays an image as well as an editable status message and a readout of
+    the current mouse position on the image.
+    """
     def __init__(self):
         super(ImageFrame, self).__init__()
 
         self.image = None
-        self.scaled_size = (0,0)
-        self.offset = (0,0)
+        self.scaled_size = (0, 0)
+        self.offset = (0, 0)
 
         self._init_ui()
         self.setTitle("Results")
 
     def _init_ui(self):
+        """ Create all the ui elements of the widget."""
         self.frame = QLabel()
         self.frame.setMouseTracking(True)
         self.frame.installEventFilter(self)
@@ -30,12 +33,12 @@ class ImageFrame(QGroupBox):
         self.lbl_status2 = QLabel("")
         self.lbl_cursor = QLabel()
 
+        # Widget layout
         hbox = QHBoxLayout()
         hbox.addWidget(self.lbl_status2)
         hbox.addStretch(1)
         hbox.addWidget(self.lbl_cursor)
 
-        # Widget layout
         vbox = QVBoxLayout()
         vbox.addWidget(self.lbl_status1)
         vbox.addLayout(hbox)
@@ -44,41 +47,48 @@ class ImageFrame(QGroupBox):
         self.setLayout(vbox)
 
     def clear(self):
+        """ Reset the frame, clearing the image and status text. """
         self.image = None
-        self.scaled_size = (0,0)
-        self.offset = (0,0)
-        self.setStatusMessage("")
+        self.scaled_size = (0, 0)
+        self.offset = (0, 0)
+        self.set_status_message("")
         self.lbl_cursor.setText("")
         self.frame.clear()
 
-    def setStatusMessage(self, line1, line2=""):
+    def set_status_message(self, line1, line2=""):
+        """ Set the text to be displayed in the status message area (2 lines). """
         self.lbl_status1.setText(line1)
         self.lbl_status2.setText(line2)
 
     def display_image(self, image):
+        """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
         self.image = image
         frame_size = self.frame.size()
 
+        # Convert to a QT pixmap and display
         pixmap = image.to_qt_pixmap()
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.frame.setPixmap(scaled)
 
+        # Calculate the offset which is used to correctly report the mouse position on the image
         self.scaled_size = (scaled.width(), scaled.height())
-
-        xOff = int((frame_size.width() - self.scaled_size[0]) / 2)
-        yOff = int((frame_size.height() - self.scaled_size[1]) / 2)
-        self.offset = (xOff, yOff)
+        x_off = int((frame_size.width() - self.scaled_size[0]) / 2)
+        y_off = int((frame_size.height() - self.scaled_size[1]) / 2)
+        self.offset = (x_off, y_off)
 
     def eventFilter(self, source, event):
+        """ Catches events on the image frame and re-directs mouse movements to the reporting function. """
         if event.type() == QEvent.MouseMove and source is self.frame:
             self.mouseMoveEvent(event)
             return False
 
         return QWidget.eventFilter(self, source, event)
 
-    def mouseMoveEvent(self, QMouseEvent):
+    def mouseMoveEvent(self, mouse_event):
+        """ Called when the mouse moves across the image frame. Displays the current position of the mouse
+        in image pixels (scaled to the original image size, not the displayed size). """
         if self.image is not None:
-            coords = QMouseEvent.pos()
+            coords = mouse_event.pos()
             x = coords.x() - self.offset[0]
             y = coords.y() - self.offset[1]
 

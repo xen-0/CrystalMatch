@@ -77,4 +77,4 @@ class FeatureMatchControl(QGroupBox):
         offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
 
         status = "Feature match complete"
-        self.image_frame.setStatusMessage(status, offset_msg)
+        self.image_frame.set_status_message(status, offset_msg)
