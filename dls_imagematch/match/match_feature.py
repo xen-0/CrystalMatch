@@ -2,6 +2,7 @@ from __future__ import division
 
 import cv2
 import numpy as np
+import math
 
 from dls_imagematch.util import Translate, Image
 
@@ -20,6 +21,7 @@ class FeatureMatcher:
     and reported problem but it doesn't seem to have been fixed yet.
     """
     DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Dense", "SimpleBlob"]
+    ADAPTATION_TYPE = ["", "Grid", "Pyramid"]
 
     def __init__(self, img_a, img_b):
         self.img_a = img_a
@@ -28,7 +30,7 @@ class FeatureMatcher:
         self.match_complete = False
         self.net_transform = None
 
-    def match(self, method):
+    def match(self, method, adaptation):
         """ Perform the matching procedure. """
         '''
         try:
@@ -41,29 +43,28 @@ class FeatureMatcher:
         '''
         if method not in self.DETECTOR_TYPES:
             raise NotImplementedError("No such feature matching method available: " + method)
+        elif adaptation not in self.ADAPTATION_TYPE:
+            raise NotImplementedError("No such feature matching adaptation available: " + adaptation)
 
-        self._perform_match(str(method))
+        self._perform_match(str(method), str(adaptation))
 
-    def _perform_match(self, method):
+    def _perform_match(self, method, adaptation):
         img1 = self.img_a
         img2 = self.img_b
 
-        kp1, des1 = self._detect_features(method, img1.img)
-        kp2, des2 = self._detect_features(method, img2.img)
+        kp1, des1 = self._detect_features(img1.img, method, adaptation)
+        kp2, des2 = self._detect_features(img2.img, method, adaptation)
 
         # Find matches
-        matches = self._find_matches(method, des1, des2)
-
-        # Draw the best 55% of matches
-        num = int(len(matches) * 0.55)
-        self._draw_matches(img1.img, kp1, img2.img, kp2, matches[:num])
+        matches = self._find_matches(method, des1, des2, n_best=200)
+        self._draw_matches(img1.img, kp1, img2.img, kp2, matches)
 
         # Calculate the Transform
         self.net_transform = self._calculate_transform(matches, kp1, kp2)
         self.match_complete = True
 
     @staticmethod
-    def _detect_features(detector_method, img):
+    def _detect_features(img, detector_method, adaptation):
         """ Detect interesting features in the image and generate descriptors. A keypoint identifies the
         location and orientation of a feature, and a descriptor is a vector of numbers that describe the
         various attributes of the feature. By generating descriptors, we can compare the set of features
@@ -76,7 +77,7 @@ class FeatureMatcher:
             extractor_method = "BRIEF"
 
         # Create the feature detector and descriptor extractor
-        detector = cv2.FeatureDetector_create(detector_method)
+        detector = cv2.FeatureDetector_create(adaptation + detector_method)
         extractor = cv2.DescriptorExtractor_create(extractor_method)
 
         # Get keypoints and descriptors
@@ -90,7 +91,7 @@ class FeatureMatcher:
         return keypoints, descriptors
 
     @staticmethod
-    def _find_matches(method, descriptors_1, descriptors_2):
+    def _find_matches(method, descriptors_1, descriptors_2, n_best):
         """ For two sets of feature descriptors generated from 2 images, attempt to find all the matches,
         i.e. find features that occur in both images.
         """
@@ -107,7 +108,7 @@ class FeatureMatcher:
         # Sort them in the order of their distance.
         matches = sorted(matches, key=lambda x: x.distance)
 
-        return matches
+        return matches[:n_best]
 
     @staticmethod
     def _calculate_transform(matches, keypoints_1, keypoints_2):

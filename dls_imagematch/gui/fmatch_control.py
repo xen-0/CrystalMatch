@@ -28,6 +28,9 @@ class FeatureMatchControl(QGroupBox):
         self._cmbo_method = QComboBox()
         self._cmbo_method.addItems(FeatureMatcher.DETECTOR_TYPES)
 
+        self._cmbo_adapt = QComboBox()
+        self._cmbo_adapt.addItems(FeatureMatcher.ADAPTATION_TYPE)
+
         # Matching function buttons
         self._btn_begin = QPushButton("Begin Match")
         self._btn_begin.clicked.connect(self._fn_begin_matching)
@@ -35,6 +38,7 @@ class FeatureMatchControl(QGroupBox):
         # Create widget layout
         hbox = QHBoxLayout()
         hbox.addWidget(self._cmbo_method)
+        hbox.addWidget(self._cmbo_adapt)
         hbox.addWidget(self._btn_begin)
         hbox.addStretch(1)
 
@@ -46,10 +50,13 @@ class FeatureMatchControl(QGroupBox):
     def _fn_begin_matching(self):
         """ Begin the feature matching process for the two selected images. """
         img_a, img_b = self._prepare_images()
+
         method = self._cmbo_method.currentText()
+        adapt = self._cmbo_adapt.currentText()
+
         self.matcher = FeatureMatcher(img_a, img_b)
         try:
-            self.matcher.match(method)
+            self.matcher.match(method, adapt)
             self._display_results()
         except OpenCvVersionError as e:
             QMessageBox.critical(self, "OpenCV Error", e.message, QMessageBox.Ok)
