@@ -31,10 +31,11 @@ class ConsensusMatcher:
         self.initial = initial
         self.grid_spacing = grid_spacing
 
+        # Create a set of starting points to use in the region matching
         starting_points = self._make_starting_points(initial, grid_spacing)
 
+        # Perform region matching with each starting point
         results = []
-
         for point in starting_points:
             matcher = RegionMatcher(self.img_a, self.img_b, point)
             matcher.skip_to_end()

@@ -41,18 +41,18 @@ class OverlapMetric:
         background = self.img_a.copy()
 
         # Determine size of B, which is the size of the overlay image area.
-        working_size = self.img_b._size()
+        working_size = self.img_b.size
         w, h = working_size
 
         # Determine offset amount
-        x,y = transform.x, transform.y
+        x, y = transform.x, transform.y
 
         # Define the rectangle that will be pasted to in the background image
         roi = (x, y, x+w, y+h)
 
         # Paste the overlay image to the background and draw a rectangle around it
         overlay = Image(overlay_img, self.img_b.pixel_size)
-        background.paste(overlay, xOff=max(x,0), yOff=max(y,0))
+        background.paste(overlay, xOff=max(x, 0), yOff=max(y, 0))
         background.draw_rectangle(roi)
 
         return background
@@ -71,6 +71,3 @@ class OverlapMetric:
         metric = np.sum(absdiff_img) / absdiff_img.size
 
         return metric
-
-def get_translation_amounts(tr_mat):
-    return map(lambda i: tr_mat[i, 2], (0, 1))

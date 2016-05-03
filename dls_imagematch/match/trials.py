@@ -11,8 +11,7 @@ class TrialTransforms:
         self.transforms.extend(king_transforms)
 
     def compose_with(self, transformation):
-        """ Compose all of the transformations with some other supplied transformation
-        """
+        """ Compose all of the transformations with some other supplied transformation. """
         return [transformation.offset(tr) for tr in self.transforms]
 
 
