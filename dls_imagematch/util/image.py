@@ -35,10 +35,11 @@ class Image:
     def save(self, filename):
         cv2.imwrite(filename, self.img)
 
-    def popup(self):
+    def popup(self, title='Popup Image'):
         """Pop up a window to display an image until a key is pressed (blocking)."""
-        cv2.imshow('dbg', self.img)
+        cv2.imshow(title, self.img)
         cv2.waitKey(0)
+        cv2.destroyWindow(title)
 
     def copy(self):
         """ Return an Image object which is a deep copy of this one.

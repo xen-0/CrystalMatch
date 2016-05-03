@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout, QMessageBox)
+from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox, QLabel
 
 from dls_imagematch.match import FeatureMatcher, Overlayer
 from dls_imagematch.match import OpenCvVersionError
@@ -24,26 +24,32 @@ class FeatureMatchControl(QGroupBox):
 
     def _init_ui(self):
         """ Create all the display elements of the widget. """
+        # Feature Detector method
+        self._cmbo_method = QComboBox()
+        self._cmbo_method.addItems(FeatureMatcher.DETECTOR_TYPES)
+
         # Matching function buttons
-        self.btn_begin = QPushButton("Begin Match")
-        self.btn_begin.clicked.connect(self._fn_begin_matching)
+        self._btn_begin = QPushButton("Begin Match")
+        self._btn_begin.clicked.connect(self._fn_begin_matching)
 
         # Create widget layout
-        hbox_btns = QHBoxLayout()
-        hbox_btns.addWidget(self.btn_begin)
-        hbox_btns.addStretch(1)
+        hbox = QHBoxLayout()
+        hbox.addWidget(self._cmbo_method)
+        hbox.addWidget(self._btn_begin)
+        hbox.addStretch(1)
 
-        self.setLayout(hbox_btns)
+        self.setLayout(hbox)
 
     def match(self):
         self._fn_begin_matching()
 
     def _fn_begin_matching(self):
-        """ Being the feature matching process for the two selected images. """
+        """ Begin the feature matching process for the two selected images. """
         img_a, img_b = self._prepare_images()
+        method = self._cmbo_method.currentText()
         self.matcher = FeatureMatcher(img_a, img_b)
         try:
-            self.matcher.match()
+            self.matcher.match(method)
             self._display_results()
         except OpenCvVersionError as e:
             QMessageBox.critical(self, "OpenCV Error", e.message, QMessageBox.Ok)
