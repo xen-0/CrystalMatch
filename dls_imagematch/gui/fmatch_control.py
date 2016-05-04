@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox, QLabel
 
 from dls_imagematch.match import FeatureMatcher, Overlayer
-from dls_imagematch.match import OpenCvVersionError
+from dls_imagematch.match import FeatureMatchException
 
 
 class FeatureMatchControl(QGroupBox):
@@ -57,9 +57,9 @@ class FeatureMatchControl(QGroupBox):
         self.matcher = FeatureMatcher(img_a, img_b)
         try:
             self.matcher.match(method, adapt)
-            self._display_results()
-        except OpenCvVersionError as e:
-            QMessageBox.critical(self, "OpenCV Error", e.message, QMessageBox.Ok)
+            self._display_results(method)
+        except FeatureMatchException as e:
+            QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
     def _prepare_images(self):
         """ Load the selected images to be matched, scale them appropriately and
@@ -74,7 +74,7 @@ class FeatureMatchControl(QGroupBox):
 
         return self.img_a.make_gray(), self.img_b.make_gray()
 
-    def _display_results(self):
+    def _display_results(self, method):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
         transform = self.matcher.net_transform
@@ -89,5 +89,5 @@ class FeatureMatchControl(QGroupBox):
         x_um, y_um = int(x * pixel_size), int(y * pixel_size)
         offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
 
-        status = "Feature match complete"
+        status = "Feature match complete (" + method + ")"
         self.image_frame.set_status_message(status, offset_msg)

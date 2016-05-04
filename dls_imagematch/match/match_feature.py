@@ -7,9 +7,9 @@ import math
 from dls_imagematch.util import Translate, Image
 
 
-class OpenCvVersionError(Exception):
+class FeatureMatchException(Exception):
     def __init__(self, message):
-        super(OpenCvVersionError, self).__init__(message)
+        super(FeatureMatchException, self).__init__(message)
         self.message = message
 
 
@@ -20,8 +20,13 @@ class FeatureMatcher:
     does not work properly for Python - it incorrectly raises an exception. This is a widely known
     and reported problem but it doesn't seem to have been fixed yet.
     """
-    DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Dense", "SimpleBlob"]
+    DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Consensus", "Dense", "SimpleBlob"]
     ADAPTATION_TYPE = ["", "Grid", "Pyramid"]
+
+    CONSENSUS_DETECTORS = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS"]
+
+    POPUP_RESULTS = True
+    MINIMUM_FEATURES = 5
 
     def __init__(self, img_a, img_b):
         self.img_a = img_a
@@ -41,27 +46,70 @@ class FeatureMatcher:
                   "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
             raise OpenCvVersionError(msg)
         '''
+        self.match_complete = False
+        self.net_transform = None
+
         if method not in self.DETECTOR_TYPES:
-            raise NotImplementedError("No such feature matching method available: " + method)
+            raise FeatureMatchException("No such feature matching method available: " + method)
         elif adaptation not in self.ADAPTATION_TYPE:
-            raise NotImplementedError("No such feature matching adaptation available: " + adaptation)
+            raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
 
-        self._perform_match(str(method), str(adaptation))
+        if method == "Consensus":
+            self._perform_consensus_match()
+        else:
+            result = self._perform_match(str(method), str(adaptation), self.img_a, self.img_b)
+            if result is not None:
+                self.net_transform = result
+                self.match_complete = True
 
-    def _perform_match(self, method, adaptation):
-        img1 = self.img_a
-        img2 = self.img_b
+    def _perform_consensus_match(self):
+        FeatureMatcher.POPUP_RESULTS = False
 
-        kp1, des1 = self._detect_features(img1.img, method, adaptation)
-        kp2, des2 = self._detect_features(img2.img, method, adaptation)
+        results = []
+        for method in FeatureMatcher.CONSENSUS_DETECTORS:
+            print(method)
+            try:
+                result = self._perform_match(method, "", self.img_a, self.img_b)
+                results.append(result)
+                print(result)
+            except FeatureMatchException:
+                pass
+
+        # Raise exception if no results were found
+        if len(results) == 0:
+            raise FeatureMatchException("No feature matching technique returned a successful match.")
+
+        best_result, confidence = self._best_translate(results)
+        print("Best: " + str(best_result))
+
+        self.net_transform = best_result
+        self.match_complete = True
+
+        FeatureMatcher.POPUP_RESULTS = True
+        return self.net_transform
+
+    @staticmethod
+    def _perform_match(method, adaptation, img_a, img_b):
+
+        kp1, des1 = FeatureMatcher._detect_features(img_a.img, method, adaptation)
+        kp2, des2 = FeatureMatcher._detect_features(img_b.img, method, adaptation)
+
+        # Check that we have actually found some features
+        if len(kp1) < FeatureMatcher.MINIMUM_FEATURES or len(kp2) < FeatureMatcher.MINIMUM_FEATURES:
+            message = "Could no find the required minimum number of features (" \
+                      + str(FeatureMatcher.MINIMUM_FEATURES) + ") in at least 1 image!"
+            raise FeatureMatchException(message)
 
         # Find matches
-        matches = self._find_matches(method, des1, des2, n_best=200)
-        self._draw_matches(img1.img, kp1, img2.img, kp2, matches)
+        matches = FeatureMatcher._find_matches(method, des1, des2, n_best=200)
+
+        # Draw matches image
+        if FeatureMatcher.POPUP_RESULTS:
+            FeatureMatcher._draw_matches(img_a.img, kp1, img_b.img, kp2, matches)
 
         # Calculate the Transform
-        self.net_transform = self._calculate_transform(matches, kp1, kp2)
-        self.match_complete = True
+        result = FeatureMatcher._calculate_transform(matches, kp1, kp2)
+        return result
 
     @staticmethod
     def _detect_features(img, detector_method, adaptation):
@@ -85,8 +133,9 @@ class FeatureMatcher:
         keypoints, descriptors = extractor.compute(img, keypoints)
 
         # Show the detected keypoints
-        marked_img = cv2.drawKeypoints(img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        Image(marked_img).popup(detector_method + " Keypoints")
+        if FeatureMatcher.POPUP_RESULTS:
+            marked_img = cv2.drawKeypoints(img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            Image(marked_img).popup(detector_method + " Keypoints")
 
         return keypoints, descriptors
 
@@ -135,6 +184,46 @@ class FeatureMatcher:
         y = -np.median(ys)
 
         return Translate(x, y)
+
+    @staticmethod
+    def _best_translate(results):
+        """ Each run of the region matching procedure can have a different result. Group together results that
+        are the same (or very similar), and return the result that has the largest group.
+        """
+        groups = []
+
+        # Divide the results into sub-groups of the same/similar results
+        for result in results:
+            assigned = False
+            for group in groups:
+                prototype = group[0]
+                # If the result is within 2 pixels of the group, add it to the group
+                del_x = math.fabs(prototype.x - result.x)
+                del_y = math.fabs(prototype.y - result.y)
+                if del_x <= 2 and del_y <= 2:
+                    group.append(result)
+                    assigned = True
+                    break
+
+            # Assign to new group
+            if not assigned:
+                groups.append([result])
+
+        # Find largest set
+        set_lengths = map(len, groups)
+        consensus = np.argmax(set_lengths)  # TODO: Check if tied for longest.
+        best_set = groups[consensus]
+
+        # Find average
+        x_mean = sum([result.x for result in best_set]) / len(best_set)
+        y_mean = sum([result.y for result in best_set]) / len(best_set)
+        best_result = Translate(x_mean, y_mean)
+
+        # Confidence of consensus
+        print('Confidence:', str(len(best_set))+'/'+str(len(results)))
+        confidence = len(best_set) / len(results)
+
+        return best_result, confidence
 
     @staticmethod
     def _draw_matches(img1, keypoints1, img2, keypoints2, matches):
