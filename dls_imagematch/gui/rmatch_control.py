@@ -4,7 +4,7 @@ from enum import Enum
 from PyQt4.QtGui import (QPushButton, QLineEdit, QLabel, QGroupBox, QHBoxLayout)
 
 from dls_imagematch.gui import RegionSelectDialog
-from dls_imagematch.match import Overlayer, RegionMatcher
+from dls_imagematch.match import Overlayer, RegionMatcher, OverlapMetric
 from dls_imagematch.util import Translate
 
 
@@ -215,6 +215,10 @@ class RegionMatchControl(QGroupBox):
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
         self.image_frame.display_image(img)
 
+        # Calculate metric value
+        metric_calc = OverlapMetric(self.img_a, self.img_b, None)
+        metric = metric_calc.calculate_overlap_metric((int(transform.x), int(transform.y)))
+
         # Determine current transformation in real units (um)
         x, y = int(transform.x), int(transform.y)
         pixel_size = self.img_a.pixel_size
@@ -223,7 +227,7 @@ class RegionMatchControl(QGroupBox):
 
         if self.matcher.match_complete:
             # Print results
-            status = "Region match (primary) complete!"
+            status = "Region match (primary) complete! (metric = " + "{0:.2f}".format(metric) + ")"
             self.image_frame.set_status_message(status, offset_msg)
 
             if self.gui_state == MatchStates.MATCHING:
