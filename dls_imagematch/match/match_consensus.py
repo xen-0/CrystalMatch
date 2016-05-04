@@ -7,7 +7,7 @@ from .match_region import RegionMatcher
 from dls_imagematch.util import Translate
 
 
-class ConsensusMatcher:
+class RegionConsensusMatcher:
     """ Matcher for finding the optimum point of overlap of two images. This works by using the iterative
     region matcher, but running it multiple times from slightly different starting positions, and then taking
     the most popular result to be the correct one.

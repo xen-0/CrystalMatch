@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import (QPushButton, QGroupBox, QHBoxLayout, QLineEdit, QLabel)
 
-from dls_imagematch.match import ConsensusMatcher, Overlayer
+from dls_imagematch.match import RegionConsensusMatcher, Overlayer
 from dls_imagematch.util import Translate
 
 
@@ -72,7 +72,7 @@ class ConsensusMatchControl(QGroupBox):
         spacing = grid * img_a.size[0]
 
         # Perform matching
-        self.matcher = ConsensusMatcher(img_a, img_b)
+        self.matcher = RegionConsensusMatcher(img_a, img_b)
         self.matcher.match(guess, spacing)
 
         self._display_results()
