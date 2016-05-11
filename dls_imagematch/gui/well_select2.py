@@ -79,18 +79,32 @@ class WellSelector2(QGroupBox):
     def _batch_selected(self):
         """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
         wells in the well dropdown. """
+        current_selection = self._cmbo_well.currentText()
         self._cmbo_well.clear()
 
         plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
+        batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
 
         # Get the list of well images.
-        # TODO: currently assumes that all the wells available in batch 1 are also available in batch 2
-        files = File.get_files(str(batch_dir1))
-        for f in files:
-            f = f.split("/")[-1]
-            num = f[:7]
-            self._cmbo_well.addItem(num)
+        files1 = File.get_files(str(batch_dir1))
+        files1 = [f.split("/")[-1] for f in files1]
+        files2 = File.get_files(str(batch_dir2))
+        files2 = [f.split("/")[-1] for f in files2]
+
+        # Find the set of images that both batches have in common
+        common = list(set(files1).intersection(files2))
+        common.sort()
+
+        # Populate the well list
+        for f in common:
+            well = str(f[:7])
+            self._cmbo_well.addItem(well)
+
+        # Set the well selection to the same as previously selected
+        index = self._cmbo_well.findText(current_selection)
+        if index != -1:
+            self._cmbo_well.setCurrentIndex(index)
 
     def _select_well(self):
         """ Select a well from the dataset to use for matching. Display the
