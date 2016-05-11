@@ -47,6 +47,9 @@ class VMXiCrystalMatcher(QMainWindow):
         # Feature Matching Control
         feature_match = FeatureMatchControl(selector_a, selector_b, image_frame)
 
+        # Secondary Mching Control
+        secondary_match = SecondaryMatchControl(selector_a, selector_b, image_frame)
+
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(well_selector)
@@ -55,20 +58,24 @@ class VMXiCrystalMatcher(QMainWindow):
         vbox_img_selection.addWidget(selector_b)
         vbox_img_selection.addStretch(1)
 
-        hbox_matching = QHBoxLayout()
-        hbox_matching.addWidget(consensus_match)
-        hbox_matching.addWidget(feature_match)
-
         vbox_matching = QVBoxLayout()
-        vbox_matching.addLayout(hbox_matching)
         vbox_matching.addWidget(region_match)
-        vbox_matching.addWidget(image_frame)
-        vbox_matching.addStretch(1)
+        vbox_matching.addWidget(consensus_match)
+        vbox_matching.addWidget(feature_match)
+
+        hbox_matching = QHBoxLayout()
+        hbox_matching.addLayout(vbox_matching)
+        hbox_matching.addWidget(secondary_match)
+
+        vbox_matching2 = QVBoxLayout()
+        vbox_matching2.addLayout(hbox_matching)
+        vbox_matching2.addWidget(image_frame)
+        vbox_matching2.addStretch(1)
 
         hbox_main = QHBoxLayout()
         hbox_main.setSpacing(10)
         hbox_main.addLayout(vbox_img_selection)
-        hbox_main.addLayout(vbox_matching)
+        hbox_main.addLayout(vbox_matching2)
         hbox_main.addStretch(1)
 
         main_widget = QWidget()

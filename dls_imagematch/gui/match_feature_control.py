@@ -12,14 +12,12 @@ class FeatureMatchControl(QGroupBox):
     def __init__(self, selector_a, selector_b, image_frame):
         super(FeatureMatchControl, self).__init__()
 
-        self.selector_a = selector_a
-        self.selector_b = selector_b
-        self.image_frame = image_frame
+        self._selector_a = selector_a
+        self._selector_b = selector_b
+        self._image_frame = image_frame
+        self._matcher = None
 
         self._init_ui()
-
-        self.matcher = None
-
         self.setTitle("Feature Matching")
 
     def _init_ui(self):
@@ -54,9 +52,9 @@ class FeatureMatchControl(QGroupBox):
         method = self._cmbo_method.currentText()
         adapt = self._cmbo_adapt.currentText()
 
-        self.matcher = FeatureMatcher(img_a, img_b)
+        self._matcher = FeatureMatcher(img_a, img_b)
         try:
-            self.matcher.match(method, adapt)
+            self._matcher.match(method, adapt)
             self._display_results(method)
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
@@ -65,8 +63,8 @@ class FeatureMatchControl(QGroupBox):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Get the selected images
-        self.img_a = self.selector_a.image()
-        self.img_b = self.selector_b.image()
+        self.img_a = self._selector_a.image()
+        self.img_b = self._selector_b.image()
 
         # Resize the image B so it has the same size per pixel as image A
         factor = self.img_b.pixel_size / self.img_a.pixel_size
@@ -77,11 +75,11 @@ class FeatureMatchControl(QGroupBox):
     def _display_results(self, method):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self.matcher.net_transform
+        transform = self._matcher.net_transform
 
         # Create image of B overlaid on A
         img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
-        self.image_frame.display_image(img)
+        self._image_frame.display_image(img)
 
         # Calculate metric value
         metric_calc = OverlapMetric(self.img_a, self.img_b, None)
@@ -94,4 +92,4 @@ class FeatureMatchControl(QGroupBox):
         offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um,y_um,x,y)
 
         status = "Feature match complete (" + method + ") - (metric = " + "{0:.2f}".format(metric) + ")"
-        self.image_frame.set_status_message(status, offset_msg)
+        self._image_frame.set_status_message(status, offset_msg)
