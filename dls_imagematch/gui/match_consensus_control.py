@@ -92,14 +92,14 @@ class ConsensusMatchControl(QGroupBox):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Get the selected images
-        self.img_a = self._selector_a.image()
-        self.img_b = self._selector_b.image()
+        self._img_a = self._selector_a.image()
+        self._img_b = self._selector_b.image()
 
         # Resize the image B so it has the same size per pixel as image A
-        factor = self.img_b.pixel_size / self.img_a.pixel_size
-        self.img_b = self.img_b.rescale(factor)
+        factor = self._img_b.pixel_size / self._img_a.pixel_size
+        self._img_b = self._img_b.rescale(factor)
 
-        return self.img_a.make_gray(), self.img_b.make_gray()
+        return self._img_a.make_gray(), self._img_b.make_gray()
 
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
@@ -107,19 +107,5 @@ class ConsensusMatchControl(QGroupBox):
         transform = self._matcher.match_transform
         confidence = self._matcher.match_confidence
 
-        # Create image of B overlaid on A
-        img = Overlayer.create_overlay_image(self.img_a, self.img_b, transform)
-        self._image_frame.display_image(img)
-
-        # Calculate metric value
-        metric_calc = OverlapMetric(self.img_a, self.img_b, None)
-        metric = metric_calc.calculate_overlap_metric((int(transform.x), int(transform.y)))
-
-        # Determine current transformation in real units (um)
-        x, y = int(transform.x), int(transform.y)
-        pixel_size = self.img_a.pixel_size
-        x_um, y_um = int(x * pixel_size), int(y * pixel_size)
-        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um, y_um, x, y)
-
-        status = "Consensus region match complete (metric = {0:.2f}, agreement = {1:.2f})".format(metric, confidence)
-        self._image_frame.set_status_message(status, offset_msg)
+        status = "Consensus region match complete (agreement = {0:.2f})".format(confidence)
+        self._image_frame.display_match_results(self._img_a, self._img_b, transform, status)

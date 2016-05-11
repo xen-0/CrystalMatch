@@ -128,25 +128,10 @@ class RegionMatchControl(QGroupBox):
         and print the offset. """
         transform = self._matcher.net_transform
 
-        # Create image of B overlaid on A
-        img = Overlayer.create_overlay_image(self._img_a, self._img_b, transform)
-        self._image_frame.display_image(img)
-
-        # Calculate metric value
-        metric_calc = OverlapMetric(self._img_a, self._img_b, None)
-        metric = metric_calc.calculate_overlap_metric((int(transform.x), int(transform.y)))
-
-        # Determine current transformation in real units (um)
-        x, y = int(transform.x), int(transform.y)
-        pixel_size = self._img_a.pixel_size
-        x_um, y_um = int(x * pixel_size), int(y * pixel_size)
-        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um, y_um, x, y)
-
         if self._matcher.match_complete:
-            # Print results
-            status = "Region match (primary) complete! (metric = " + "{0:.2f}".format(metric) + ")"
-            self._image_frame.set_status_message(status, offset_msg)
+            status = "Region match complete!"
             self._set_is_matching(False)
         else:
-            status = "Region match (primary) in progress"
-            self._image_frame.set_status_message(status, offset_msg)
+            status = "Region match in progress"
+
+        self._image_frame.display_match_results(self._img_a, self._img_b, transform, status)

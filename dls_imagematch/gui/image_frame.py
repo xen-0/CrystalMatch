@@ -3,6 +3,8 @@ from __future__ import division
 from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QEvent
 
+from dls_imagematch.match import Overlayer, OverlapMetric
+
 
 class ImageFrame(QGroupBox):
     """ Widget that displays an image as well as an editable status message and a readout of
@@ -54,6 +56,26 @@ class ImageFrame(QGroupBox):
         self.set_status_message("")
         self.lbl_cursor.setText("")
         self.frame.clear()
+
+    def display_match_results(self, img_a, img_b, transform, message):
+        """ Display the results of the matching process (display overlaid image
+        and print the offset. """
+        # Create image of B overlaid on A
+        img = Overlayer.create_overlay_image(img_a, img_b, transform)
+        self.display_image(img)
+
+        # Calculate metric value
+        metric_calc = OverlapMetric(img_a, img_b, None)
+        metric = metric_calc.calculate_overlap_metric((int(transform.x), int(transform.y)))
+
+        # Determine transformation in real units (um)
+        x, y = int(transform.x), int(transform.y)
+        pixel_size = img_a.pixel_size
+        x_um, y_um = int(x * pixel_size), int(y * pixel_size)
+        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um, y_um, x, y)
+
+        status = message + " (metric = " + "{0:.2f}".format(metric) + ")"
+        self.set_status_message(status, offset_msg)
 
     def set_status_message(self, line1, line2=""):
         """ Set the text to be displayed in the status message area (2 lines). """
