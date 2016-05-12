@@ -4,8 +4,8 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QLabel
 
 from dls_imagematch.gui import RegionSelectDialog
-from dls_imagematch.match import RegionMatcher
-from dls_imagematch.util import Translate
+from dls_imagematch.match import RegionMatcher, Overlayer
+from dls_imagematch.util import Translate, Image
 
 
 class SecondaryMatchControl(QGroupBox):
@@ -32,7 +32,6 @@ class SecondaryMatchControl(QGroupBox):
         # Matching function buttons
         self._btn_region = QPushButton("Select Region")
         self._btn_region.clicked.connect(self._fn_select_region)
-        self._btn_region.setEnabled(False)
 
         # Selection Image Frames
         self._frame = QLabel()
@@ -58,9 +57,18 @@ class SecondaryMatchControl(QGroupBox):
     ------------------------'''
     def _fn_select_region(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
-        region_image, roi = RegionSelectDialog.get_region(self._img_a)
+        img_a = self._image_frame.last_img_a
+        img_b = self._image_frame.last_img_b
+        transform = self._image_frame.last_transform
+        offset = (int(transform.x), int(transform.y))
+
+        img, _ = Overlayer.get_overlap_regions(img_a, img_b, offset)
+        img = Image(img, img_a.pixel_size)
+
+        region_image, roi = RegionSelectDialog.get_region(img)
 
         if region_image is not None:
+            self.display_image(region_image)
             pass  # self._matching_secondary(self.img_b, region_image, roi)
 
     ''' ----------------------
@@ -94,3 +102,12 @@ class SecondaryMatchControl(QGroupBox):
         self._scale_factor = factor
 
         return self._img_a.make_gray(), self._img_b.make_gray()
+
+    def display_image(self, image):
+        """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
+        frame_size = self._frame.size()
+
+        # Convert to a QT pixmap and display
+        pixmap = image.to_qt_pixmap()
+        scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self._frame.setPixmap(scaled)

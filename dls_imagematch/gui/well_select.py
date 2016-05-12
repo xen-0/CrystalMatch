@@ -56,7 +56,7 @@ class WellSelector(QGroupBox):
         self.selector_b.setFile(file_b)
 
         # Set pixel sizes
-        pixel_size_a = 4.0
+        pixel_size_a = 1.0
         pixel_size_b = pixel_size_a / WellSelector.SET_FACTOR
         self.selector_a.setPixelSize(pixel_size_a)
         self.selector_b.setPixelSize(pixel_size_b)

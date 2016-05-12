@@ -19,6 +19,8 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
+    ROI_SIZE = 20
+
     def __init__(self, max_size, image):
         super(SelectorFrame, self).__init__()
         self.max_size = max_size
@@ -90,7 +92,7 @@ class SelectorFrame(QLabel):
             x1, y1 = self.start_coords.x(), self.start_coords.y()
             x2, y2 = end_coords.x(), end_coords.y()
         elif self.mode == SelectorMode.SINGLE_POINT:
-            roi_size = 10
+            roi_size = self.ROI_SIZE / self.cvimg.pixel_size
             x1, y1 = end_coords.x() - roi_size, end_coords.y() - roi_size
             x2, y2 = end_coords.x() + roi_size, end_coords.y() + roi_size
         else:
