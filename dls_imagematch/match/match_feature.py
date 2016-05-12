@@ -26,7 +26,7 @@ class FeatureMatcher:
     CONSENSUS_DETECTORS = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS"]
 
     POPUP_RESULTS = True
-    MINIMUM_FEATURES = 5
+    MINIMUM_FEATURES = 1
 
     def __init__(self, img_a, img_b):
         self.img_a = img_a

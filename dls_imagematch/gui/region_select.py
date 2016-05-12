@@ -57,7 +57,7 @@ class SelectorFrame(QLabel):
         self.setMaximumHeight(height)
 
         # Display the Image
-        self.size_display(self._selector_image)
+        self._size_display(self._selector_image)
 
     def _prepare_selector_image(self):
         images = self._aligned_images
@@ -74,7 +74,7 @@ class SelectorFrame(QLabel):
 
         self._selector_image = background
 
-    def size_display(self, cvimg):
+    def _size_display(self, cvimg):
         """ Size the image appropriately and display it in the frame. """
         width, height = self._display_size
         pixmap = cvimg.to_qt_pixmap()
@@ -83,7 +83,7 @@ class SelectorFrame(QLabel):
         # Set label size
         self.setPixmap(pixmap)
 
-    def set_roi(self, display_roi):
+    def _set_roi(self, display_roi):
         """ Set the selected region of interest (display it on image and store the area
         of the image for later use by clients. """
         # Convert display coords to image coords
@@ -93,7 +93,7 @@ class SelectorFrame(QLabel):
         # Display the image with the highlighted roi
         img_copy = self._selector_image.copy()
         img_copy.draw_rectangle(self.roi)
-        self.size_display(img_copy)
+        self._size_display(img_copy)
 
         # Store the selected region as a separate image
         self.image_region = self._selector_image.sub_image(self.roi).copy()
@@ -116,7 +116,6 @@ class SelectorFrame(QLabel):
         elif self.mode == SelectorMode.SINGLE_POINT:
             # convert the roi size (in um) to one in display image pixels
             roi_size = self.ROI_SIZE / (self._display_scale * self._selector_image.pixel_size)
-            print(self._display_scale, self._selector_image.pixel_size, roi_size)
             x1, y1 = end_coords.x() - roi_size, end_coords.y() - roi_size
             x2, y2 = end_coords.x() + roi_size, end_coords.y() + roi_size
         else:
@@ -131,7 +130,7 @@ class SelectorFrame(QLabel):
 
         # Paint the rectangle on the image
         display_roi = (x1, y1, x2, y2)
-        self.set_roi(display_roi)
+        self._set_roi(display_roi)
 
         self.start_coords = None
 

@@ -9,13 +9,16 @@ from dls_imagematch.match import FeatureMatchException
 class FeatureMatchControl(QGroupBox):
     """ Widget that allows control of the Feature Matching process.
     """
-    def __init__(self, selector_a, selector_b, results_frame):
+    def __init__(self, selector_a, selector_b, results_frame, with_popup=True):
         super(FeatureMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
         self._results_frame = results_frame
         self._matcher = None
+        self._with_popup = with_popup
+
+        self.last_images = None
 
         self._init_ui()
         self.setTitle("Feature Matching")
@@ -30,7 +33,7 @@ class FeatureMatchControl(QGroupBox):
         self._cmbo_adapt.addItems(FeatureMatcher.ADAPTATION_TYPE)
 
         # Matching function buttons
-        self._btn_begin = QPushButton("Begin Match")
+        self._btn_begin = QPushButton("Align Images")
         self._btn_begin.clicked.connect(self._fn_begin_matching)
 
         # Create widget layout
@@ -53,6 +56,7 @@ class FeatureMatchControl(QGroupBox):
         adapt = self._cmbo_adapt.currentText()
 
         self._matcher = FeatureMatcher(img_a, img_b)
+        FeatureMatcher.POPUP_RESULTS = self._with_popup
         try:
             self._matcher.match(method, adapt)
             self._display_results(method, adapt)
@@ -66,7 +70,7 @@ class FeatureMatchControl(QGroupBox):
         self._img_a = self._selector_a.image()
         self._img_b = self._selector_b.image()
 
-        # Resize the image B so it has the same size per pixel as image A
+        # Resize image B so it has the same size per pixel as image A
         factor = self._img_b.pixel_size / self._img_a.pixel_size
         self._img_b = self._img_b.rescale(factor)
 
@@ -84,3 +88,4 @@ class FeatureMatchControl(QGroupBox):
 
         aligned = AlignedImages(self._img_a, self._img_b, translate)
         self._results_frame.display_match_results(aligned, status)
+        self.last_images = aligned
