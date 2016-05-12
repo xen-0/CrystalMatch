@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import (QPushButton, QLineEdit, QLabel, QGroupBox, QHBoxLayout)
 
-from dls_imagematch.match import Overlayer, RegionMatcher, OverlapMetric
+from dls_imagematch.match import RegionMatcher, AlignedImages
 from dls_imagematch.util import Translate
 
 
@@ -12,12 +12,12 @@ class RegionMatchControl(QGroupBox):
     DEFAULT_X = "0"
     DEFAULT_Y = "0"
 
-    def __init__(self, selector_a, selector_b, image_frame):
+    def __init__(self, selector_a, selector_b, results_frame):
         super(RegionMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._image_frame = image_frame
+        self._results_frame = results_frame
 
         self._img_a = None
         self._img_b = None
@@ -126,7 +126,7 @@ class RegionMatchControl(QGroupBox):
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self._matcher.net_transform
+        translate = self._matcher.net_transform
 
         if self._matcher.match_complete:
             status = "Region match complete!"
@@ -134,4 +134,5 @@ class RegionMatchControl(QGroupBox):
         else:
             status = "Region match in progress"
 
-        self._image_frame.display_match_results(self._img_a, self._img_b, transform, status)
+        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        self._results_frame.display_match_results(aligned, status)

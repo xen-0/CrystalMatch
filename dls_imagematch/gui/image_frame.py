@@ -17,9 +17,7 @@ class ImageFrame(QGroupBox):
         self._scaled_size = (0, 0)
         self._offset = (0, 0)
 
-        self.last_img_a = None
-        self.last_img_b = None
-        self.last_transform = None
+        self.last_images = None
 
         self._init_ui()
         self.setTitle("Results")
@@ -61,26 +59,19 @@ class ImageFrame(QGroupBox):
         self._lbl_cursor.setText("")
         self._frame.clear()
 
-    def display_match_results(self, img_a, img_b, transform, message):
+    def display_match_results(self, aligned_images, message):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        self.last_img_a = img_a
-        self.last_img_b = img_b
-        self.last_transform = transform
+        self.last_images = aligned_images
 
-        # Create image of B overlaid on A
-        img = Overlayer.create_overlay_image(img_a, img_b, transform)
-        self.display_image(img)
-
-        # Calculate metric value
-        metric_calc = OverlapMetric(img_a, img_b, None)
-        metric = metric_calc.calculate_overlap_metric((int(transform.x), int(transform.y)))
+        # Display image of B overlaid on A
+        self.display_image(aligned_images.overlay())
+        metric = aligned_images.overlap_metric()
 
         # Determine transformation in real units (um)
-        x, y = int(transform.x), int(transform.y)
-        pixel_size = img_a.pixel_size
-        x_um, y_um = int(x * pixel_size), int(y * pixel_size)
-        offset_msg = "x={} um, y={} um ({} px, {} px)".format(x_um, y_um, x, y)
+        x, y = aligned_images.pixel_offset()
+        x_um, y_um = aligned_images.real_offset()
+        offset_msg = "x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(x_um, y_um, x, y)
 
         status = message + " (metric = " + "{0:.2f}".format(metric) + ")"
         self.set_status_message(status, offset_msg)

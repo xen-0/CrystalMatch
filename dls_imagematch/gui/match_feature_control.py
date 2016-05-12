@@ -2,19 +2,19 @@ from __future__ import division
 
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox
 
-from dls_imagematch.match import FeatureMatcher
+from dls_imagematch.match import FeatureMatcher, AlignedImages
 from dls_imagematch.match import FeatureMatchException
 
 
 class FeatureMatchControl(QGroupBox):
     """ Widget that allows control of the Feature Matching process.
     """
-    def __init__(self, selector_a, selector_b, image_frame):
+    def __init__(self, selector_a, selector_b, results_frame):
         super(FeatureMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._image_frame = image_frame
+        self._results_frame = results_frame
         self._matcher = None
 
         self._init_ui()
@@ -75,11 +75,12 @@ class FeatureMatchControl(QGroupBox):
     def _display_results(self, method, adapt):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self._matcher.net_transform
+        translate = self._matcher.net_transform
 
         status = "Feature match complete (" + method
         if adapt != '':
             status += " - " + adapt
         status += ")"
 
-        self._image_frame.display_match_results(self._img_a, self._img_b, transform, status)
+        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        self._results_frame.display_match_results(aligned, status)

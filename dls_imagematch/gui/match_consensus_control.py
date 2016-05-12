@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QLineEdit, QLabel, QComboBox
 
-from dls_imagematch.match import RegionConsensusMatcher, Overlayer, OverlapMetric
+from dls_imagematch.match import RegionConsensusMatcher, AlignedImages
 from dls_imagematch.util import Translate
 
 
@@ -17,12 +17,12 @@ class ConsensusMatchControl(QGroupBox):
     GRID_SIZE_NAMES = ["3x3", "5x5", "7x7", "9x9"]
     GRID_SIZE_VALUES = [1, 2, 3, 4]
 
-    def __init__(self, selector_a, selector_b, image_frame):
+    def __init__(self, selector_a, selector_b, results_frame):
         super(ConsensusMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._image_frame = image_frame
+        self._results_frame = results_frame
         self._matcher = None
 
         self._init_ui()
@@ -79,8 +79,8 @@ class ConsensusMatchControl(QGroupBox):
         spacing = grid * img_a.size[0]
 
         # Clear existing image from frame
-        self._image_frame.clear()
-        self._image_frame.set_status_message("Performing consensus match...")
+        self._results_frame.clear()
+        self._results_frame.set_status_message("Performing consensus match...")
 
         # Perform matching
         self._matcher = RegionConsensusMatcher(img_a, img_b)
@@ -104,8 +104,9 @@ class ConsensusMatchControl(QGroupBox):
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self._matcher.match_transform
+        translate = self._matcher.match_transform
         confidence = self._matcher.match_confidence
 
         status = "Consensus region match complete (agreement = {0:.2f})".format(confidence)
-        self._image_frame.display_match_results(self._img_a, self._img_b, transform, status)
+        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        self._results_frame.display_match_results(aligned, status)
