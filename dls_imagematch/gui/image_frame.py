@@ -3,8 +3,6 @@ from __future__ import division
 from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QEvent
 
-from dls_imagematch.match import Overlayer, OverlapMetric
-
 
 class ImageFrame(QGroupBox):
     """ Widget that displays an image as well as an editable status message and a readout of

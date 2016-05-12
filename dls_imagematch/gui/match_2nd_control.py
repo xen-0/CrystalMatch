@@ -57,15 +57,10 @@ class SecondaryMatchControl(QGroupBox):
     ------------------------'''
     def _fn_select_region(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
-        img_a = self._image_frame.last_img_a
-        img_b = self._image_frame.last_img_b
-        transform = self._image_frame.last_transform
-        offset = (int(transform.x), int(transform.y))
+        aligned_images = self._image_frame.last_images
 
-        img, _ = Overlayer.get_overlap_regions(img_a, img_b, offset)
-        img = Image(img, img_a.pixel_size)
-
-        region_image, roi = RegionSelectDialog.get_region(img)
+        img_a, img_b = aligned_images.overlap_images()
+        region_image, roi = RegionSelectDialog.get_region(img_a)
 
         if region_image is not None:
             self.display_image(region_image)

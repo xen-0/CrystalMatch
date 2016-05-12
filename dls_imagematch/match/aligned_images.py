@@ -1,5 +1,6 @@
 from .overlay import Overlayer
 from .metric_overlap import OverlapMetric
+from dls_imagematch.util import Image
 
 
 class AlignedImages:
@@ -12,6 +13,7 @@ class AlignedImages:
         self._pixel_offset = None
         self._overlay = None
         self._metric = None
+        self._overlap_images = None
 
     def pixel_offset(self):
         if self._pixel_offset is None:
@@ -40,3 +42,12 @@ class AlignedImages:
             self._metric = metric_calc.calculate_overlap_metric(offset)
 
         return self._metric
+
+    def overlap_images(self):
+        if self._overlap_images is None:
+            region_a, region_b = Overlayer.get_overlap_regions(self.img_a, self.img_b, self.pixel_offset())
+            overlap_image_a = Image(region_a, self.img_a.pixel_size)
+            overlap_image_b = Image(region_b, self.img_b.pixel_size)
+            self._overlap_images = (overlap_image_a, overlap_image_b)
+
+        return self._overlap_images
