@@ -10,9 +10,9 @@ sys.path.append("..")
 from dls_imagematch.gui import *
 
 
-class VMXiCrystalMatcher(QMainWindow):
+class AlignmentMain(QMainWindow):
     def __init__(self):
-        super(VMXiCrystalMatcher, self).__init__()
+        super(AlignmentMain, self).__init__()
 
         self.gui_state = None
         self.matcher = None
@@ -47,9 +47,6 @@ class VMXiCrystalMatcher(QMainWindow):
         # Feature Matching Control
         feature_match = FeatureMatchControl(selector_a, selector_b, image_frame)
 
-        # Secondary Mching Control
-        secondary_match = SecondaryMatchControl(selector_a, selector_b, image_frame)
-
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(well_selector)
@@ -65,7 +62,7 @@ class VMXiCrystalMatcher(QMainWindow):
 
         hbox_matching = QHBoxLayout()
         hbox_matching.addLayout(vbox_matching)
-        hbox_matching.addWidget(secondary_match)
+        hbox_matching.addStretch(1)
 
         vbox_matching2 = QVBoxLayout()
         vbox_matching2.addLayout(hbox_matching)
@@ -102,7 +99,7 @@ class VMXiCrystalMatcher(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    ex = VMXiCrystalMatcher()
+    ex = AlignmentMain()
     sys.exit(app.exec_())
 
 
