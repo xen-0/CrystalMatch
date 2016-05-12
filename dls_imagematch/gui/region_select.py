@@ -1,8 +1,11 @@
 from __future__ import division
 
+import cv2
 from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from enum import Enum
+
+from dls_imagematch.util import Image
 
 
 class SelectorMode(Enum):
@@ -21,7 +24,7 @@ class SelectorFrame(QLabel):
     """
     ROI_SIZE = 20
 
-    def __init__(self, max_size, image):
+    def __init__(self, max_size, aligned_images):
         super(SelectorFrame, self).__init__()
         self.max_size = max_size
 
@@ -33,28 +36,47 @@ class SelectorFrame(QLabel):
         self.mode = SelectorMode.REGION
 
         # Load image from file
-        self.cvimg = image
-        self.size_image = self.cvimg.size
+        self._selector_image = None
+        self._aligned_images = aligned_images
+        self._prepare_selector_image()
+        self._original_size = self._selector_image.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
         #  but must be no larger than the maximum size
-        w, h = self.cvimg.size
+        w, h = self._selector_image.size
         if w > h:
             width = self.max_size
             height = int(h / w * self.max_size)
         else:
             height = self.max_size
             width = int(w / h * self.max_size)
-        self.display_size = (width, height)
+        self._display_size = (width, height)
+        self._display_scale = self._original_size[0] / self._display_size[0]
+
         self.setMaximumWidth(width)
         self.setMaximumHeight(height)
 
         # Display the Image
-        self.size_display(self.cvimg)
+        self.size_display(self._selector_image)
+
+    def _prepare_selector_image(self):
+        images = self._aligned_images
+
+        img_a = images.img_a
+        overlap_img_a, _ = images.overlap_images()
+        x, y = images.pixel_offset()
+
+        # Make faded background
+        blank_image = Image.blank(img_a.size[0], img_a.size[1])
+        blended = cv2.addWeighted(img_a.img, 0.5, blank_image.img, 0.5, 0)
+        background = Image(blended, img_a.pixel_size)
+        background.paste(overlap_img_a, x, y)
+
+        self._selector_image = background
 
     def size_display(self, cvimg):
         """ Size the image appropriately and display it in the frame. """
-        width, height = self.display_size
+        width, height = self._display_size
         pixmap = cvimg.to_qt_pixmap()
         pixmap = pixmap.scaled(QSize(width, height), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
@@ -65,16 +87,16 @@ class SelectorFrame(QLabel):
         """ Set the selected region of interest (display it on image and store the area
         of the image for later use by clients. """
         # Convert display coords to image coords
-        scale = self.size_image[0] / self.display_size[0]
+        scale = self._display_scale
         self.roi = list((scale * p for p in display_roi))
 
         # Display the image with the highlighted roi
-        img_copy = self.cvimg.copy()
+        img_copy = self._selector_image.copy()
         img_copy.draw_rectangle(self.roi)
         self.size_display(img_copy)
 
         # Store the selected region as a separate image
-        self.image_region = self.cvimg.sub_image(self.roi).copy()
+        self.image_region = self._selector_image.sub_image(self.roi).copy()
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
@@ -92,7 +114,9 @@ class SelectorFrame(QLabel):
             x1, y1 = self.start_coords.x(), self.start_coords.y()
             x2, y2 = end_coords.x(), end_coords.y()
         elif self.mode == SelectorMode.SINGLE_POINT:
-            roi_size = self.ROI_SIZE / self.cvimg.pixel_size
+            # convert the roi size (in um) to one in display image pixels
+            roi_size = self.ROI_SIZE / (self._display_scale * self._selector_image.pixel_size)
+            print(self._display_scale, self._selector_image.pixel_size, roi_size)
             x1, y1 = end_coords.x() - roi_size, end_coords.y() - roi_size
             x2, y2 = end_coords.x() + roi_size, end_coords.y() + roi_size
         else:
@@ -116,14 +140,14 @@ class RegionSelectDialog(QDialog):
     """ Dialog that displays the Region Selector Frame and stores the result so that it may be
     retrieved by the caller.
     """
-    def __init__(self, image):
+    def __init__(self, aligned_images):
         super(RegionSelectDialog, self).__init__()
-        self._init_ui(image)
+        self._init_ui(aligned_images)
 
-    def _init_ui(self, image):
+    def _init_ui(self, aligned_images):
         self.setWindowTitle('Select Region of Interest')
 
-        self.selector_frame = SelectorFrame(900, image)
+        self.selector_frame = SelectorFrame(900, aligned_images)
         self.selector_frame.mode = SelectorMode.SINGLE_POINT
 
         buttons = QDialogButtonBox(

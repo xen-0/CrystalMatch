@@ -144,8 +144,12 @@ class Image:
 
         target[y1:y2, x1:x2] = source[sy1:sy2, sx1:sx2]
 
-    def paste_blend(self):
-        pass
+    @staticmethod
+    def blank(width, height, channels=3, value=0):
+        """ Return a new empty image of the specified size.
+        """
+        blank_image = np.full((height, width, channels), value, np.uint8)
+        return Image(img=blank_image)
 
 
 
