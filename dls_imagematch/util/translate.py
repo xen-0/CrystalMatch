@@ -1,5 +1,8 @@
 from __future__ import division
 
+from .point import Point
+
+
 class Translate:
     def __init__(self, x, y):
         self.x = x
@@ -13,3 +16,6 @@ class Translate:
 
     def offset(self, trs):
         return Translate(self.x + trs.x, self.y + trs.y)
+
+    def to_point(self):
+        return Point(self.x, self.y)

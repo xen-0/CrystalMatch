@@ -67,9 +67,9 @@ class ImageFrame(QGroupBox):
         metric = aligned_images.overlap_metric()
 
         # Determine transformation in real units (um)
-        x, y = aligned_images.pixel_offset()
-        x_um, y_um = aligned_images.real_offset()
-        offset_msg = "x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(x_um, y_um, x, y)
+        pixel = aligned_images.pixel_offset()
+        real = aligned_images.real_offset()
+        offset_msg = "x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(real.x, real.y, pixel.x, pixel.y)
 
         status = message + " (metric = " + "{0:.2f}".format(metric) + ")"
         self.set_status_message(status, offset_msg)

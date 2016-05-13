@@ -3,7 +3,8 @@ import cv2
 import numpy as np
 from PyQt4.QtGui import QImage, QPixmap
 
-from .rectangle import Rectangle
+from .rectangle import Rectangle, Point
+
 
 class Image:
     def __init__(self, img, pixel_size=0):
@@ -29,7 +30,7 @@ class Image:
         return working_size
 
     def bounds(self):
-        return Rectangle(0, 0, self.size[0], self.size[1])
+        return Rectangle(Point(), Point(self.size[0], self.size[1]))
 
     @staticmethod
     def from_file(filename, pixel_size=0):
@@ -51,7 +52,7 @@ class Image:
         return Image(self.img.copy(), self.pixel_size)
 
     def sub_image(self, rect):
-        rect = rect.to_ints()
+        rect = rect.intify()
         sub = self.img[rect.y1:rect.y2, rect.x1:rect.x2]
         return Image(sub,self.pixel_size)
 
@@ -114,8 +115,8 @@ class Image:
     def draw_rectangle(self, rect, thickness=1):
         """ Draw the specified rectangle on the image (in place) """
         color = (0, 0, 0, 255)
-        rect = rect.to_ints()
-        cv2.rectangle(self.img, rect.top_left(), rect.bottom_right(), color, thickness=thickness)
+        rect = rect.intify()
+        cv2.rectangle(self.img, rect.top_left().tuple(), rect.bottom_right().tuple(), color, thickness=thickness)
 
     def paste(self, src, xOff, yOff):
         """ Paste the source image onto the target one at the specified position.

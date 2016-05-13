@@ -126,10 +126,11 @@ class CrystalMatchControl(QGroupBox):
         status = "Crystal matching complete"
         self._results_frame.display_match_results(crystal_aligned, status)
 
-        x, y = crystal_aligned.pixel_center()
-        x_um, y_um = crystal_aligned.real_center()
+        pixel = crystal_aligned.pixel_center()
+        real = crystal_aligned.real_center()
 
-        beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(x_um, y_um, x, y)
+        beam_position = "Beam Position: x={0:.2f} um, " \
+                        "y={1:.2f} um ({2} px, {3} px)".format(real.x, real.y, pixel.x, pixel.y)
         print(beam_position)
 
 

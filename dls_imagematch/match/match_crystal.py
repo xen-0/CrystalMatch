@@ -1,7 +1,7 @@
 
 from .match_feature import FeatureMatcher
 from .aligned_images import AlignedImages
-from dls_imagematch.util import Translate, Rectangle
+from dls_imagematch.util import Translate, Rectangle, Point
 
 
 class CrystalMatcher:
@@ -38,14 +38,11 @@ class CrystalMatcher:
         return crystal_aligned
 
     def _make_image_b_region(self, aligned_images, img_a_rect):
-        align_offset = aligned_images.pixel_offset()
         img_b = aligned_images.img_b
 
-        # Find the center of the rectangle in image A
+        # Find the center of the rectangle in image A, convert to image B coords
         center_a = img_a_rect.center()
-
-        # Convert the center to Image B coordinates
-        center_b = center_a[0] - align_offset[0], center_a[1] - align_offset[1]
+        center_b = center_a - aligned_images.pixel_offset()
 
         # Determine size (in pixels) of the search box in image B
         width = self.SEARCH_WIDTH / img_b.pixel_size
@@ -53,9 +50,8 @@ class CrystalMatcher:
 
         # Create a rectangle area of image B in which to search
         # Its tall because crystal likely to move downwards under gravity
-        x1 = center_b[0] - (width / 2.0)
-        y1 = center_b[1] - (width / 2.0)
-        rect = Rectangle.from_corner(x1, y1, width, height)
+        top_left = center_b - Point(width/2, width/2)
+        rect = Rectangle.from_corner(top_left, width, height)
 
         rect = rect.intersection(img_b.bounds())
         region = img_b.sub_image(rect)

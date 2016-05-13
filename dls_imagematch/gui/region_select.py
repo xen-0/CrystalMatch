@@ -5,7 +5,7 @@ from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from enum import Enum
 
-from dls_imagematch.util import Image, Rectangle
+from dls_imagematch.util import Image, Rectangle, Point
 
 
 class SelectorMode(Enum):
@@ -22,7 +22,7 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    ROI_SIZE = 30
+    REGION_SIZE = 30
 
     def __init__(self, max_size, aligned_images):
         super(SelectorFrame, self).__init__()
@@ -53,6 +53,8 @@ class SelectorFrame(QLabel):
         self._display_size = (width, height)
         self._display_scale = self._original_size[0] / self._display_size[0]
 
+        self._region_size = self.REGION_SIZE / (self._display_scale * self._selector_image.pixel_size)
+
         self.setMaximumWidth(width)
         self.setMaximumHeight(height)
 
@@ -64,7 +66,7 @@ class SelectorFrame(QLabel):
 
         img_a = images.img_a
         overlap_img_a, _ = images.overlap_images()
-        x, y = images.pixel_offset()
+        x, y = images.pixel_offset().tuple()
 
         # Make faded background
         blank_image = Image.blank(img_a.size[0], img_a.size[1])
@@ -88,7 +90,7 @@ class SelectorFrame(QLabel):
         of the image for later use by clients. """
         # Convert display coords to image coords
         scale = self._display_scale
-        self.rect = display_rect.scale(scale).to_ints()
+        self.rect = display_rect.scale(scale).intify()
         print(self.rect)
         # Display the image with the highlighted roi
         img_copy = self._selector_image.copy()
@@ -101,7 +103,8 @@ class SelectorFrame(QLabel):
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
         rectangle drag. """
-        self.start_coords = QMouseEvent.pos()
+        start_coords = QMouseEvent.pos()
+        self.start_coords = Point(start_coords.x(), start_coords.y())
 
     def mouseReleaseEvent(self, QMouseEvent):
         """ Called when the mouse is released after having been initially clicked in the frame
@@ -109,21 +112,17 @@ class SelectorFrame(QLabel):
         the image. This still works correctly if the drag finishes outside the bounds of the
         frame. """
         end_coords = QMouseEvent.pos()
+        end_coords = Point(end_coords.x(), end_coords.y())
 
         if self.mode == SelectorMode.REGION:
-            x1, y1 = self.start_coords.x(), self.start_coords.y()
-            x2, y2 = end_coords.x(), end_coords.y()
-            display_rect = Rectangle(x1, y1, x2, y2)
+            display_rect = Rectangle(self.start_coords, end_coords)
         elif self.mode == SelectorMode.SINGLE_POINT:
-            # convert the roi size (in um) to one in display image pixels
-            roi_size = self.ROI_SIZE / (self._display_scale * self._selector_image.pixel_size)
-            x, y = end_coords.x(), end_coords.y()
-            display_rect = Rectangle.from_center(x, y, roi_size, roi_size)
+            display_rect = Rectangle.from_center(end_coords, self._region_size, self._region_size)
         else:
             raise NotImplementedError
 
-        w, h = self.size().width(), self.size().height()
-        frame_rect = Rectangle(0, 0, w, h)
+        bottom_right = Point(self.size().width(), self.size().height())
+        frame_rect = Rectangle(Point(), bottom_right)
 
         display_rect = display_rect.intersection(frame_rect)
 
