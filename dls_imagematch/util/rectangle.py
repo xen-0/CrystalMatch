@@ -66,6 +66,6 @@ class Rectangle:
         return Rectangle(x1, y1, x2, y2)
 
     @staticmethod
-    def from_corner(x1, y2, width, height):
-        x2, y2 = x1 + width, y2 + height
-        return Rectangle(x1, y2, x2, y2)
+    def from_corner(x1, y1, width, height):
+        x2, y2 = x1 + width, y1 + height
+        return Rectangle(x1, y1, x2, y2)

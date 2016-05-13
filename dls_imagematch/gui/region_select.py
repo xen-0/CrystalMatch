@@ -22,7 +22,7 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    ROI_SIZE = 20
+    ROI_SIZE = 30
 
     def __init__(self, max_size, aligned_images):
         super(SelectorFrame, self).__init__()

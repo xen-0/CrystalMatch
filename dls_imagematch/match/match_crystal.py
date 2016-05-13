@@ -55,9 +55,8 @@ class CrystalMatcher:
         # Its tall because crystal likely to move downwards under gravity
         x1 = center_b[0] - (width / 2.0)
         y1 = center_b[1] - (width / 2.0)
-        x2 = x1 + width
-        y2 = y1 + height
+        rect = Rectangle.from_corner(x1, y1, width, height)
 
-        rect = Rectangle(x1, y1, x2, y2).intersection(img_b.bounds())
+        rect = rect.intersection(img_b.bounds())
         region = img_b.sub_image(rect)
         return region, rect

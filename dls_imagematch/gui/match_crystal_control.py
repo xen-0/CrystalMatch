@@ -99,6 +99,7 @@ class CrystalMatchControl(QGroupBox):
         try:
             crystal_aligned = self._matcher.match(self._aligned_images, self._img_a_rect)
             status = "Crystal matching complete"
+
             self._results_frame.display_match_results(crystal_aligned, status)
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
