@@ -79,7 +79,7 @@ class FeatureMatcher:
         if len(results) == 0:
             raise FeatureMatchException("No feature matching technique returned a successful match.")
 
-        best_result, confidence = self._best_translate(results)
+        best_result, confidence = self._best_consensus_result(results)
         print("Best: " + str(best_result))
 
         self.net_transform = best_result
@@ -96,7 +96,7 @@ class FeatureMatcher:
 
         # Check that we have actually found some features
         if len(kp1) < FeatureMatcher.MINIMUM_FEATURES or len(kp2) < FeatureMatcher.MINIMUM_FEATURES:
-            message = "Could no find the required minimum number of features (" \
+            message = "Could not find the required minimum number of features (" \
                       + str(FeatureMatcher.MINIMUM_FEATURES) + ") in at least 1 image!"
             raise FeatureMatchException(message)
 
@@ -186,9 +186,10 @@ class FeatureMatcher:
         return Translate(x, y)
 
     @staticmethod
-    def _best_translate(results):
-        """ Each run of the region matching procedure can have a different result. Group together results that
-        are the same (or very similar), and return the result that has the largest group.
+    def _best_consensus_result(results):
+        """ Each method used in the consensus match will have a different result. Group
+        together results that are the same (or very similar), and return the result that
+        has the largest group.
         """
         groups = []
 
@@ -209,6 +210,7 @@ class FeatureMatcher:
             if not assigned:
                 groups.append([result])
 
+        # TODO - resolve ties by which result had the best agreement values (distances) for its set of matches
         # Find largest set
         set_lengths = map(len, groups)
         consensus = np.argmax(set_lengths)  # TODO: Check if tied for longest.
