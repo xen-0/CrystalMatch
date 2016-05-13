@@ -1,6 +1,6 @@
 import cv2
 
-from dls_imagematch.util.image import Image
+from dls_imagematch.util.image import Image, Rectangle
 
 
 class Overlayer:
@@ -28,8 +28,8 @@ class Overlayer:
 
         # Define the rectangle that will be pasted to the background image
         w, h = img_b.size
-        roi = (x, y, x+w, y+h)
-        background.draw_rectangle(roi)
+        rect = Rectangle(x, y, x+w, y+h)
+        background.draw_rectangle(rect)
 
         return background
 

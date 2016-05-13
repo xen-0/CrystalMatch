@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from PyQt4.QtGui import QImage, QPixmap
 
+from .rectangle import Rectangle
 
 class Image:
     def __init__(self, img, pixel_size=0):
@@ -27,6 +28,9 @@ class Image:
             working_size = self.img.shape[::-1]
         return working_size
 
+    def bounds(self):
+        return Rectangle(0, 0, self.size[0], self.size[1])
+
     @staticmethod
     def from_file(filename, pixel_size=0):
         img = cv2.imread(filename)
@@ -46,17 +50,17 @@ class Image:
         """
         return Image(self.img.copy(), self.pixel_size)
 
-    def sub_image(self, roi):
-        x1, y1, x2, y2 = int(roi[0]), int(roi[1]), int(roi[2]), int(roi[3])
-        sub = self.img[y1:y2, x1:x2]
+    def sub_image(self, rect):
+        rect = rect.to_ints()
+        sub = self.img[rect.y1:rect.y2, rect.x1:rect.x2]
         return Image(sub,self.pixel_size)
 
     def to_qt_pixmap(self):
         width, height = self.size
-        bytesPerLine = 3 * width
+        bytes_per_line = 3 * width
         rgb = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
-        qImg = QImage(rgb.data, width, height, bytesPerLine, QImage.Format_RGB888)
-        return QPixmap.fromImage( qImg )
+        qImg = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        return QPixmap.fromImage(qImg)
 
     def make_gray(self):
         """ Return a greyscale version of the image
@@ -107,12 +111,11 @@ class Image:
         pixel_size = self.pixel_size / corrected_factor
         return Image(resized_img, pixel_size)
 
-    def draw_rectangle(self, roi, thickness=1):
+    def draw_rectangle(self, rect, thickness=1):
         """ Draw the specified rectangle on the image (in place) """
-        top_left = (int(roi[0]), int(roi[1]))
-        bottom_right = (int(roi[2]), int(roi[3]))
-        color = (0,0,0,255)
-        cv2.rectangle(self.img, top_left, bottom_right, color, thickness=thickness)
+        color = (0, 0, 0, 255)
+        rect = rect.to_ints()
+        cv2.rectangle(self.img, rect.top_left(), rect.bottom_right(), color, thickness=thickness)
 
     def paste(self, src, xOff, yOff):
         """ Paste the source image onto the target one at the specified position.

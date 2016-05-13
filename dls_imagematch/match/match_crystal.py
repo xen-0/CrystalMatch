@@ -1,7 +1,7 @@
 
 from .match_feature import FeatureMatcher
 from .aligned_images import AlignedImages
-from dls_imagematch.util import Translate
+from dls_imagematch.util import Translate, Rectangle
 
 
 class CrystalMatcher:
@@ -30,7 +30,7 @@ class CrystalMatcher:
         matcher.match(method, adapt)
 
         crystal_translate = matcher.net_transform
-        position = Translate(img_b_rect[0], img_b_rect[1])
+        position = Translate(img_b_rect.x1, img_b_rect.y1)
         position = position.offset(crystal_translate)
 
         img_b = aligned_images.img_b
@@ -40,10 +40,9 @@ class CrystalMatcher:
     def _make_image_b_region(self, aligned_images, img_a_rect):
         align_offset = aligned_images.pixel_offset()
         img_b = aligned_images.img_b
-        roi_a = img_a_rect
 
         # Find the center of the rectangle in image A
-        center_a = (roi_a[2]+roi_a[0])/2, (roi_a[3]+roi_a[1])/2
+        center_a = img_a_rect.center()
 
         # Convert the center to Image B coordinates
         center_b = center_a[0] - align_offset[0], center_a[1] - align_offset[1]
@@ -59,9 +58,6 @@ class CrystalMatcher:
         x2 = x1 + width
         y2 = y1 + height
 
-        x1, y1 = max(x1, 0), max(y1, 0)
-        x2, y2 = min(x2, img_b.size[0]), min(y2, img_b.size[1])
-        rect = (x1, y1, x2, y2)
-
+        rect = Rectangle(x1, y1, x2, y2).intersection(img_b.bounds())
         region = img_b.sub_image(rect)
         return region, rect

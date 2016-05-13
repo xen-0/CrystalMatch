@@ -83,9 +83,9 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = self._aligner.last_images
 
         if self._aligned_images is not None:
-            region_image, roi = RegionSelectDialog.get_region(self._aligned_images)
+            region_image, rect = RegionSelectDialog.get_region(self._aligned_images)
             self._img_a_region = region_image
-            self._img_a_rect = roi
+            self._img_a_rect = rect
         else:
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
 

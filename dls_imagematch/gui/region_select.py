@@ -5,7 +5,7 @@ from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 from enum import Enum
 
-from dls_imagematch.util import Image
+from dls_imagematch.util import Image, Rectangle
 
 
 class SelectorMode(Enum):
@@ -29,7 +29,7 @@ class SelectorFrame(QLabel):
         self.max_size = max_size
 
         self.start_coords = None
-        self.roi = None
+        self.rect = None
         self.image_region = None
 
         # Set selection mode
@@ -83,20 +83,20 @@ class SelectorFrame(QLabel):
         # Set label size
         self.setPixmap(pixmap)
 
-    def _set_roi(self, display_roi):
+    def _set_rect(self, display_rect):
         """ Set the selected region of interest (display it on image and store the area
         of the image for later use by clients. """
         # Convert display coords to image coords
         scale = self._display_scale
-        self.roi = list((scale * p for p in display_roi))
-
+        self.rect = display_rect.scale(scale).to_ints()
+        print(self.rect)
         # Display the image with the highlighted roi
         img_copy = self._selector_image.copy()
-        img_copy.draw_rectangle(self.roi)
+        img_copy.draw_rectangle(self.rect)
         self._size_display(img_copy)
 
         # Store the selected region as a separate image
-        self.image_region = self._selector_image.sub_image(self.roi).copy()
+        self.image_region = self._selector_image.sub_image(self.rect).copy()
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
@@ -113,24 +113,22 @@ class SelectorFrame(QLabel):
         if self.mode == SelectorMode.REGION:
             x1, y1 = self.start_coords.x(), self.start_coords.y()
             x2, y2 = end_coords.x(), end_coords.y()
+            display_rect = Rectangle(x1, y1, x2, y2)
         elif self.mode == SelectorMode.SINGLE_POINT:
             # convert the roi size (in um) to one in display image pixels
             roi_size = self.ROI_SIZE / (self._display_scale * self._selector_image.pixel_size)
-            x1, y1 = end_coords.x() - roi_size, end_coords.y() - roi_size
-            x2, y2 = end_coords.x() + roi_size, end_coords.y() + roi_size
+            x, y = end_coords.x(), end_coords.y()
+            display_rect = Rectangle.from_center(x, y, roi_size, roi_size)
         else:
             raise NotImplementedError
 
         w, h = self.size().width(), self.size().height()
+        frame_rect = Rectangle(0, 0, w, h)
 
-        x1, x2 = min(x1, x2), max(x1, x2)
-        y1, y2 = min(y1, y2), max(y1, y2)
-        x1, x2 = max(x1, 0), min(x2, w-1)
-        y1, y2 = max(y1, 0), min(y2, h-1)
+        display_rect = display_rect.intersection(frame_rect)
 
         # Paint the rectangle on the image
-        display_roi = (x1, y1, x2, y2)
-        self._set_roi(display_roi)
+        self._set_rect(display_rect)
 
         self.start_coords = None
 
@@ -146,7 +144,7 @@ class RegionSelectDialog(QDialog):
     def _init_ui(self, aligned_images):
         self.setWindowTitle('Select Region of Interest')
 
-        self.selector_frame = SelectorFrame(900, aligned_images)
+        self.selector_frame = SelectorFrame(1200, aligned_images)
         self.selector_frame.mode = SelectorMode.SINGLE_POINT
 
         buttons = QDialogButtonBox(
@@ -162,15 +160,15 @@ class RegionSelectDialog(QDialog):
         self.setLayout(vbox)
         self.show()
 
-    def region_of_interest(self):
+    def region_rectangle(self):
         """ The selected section of the image and the rectangle (x1, y1, x2, y2) that was drawn on
         the selector frame. """
-        return self.selector_frame.image_region, self.selector_frame.roi
+        return self.selector_frame.image_region, self.selector_frame.rect
 
     @staticmethod
     def get_region(filename):
         """ Display a dialog and return the result to the caller. """
         dialog = RegionSelectDialog(filename)
         _ = dialog.exec_()
-        region_image, rectangle = dialog.region_of_interest()
+        region_image, rectangle = dialog.region_rectangle()
         return region_image, rectangle
