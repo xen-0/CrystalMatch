@@ -98,9 +98,7 @@ class CrystalMatchControl(QGroupBox):
 
         try:
             crystal_aligned = self._matcher.match(self._aligned_images, self._img_a_rect)
-            status = "Crystal matching complete"
-
-            self._results_frame.display_match_results(crystal_aligned, status)
+            self._display_results(crystal_aligned)
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
@@ -123,6 +121,17 @@ class CrystalMatchControl(QGroupBox):
         pixmap = image.to_qt_pixmap()
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self._frame.setPixmap(scaled)
+
+    def _display_results(self, crystal_aligned):
+        status = "Crystal matching complete"
+        self._results_frame.display_match_results(crystal_aligned, status)
+
+        x, y = crystal_aligned.pixel_center()
+        x_um, y_um = crystal_aligned.real_center()
+
+        beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(x_um, y_um, x, y)
+        print(beam_position)
+
 
 
 

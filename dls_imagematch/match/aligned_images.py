@@ -15,6 +15,8 @@ class AlignedImages:
 
         self._real_offset = None
         self._pixel_offset = None
+        self._real_center = None
+        self._pixel_center = None
         self._overlay = None
         self._metric = None
         self._overlap_images = None
@@ -34,6 +36,25 @@ class AlignedImages:
             self._real_offset = (x * pixel_size, y * pixel_size)
 
         return self._real_offset
+
+    def pixel_center(self):
+        """ The position of the center of image B (in image A coordinates) - in pixels. """
+        if self._pixel_center is None:
+            width, height = self.img_b.size
+            x, y = self.transform.x + width / 2, self.transform.y + height / 2
+            x, y = int(round(x)), int(round(y))
+            self._pixel_center = (x, y)
+
+        return self._pixel_center
+
+    def real_center(self):
+        """ The position of the center of image B (in image A coordinates) - in pixels. """
+        if self._real_center is None:
+            width, height = self.img_b.size
+            x, y = self.transform.x + width / 2, self.transform.y + height / 2
+            self._real_center = (x, y)
+
+        return self._real_center
 
     def overlay(self):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """

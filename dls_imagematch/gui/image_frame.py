@@ -122,8 +122,8 @@ class ImageFrame(QGroupBox):
             real_y_um = real_y_pixels * self._image.pixel_size
 
             if 0 <= real_x_pixels <= real_size[0] and 0 <= real_y_pixels <= real_size[1]:
-                position_txt = str(real_x_pixels) + " px, " + str(real_y_pixels) + " px (" + \
-                    "{0:.2f}".format(real_x_um) + " um, " + "{0:.2f}".format(real_y_um) + " um)"
+                position_txt = "{:.2f} um, {:.2f} um ({} px, " \
+                               "{} px)".format(real_x_um, real_y_um, real_x_pixels, real_y_pixels)
             else:
                 position_txt = ""
 
