@@ -54,7 +54,7 @@ class Image:
     def sub_image(self, rect):
         rect = rect.intify()
         sub = self.img[rect.y1:rect.y2, rect.x1:rect.x2]
-        return Image(sub,self.pixel_size)
+        return Image(sub, self.pixel_size)
 
     def to_qt_pixmap(self):
         width, height = self.size

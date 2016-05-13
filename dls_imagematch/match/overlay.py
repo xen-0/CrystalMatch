@@ -13,22 +13,20 @@ class Overlayer:
         # Make a copy of A, the background image
         background = img_a.copy()
 
-        # Determine offset amount
-        x, y = int(transform.x), int(transform.y)
-
         # Get overlapping regions of images
-        overlap_a, overlap_b = Overlayer.get_overlap_regions(img_a, img_b, (x, y))
+        offset = transform.to_point()
+        overlap_a, overlap_b = Overlayer.get_overlap_regions(img_a, img_b, offset)
         if overlap_a is None or overlap_b is None:
             return background
 
         # Blend the two overlapping regions
         perc_a, perc_b = 0.5, 0.5
-        blended = cv2.addWeighted(overlap_a, perc_a, overlap_b, perc_b, 0)
-        background.paste(Image(blended), xOff=max(x, 0), yOff=max(y, 0))
+        blended = cv2.addWeighted(overlap_a.img, perc_a, overlap_b.img, perc_b, 0)
+        background.paste(Image(blended), xOff=max(offset.x, 0), yOff=max(offset.y, 0))
 
         # Define the rectangle that will be pasted to the background image
         w, h = img_b.size
-        rect = Rectangle.from_corner(Point(x, y), w, h)
+        rect = Rectangle.from_corner(offset, w, h)
         background.draw_rectangle(rect)
 
         return background
@@ -47,29 +45,14 @@ class Overlayer:
         If image B only partially overlaps image A, only the overlapping sections of each
         are returned.
         """
-        # Determine size of images
-        width_a, height_a = img_a.size
-        width_b, height_b = img_b.size
+        rect_a = img_a.bounds()
+        rect_b = img_b.bounds().offset(offset)
+        overlap_a_rect = rect_a.intersection(rect_b)
+        overlap_a = img_a.sub_image(overlap_a_rect)
 
-        # Corners (top-left, bottom-right) of the overlap rectangle for image A
-        x_off, y_off = offset
-        x1_a = max(x_off, 0)
-        y1_a = max(y_off, 0)
-        x2_a = min(x_off+width_b, width_a)
-        y2_a = min(y_off+height_b, height_a)
-
-        # Corners of the overlap rectangle for image B
-        x1_b = x1_a - x_off
-        y1_b = y1_a - y_off
-        x2_b = x2_a - x_off
-        y2_b = y2_a - y_off
-
-        # Error if paste location is totally outside image
-        if x1_a > x2_a or y1_a > y2_a:
-            return None, None
-
-        # Get overlap sections of each image
-        overlap_a = img_a.img[y1_a:y2_a, x1_a:x2_a]
-        overlap_b = img_b.img[y1_b:y2_b, x1_b:x2_b]
+        rect_a = img_a.bounds().offset(-offset)
+        rect_b = img_b.bounds()
+        overlap_b_rect = rect_a.intersection(rect_b)
+        overlap_b = img_b.sub_image(overlap_b_rect)
 
         return overlap_a, overlap_b

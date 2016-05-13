@@ -39,6 +39,9 @@ class Rectangle:
     def center(self):
         return Point((self.x1 + self.x2)/2, (self.y1 + self.y2)/2)
 
+    def offset(self, point):
+        return Rectangle(self.top_left() + point, self.bottom_right() + point)
+
     def scale(self, factor):
         f = factor
         return Rectangle(self.top_left() * f, self.bottom_right() * f)

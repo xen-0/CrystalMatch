@@ -67,7 +67,7 @@ class AlignedImages:
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
             metric_calc = OverlapMetric(self.img_a, self.img_b, None)
-            offset = (int(self.transform.x), int(self.transform.y))
+            offset = self.transform.to_point()
             self._metric = metric_calc.calculate_overlap_metric(offset)
 
         return self._metric

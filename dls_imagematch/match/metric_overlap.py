@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 
 from dls_imagematch.match.overlay import Overlayer
-from dls_imagematch.util.image import Image
 
 
 class OverlapMetric:
@@ -23,7 +22,7 @@ class OverlapMetric:
         transforms = self.trial_transforms.compose_with(starting_transform)
 
         for transform in transforms:
-            offset = (int(transform.x), int(transform.y))
+            offset = transform.to_point().intify()
             metric = self.calculate_overlap_metric(offset)
             metrics.append(metric)
 
@@ -36,27 +35,6 @@ class OverlapMetric:
 
         return best_transform, is_identity
 
-    def create_overlay_image(self, overlay_img, transform):
-        # Make a copy of A, the background image
-        background = self.img_a.copy()
-
-        # Determine size of B, which is the size of the overlay image area.
-        working_size = self.img_b.size
-        w, h = working_size
-
-        # Determine offset amount
-        x, y = transform.x, transform.y
-
-        # Define the rectangle that will be pasted to in the background image
-        roi = (x, y, x+w, y+h)
-
-        # Paste the overlay image to the background and draw a rectangle around it
-        overlay = Image(overlay_img, self.img_b.pixel_size)
-        background.paste(overlay, xOff=max(x, 0), yOff=max(y, 0))
-        background.draw_rectangle(roi)
-
-        return background
-
     def calculate_overlap_metric(self, offset):
         """ For two images, A and B, where B is offset relative to A, calculate the average
         per pixel absolute difference of the region of overlap of the two images.
@@ -67,7 +45,7 @@ class OverlapMetric:
         """
         cr1, cr2 = Overlayer.get_overlap_regions(self.img_a, self.img_b, offset)
 
-        absdiff_img = cv2.absdiff(cr1, cr2)
+        absdiff_img = cv2.absdiff(cr1.img, cr2.img)
         metric = np.sum(absdiff_img) / absdiff_img.size
 
         return metric
