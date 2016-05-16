@@ -11,23 +11,22 @@ class Image:
         self.img = img
 
         # The size of the image in number of pixels
-        self.size = self._size()
+        shape = img.shape
+        self.width = shape[1]
+        self.height = shape[0]
+        self.size = (self.width, self.height)
+        if len(shape) > 2:
+            self.channels = shape[2]
+        else:
+            self.channels = 1
 
         # The real size represented by a single pixel in the image
         self.pixel_size = pixel_size
 
         # The real size represented by the image
         self.real_size = (self.size[0] * self.pixel_size, self.size[1] * self.pixel_size)
-
-    def _size(self):
-        """Return the size of an image in pixels in the format [width, height].
-        """
-        if self.img.ndim == 3:  # Colour
-            working_size = self.img.shape[::-1][1:3]
-        else:
-            assert self.img.ndim == 2  # Greyscale
-            working_size = self.img.shape[::-1]
-        return working_size
+        self.real_width = self.real_size[0]
+        self.real_height = self.real_size[1]
 
     def bounds(self):
         return Rectangle(Point(), Point(self.size[0], self.size[1]))
@@ -117,6 +116,18 @@ class Image:
         color = (0, 0, 0, 255)
         rect = rect.intify()
         cv2.rectangle(self.img, rect.top_left().tuple(), rect.bottom_right().tuple(), color, thickness=thickness)
+
+    def draw_line(self, pt1, pt2, color, thickness=2):
+        """ Draw the specified line on the image (in place) """
+        cv2.line(self.img, pt1.tuple(), pt2.tuple(), color, thickness=thickness)
+
+    def draw_polygon(self, points, color, thickness=2):
+        i = 0
+        while i < len(points) - 1:
+            self.draw_line(points[i], points[i + 1], color, thickness)
+            i += 1
+
+        self.draw_line(points[i], points[0], color, thickness)
 
     def paste(self, src, xOff, yOff):
         """ Paste the source image onto the target one at the specified position.
