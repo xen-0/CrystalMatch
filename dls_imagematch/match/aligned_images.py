@@ -75,9 +75,7 @@ class AlignedImages:
     def overlap_images(self):
         """ Two images which are the sub-regions of Images A and B which overlap. """
         if self._overlap_images is None:
-            region_a, region_b = Overlayer.get_overlap_regions(self.img_a, self.img_b, self.pixel_offset().tuple())
-            overlap_image_a = Image(region_a, self.img_a.pixel_size)
-            overlap_image_b = Image(region_b, self.img_b.pixel_size)
-            self._overlap_images = (overlap_image_a, overlap_image_b)
+            region_a, region_b = Overlayer.get_overlap_regions(self.img_a, self.img_b, self.pixel_offset())
+            self._overlap_images = (region_a, region_b)
 
         return self._overlap_images
