@@ -22,7 +22,7 @@ class Overlayer:
         # Blend the two overlapping regions
         perc_a, perc_b = 0.5, 0.5
         blended = cv2.addWeighted(overlap_a.img, perc_a, overlap_b.img, perc_b, 0)
-        background.paste(Image(blended), xOff=max(offset.x, 0), yOff=max(offset.y, 0))
+        background.paste(Image(blended), Point(max(offset.x, 0), max(offset.y, 0)))
 
         # Define the rectangle that will be pasted to the background image
         w, h = img_b.size
@@ -48,11 +48,11 @@ class Overlayer:
         rect_a = img_a.bounds()
         rect_b = img_b.bounds().offset(offset)
         overlap_a_rect = rect_a.intersection(rect_b)
-        overlap_a = img_a.sub_image(overlap_a_rect)
+        overlap_a = img_a.crop(overlap_a_rect)
 
         rect_a = img_a.bounds().offset(-offset)
         rect_b = img_b.bounds()
         overlap_b_rect = rect_a.intersection(rect_b)
-        overlap_b = img_b.sub_image(overlap_b_rect)
+        overlap_b = img_b.crop(overlap_b_rect)
 
         return overlap_a, overlap_b

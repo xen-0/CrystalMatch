@@ -129,7 +129,7 @@ class FeatureMatcher:
 
         blended = Image(blended)
         blended.popup()
-        blended.draw_polygon(corners, (0, 0, 0))
+        blended.draw_polygon(corners)
         blended.popup()
 
 

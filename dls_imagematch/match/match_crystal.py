@@ -16,11 +16,11 @@ class CrystalMatcher:
         return crystal_aligned
 
     def _perform_match(self, aligned_images, img_a_rect):
-        crystal_img_a = aligned_images.img_a.sub_image(img_a_rect)
+        crystal_img_a = aligned_images.img_a.crop(img_a_rect)
         crystal_img_b, img_b_rect = self._make_image_b_region(aligned_images, img_a_rect)
 
-        crystal_img_a_gray = crystal_img_a.make_gray()
-        crystal_img_b_gray = crystal_img_b.make_gray()
+        crystal_img_a_gray = crystal_img_a.to_mono()
+        crystal_img_b_gray = crystal_img_b.to_mono()
 
         method = "Consensus"
         adapt = 'Pyramid'
@@ -54,5 +54,5 @@ class CrystalMatcher:
         rect = Rectangle.from_corner(top_left, width, height)
 
         rect = rect.intersection(img_b.bounds())
-        region = img_b.sub_image(rect)
+        region = img_b.crop(rect)
         return region, rect

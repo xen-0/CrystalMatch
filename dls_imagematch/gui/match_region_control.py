@@ -121,7 +121,7 @@ class RegionMatchControl(QGroupBox):
         self._img_b = self._img_b.rescale(factor)
         self._scale_factor = factor
 
-        return self._img_a.make_gray(), self._img_b.make_gray()
+        return self._img_a.to_mono(), self._img_b.to_mono()
 
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image

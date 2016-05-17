@@ -98,7 +98,7 @@ class SelectorFrame(QLabel):
         self._size_display(img_copy)
 
         # Store the selected region as a separate image
-        self.image_region = self._selector_image.sub_image(self.rect).copy()
+        self.image_region = self._selector_image.crop(self.rect).copy()
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a
