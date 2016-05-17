@@ -108,7 +108,31 @@ class FeatureMatcher:
             FeatureMatcher._draw_matches(img_a.img, kp1, img_b.img, kp2, matches)
 
         # Calculate the Transform
-        result = FeatureMatcher._calculate_transform(matches, kp1, kp2)
+        result = FeatureMatcher._calculate_median_translation(matches, kp1, kp2)
+
+        # DEBUG FUN
+        from .transformation import Transformation
+        homography = FeatureMatcher._calculate_homography(matches, kp1, kp2)
+        if homography is not None:
+            trans = Transformation(homography)
+        else:
+            trans = Transformation.from_translation(result)
+
+        warped = trans.inverse_transform_image(img_b, (img_a.width, img_a.height))
+
+        img_a.popup()
+        warped.popup()
+        blended = cv2.addWeighted(img_a.img, 0.5, warped.img, 0.5, 0)
+
+        corners = img_b.bounds().corners()
+        corners = trans.inverse_transform_points(corners)
+
+        blended = Image(blended)
+        blended.popup()
+        blended.draw_polygon(corners, (0, 0, 0))
+        blended.popup()
+
+
         return result
 
     @staticmethod
@@ -160,7 +184,7 @@ class FeatureMatcher:
         return matches[:n_best]
 
     @staticmethod
-    def _calculate_transform(matches, keypoints_1, keypoints_2):
+    def _calculate_median_translation(matches, keypoints_1, keypoints_2):
         """ For a set of feature matches between two images, find the average (median) translation that maps
         one image to the other.
         """
@@ -179,11 +203,34 @@ class FeatureMatcher:
             xs.append(x2-x1)
             ys.append(y2-y1)
 
-        # Draw matches.
+        # Get median result
         x = -np.median(xs)
         y = -np.median(ys)
-
+        print(x, y)
         return Translate(x, y)
+
+    @staticmethod
+    def _calculate_homography(matches, keypoints_1, keypoints_2):
+        homography = None
+        # TEST - calculate transform
+        if len(matches) >= 4:
+            src_pts = np.float32([keypoints_1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32([keypoints_2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+
+            # see: http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
+            # The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
+            # inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
+            # there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
+            # use the default method (method=0).
+            homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.LMEDS)
+            pts = np.float32([[0, 0]]).reshape(-1, 1, 2)
+            dst = cv2.perspectiveTransform(pts, homography)
+
+            print(homography)
+            print(dst)
+
+        return homography
+
 
     @staticmethod
     def _best_consensus_result(results):

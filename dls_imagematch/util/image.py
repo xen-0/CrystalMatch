@@ -119,7 +119,7 @@ class Image:
 
     def draw_line(self, pt1, pt2, color, thickness=2):
         """ Draw the specified line on the image (in place) """
-        cv2.line(self.img, pt1.tuple(), pt2.tuple(), color, thickness=thickness)
+        cv2.line(self.img, pt1.intify().tuple(), pt2.intify().tuple(), color, thickness=thickness)
 
     def draw_polygon(self, points, color, thickness=2):
         i = 0

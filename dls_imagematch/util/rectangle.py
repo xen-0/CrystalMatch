@@ -36,6 +36,9 @@ class Rectangle:
     def bottom_right(self):
         return Point(self.x2, self.y2)
 
+    def corners(self):
+        return [self.top_left(), self.top_right(), self.bottom_right(), self.bottom_left()]
+
     def center(self):
         return Point((self.x1 + self.x2)/2, (self.y1 + self.y2)/2)
 
