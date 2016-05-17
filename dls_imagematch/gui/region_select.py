@@ -66,13 +66,13 @@ class SelectorFrame(QLabel):
 
         img_a = images.img_a
         overlap_img_a, _ = images.overlap_images()
-        x, y = images.pixel_offset().tuple()
+        offset = images.pixel_offset()
 
         # Make faded background
         blank_image = Image.blank(img_a.size[0], img_a.size[1])
         blended = cv2.addWeighted(img_a.img, 0.5, blank_image.img, 0.5, 0)
         background = Image(blended, img_a.pixel_size)
-        background.paste(overlap_img_a, x, y)
+        background.paste(overlap_img_a, offset)
 
         self._selector_image = background
 

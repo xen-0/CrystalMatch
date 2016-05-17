@@ -122,6 +122,7 @@ class FeatureMatcher:
 
         img_a.popup()
         warped.popup()
+        print(img_a.size, warped.size)
         blended = cv2.addWeighted(img_a.img, 0.5, warped.img, 0.5, 0)
 
         corners = img_b.bounds().corners()
