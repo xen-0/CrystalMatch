@@ -1,6 +1,7 @@
 from __future__ import division
 import cv2
 import numpy as np
+import math
 from PyQt4.QtGui import QImage, QPixmap
 
 from .rectangle import Rectangle, Point
@@ -121,6 +122,32 @@ class Image:
         else:
             # No alpha blending
             target[y1:y2, x1:x2] = src.img[sy1:sy2, sx1:sx2]
+
+    def rotate(self, angle, center):
+        """ Rotate the image around the specified center. Note that this will
+        cut off any areas that are rotated out of the frame.
+        """
+        degrees = angle * 180 / math.pi
+        matrix = cv2.getRotationMatrix2D(center, degrees, 1.0)
+
+        rotated = cv2.warpAffine(self.img, matrix, (self.width, self.height))
+        return Image(rotated, self.pixel_size)
+
+    def rotate_no_clip(self, angle):
+        """Rotate the image about its center point, but expand the frame of the image
+        so that the whole rotated shape will be visible without any being cropped.
+        """
+        # Calculate the size the expanded image needs to be to contain rotated image
+        x, y = self.width, self.height
+        w = abs(x*math.cos(angle)) + abs(y*math.sin(angle))
+        h = abs(x*math.sin(angle)) + abs(y*math.cos(angle))
+
+        # Paste the image into a larger frame and rotate
+        img = Image.blank(w, h, 4, 0)
+        img.paste(self, w/2-x/2, h/2-y/2)
+        rotated = img.rotate(angle, (w/2,h/2))
+
+        return rotated
 
     ############################
     # Colour Space Conversions
