@@ -22,6 +22,12 @@ class Color:
         return Color(randint(0, 255), randint(0, 255), randint(0, 255), 255)
 
     @staticmethod
+    def TransparentBlack(): return Color(0, 0, 0, 0)
+
+    @staticmethod
+    def TransparentWhite(): return Color(255, 255, 255, 0)
+
+    @staticmethod
     def White(): return Color(255, 255, 255)
 
     @staticmethod

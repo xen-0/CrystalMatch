@@ -44,10 +44,11 @@ class Image:
         return Image(img, pixel_size)
 
     @staticmethod
-    def blank(width, height, channels=3, value=0):
+    def blank(width, height, channels=3, color=Color.Black()):
         """ Return a new empty image of the specified size. """
-        blank_image = np.full((height, width, channels), value, np.uint8)
-        return Image(blank_image)
+        blank = Image(np.full((height, width, channels), 0, np.uint8))
+        blank.draw_rectangle(blank.bounds(), color, thickness=-1)
+        return blank
 
     def popup(self, title='Popup Image'):
         """ Pop up a window to display an image until a key is pressed (blocking)."""
