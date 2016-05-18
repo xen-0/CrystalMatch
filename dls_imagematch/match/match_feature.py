@@ -4,13 +4,25 @@ import cv2
 import numpy as np
 import math
 
-from dls_imagematch.util import Translate, Image
+from dls_imagematch.util import Translate, Image, Color, Point
+from .transformation import Transformation
 
 
 class FeatureMatchException(Exception):
     def __init__(self, message):
         super(FeatureMatchException, self).__init__(message)
         self.message = message
+
+
+class _Match:
+    def __init__(self, match, kp1, kp2):
+        self._match = match
+        self._kp1 = kp1
+        self._kp2 = kp2
+
+    def kp1(self): return self._kp1.pt
+
+    def kp2(self): return self._kp2.pt
 
 
 class FeatureMatcher:
@@ -26,7 +38,7 @@ class FeatureMatcher:
     CONSENSUS_DETECTORS = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS"]
 
     POPUP_RESULTS = True
-    MINIMUM_FEATURES = 1
+    MINIMUM_MATCHES = 1
 
     def __init__(self, img_a, img_b):
         self.img_a = img_a
@@ -54,71 +66,37 @@ class FeatureMatcher:
         elif adaptation not in self.ADAPTATION_TYPE:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
 
+        self._perform_match(self.img_a, self.img_b, str(method), str(adaptation))
+
+    def _perform_match(self, img1, img2, method, adaptation):
+
         if method == "Consensus":
-            self._perform_consensus_match()
+            self.POPUP_RESULTS = False
+            matches = self._find_matches_for_consensus(img1, img2, adaptation)
         else:
-            result = self._perform_match(str(method), str(adaptation), self.img_a, self.img_b)
-            if result is not None:
-                self.net_transform = result
-                self.match_complete = True
-
-    def _perform_consensus_match(self):
-        FeatureMatcher.POPUP_RESULTS = False
-
-        results = []
-        for method in FeatureMatcher.CONSENSUS_DETECTORS:
-            print(method)
-            try:
-                result = self._perform_match(method, "", self.img_a, self.img_b)
-                results.append(result)
-                print(result)
-            except FeatureMatchException:
-                pass
-
-        # Raise exception if no results were found
-        if len(results) == 0:
-            raise FeatureMatchException("No feature matching technique returned a successful match.")
-
-        best_result, confidence = self._best_consensus_result(results)
-        print("Best: " + str(best_result))
-
-        self.net_transform = best_result
-        self.match_complete = True
-
-        FeatureMatcher.POPUP_RESULTS = True
-        return self.net_transform
-
-    @staticmethod
-    def _perform_match(method, adaptation, img_a, img_b):
-
-        kp1, des1 = FeatureMatcher._detect_features(img_a.img, method, adaptation)
-        kp2, des2 = FeatureMatcher._detect_features(img_b.img, method, adaptation)
+            matches = self._find_matches_for_method(img1, img2, method, adaptation)
 
         # Check that we have actually found some features
-        if len(kp1) < FeatureMatcher.MINIMUM_FEATURES or len(kp2) < FeatureMatcher.MINIMUM_FEATURES:
-            message = "Could not find the required minimum number of features (" \
-                      + str(FeatureMatcher.MINIMUM_FEATURES) + ") in at least 1 image!"
+        min_matches = self.MINIMUM_MATCHES
+        if len(matches) < min_matches:
+            message = "Could not find the required minimum number of matches ({})!".format(min_matches)
             raise FeatureMatchException(message)
 
-        # Find matches
-        matches = FeatureMatcher._find_matches(method, des1, des2, n_best=200)
-
-        # Draw matches image
-        if FeatureMatcher.POPUP_RESULTS:
-            FeatureMatcher._draw_matches(img_a.img, kp1, img_b.img, kp2, matches)
-
         # Calculate the Transform
-        result = FeatureMatcher._calculate_median_translation(matches, kp1, kp2)
+        translation = self._calculate_median_translation(matches)
+        homography = self._calculate_homography(matches)
 
-        # DEBUG FUN
-        from .transformation import Transformation
-        homography = FeatureMatcher._calculate_homography(matches, kp1, kp2)
         if homography is not None:
-            trans = Transformation(homography)
+            transform = Transformation(homography)
         else:
-            trans = Transformation.from_translation(result)
+            transform = Transformation.from_translation(translation)
 
-        warped = trans.inverse_transform_image(img_b, (img_a.width, img_a.height))
+        self.net_transform = transform
+        self.match_complete = True
+        self.POPUP_RESULTS = True
+
+        '''
+        warped = transform.inverse_transform_image(img_b, (img_a.width, img_a.height))
 
         img_a.popup()
         warped.popup()
@@ -126,15 +104,47 @@ class FeatureMatcher:
         blended = cv2.addWeighted(img_a.img, 0.5, warped.img, 0.5, 0)
 
         corners = img_b.bounds().corners()
-        corners = trans.inverse_transform_points(corners)
+        corners = transform.inverse_transform_points(corners)
 
         blended = Image(blended)
         blended.popup()
         blended.draw_polygon(corners)
         blended.popup()
+        '''
 
+    @staticmethod
+    def _find_matches_for_consensus(img1, img2, adaptation):
+        matches = []
+        for method in FeatureMatcher.CONSENSUS_DETECTORS:
+            try:
+                method_matches = FeatureMatcher._find_matches_for_method(img1, img2, method, adaptation)
+                matches.append(method_matches)
+                print("{} - {} matches".format(method, len(matches)))
+            except FeatureMatchException:
+                print(method + " - 0 matches")
 
-        return result
+        return matches
+
+    @staticmethod
+    def _find_matches_for_method(img1, img2, method, adaptation):
+        keypoints_1, des1 = FeatureMatcher._detect_features(img1, method, adaptation)
+        keypoints_2, des2 = FeatureMatcher._detect_features(img2, method, adaptation)
+
+        # Find matches
+        raw_matches = FeatureMatcher._brute_force_descriptor_match(method, des1, des2, n_best=200)
+
+        # Create wrapping _Match objects so the results are easier to pass around
+        matches = []
+        for match in raw_matches:
+            kp1 = keypoints_1[match.queryIdx]
+            kp2 = keypoints_2[match.trainIdx]
+            matches.append(_Match(match, kp1, kp2))
+
+        # Draw matches image
+        if FeatureMatcher.POPUP_RESULTS:
+            FeatureMatcher._draw_matches(img1, img2, matches)
+
+        return matches
 
     @staticmethod
     def _detect_features(img, detector_method, adaptation):
@@ -154,18 +164,17 @@ class FeatureMatcher:
         extractor = cv2.DescriptorExtractor_create(extractor_method)
 
         # Get keypoints and descriptors
-        keypoints = detector.detect(img, None)
-        keypoints, descriptors = extractor.compute(img, keypoints)
+        keypoints = detector.detect(img.img, None)
+        keypoints, descriptors = extractor.compute(img.img, keypoints)
 
         # Show the detected keypoints
         if FeatureMatcher.POPUP_RESULTS:
-            marked_img = cv2.drawKeypoints(img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            Image(marked_img).popup(detector_method + " Keypoints")
+            FeatureMatcher._draw_keypoints(img, keypoints)
 
         return keypoints, descriptors
 
     @staticmethod
-    def _find_matches(method, descriptors_1, descriptors_2, n_best):
+    def _brute_force_descriptor_match(method, descriptors_1, descriptors_2, n_best):
         """ For two sets of feature descriptors generated from 2 images, attempt to find all the matches,
         i.e. find features that occur in both images.
         """
@@ -185,44 +194,40 @@ class FeatureMatcher:
         return matches[:n_best]
 
     @staticmethod
-    def _calculate_median_translation(matches, keypoints_1, keypoints_2):
+    def _calculate_median_translation(matches):
         """ For a set of feature matches between two images, find the average (median) translation that maps
         one image to the other.
         """
         xs = []
         ys = []
-        for mat in matches:
-            # Get the matching keypoints for each of the images
-            img1_idx = mat.queryIdx
-            img2_idx = mat.trainIdx
-
-            # x - columns
-            # y - rows
-            (x1, y1) = keypoints_1[img1_idx].pt
-            (x2, y2) = keypoints_2[img2_idx].pt
-
+        for match in matches:
+            (x1, y1) = match.kp1()
+            (x2, y2) = match.kp2()
             xs.append(x2-x1)
             ys.append(y2-y1)
 
         # Get median result
         x = -np.median(xs)
         y = -np.median(ys)
-        print(x, y)
+
         return Translate(x, y)
 
     @staticmethod
-    def _calculate_homography(matches, keypoints_1, keypoints_2):
-        homography = None
-        # TEST - calculate transform
-        if len(matches) >= 4:
-            src_pts = np.float32([keypoints_1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-            dst_pts = np.float32([keypoints_2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    def _calculate_homography(matches):
+        """ See:
+        http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
 
-            # see: http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
-            # The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
-            # inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
-            # there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
-            # use the default method (method=0).
+        The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
+        inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
+        there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
+        use the default method (method=0).
+        """
+        homography = None
+
+        if len(matches) >= 4:
+            src_pts = np.float32([m.kp1() for m in matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32([m.kp2() for m in matches]).reshape(-1, 1, 2)
+
             homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.LMEDS)
             pts = np.float32([[0, 0]]).reshape(-1, 1, 2)
             dst = cv2.perspectiveTransform(pts, homography)
@@ -232,103 +237,37 @@ class FeatureMatcher:
 
         return homography
 
-
     @staticmethod
-    def _best_consensus_result(results):
-        """ Each method used in the consensus match will have a different result. Group
-        together results that are the same (or very similar), and return the result that
-        has the largest group.
-        """
-        groups = []
-
-        # Divide the results into sub-groups of the same/similar results
-        for result in results:
-            assigned = False
-            for group in groups:
-                prototype = group[0]
-                # If the result is within 2 pixels of the group, add it to the group
-                del_x = math.fabs(prototype.x - result.x)
-                del_y = math.fabs(prototype.y - result.y)
-                if del_x <= 2 and del_y <= 2:
-                    group.append(result)
-                    assigned = True
-                    break
-
-            # Assign to new group
-            if not assigned:
-                groups.append([result])
-
-        # TODO - resolve ties by which result had the best agreement values (distances) for its set of matches
-        # Find largest set
-        set_lengths = map(len, groups)
-        consensus = np.argmax(set_lengths)  # TODO: Check if tied for longest.
-        best_set = groups[consensus]
-
-        # Find average
-        x_mean = sum([result.x for result in best_set]) / len(best_set)
-        y_mean = sum([result.y for result in best_set]) / len(best_set)
-        best_result = Translate(x_mean, y_mean)
-
-        # Confidence of consensus
-        print('Confidence:', str(len(best_set))+'/'+str(len(results)))
-        confidence = len(best_set) / len(results)
-
-        return best_result, confidence
-
-    @staticmethod
-    def _draw_matches(img1, keypoints1, img2, keypoints2, matches):
-        """ Based on original from from:
-            http://stackoverflow.com/questions/20259025/module-object-has-no-attribute-drawmatches-opencv-python
-
-        Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
-
+    def _draw_matches(img1, img2, matches):
+        """ Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
         Makes an image that is a side-by-side of the two images, with detected features highlighted and lines
         drawn between matching features in the two images.
         """
         # Create a new output image that concatenates the two images together
-        rows1 = img1.shape[0]
-        cols1 = img1.shape[1]
-        rows2 = img2.shape[0]
-        cols2 = img2.shape[1]
+        w1, h1 = img1.size
+        w2, h2 = img2.size
+        img1_pos, img2_pos = Point(0, 0), Point(w1, 0)
+        out = Image.blank(w1+w2, max(h1, h2))
+        out.paste(img1, img1_pos)
+        out.paste(img2, img2_pos)
 
-        out = np.zeros((max([rows1, rows2]), cols1+cols2, 3), dtype='uint8')
-
-        # Place the first image to the left
-        out[:rows1, :cols1] = np.dstack([img1, img1, img1])
-
-        # Place the next image to the right of it
-        out[:rows2, cols1:] = np.dstack([img2, img2, img2])
-
-        # For each pair of points we have between both images
-        # draw circles, then connect a line between them
-        for mat in matches:
-
-            # Get the matching keypoints for each of the images
-            img1_idx = mat.queryIdx
-            img2_idx = mat.trainIdx
-
-            # x - columns
-            # y - rows
-            (x1, y1) = keypoints1[img1_idx].pt
-            (x2, y2) = keypoints2[img2_idx].pt
-
+        # For each pair of points we have between both images draw circles, then connect a line between them
+        for match in matches:
+            point1 = match.kp1()
+            point2 = match.kp2() + img2_pos
             # Draw a small circle at both co-ordinates
-            radius = 4
-            color = (255, 0, 0)  # blue
-            thickness = 1
-            cv2.circle(out, (int(x1), int(y1)), radius, color, thickness)
-            cv2.circle(out, (int(x2)+cols1, int(y2)), radius, color, thickness)
+            out.draw_circle(center=point1, radius=4, color=Color.Blue(), thickness=1)
+            out.draw_circle(center=point2, radius=4, color=Color.Blue(), thickness=1)
 
-            # Draw a line in between the two points
-            # thickness = 1
-            # colour blue
-            cv2.line(out, (int(x1), int(y1)), (int(x2)+cols1, int(y2)), (255, 0, 0), 1)
+            # Draw a line between the two points
+            out.draw_line(point1, point2, color=Color.Blue(), thickness=1)
 
         # Resize so that it fits on the screen
-        img = Image(out)
-        factor = 1800 / img.size[0]
-        out = Image(out).rescale(factor)
+        factor = 1800 / out.width
+        out = out.rescale(factor)
         out.popup("Matches")
 
-        # Also return the image if you'd like a copy
-        return out
+    @staticmethod
+    def _draw_keypoints(img, keypoints):
+        marked_img = cv2.drawKeypoints(img.img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        Image(marked_img).popup("Keypoints")

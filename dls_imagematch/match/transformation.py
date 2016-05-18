@@ -17,21 +17,25 @@ class Transformation:
 
     def transform_image(self, image, output_size):
         if self._translation_only:
-            # TODO: implement this
-            warped = image.img
+            offset = self._translation.to_point()
+            warped = Image.blank(output_size[0], output_size[1], image.channels)
+            warped.paste(image, offset)
         else:
             warped = cv2.warpPerspective(image.img, self._homography, output_size)
+            warped = Image(warped)
 
-        return Image(warped)
+        return warped
 
     def inverse_transform_image(self, image, output_size):
         if self._translation_only:
-            # TODO: implement this
-            warped = image.img
+            offset = - self._translation.to_point()
+            warped = Image.blank(output_size[0], output_size[1], image.channels)
+            warped.paste(image, offset)
         else:
             warped = cv2.warpPerspective(image.img, self._homography_inverse, output_size)
+            warped = Image(warped)
 
-        return Image(warped)
+        return warped
 
     def transform_points(self, points):
         if self._translation_only:
