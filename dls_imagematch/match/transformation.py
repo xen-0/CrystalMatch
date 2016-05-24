@@ -5,15 +5,18 @@ from dls_imagematch.util import Point, Image
 
 
 class Transformation:
-    def __init__(self, homography_matrix, translate=None):
+    def __init__(self, translation, homography_matrix=None):
+        self._translation = translation
         self._homography = homography_matrix
         self._homography_inverse = None
-        self._translation = translate
 
         if self._homography is not None:
             _, self._homography_inverse = cv2.invert(self._homography)
 
         self._translation_only = self._homography is None
+
+    def translation(self):
+        return self._translation
 
     def transform_image(self, image, output_size):
         if self._translation_only:
@@ -70,7 +73,3 @@ class Transformation:
             points.append(Point(p[0][0], p[0][1]))
 
         return points
-
-    @staticmethod
-    def from_translation(translate):
-        return Transformation(None, translate)

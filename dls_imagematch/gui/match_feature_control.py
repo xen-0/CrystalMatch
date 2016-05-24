@@ -79,13 +79,13 @@ class FeatureMatchControl(QGroupBox):
     def _display_results(self, method, adapt):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        translate = self._matcher.net_transform
+        transform = self._matcher.net_transform
 
         status = "Feature match complete (" + method
         if adapt != '':
             status += " - " + adapt
         status += ")"
 
-        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        aligned = AlignedImages(self._img_a, self._img_b, transform.translation())
         self._results_frame.display_match_results(aligned, status)
         self.last_images = aligned

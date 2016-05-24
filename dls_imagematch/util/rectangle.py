@@ -51,7 +51,7 @@ class Rectangle:
 
     def intersection(self, rect_b):
         if not self.intersects(rect_b):
-            return Rectangle(0, 0, 0, 0)
+            return Rectangle(Point(0, 0), Point(0, 0))
 
         x1 = max(self.x1, rect_b.x1)
         y1 = max(self.y1, rect_b.y1)

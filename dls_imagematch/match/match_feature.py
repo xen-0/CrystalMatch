@@ -20,10 +20,17 @@ class _Match:
         self._kp1 = kp1
         self._kp2 = kp2
 
-    def kp1(self): return self._kp1.pt
+    def point1(self):
+        return Point(self._kp1.pt[0], self._kp1.pt[1])
 
-    def kp2(self): return self._kp2.pt
+    def point2(self):
+        return Point(self._kp2.pt[0], self._kp2.pt[1])
 
+    def kp1(self):
+        return self._kp1.pt
+
+    def kp2(self):
+        return self._kp2.pt
 
 class FeatureMatcher:
     """ Use feature matching to compare to images and align the second on the first.
@@ -71,7 +78,7 @@ class FeatureMatcher:
     def _perform_match(self, img1, img2, method, adaptation):
 
         if method == "Consensus":
-            self.POPUP_RESULTS = False
+            FeatureMatcher.POPUP_RESULTS = False
             matches = self._find_matches_for_consensus(img1, img2, adaptation)
         else:
             matches = self._find_matches_for_method(img1, img2, method, adaptation)
@@ -87,23 +94,25 @@ class FeatureMatcher:
         homography = self._calculate_homography(matches)
 
         if homography is not None:
-            transform = Transformation(homography)
+            transform = Transformation(translation, homography)
         else:
-            transform = Transformation.from_translation(translation)
+            transform = Transformation(translation)
 
         self.net_transform = transform
         self.match_complete = True
         self.POPUP_RESULTS = True
 
+        # TESTING
         '''
-        warped = transform.inverse_transform_image(img_b, (img_a.width, img_a.height))
+        warped = transform.inverse_transform_image(img1, (img1.width, img1.height))
 
-        img_a.popup()
+        img2.popup()
         warped.popup()
-        print(img_a.size, warped.size)
-        blended = cv2.addWeighted(img_a.img, 0.5, warped.img, 0.5, 0)
 
-        corners = img_b.bounds().corners()
+        print(img1.size, warped.size)
+        blended = cv2.addWeighted(img1.img, 0.5, warped.img, 0.5, 0)
+
+        corners = img2.bounds().corners()
         corners = transform.inverse_transform_points(corners)
 
         blended = Image(blended)
@@ -118,10 +127,10 @@ class FeatureMatcher:
         for method in FeatureMatcher.CONSENSUS_DETECTORS:
             try:
                 method_matches = FeatureMatcher._find_matches_for_method(img1, img2, method, adaptation)
-                matches.append(method_matches)
-                print("{} - {} matches".format(method, len(matches)))
+                matches.extend(method_matches)
+                print(method + " - success")
             except FeatureMatchException:
-                print(method + " - 0 matches")
+                print(method + " - fail")
 
         return matches
 
@@ -225,10 +234,10 @@ class FeatureMatcher:
         homography = None
 
         if len(matches) >= 4:
-            src_pts = np.float32([m.kp1() for m in matches]).reshape(-1, 1, 2)
-            dst_pts = np.float32([m.kp2() for m in matches]).reshape(-1, 1, 2)
+            img1_pts = np.float32([m.kp1() for m in matches]).reshape(-1, 1, 2)
+            img2_pts = np.float32([m.kp2() for m in matches]).reshape(-1, 1, 2)
 
-            homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.LMEDS)
+            homography, mask = cv2.findHomography(img2_pts, img1_pts, cv2.LMEDS)
             pts = np.float32([[0, 0]]).reshape(-1, 1, 2)
             dst = cv2.perspectiveTransform(pts, homography)
 
@@ -253,11 +262,11 @@ class FeatureMatcher:
 
         # For each pair of points we have between both images draw circles, then connect a line between them
         for match in matches:
-            point1 = match.kp1()
-            point2 = match.kp2() + img2_pos
+            point1 = match.point1()
+            point2 = match.point2() + img2_pos
             # Draw a small circle at both co-ordinates
-            out.draw_circle(center=point1, radius=4, color=Color.Blue(), thickness=1)
-            out.draw_circle(center=point2, radius=4, color=Color.Blue(), thickness=1)
+            out.draw_circle(point=point1, radius=4, color=Color.Blue(), thickness=1)
+            out.draw_circle(point=point2, radius=4, color=Color.Blue(), thickness=1)
 
             # Draw a line between the two points
             out.draw_line(point1, point2, color=Color.Blue(), thickness=1)

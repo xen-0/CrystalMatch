@@ -109,9 +109,9 @@ class Image:
 
         # Perform paste
         target = self.img
-        source = src.img
+        source = src.to_channels(self.channels).img
 
-        if self.channels == 4 and src.channels == 4:
+        if self.channels == 4:
             # Use alpha blending
             ALPHA = 3
             for c in range(0, 3):
@@ -122,7 +122,7 @@ class Image:
 
         else:
             # No alpha blending
-            target[y1:y2, x1:x2] = src.img[sy1:sy2, sx1:sx2]
+            target[y1:y2, x1:x2] = source[sy1:sy2, sx1:sx2]
 
     def rotate(self, angle, center):
         """ Rotate the image around the specified center. Note that this will
@@ -201,9 +201,9 @@ class Image:
         """ Draw the specified dot on the image (in place) """
         cv2.circle(self.img, point.intify().tuple(), 0, color.bgra(), thickness)
 
-    def draw_circle(self, point, radius, color, thickness=2):
+    def draw_circle(self, point, radius, color=Color.Black(), thickness=2):
         """ Draw the specified circle on the image (in place) """
-        cv2.circle(self.img, point.intify().tuple(), int(radius), color, thickness)
+        cv2.circle(self.img, point.intify().tuple(), int(radius), color.bgra(), thickness)
 
     def draw_rectangle(self, rect, color=Color.Black(), thickness=1):
         """ Draw the specified rectangle on the image (in place) """
