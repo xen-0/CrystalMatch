@@ -32,6 +32,7 @@ class _Match:
     def kp2(self):
         return self._kp2.pt
 
+
 class FeatureMatcher:
     """ Use feature matching to compare to images and align the second on the first.
 
@@ -54,7 +55,7 @@ class FeatureMatcher:
         self.match_complete = False
         self.net_transform = None
 
-    def match(self, method, adaptation):
+    def match(self, method, adaptation, translation_only=False):
         """ Perform the matching procedure. """
         '''
         try:
@@ -73,9 +74,9 @@ class FeatureMatcher:
         elif adaptation not in self.ADAPTATION_TYPE:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
 
-        self._perform_match(self.img_a, self.img_b, str(method), str(adaptation))
+        self._perform_match(self.img_a, self.img_b, str(method), str(adaptation), translation_only)
 
-    def _perform_match(self, img1, img2, method, adaptation):
+    def _perform_match(self, img1, img2, method, adaptation, translation_only):
 
         if method == "Consensus":
             FeatureMatcher.POPUP_RESULTS = False
@@ -91,12 +92,12 @@ class FeatureMatcher:
 
         # Calculate the Transform
         translation = self._calculate_median_translation(matches)
-        homography = self._calculate_homography(matches)
 
-        if homography is not None:
-            transform = Transformation(translation, homography)
-        else:
-            transform = Transformation(translation)
+        homography = None
+        if not translation_only:
+            homography = self._calculate_homography(matches)
+
+        transform = Transformation(translation, homography)
 
         self.net_transform = transform
         self.match_complete = True
@@ -128,7 +129,7 @@ class FeatureMatcher:
             try:
                 method_matches = FeatureMatcher._find_matches_for_method(img1, img2, method, adaptation)
                 matches.extend(method_matches)
-                print(method + " - success")
+                print("{} - {} matches".format(method, len(method_matches)))
             except FeatureMatchException:
                 print(method + " - fail")
 
@@ -150,7 +151,7 @@ class FeatureMatcher:
             matches.append(_Match(match, kp1, kp2))
 
         # Draw matches image
-        if FeatureMatcher.POPUP_RESULTS:
+        if FeatureMatcher.POPUP_RESULTS and len(matches) > 0:
             FeatureMatcher._draw_matches(img1, img2, matches)
 
         return matches
@@ -176,8 +177,11 @@ class FeatureMatcher:
         keypoints = detector.detect(img.img, None)
         keypoints, descriptors = extractor.compute(img.img, keypoints)
 
+        if descriptors is None:
+            keypoints, descriptors = [], []
+
         # Show the detected keypoints
-        if FeatureMatcher.POPUP_RESULTS:
+        if FeatureMatcher.POPUP_RESULTS and len(keypoints) > 0:
             FeatureMatcher._draw_keypoints(img, keypoints)
 
         return keypoints, descriptors
@@ -187,6 +191,9 @@ class FeatureMatcher:
         """ For two sets of feature descriptors generated from 2 images, attempt to find all the matches,
         i.e. find features that occur in both images.
         """
+        if len(descriptors_1) == 0 or len(descriptors_2) == 0:
+            return []
+
         # TODO: Try out a FLANN based matcher
         # Create Brute-Force matcher object
         if method in ["SIFT", "SURF"]:
@@ -240,9 +247,6 @@ class FeatureMatcher:
             homography, mask = cv2.findHomography(img2_pts, img1_pts, cv2.LMEDS)
             pts = np.float32([[0, 0]]).reshape(-1, 1, 2)
             dst = cv2.perspectiveTransform(pts, homography)
-
-            print(homography)
-            print(dst)
 
         return homography
 

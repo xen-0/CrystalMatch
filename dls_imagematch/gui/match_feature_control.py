@@ -58,7 +58,7 @@ class FeatureMatchControl(QGroupBox):
         self._matcher = FeatureMatcher(img_a, img_b)
         FeatureMatcher.POPUP_RESULTS = self._with_popup
         try:
-            self._matcher.match(method, adapt)
+            self._matcher.match(method, adapt, translation_only=True)
             self._display_results(method, adapt)
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)

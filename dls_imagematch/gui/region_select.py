@@ -36,9 +36,8 @@ class SelectorFrame(QLabel):
         self.mode = SelectorMode.REGION
 
         # Load image from file
-        self._selector_image = None
         self._aligned_images = aligned_images
-        self._prepare_selector_image()
+        self._selector_image = aligned_images.img_a
         self._original_size = self._selector_image.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
@@ -61,21 +60,6 @@ class SelectorFrame(QLabel):
         # Display the Image
         self._size_display(self._selector_image)
 
-    def _prepare_selector_image(self):
-        images = self._aligned_images
-
-        img_a = images.img_a
-        overlap_img_a, _ = images.overlap_images()
-        offset = images.pixel_offset()
-
-        # Make faded background
-        blank_image = Image.blank(img_a.size[0], img_a.size[1])
-        blended = cv2.addWeighted(img_a.img, 0.5, blank_image.img, 0.5, 0)
-        background = Image(blended, img_a.pixel_size)
-        background.paste(overlap_img_a, offset)
-
-        self._selector_image = background
-
     def _size_display(self, cvimg):
         """ Size the image appropriately and display it in the frame. """
         width, height = self._display_size
@@ -91,7 +75,7 @@ class SelectorFrame(QLabel):
         # Convert display coords to image coords
         scale = self._display_scale
         self.rect = display_rect.scale(scale).intify()
-        print(self.rect)
+
         # Display the image with the highlighted roi
         img_copy = self._selector_image.copy()
         img_copy.draw_rectangle(self.rect)
@@ -141,7 +125,7 @@ class RegionSelectDialog(QDialog):
         self._init_ui(aligned_images)
 
     def _init_ui(self, aligned_images):
-        self.setWindowTitle('Select Region of Interest')
+        self.setWindowTitle('Select Region of Interest from Image A')
 
         self.selector_frame = SelectorFrame(1200, aligned_images)
         self.selector_frame.mode = SelectorMode.SINGLE_POINT

@@ -23,13 +23,13 @@ class CrystalMatcher:
         crystal_img_b_gray = crystal_img_b.to_mono()
 
         method = "Consensus"
-        adapt = 'Pyramid'
+        adapt = ''
 
         FeatureMatcher.POPUP_RESULTS = True
         matcher = FeatureMatcher(crystal_img_b_gray, crystal_img_a_gray)
         matcher.match(method, adapt)
 
-        crystal_translate = matcher.net_transform
+        crystal_translate = matcher.net_transform.translation().to_point()
         position = Translate(img_b_rect.x1, img_b_rect.y1)
         position = position.offset(crystal_translate)
 

@@ -11,7 +11,7 @@ class AlignedImages:
     def __init__(self, img_a, img_b, translate):
         self.img_a = img_a
         self.img_b = img_b
-        self.transform = translate
+        self.translate = translate
 
         self._real_offset = None
         self._pixel_offset = None
@@ -24,14 +24,14 @@ class AlignedImages:
     def pixel_offset(self):
         """ The transform (offset) in pixels - nearest whole number. """
         if self._pixel_offset is None:
-            self._pixel_offset = Point(int(round(self.transform.x, 0)), int(round(self.transform.y, 0)))
+            self._pixel_offset = Point(int(round(self.translate.x, 0)), int(round(self.translate.y, 0)))
 
         return self._pixel_offset
 
     def real_offset(self):
         """ The transform in real units (um) with no rounding. """
         if self._real_offset is None:
-            x, y = self.transform.x, self.transform.y
+            x, y = self.translate.x, self.translate.y
             pixel_size = self.img_a.pixel_size
             self._real_offset = Point(x * pixel_size, y * pixel_size)
 
@@ -41,7 +41,7 @@ class AlignedImages:
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._pixel_center is None:
             width, height = self.img_b.size
-            x, y = self.transform.x + width / 2, self.transform.y + height / 2
+            x, y = self.translate.x + width / 2, self.translate.y + height / 2
             x, y = int(round(x)), int(round(y))
             self._pixel_center = Point(x, y)
 
@@ -51,7 +51,7 @@ class AlignedImages:
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._real_center is None:
             width, height = self.img_b.size
-            x, y = self.transform.x + width / 2, self.transform.y + height / 2
+            x, y = self.translate.x + width / 2, self.translate.y + height / 2
             self._real_center = Point(x, y)
 
         return self._real_center
@@ -59,7 +59,7 @@ class AlignedImages:
     def overlay(self):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
-            self._overlay = Overlayer.create_overlay_image(self.img_a, self.img_b, self.transform)
+            self._overlay = Overlayer.create_overlay_image(self.img_a, self.img_b, self.translate)
 
         return self._overlay
 
@@ -67,7 +67,7 @@ class AlignedImages:
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
             metric_calc = OverlapMetric(self.img_a, self.img_b, None)
-            offset = self.transform.to_point()
+            offset = self.translate.to_point()
             self._metric = metric_calc.calculate_overlap_metric(offset)
 
         return self._metric
