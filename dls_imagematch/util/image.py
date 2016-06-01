@@ -232,6 +232,10 @@ class Image:
         position = position.intify().tuple()
         cv2.putText(self.img, text, position, cv2.FONT_HERSHEY_SIMPLEX, scale, color.bgra(), thickness)
 
+    def draw_cross(self, point, color=Color.Black(), size=5, thickness=1):
+        self.draw_line(point - Point(size, size), point + Point(size, size), color, thickness)
+        self.draw_line(point + Point(size, -size), point + Point(-size, size), color, thickness)
+
     def freq_range(self, coarseness_range, scale_factor):
         """Copy an image, discarding all but a range of frequency components.
 
