@@ -1,5 +1,5 @@
 from .constants import *
-from .point_select import PointSelectDialog
+from .point_select_dialog import PointSelectDialog
 from .image_select import ImageSelector
 from .well_select import WellSelector
 from .well_select2 import WellSelector2
