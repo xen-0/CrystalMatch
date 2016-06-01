@@ -6,12 +6,11 @@ from dls_imagematch.util import Rectangle, Point
 class CrystalMatcher:
     SEARCH_WIDTH = 200
     SEARCH_HEIGHT = 400
-    REGION_SIZE = 30
 
     def __init__(self):
         pass
 
-    def match(self, crystal_match_set):
+    def match(self, crystal_match_set, region_size):
         img1 = crystal_match_set.img1().to_mono()
         img2 = crystal_match_set.img2().to_mono()
 
@@ -20,7 +19,7 @@ class CrystalMatcher:
         FeatureMatcher.POPUP_RESULTS = True
 
         for crystal_match in crystal_match_set.matches:
-            img1_rect = crystal_match.img1_region(size=30)
+            img1_rect = crystal_match.img1_region(region_size)
             img2_rect = self._make_image2_region(crystal_match_set.img2(),
                                                  crystal_match_set.pixel_offset(), img1_rect)
 

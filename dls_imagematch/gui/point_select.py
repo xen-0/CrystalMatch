@@ -15,12 +15,11 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    REGION_SIZE = 30
-
-    def __init__(self, max_size, aligned_images):
+    def __init__(self, max_size, aligned_images, selection_rect_size):
         super(SelectorFrame, self).__init__()
 
         self._selected_points = []
+        self._rect_size = selection_rect_size
 
         # Load image from file
         self._aligned_images = aligned_images
@@ -69,9 +68,9 @@ class SelectorFrame(QLabel):
         img_copy = self._selector_image.copy()
 
         for point in self._selected_points:
-            rect = Rectangle.from_center(point, self.REGION_SIZE, self.REGION_SIZE)
-            img_copy.draw_cross(point, color=Color.Green(), thickness=2)
-            img_copy.draw_rectangle(rect, color=Color.Green(), thickness=2)
+            rect = Rectangle.from_center(point, self._rect_size, self._rect_size)
+            img_copy.draw_rectangle(rect, color=Color.Green(), thickness=1)
+            img_copy.draw_cross(point, color=Color.Green(), thickness=1, size=int(self._rect_size/2))
 
         self._display_image(img_copy)
 
@@ -88,14 +87,15 @@ class PointSelectDialog(QDialog):
     """ Dialog that displays the Region Selector Frame and stores the result so that it may be
     retrieved by the caller.
     """
-    def __init__(self, aligned_images):
+    def __init__(self, aligned_images, config):
         super(PointSelectDialog, self).__init__()
-        self._init_ui(aligned_images)
+        self._init_ui(aligned_images, config)
 
-    def _init_ui(self, aligned_images):
+    def _init_ui(self, aligned_images, config):
         self.setWindowTitle('Select Region of Interest from Image A')
 
-        self._frame = SelectorFrame(1100, aligned_images)
+        selection_region_size = config.region_size
+        self._frame = SelectorFrame(1100, aligned_images, selection_region_size)
 
         dialog_btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
@@ -121,9 +121,9 @@ class PointSelectDialog(QDialog):
         return self._frame.get_points()
 
     @staticmethod
-    def get_region(filename):
+    def get_points(filename, config):
         """ Display a dialog and return the result to the caller. """
-        dialog = PointSelectDialog(filename)
+        dialog = PointSelectDialog(filename, config)
         _ = dialog.exec_()
 
         points = dialog.selected_points()

@@ -3,6 +3,6 @@ test-images
 test-output
 focusstack
 scratchpad.py
-
+config.ini
 
 *.pyc

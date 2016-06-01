@@ -8,14 +8,19 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 sys.path.append("..")
 
 from dls_imagematch.gui import *
+from dls_imagematch.config import Config
 
 
 class VMXiCrystalMatcher(QMainWindow):
+    CONFIG_FILE = "../config.ini"
+
     def __init__(self):
         super(VMXiCrystalMatcher, self).__init__()
 
         self.gui_state = None
         self.matcher = None
+
+        self._config = Config(VMXiCrystalMatcher.CONFIG_FILE)
 
         self.init_ui()
 
@@ -41,7 +46,7 @@ class VMXiCrystalMatcher(QMainWindow):
         aligner = FeatureMatchControl(selector_a, selector_b, image_frame, with_popup=False)
 
         # Secondary Matching Control
-        secondary_match = CrystalMatchControl(selector_a, selector_b, image_frame, aligner)
+        secondary_match = CrystalMatchControl(selector_a, selector_b, image_frame, aligner, self._config)
 
         # Create layout
         vbox_img_selection = QVBoxLayout()

@@ -15,7 +15,7 @@ class CrystalMatchControl(QGroupBox):
     NUM_FRAMES = 10
     FRAME_SIZE = 75
 
-    def __init__(self, selector_a, selector_b, results_frame, aligner):
+    def __init__(self, selector_a, selector_b, results_frame, aligner, config):
         super(CrystalMatchControl, self).__init__()
 
         self._selector_a = selector_a
@@ -27,6 +27,9 @@ class CrystalMatchControl(QGroupBox):
 
         self._aligned_images = None
         self._selected_points = []
+
+        self._config = config
+        self._region_size = config.region_size
 
         self._init_ui()
         self.setTitle("Crystal Matching")
@@ -81,7 +84,7 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = self._aligner.last_images
 
         if self._aligned_images is not None:
-            self._selected_points = PointSelectDialog.get_region(self._aligned_images)
+            self._selected_points = PointSelectDialog.get_points(self._aligned_images, self._config)
         else:
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
 
@@ -103,19 +106,18 @@ class CrystalMatchControl(QGroupBox):
         selected_img1_points = self._selected_points
 
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
-        self._matcher.match(match_set)
+        self._matcher.match(match_set, self._region_size)
 
         self._display_results(match_set)
 
     def _display_image_regions(self):
         img1 = self._aligned_images.img_a
-        region_size = CrystalMatcher.REGION_SIZE
 
         for i, point in enumerate(self._selected_points):
             if i >= self.NUM_FRAMES:
                 break
 
-            rect = Rectangle.from_center(point, region_size, region_size)
+            rect = Rectangle.from_center(point, self._region_size, self._region_size)
             img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
             img.draw_cross(img.bounds().center(), color=Color.Green(), thickness=1)
             self._display_image(img, i)
@@ -166,12 +168,11 @@ class CrystalMatchControl(QGroupBox):
             img1.draw_cross(pixel1, Color.Red(), size=10, thickness=2)
             img1.draw_cross(px2+off, Color.Blue(), size=10, thickness=2)
             img1.draw_cross(pixel2+off, Color.Green(), size=10, thickness=2)
-            img1.draw_circle(pixel2+off, 30, Color.Green())
+            #img1.draw_circle(pixel2+off, 30, Color.Green())
 
             img2.draw_cross(pixel1-off, Color.Red(), size=10, thickness=2)
             img2.draw_cross(pixel2, Color.Green(), size=10, thickness=2)
             img2.draw_cross(px2, Color.Blue(), size=10, thickness=2)
-
 
         img1.popup()
         img2.popup()
