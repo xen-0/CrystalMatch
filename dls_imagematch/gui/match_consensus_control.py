@@ -109,4 +109,4 @@ class ConsensusMatchControl(QGroupBox):
 
         status = "Consensus region match complete (agreement = {0:.2f})".format(confidence)
         aligned = AlignedImages(self._img_a, self._img_b, translate)
-        self._results_frame.display_match_results(aligned, status)
+        self._results_frame.display_align_results(aligned, status)

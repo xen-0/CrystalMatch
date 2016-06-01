@@ -57,7 +57,7 @@ class ImageFrame(QGroupBox):
         self._lbl_cursor.setText("")
         self._frame.clear()
 
-    def display_match_results(self, aligned_images, message):
+    def display_align_results(self, aligned_images, message):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
         self.last_images = aligned_images

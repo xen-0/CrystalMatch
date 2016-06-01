@@ -87,5 +87,5 @@ class FeatureMatchControl(QGroupBox):
         status += ")"
 
         aligned = AlignedImages(self._img_a, self._img_b, transform.translation())
-        self._results_frame.display_match_results(aligned, status)
+        self._results_frame.display_align_results(aligned, status)
         self.last_images = aligned
