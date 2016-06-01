@@ -5,5 +5,6 @@ from .match_crystal import CrystalMatcher
 from .overlay import Overlayer
 from .metric_overlap import OverlapMetric
 from .aligned_images import AlignedImages
+from .crystal_match_set import CrystalMatchSet
 
 from .match_feature import FeatureMatchException
