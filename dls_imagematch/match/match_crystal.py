@@ -1,7 +1,6 @@
 
 from .match_feature import FeatureMatcher
-from .aligned_images import AlignedImages
-from dls_imagematch.util import Translate, Rectangle, Point
+from dls_imagematch.util import Rectangle, Point
 
 
 class CrystalMatcher:
@@ -11,48 +10,37 @@ class CrystalMatcher:
     def __init__(self):
         pass
 
-    def match(self, aligned_images, img_a_rect):
-        crystal_aligned = self._perform_match(aligned_images, img_a_rect)
-        return crystal_aligned
-
-    def _perform_match(self, aligned_images, img_a_rect):
-        crystal_img_a = aligned_images.img_a.crop(img_a_rect)
-        crystal_img_b, img_b_rect = self._make_image_b_region(aligned_images, img_a_rect)
-
-        crystal_img_a_gray = crystal_img_a.to_mono()
-        crystal_img_b_gray = crystal_img_b.to_mono()
+    def match(self, crystal_match_set):
+        img1 = crystal_match_set.img1().to_mono()
+        img2 = crystal_match_set.img2().to_mono()
 
         method = "Consensus"
         adapt = ''
-
         FeatureMatcher.POPUP_RESULTS = True
-        matcher = FeatureMatcher(crystal_img_b_gray, crystal_img_a_gray)
-        matcher.match(method, adapt)
 
-        crystal_translate = matcher.net_transform.translation().to_point()
-        position = Translate(img_b_rect.x1, img_b_rect.y1)
-        position = position.offset(crystal_translate)
+        for crystal_match in crystal_match_set.matches:
+            img1_rect = crystal_match.img1_region(size=30)
+            img2_rect = self._make_image2_region(crystal_match_set.img2(),
+                                                 crystal_match_set.pixel_offset(), img1_rect)
 
-        img_b = aligned_images.img_b
-        crystal_aligned = AlignedImages(img_b, crystal_img_a, position)
-        return crystal_aligned
+            matcher = FeatureMatcher(img1, img2, img1_rect, img2_rect)
+            transform = matcher.match(method, adapt)
 
-    def _make_image_b_region(self, aligned_images, img_a_rect):
-        img_b = aligned_images.img_b
+            crystal_match.set_transformation(transform)
 
+    def _make_image2_region(self, img2, align_offset, img1_rect):
         # Find the center of the rectangle in image A, convert to image B coords
-        center_a = img_a_rect.center()
-        center_b = center_a - aligned_images.pixel_offset()
+        center_a = img1_rect.center()
+        center_b = center_a - align_offset
 
         # Determine size (in pixels) of the search box in image B
-        width = self.SEARCH_WIDTH / img_b.pixel_size
-        height = self.SEARCH_HEIGHT / img_b.pixel_size
+        width = self.SEARCH_WIDTH / img2.pixel_size
+        height = self.SEARCH_HEIGHT / img2.pixel_size
 
         # Create a rectangle area of image B in which to search
         # Its tall because crystal likely to move downwards under gravity
         top_left = center_b - Point(width/2, width/2)
         rect = Rectangle.from_corner(top_left, width, height)
 
-        rect = rect.intersection(img_b.bounds())
-        region = img_b.crop(rect)
-        return region, rect
+        rect = rect.intersection(img2.bounds())
+        return rect

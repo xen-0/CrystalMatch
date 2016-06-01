@@ -4,7 +4,8 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
 from dls_imagematch.gui import RegionSelectDialog
-from dls_imagematch.match import CrystalMatcher, FeatureMatchException
+from dls_imagematch.util import Color
+from dls_imagematch.match import CrystalMatcher, CrystalMatchSet, FeatureMatchException
 
 
 class CrystalMatchControl(QGroupBox):
@@ -24,9 +25,7 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = None
 
         self._img_a_region = None
-        self._img_b_region = None
         self._img_a_rect = None
-        self._img_b_rect = None
 
         self._init_ui()
         self.setTitle("Crystal Matching")
@@ -62,16 +61,10 @@ class CrystalMatchControl(QGroupBox):
 
         self.setLayout(hbox_btns)
 
-    def match(self):
-        """ Begin the matching process. """
-        self._fn_begin_matching()
-
     def reset(self):
         self._aligned_images = None
         self._img_a_region = None
-        self._img_b_region = None
         self._img_a_rect = None
-        self._img_b_rect = None
         self._btn_locate.setEnabled(False)
 
     ''' ----------------------
@@ -95,19 +88,27 @@ class CrystalMatchControl(QGroupBox):
             self._btn_locate.setEnabled(True)
 
     def _fn_perform_match(self):
-
         try:
-            crystal_aligned = self._matcher.match(self._aligned_images, self._img_a_rect)
-            self._display_results(crystal_aligned)
+            self._perform_match()
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
     ''' ----------------------
     OTHER FUNCTIONS
     ------------------------'''
+    def _perform_match(self):
+        selected_img1_points = list()
+        selected_img1_points.append(self._img_a_rect.center())
+
+        match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
+        self._matcher.match(match_set)
+
+        self._display_results(match_set)
+
     def _display_image_b_marked(self):
-        _, rect = self._matcher._make_image_b_region(self._aligned_images, self._img_a_rect)
-        marked_img = self._aligned_images.img_b.copy()
+        img_b = self._aligned_images.img_b
+        rect = self._matcher._make_image2_region(img_b, self._aligned_images.pixel_offset(), self._img_a_rect)
+        marked_img = img_b.copy()
         marked_img.draw_rectangle(rect)
 
         self._results_frame.display_image(marked_img)
@@ -122,16 +123,48 @@ class CrystalMatchControl(QGroupBox):
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self._frame.setPixmap(scaled)
 
-    def _display_results(self, crystal_aligned):
+    def _display_results(self, crystal_match_set):
         status = "Crystal matching complete"
-        self._results_frame.display_match_results(crystal_aligned, status)
 
-        pixel = crystal_aligned.pixel_center()
-        real = crystal_aligned.real_center()
+        self._results_frame.clear()
+        self._results_frame.set_status_message(status)
 
-        beam_position = "Beam Position: x={0:.2f} um, " \
-                        "y={1:.2f} um ({2} px, {3} px)".format(real.x, real.y, pixel.x, pixel.y)
-        print(beam_position)
+        img1 = crystal_match_set.img1().copy()
+        img2 = crystal_match_set.img2().copy()
+
+        print(status)
+        for i, match in enumerate(crystal_match_set.matches):
+
+            pixel1, real1 = match.img1_point(), match.img1_point_real()
+            pixel2, real2 = match.img2_point(), match.img2_point_real()
+
+            beam_position = "Beam Position: x={0:.2f} um, " \
+                            "y={1:.2f} um ({2} px, {3} px)".format(real2.x, real2.y, pixel2.x, pixel2.y)
+
+            delta_pixel = pixel2 - pixel1 - crystal_match_set.pixel_offset()
+            delta_real = real2 - real1 - crystal_match_set.real_offset()
+            delta = "Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
+                    "{3} px)".format(delta_real.x, delta_real.y, delta_pixel.x, delta_pixel.y)
+
+            print("-- Match {} --".format(i))
+            print(beam_position)
+            print(delta)
+
+            px2 = match.img1_point() - match._transformation.translation().to_point()
+            off = crystal_match_set.pixel_offset()
+            img1.draw_cross(pixel1, Color.Red(), size=10, thickness=2)
+            img1.draw_cross(px2+off, Color.Blue(), size=10, thickness=2)
+            img1.draw_cross(pixel2+off, Color.Green(), size=10, thickness=2)
+            img1.draw_circle(pixel2+off, 30, Color.Green())
+
+            img2.draw_cross(pixel1-off, Color.Red(), size=10, thickness=2)
+            img2.draw_cross(pixel2, Color.Green(), size=10, thickness=2)
+            img2.draw_cross(px2, Color.Blue(), size=10, thickness=2)
+
+
+        img1.popup()
+        img2.popup()
+
 
 
 
