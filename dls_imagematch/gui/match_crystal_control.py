@@ -3,14 +3,17 @@ from __future__ import division
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
-from dls_imagematch.gui import RegionSelectDialog
-from dls_imagematch.util import Color
+from dls_imagematch.gui import PointSelectDialog
+from dls_imagematch.util import Color, Rectangle
 from dls_imagematch.match import CrystalMatcher, CrystalMatchSet, FeatureMatchException
 
 
 class CrystalMatchControl(QGroupBox):
     """ Widget that allows control of the Secondary Matching process.
     """
+
+    NUM_FRAMES = 10
+    FRAME_SIZE = 75
 
     def __init__(self, selector_a, selector_b, results_frame, aligner):
         super(CrystalMatchControl, self).__init__()
@@ -23,9 +26,7 @@ class CrystalMatchControl(QGroupBox):
         self._matcher = CrystalMatcher()
 
         self._aligned_images = None
-
-        self._img_a_region = None
-        self._img_a_rect = None
+        self._selected_points = []
 
         self._init_ui()
         self.setTitle("Crystal Matching")
@@ -41,11 +42,16 @@ class CrystalMatchControl(QGroupBox):
         self._btn_locate.setEnabled(False)
 
         # Selection Image Frames
-        self._frame = QLabel()
-        self._frame.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
-        self._frame.setFixedWidth(150)
-        self._frame.setFixedHeight(150)
-        self._frame.setAlignment(Qt.AlignCenter)
+        self._frames = []
+        hbox_frames = QHBoxLayout()
+        for i in range(self.NUM_FRAMES):
+            frame = QLabel()
+            frame.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
+            frame.setFixedWidth(self.FRAME_SIZE)
+            frame.setFixedHeight(self.FRAME_SIZE)
+            frame.setAlignment(Qt.AlignCenter)
+            self._frames.append(frame)
+            hbox_frames.addWidget(frame)
 
         # Create widget layout
         vbox_btns = QVBoxLayout()
@@ -56,15 +62,14 @@ class CrystalMatchControl(QGroupBox):
 
         hbox_btns = QHBoxLayout()
         hbox_btns.addLayout(vbox_btns)
-        hbox_btns.addWidget(self._frame)
+        hbox_btns.addLayout(hbox_frames)
         hbox_btns.addStretch(1)
 
         self.setLayout(hbox_btns)
 
     def reset(self):
         self._aligned_images = None
-        self._img_a_region = None
-        self._img_a_rect = None
+        self._selected_points = []
         self._btn_locate.setEnabled(False)
 
     ''' ----------------------
@@ -76,15 +81,13 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = self._aligner.last_images
 
         if self._aligned_images is not None:
-            region_image, rect = RegionSelectDialog.get_region(self._aligned_images)
-            self._img_a_region = region_image
-            self._img_a_rect = rect
+            self._selected_points = PointSelectDialog.get_region(self._aligned_images)
         else:
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
 
-        if self._img_a_region is not None:
-            self._display_image(self._img_a_region)
-            self._display_image_b_marked()
+        if len(self._selected_points) > 0:
+            self._clear_images()
+            self._display_image_regions()
             self._btn_locate.setEnabled(True)
 
     def _fn_perform_match(self):
@@ -97,31 +100,39 @@ class CrystalMatchControl(QGroupBox):
     OTHER FUNCTIONS
     ------------------------'''
     def _perform_match(self):
-        selected_img1_points = list()
-        selected_img1_points.append(self._img_a_rect.center())
+        selected_img1_points = self._selected_points
 
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
         self._matcher.match(match_set)
 
         self._display_results(match_set)
 
-    def _display_image_b_marked(self):
-        img_b = self._aligned_images.img_b
-        rect = self._matcher._make_image2_region(img_b, self._aligned_images.pixel_offset(), self._img_a_rect)
-        marked_img = img_b.copy()
-        marked_img.draw_rectangle(rect)
+    def _display_image_regions(self):
+        img1 = self._aligned_images.img_a
+        region_size = CrystalMatcher.REGION_SIZE
 
-        self._results_frame.display_image(marked_img)
-        self._results_frame.set_status_message("Image B search region")
+        for i, point in enumerate(self._selected_points):
+            if i >= self.NUM_FRAMES:
+                break
 
-    def _display_image(self, image):
+            rect = Rectangle.from_center(point, region_size, region_size)
+            img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
+            img.draw_cross(img.bounds().center(), color=Color.Green(), thickness=1)
+            self._display_image(img, i)
+
+    def _display_image(self, image, frame_number):
         """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
-        frame_size = self._frame.size()
+        frame = self._frames[frame_number]
+        frame_size = frame.size()
 
         # Convert to a QT pixmap and display
         pixmap = image.to_qt_pixmap()
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self._frame.setPixmap(scaled)
+        frame.setPixmap(scaled)
+
+    def _clear_images(self):
+        for i in range(self.NUM_FRAMES):
+            self._frames[i].clear()
 
     def _display_results(self, crystal_match_set):
         status = "Crystal matching complete"

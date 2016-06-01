@@ -6,6 +6,7 @@ from dls_imagematch.util import Rectangle, Point
 class CrystalMatcher:
     SEARCH_WIDTH = 200
     SEARCH_HEIGHT = 400
+    REGION_SIZE = 30
 
     def __init__(self):
         pass
