@@ -1,10 +1,16 @@
 import os
 
 TAG_REGION_SIZE = "region_size"
+TAG_INPUT_DIR = "input_dir_root"
+TAG_SAMPLES_DIR = "samples_dir"
+TAG_OUTPUT_DIR = "output_dir"
 
 DELIMITER = "="
 
 DEFAULT_REGION_SIZE = 30
+DEFAULT_INPUT_DIR = "../test-images/"
+DEFAULT_SAMPLES_DIR = "../test-images/Sample Sets/"
+DEFAULT_OUTPUT_DIR = "../test-output/"
 
 
 class Config:
@@ -12,6 +18,9 @@ class Config:
         self._file = file
 
         self.region_size = None
+        self.input_dir = None
+        self.samples_dir = None
+        self.output_dir = None
 
         self.reset_all()
 
@@ -23,8 +32,24 @@ class Config:
 
     def reset_all(self):
         self.region_size = DEFAULT_REGION_SIZE
+        self.input_dir = DEFAULT_INPUT_DIR
+        self.samples_dir = DEFAULT_SAMPLES_DIR
+        self.output_dir = DEFAULT_OUTPUT_DIR
 
     def _clean_values(self):
+        self.input_dir = self.input_dir.strip()
+        self.samples_dir = self.samples_dir.strip()
+        self.output_dir = self.output_dir.strip()
+
+        if not self.input_dir.endswith("/"):
+            self.input_dir += "/"
+
+        if not self.samples_dir.endswith("/"):
+            self.samples_dir += "/"
+
+        if not self.output_dir.endswith("/"):
+            self.output_dir += "/"
+
         try:
             self.region_size = int(self.region_size)
         except ValueError:
@@ -37,6 +62,9 @@ class Config:
 
         with open(file, 'w') as f:
             f.write(line.format(TAG_REGION_SIZE, self.region_size))
+            f.write(line.format(TAG_INPUT_DIR, self.input_dir))
+            f.write(line.format(TAG_SAMPLES_DIR, self.samples_dir))
+            f.write(line.format(TAG_OUTPUT_DIR, self.output_dir))
 
     def _load_from_file(self, file):
         """ Load options from the specified file. """
@@ -60,3 +88,9 @@ class Config:
         """ Parse a line from a config file, setting the relevant option. """
         if tag == TAG_REGION_SIZE:
             self.region_size = int(value)
+        elif tag == TAG_INPUT_DIR:
+            self.input_dir = str(value)
+        elif tag == TAG_SAMPLES_DIR:
+            self.samples_dir = str(value)
+        elif tag == TAG_OUTPUT_DIR:
+            self.output_dir = str(value)
