@@ -2,7 +2,6 @@ from __future__ import division
 
 import cv2
 import numpy as np
-import math
 
 from dls_imagematch.util import Translate, Image, Color, Point
 from .transformation import Transformation
@@ -14,7 +13,10 @@ class FeatureMatchException(Exception):
         self.message = message
 
 
-class _Match:
+class _SingleFeatureMatch:
+    """ Wrapper for the match and keypoint objects produced byt the OpenCV feature matching routines. Makes
+    it easier to use and pass around this data. Only intended for internal use in the FeatureMatcher class.
+    """
     def __init__(self, match, kp1, kp2):
         self._match = match
         self._kp1 = kp1
@@ -25,12 +27,6 @@ class _Match:
 
     def point2(self):
         return Point(self._kp2.pt[0], self._kp2.pt[1])
-
-    def kp1(self):
-        return self._kp1.pt
-
-    def kp2(self):
-        return self._kp2.pt
 
 
 class FeatureMatcher:
@@ -48,24 +44,39 @@ class FeatureMatcher:
     POPUP_RESULTS = True
     MINIMUM_MATCHES = 1
 
-    def __init__(self, img_a, img_b):
-        self.img_a = img_a
-        self.img_b = img_b
+    _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
+                            "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
+                            "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
+
+    def __init__(self, img1, img2, img1_rect=None, img2_rect=None):
+        """ Feature Matching between two images. If rectangular regions are provided, the routine will
+        only consider features in those regions. """
+        if img1_rect is None:
+            img1_rect = img1.bounds()
+
+        if img2_rect is None:
+            img2_rect = img2.bounds()
+
+        self.img1 = img1.crop(img1_rect)
+        self.img2 = img2.crop(img2_rect)
+
+        self.img1_offset = img1_rect.top_left()
+        self.img2_offset = img2_rect.top_left()
 
         self.match_complete = False
         self.net_transform = None
 
     def match(self, method, adaptation, translation_only=False):
-        """ Perform the matching procedure. """
-        '''
-        try:
-            self._perform_match()
-        except AttributeError:
-            msg = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
-                  "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
-                  "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
-            raise OpenCvVersionError(msg)
-        '''
+        """ Perform a feature matching operation between the two selected images (or image regions if
+        specified. The resulting transformation can be applied to a point in Image/Region 1 coordinates
+        to map it to its matching point in Image 2 coordinates.
+
+        Parameters
+        ----------
+        method - Name (string) of the OpenCV feature matching method to use (one of DETECTOR_TYPES)
+        adaptation - Feature matching adaptation (one of ADAPTATION_TYPE)
+        translation_only - If True, consider only the translation component of the match transformation.
+        """
         self.match_complete = False
         self.net_transform = None
 
@@ -74,10 +85,12 @@ class FeatureMatcher:
         elif adaptation not in self.ADAPTATION_TYPE:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
 
-        self._perform_match(self.img_a, self.img_b, str(method), str(adaptation), translation_only)
+        transform = self._perform_match(self.img1, self.img2, str(method), str(adaptation), translation_only)
+        return transform
 
     def _perform_match(self, img1, img2, method, adaptation, translation_only):
-
+        """ Call the correct feature matching function (normal or consensus). And determine the
+        proper transformation from the match results. """
         if method == "Consensus":
             FeatureMatcher.POPUP_RESULTS = False
             matches = self._find_matches_for_consensus(img1, img2, adaptation)
@@ -90,9 +103,10 @@ class FeatureMatcher:
             message = "Could not find the required minimum number of matches ({})!".format(min_matches)
             raise FeatureMatchException(message)
 
-        # Calculate the Transform
+        # Calculate the average translation from the match deltas
         translation = self._calculate_median_translation(matches)
 
+        # Calculate the full transformation the maps image 1 to image 2 (includes rotation, scaling, skew)
         homography = None
         if not translation_only:
             homography = self._calculate_homography(matches)
@@ -103,27 +117,11 @@ class FeatureMatcher:
         self.match_complete = True
         self.POPUP_RESULTS = True
 
-        # TESTING
-        '''
-        warped = transform.inverse_transform_image(img1, (img1.width, img1.height))
-
-        img2.popup()
-        warped.popup()
-
-        print(img1.size, warped.size)
-        blended = cv2.addWeighted(img1.img, 0.5, warped.img, 0.5, 0)
-
-        corners = img2.bounds().corners()
-        corners = transform.inverse_transform_points(corners)
-
-        blended = Image(blended)
-        blended.popup()
-        blended.draw_polygon(corners)
-        blended.popup()
-        '''
+        return transform
 
     @staticmethod
     def _find_matches_for_consensus(img1, img2, adaptation):
+        """ Perform feature matching for each method in the consensus list, and aggregate the match results."""
         matches = []
         for method in FeatureMatcher.CONSENSUS_DETECTORS:
             try:
@@ -137,18 +135,20 @@ class FeatureMatcher:
 
     @staticmethod
     def _find_matches_for_method(img1, img2, method, adaptation):
+        """ Perform feature matching using the specified method and return a list of matches. """
+        # Detect features in both the images
         keypoints_1, des1 = FeatureMatcher._detect_features(img1, method, adaptation)
         keypoints_2, des2 = FeatureMatcher._detect_features(img2, method, adaptation)
 
-        # Find matches
+        # Find matches between feature sets
         raw_matches = FeatureMatcher._brute_force_descriptor_match(method, des1, des2, n_best=200)
 
-        # Create wrapping _Match objects so the results are easier to pass around
+        # Create wrapping _SingleFeatureMatch objects so the results are easier to pass around
         matches = []
         for match in raw_matches:
             kp1 = keypoints_1[match.queryIdx]
             kp2 = keypoints_2[match.trainIdx]
-            matches.append(_Match(match, kp1, kp2))
+            matches.append(_SingleFeatureMatch(match, kp1, kp2))
 
         # Draw matches image
         if FeatureMatcher.POPUP_RESULTS and len(matches) > 0:
@@ -170,8 +170,11 @@ class FeatureMatcher:
             extractor_method = "BRIEF"
 
         # Create the feature detector and descriptor extractor
-        detector = cv2.FeatureDetector_create(adaptation + detector_method)
-        extractor = cv2.DescriptorExtractor_create(extractor_method)
+        try:
+            detector = cv2.FeatureDetector_create(adaptation + detector_method)
+            extractor = cv2.DescriptorExtractor_create(extractor_method)
+        except AttributeError:
+            raise FeatureMatchException(FeatureMatcher._OPENCV_VERSION_ERROR)
 
         # Get keypoints and descriptors
         keypoints = detector.detect(img.img, None)
@@ -209,27 +212,24 @@ class FeatureMatcher:
 
         return matches[:n_best]
 
-    @staticmethod
-    def _calculate_median_translation(matches):
+    def _calculate_median_translation(self, matches):
         """ For a set of feature matches between two images, find the average (median) translation that maps
         one image to the other.
         """
-        xs = []
-        ys = []
+        deltas = []
         for match in matches:
-            (x1, y1) = match.kp1()
-            (x2, y2) = match.kp2()
-            xs.append(x2-x1)
-            ys.append(y2-y1)
+            point1 = match.point1() + self.img1_offset
+            point2 = match.point2() + self.img2_offset
+            delta = point2 - point1
+            deltas.append(delta)
 
         # Get median result
-        x = -np.median(xs)
-        y = -np.median(ys)
+        x = -np.median([d.x for d in deltas])
+        y = -np.median([d.y for d in deltas])
 
         return Translate(x, y)
 
-    @staticmethod
-    def _calculate_homography(matches):
+    def _calculate_homography(self, matches):
         """ See:
         http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
 
@@ -241,10 +241,12 @@ class FeatureMatcher:
         homography = None
 
         if len(matches) >= 4:
-            img1_pts = np.float32([m.kp1() for m in matches]).reshape(-1, 1, 2)
-            img2_pts = np.float32([m.kp2() for m in matches]).reshape(-1, 1, 2)
+            img1_pts = [m.point1() + self.img1_offset for m in matches]
+            img1_pts = np.float32([p.tuple() for p in img1_pts]).reshape(-1, 1, 2)
+            img2_pts = [m.point2() + self.img2_offset for m in matches]
+            img2_pts = np.float32([p.tuple() for p in img2_pts]).reshape(-1, 1, 2)
 
-            homography, mask = cv2.findHomography(img2_pts, img1_pts, cv2.LMEDS)
+            homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
             pts = np.float32([[0, 0]]).reshape(-1, 1, 2)
             dst = cv2.perspectiveTransform(pts, homography)
 
@@ -276,11 +278,12 @@ class FeatureMatcher:
             out.draw_line(point1, point2, color=Color.Blue(), thickness=1)
 
         # Resize so that it fits on the screen
-        factor = 1800 / out.width
+        factor = 1000 / out.width
         out = out.rescale(factor)
         out.popup("Matches")
 
     @staticmethod
     def _draw_keypoints(img, keypoints):
+        """ Draw the list of keypoints to the specified image and display it as a popup window. """
         marked_img = cv2.drawKeypoints(img.img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         Image(marked_img).popup("Keypoints")
