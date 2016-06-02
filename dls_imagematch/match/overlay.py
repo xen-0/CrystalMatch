@@ -1,6 +1,6 @@
 import cv2
 
-from dls_imagematch.util import Image, Rectangle, Point
+from dls_imagematch.util import Image, Rectangle, Point, Color
 
 
 class Overlayer:
@@ -23,11 +23,12 @@ class Overlayer:
         perc_a, perc_b = 0.5, 0.5
         blended = cv2.addWeighted(overlap_a.img, perc_a, overlap_b.img, perc_b, 0)
         background.paste(Image(blended), Point(max(offset.x, 0), max(offset.y, 0)))
+        background = background.to_channels(3)
 
         # Define the rectangle that will be pasted to the background image
         w, h = img_b.size
         rect = Rectangle.from_corner(offset, w, h)
-        background.draw_rectangle(rect)
+        background.draw_rectangle(rect, color=Color.Purple())
 
         return background
 
