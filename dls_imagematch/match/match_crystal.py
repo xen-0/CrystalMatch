@@ -38,7 +38,7 @@ class CrystalMatcher:
 
         # Create a rectangle area of image B in which to search
         # Its tall because crystal likely to move downwards under gravity
-        top_left = center_b - Point(width/2, width/2)
+        top_left = center_b - Point(width/2, height/4)
         rect = Rectangle.from_corner(top_left, width, height)
 
         rect = rect.intersection(img2.bounds())
