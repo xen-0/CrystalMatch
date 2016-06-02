@@ -193,28 +193,6 @@ class CrystalMatchControl(QGroupBox):
             img2.draw_cross(pixel2, Color.Green(), size=10, thickness=2)
             img2.draw_cross(px2, Color.Blue(), size=10, thickness=2)
 
-        img1.popup()
-        img2.popup()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self._results_frame.display_image(img2)
+        #img1.popup()
+        #img2.popup()
