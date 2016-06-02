@@ -8,14 +8,19 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 sys.path.append("..")
 
 from dls_imagematch.gui import *
+from dls_imagematch.config import Config
 
 
 class AlignmentMain(QMainWindow):
+    CONFIG_FILE = "../config.ini"
+
     def __init__(self):
         super(AlignmentMain, self).__init__()
 
         self.gui_state = None
         self.matcher = None
+
+        self._config = Config(AlignmentMain.CONFIG_FILE)
 
         self.init_ui()
 
@@ -28,12 +33,12 @@ class AlignmentMain(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        selector_a = ImageSelector("Select Image A")
-        selector_b = ImageSelector("Select Image B")
+        selector_a = ImageSelector("Select Image A", self._config)
+        selector_b = ImageSelector("Select Image B", self._config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelector(selector_a, selector_b)
-        well_selector2 = WellSelector2(selector_a, selector_b)
+        well_selector = WellSelector(selector_a, selector_b, self._config)
+        well_selector2 = WellSelector2(selector_a, selector_b, self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame()

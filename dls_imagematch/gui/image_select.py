@@ -4,9 +4,8 @@ import os
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit)
+from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit
 
-from dls_imagematch.gui import INPUT_DIR_ROOT
 from dls_imagematch.util import Image
 
 
@@ -14,10 +13,11 @@ class ImageSelector(QtGui.QGroupBox):
     """ Widget that allows the user to select and view an image and to specify a
     corresponding real pixel size in micrometers (um).
     """
-    def __init__(self, title):
+    def __init__(self, title, config):
         super(ImageSelector, self).__init__()
 
         self._file = None
+        self._config = config
 
         self._init_ui()
         self.setTitle(title)
@@ -69,7 +69,7 @@ class ImageSelector(QtGui.QGroupBox):
             self._set_filename_label(filepath)
 
     def setPixelSize(self, size):
-        """ Set the per pixel size for the image in micormeters. """
+        """ Set the per pixel size for the image in micrometers. """
         self._txt_px_size.setText("{0:.5f}".format(size))
 
     def image(self):
@@ -86,7 +86,8 @@ class ImageSelector(QtGui.QGroupBox):
 
     def _open_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
-        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', INPUT_DIR_ROOT))
+        input_dir = self._config.input_dir
+        filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', input_dir))
         if filepath:
             self.setFile(filepath)
 

@@ -2,8 +2,6 @@ from __future__ import division
 
 from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
 
-from dls_imagematch.gui import SAMPLES_DIR
-
 
 class WellSelector(QGroupBox):
     """ Widget that allows the user to select a particular well from a
@@ -11,11 +9,13 @@ class WellSelector(QGroupBox):
     """
     SET_FACTOR = 6.55
 
-    def __init__(self, selector_a, selector_b):
+    def __init__(self, selector_a, selector_b, config):
         super(WellSelector, self).__init__()
 
         self.selector_a = selector_a
         self.selector_b = selector_b
+
+        self._samples_dir = config.samples_dir
 
         self._init_ui()
         self.setTitle("Select Well (441350000072)")
@@ -51,7 +51,7 @@ class WellSelector(QGroupBox):
         row = self._cmbo_row.currentText()
         col = self._cmbo_col.currentText()
 
-        file_a, file_b = self._get_441350000072_files(row, col)
+        file_a, file_b = self._get_441350000072_files(row, col, self._samples_dir)
         self.selector_a.setFile(file_a)
         self.selector_b.setFile(file_b)
 
@@ -62,13 +62,13 @@ class WellSelector(QGroupBox):
         self.selector_b.setPixelSize(pixel_size_b)
 
     @staticmethod
-    def _get_441350000072_files(row, col):
+    def _get_441350000072_files(row, col, dir):
         """ Get the full paths of the files for the specified well of the 441350000072 data set. """
-        mov_filepath = SAMPLES_DIR + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
+        mov_filepath = dir + "441350000072_OAVS/_1_" + str(row) + str(col) + ".png"
         col = int(col)
         if col < 10:
             col = '0' + str(col)
 
-        ref_filepath = SAMPLES_DIR + "441350000072/" + str(row) + str(col) + "_13.jpg"
+        ref_filepath = dir + "441350000072/" + str(row) + str(col) + "_13.jpg"
 
         return ref_filepath, mov_filepath

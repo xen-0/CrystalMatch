@@ -2,7 +2,6 @@ from __future__ import division
 
 from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
 
-from dls_imagematch.gui import SAMPLES_DIR
 from dls_imagematch.util import File
 
 
@@ -13,11 +12,13 @@ class WellSelector2(QGroupBox):
 
     The path of an image is expected to be: plate_xxx/batch_yy/well_zz_profile_1.jpg
     """
-    def __init__(self, selector_a, selector_b):
+    def __init__(self, selector_a, selector_b, config):
         super(WellSelector2, self).__init__()
 
         self.selector_a = selector_a
         self.selector_b = selector_b
+
+        self._samples_dir = config.samples_dir
 
         self._init_ui()
         self.setTitle("Select Plate")
@@ -28,7 +29,7 @@ class WellSelector2(QGroupBox):
     def _init_ui(self):
         """ Create all the display elements of the widget. """
         # Get list of plate directories
-        plate_folders = File.get_sub_dirs(SAMPLES_DIR, startswith="plate_")
+        plate_folders = File.get_sub_dirs(self._samples_dir, startswith="plate_")
 
         # Row dropdown box
         self._cmbo_plate = QComboBox()
@@ -65,7 +66,7 @@ class WellSelector2(QGroupBox):
         self._cmbo_batch1.clear()
         self._cmbo_batch2.clear()
 
-        plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
+        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
         batch_folders = File.get_sub_dirs(str(plate_dir), startswith="batch_")
 
         for folder in batch_folders:
@@ -82,7 +83,7 @@ class WellSelector2(QGroupBox):
         current_selection = self._cmbo_well.currentText()
         self._cmbo_well.clear()
 
-        plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
+        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
         batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
 
@@ -109,7 +110,7 @@ class WellSelector2(QGroupBox):
     def _select_well(self):
         """ Select a well from the dataset to use for matching. Display the
         corresponding images in slot A and B. """
-        plate_dir = SAMPLES_DIR + self._cmbo_plate.currentText()
+        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
         batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
 

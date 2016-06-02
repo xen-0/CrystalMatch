@@ -1,18 +1,16 @@
 import sys
 import os
-import cv2
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget, QCheckBox, QMessageBox, \
-    QLineEdit, QPushButton
+from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton
 
 
 class ConfigDialog(QtGui.QDialog):
 
-    def __init__(self, options):
+    def __init__(self, config):
         super(ConfigDialog, self).__init__()
 
-        self.options = options
+        self._config = config
 
         self._init_ui()
         self._update_options_display()
@@ -25,7 +23,7 @@ class ConfigDialog(QtGui.QDialog):
         self.setWindowIcon(QtGui.QIcon('web.png'))
 
         LABEL_WIDTH = 100
-        BUTTON_WIDTH = 130
+        BUTTON_WIDTH = 120
 
         # Region Size
         self.txt_region_size = QLineEdit()
@@ -40,7 +38,7 @@ class ConfigDialog(QtGui.QDialog):
 
         # Input Directory
         self.txt_input_dir = QLineEdit()
-        lbl_input_dir = QLabel("Samples Directory:")
+        lbl_input_dir = QLabel("Input Directory:")
         lbl_input_dir.setFixedWidth(LABEL_WIDTH)
 
         btn_show_input_dir = QPushButton('View Input Files')
@@ -110,23 +108,23 @@ class ConfigDialog(QtGui.QDialog):
         self.setLayout(vbox)
 
     def _update_options_display(self):
-        self.txt_region_size.setText(str(self.options.region_size))
-        self.txt_input_dir.setText(self.options.input_dir)
-        self.txt_samples_dir.setText(self.options.samples_dir)
-        self.txt_output_dir.setText(self.options.output_dir)
+        self.txt_region_size.setText(str(self._config.region_size))
+        self.txt_input_dir.setText(self._config.input_dir)
+        self.txt_samples_dir.setText(self._config.samples_dir)
+        self.txt_output_dir.setText(self._config.output_dir)
 
     def _open_input_dir(self):
-        path = self.options.input_dir
+        path = self._config.input_dir
         path = os.path.abspath(path)
         self._open_directory(path)
 
     def _open_samples_dir(self):
-        path = self.options.samples_dir
+        path = self._config.samples_dir
         path = os.path.abspath(path)
         self._open_directory(path)
 
     def _open_output_dir(self):
-        path = self.options.output_dir
+        path = self._config.output_dir
         path = os.path.abspath(path)
         self._open_directory(path)
 
@@ -140,12 +138,12 @@ class ConfigDialog(QtGui.QDialog):
             QMessageBox.critical(self, "File Error", "Only available on Windows")
 
     def _dialog_apply_changes(self):
-        self.options.region_size = self.txt_region_size.text()
-        self.options.input_dir = self.txt_input_dir.text()
-        self.options.samples_dir = self.txt_samples_dir.text()
-        self.options.output_dir = self.txt_output_dir.text()
+        self._config.region_size = self.txt_region_size.text()
+        self._config.input_dir = self.txt_input_dir.text()
+        self._config.samples_dir = self.txt_samples_dir.text()
+        self._config.output_dir = self.txt_output_dir.text()
 
-        self.options.update_config_file()
+        self._config.update_config_file()
         self._update_options_display()
 
     def _dialog_close_ok(self):
@@ -156,6 +154,7 @@ class ConfigDialog(QtGui.QDialog):
         self.close()
 
     def _dialog_reset(self):
+        self._config.reset_all()
         self._update_options_display()
 
 

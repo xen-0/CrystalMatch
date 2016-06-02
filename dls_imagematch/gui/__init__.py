@@ -1,4 +1,3 @@
-from .constants import *
 from .point_select_dialog import PointSelectDialog
 from .image_select import ImageSelector
 from .well_select import WellSelector
