@@ -34,6 +34,7 @@ class ConfigDialog(QtGui.QDialog):
         hbox_region_size = QHBoxLayout()
         hbox_region_size.addWidget(lbl_region_size)
         hbox_region_size.addWidget(self.txt_region_size)
+        hbox_region_size.addWidget(QLabel('px'))
         hbox_region_size.addStretch()
 
         # Search Width
@@ -45,6 +46,7 @@ class ConfigDialog(QtGui.QDialog):
         hbox_search_width = QHBoxLayout()
         hbox_search_width.addWidget(lbl_search_width)
         hbox_search_width.addWidget(self.txt_search_width)
+        hbox_search_width.addWidget(QLabel('px'))
         hbox_search_width.addStretch()
 
         # Search Height
@@ -56,6 +58,7 @@ class ConfigDialog(QtGui.QDialog):
         hbox_search_height = QHBoxLayout()
         hbox_search_height.addWidget(lbl_search_height)
         hbox_search_height.addWidget(self.txt_search_height)
+        hbox_search_height.addWidget(QLabel('px'))
         hbox_search_height.addStretch()
 
         # Input Directory
