@@ -43,8 +43,8 @@ class RegionMatcher:
         # Scale-dependent range of frequencies to pick out in pre-processing step
         self._freq_range = (1, 50)
 
-        self.img_a = reference_img
-        self.img_b = moving_img
+        self.img1 = reference_img
+        self.img2 = moving_img
         self.net_transform = starting_guess
 
         self.match_complete = False
@@ -108,8 +108,8 @@ class RegionMatcher:
         # Do the scale factor-dependent pre-processing step. In our case, we'll
         # pick out frequency ranges somewhat coarser than 1 px. Then resize the
         # image to the correct scale
-        scale_img_ref = self.img_a.freq_range(self._freq_range, scale).rescale(scale)
-        scale_img_mov = self.img_b.freq_range(self._freq_range, scale).rescale(scale)
+        scale_img_ref = self.img1.freq_range(self._freq_range, scale).rescale(scale)
+        scale_img_mov = self.img2.freq_range(self._freq_range, scale).rescale(scale)
 
         # Choose the transform candidates for this working size.
         trial_transforms = TrialTransforms()

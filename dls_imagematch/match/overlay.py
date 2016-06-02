@@ -5,17 +5,17 @@ from dls_imagematch.util import Image, Rectangle, Point, Color
 
 class Overlayer:
     @staticmethod
-    def create_overlay_image(img_a, img_b, transform):
+    def create_overlay_image(img1, img2, transform):
         """ For the two images, A and B, where the position of B is offset from that of A, overlay
         image B onto image A at the appropriate position. The overlaid area will ve a blending of the
         two images. A rectangle will be drawn around the area.
         """
         # Make a copy of A, the background image
-        background = img_a.copy()
+        background = img1.copy()
 
         # Get overlapping regions of images
         offset = transform.to_point()
-        overlap_a, overlap_b = Overlayer.get_overlap_regions(img_a, img_b, offset)
+        overlap_a, overlap_b = Overlayer.get_overlap_regions(img1, img2, offset)
         if overlap_a is None or overlap_b is None:
             return background
 
@@ -26,14 +26,14 @@ class Overlayer:
         background = background.to_channels(3)
 
         # Define the rectangle that will be pasted to the background image
-        w, h = img_b.size
+        w, h = img2.size
         rect = Rectangle.from_corner(offset, w, h)
         background.draw_rectangle(rect, color=Color.Purple())
 
         return background
 
     @staticmethod
-    def get_overlap_regions(img_a, img_b, offset):
+    def get_overlap_regions(img1, img2, offset):
         """ For the two images, A and B, where the position of B is offset from that of A,
         return two new images that are the overlapping segments of the original images.
 
@@ -46,14 +46,14 @@ class Overlayer:
         If image B only partially overlaps image A, only the overlapping sections of each
         are returned.
         """
-        rect_a = img_a.bounds()
-        rect_b = img_b.bounds().offset(offset)
+        rect_a = img1.bounds()
+        rect_b = img2.bounds().offset(offset)
         overlap_a_rect = rect_a.intersection(rect_b)
-        overlap_a = img_a.crop(overlap_a_rect)
+        overlap_a = img1.crop(overlap_a_rect)
 
-        rect_a = img_a.bounds().offset(-offset)
-        rect_b = img_b.bounds()
+        rect_a = img1.bounds().offset(-offset)
+        rect_b = img2.bounds()
         overlap_b_rect = rect_a.intersection(rect_b)
-        overlap_b = img_b.crop(overlap_b_rect)
+        overlap_b = img2.crop(overlap_b_rect)
 
         return overlap_a, overlap_b

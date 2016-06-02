@@ -17,10 +17,10 @@ class RegionConsensusMatcher:
     """
     PARALLEL = True
 
-    def __init__(self, img_a, img_b):
+    def __init__(self, img1, img2):
         # The two images. The end result should map image B onto image A.
-        self.img_a = img_a
-        self.img_b = img_b
+        self.img1 = img1
+        self.img2 = img2
 
         # Starting guess for the translation
         self.initial = None
@@ -46,12 +46,12 @@ class RegionConsensusMatcher:
             # Parallel algorithm is about the same speed with 9 points, but gets faster with more points
             cpu_count = multiprocessing.cpu_count() - 1
             worker_pool = Pool(processes=cpu_count)
-            partial_matcher = partial(_perform_region_match, img_a=self.img_a, img_b=self.img_b)
+            partial_matcher = partial(_perform_region_match, img1=self.img1, img2=self.img2)
             results = worker_pool.map(partial_matcher, starting_points)
         else:
             results = []
             for point in starting_points:
-                result = _perform_region_match(point, self.img_a, self.img_b)
+                result = _perform_region_match(point, self.img1, self.img2)
                 results.append(result)
 
         # Filter out None's
@@ -117,8 +117,8 @@ class RegionConsensusMatcher:
         return groups[consensus][0], confidence
 
 
-def _perform_region_match(point, img_a, img_b):
-    matcher = RegionMatcher(img_a, img_b, point)
+def _perform_region_match(point, img1, img2):
+    matcher = RegionMatcher(img1, img2, point)
     matcher.skip_to_end()
 
     result = None

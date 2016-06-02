@@ -19,8 +19,8 @@ class RegionMatchControl(QGroupBox):
         self._selector_b = selector_b
         self._results_frame = results_frame
 
-        self._img_a = None
-        self._img_b = None
+        self._img1 = None
+        self._img2 = None
         self._scale_factor = 1
         self._matcher = None
 
@@ -100,28 +100,28 @@ class RegionMatchControl(QGroupBox):
     ------------------------'''
     def _perform_matching(self):
         """ Begin the matching procedure. """
-        img_a, img_b = self._prepare_images()
+        img1, img2 = self._prepare_images()
 
         guess_x = float(self._txt_guess_x.text())
         guess_y = float(self._txt_guess_y.text())
-        guess = Translate(guess_x*img_a.size[0], guess_y*img_a.size[1])
+        guess = Translate(guess_x*img1.size[0], guess_y*img1.size[1])
 
-        self._matcher = RegionMatcher(img_a, img_b, guess)
+        self._matcher = RegionMatcher(img1, img2, guess)
         self._fn_next_frame()
 
     def _prepare_images(self):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Get the selected images
-        self._img_a = self._selector_a.image()
-        self._img_b = self._selector_b.image()
+        self._img1 = self._selector_a.image()
+        self._img2 = self._selector_b.image()
 
         # Resize the mov image so it has the same size per pixel as the ref image
-        factor = self._img_b.pixel_size / self._img_a.pixel_size
-        self._img_b = self._img_b.rescale(factor)
+        factor = self._img2.pixel_size / self._img1.pixel_size
+        self._img2 = self._img2.rescale(factor)
         self._scale_factor = factor
 
-        return self._img_a.to_mono(), self._img_b.to_mono()
+        return self._img1.to_mono(), self._img2.to_mono()
 
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
@@ -134,5 +134,5 @@ class RegionMatchControl(QGroupBox):
         else:
             status = "Region match in progress"
 
-        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        aligned = AlignedImages(self._img1, self._img2, translate)
         self._results_frame.display_align_results(aligned, status)

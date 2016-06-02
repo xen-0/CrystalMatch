@@ -76,7 +76,7 @@ class CrystalMatchSet:
         self._aligned_images = aligned_images
         self.matches = []
 
-        pixel_size = aligned_images.img_a.pixel_size
+        pixel_size = aligned_images.img1.pixel_size
         for point in img1_points:
             self.matches.append(CrystalMatch(point, pixel_size))
 
@@ -90,11 +90,11 @@ class CrystalMatchSet:
 
     def img1(self):
         """ The first image; contains the user-selected crystal locations. """
-        return self._aligned_images.img_a
+        return self._aligned_images.img1
 
     def img2(self):
         """ The second image. """
-        return self._aligned_images.img_b
+        return self._aligned_images.img2
 
     def pixel_offset(self):
         """ The alignment offset between Image 1 and Image 2 (in pixels). """

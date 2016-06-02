@@ -8,9 +8,9 @@ class AlignedImages:
     have the same real size per pixel. The translate is the distance (in pixels) that the top-left corner
     of image B should be offset from the top-left corner of image A, in order to properly align the images.
     """
-    def __init__(self, img_a, img_b, translate):
-        self.img_a = img_a
-        self.img_b = img_b
+    def __init__(self, img1, img2, translate):
+        self.img1 = img1
+        self.img2 = img2
         self.translate = translate
 
         self._real_offset = None
@@ -32,7 +32,7 @@ class AlignedImages:
         """ The transform in real units (um) with no rounding. """
         if self._real_offset is None:
             x, y = self.translate.x, self.translate.y
-            pixel_size = self.img_a.pixel_size
+            pixel_size = self.img1.pixel_size
             self._real_offset = Point(x * pixel_size, y * pixel_size)
 
         return self._real_offset
@@ -40,7 +40,7 @@ class AlignedImages:
     def pixel_center(self):
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._pixel_center is None:
-            width, height = self.img_b.size
+            width, height = self.img2.size
             x, y = self.translate.x + width / 2, self.translate.y + height / 2
             x, y = int(round(x)), int(round(y))
             self._pixel_center = Point(x, y)
@@ -50,7 +50,7 @@ class AlignedImages:
     def real_center(self):
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._real_center is None:
-            width, height = self.img_b.size
+            width, height = self.img2.size
             x, y = self.translate.x + width / 2, self.translate.y + height / 2
             self._real_center = Point(x, y)
 
@@ -59,14 +59,14 @@ class AlignedImages:
     def overlay(self):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
-            self._overlay = Overlayer.create_overlay_image(self.img_a, self.img_b, self.translate)
+            self._overlay = Overlayer.create_overlay_image(self.img1, self.img2, self.translate)
 
         return self._overlay
 
     def overlap_metric(self):
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
-            metric_calc = OverlapMetric(self.img_a, self.img_b, None)
+            metric_calc = OverlapMetric(self.img1, self.img2, None)
             offset = self.translate.to_point()
             self._metric = metric_calc.calculate_overlap_metric(offset)
 
@@ -75,7 +75,7 @@ class AlignedImages:
     def overlap_images(self):
         """ Two images which are the sub-regions of Images A and B which overlap. """
         if self._overlap_images is None:
-            region_a, region_b = Overlayer.get_overlap_regions(self.img_a, self.img_b, self.pixel_offset())
+            region_a, region_b = Overlayer.get_overlap_regions(self.img1, self.img2, self.pixel_offset())
             self._overlap_images = (region_a, region_b)
 
         return self._overlap_images

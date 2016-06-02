@@ -8,9 +8,9 @@ from dls_imagematch.match.overlay import Overlayer
 
 class OverlapMetric:
 
-    def __init__(self, img_a, img_b, trial_transforms):
-        self.img_a = img_a
-        self.img_b = img_b
+    def __init__(self, img1, img2, trial_transforms):
+        self.img1 = img1
+        self.img2 = img2
         self.trial_transforms = trial_transforms
 
     def best_transform(self, starting_transform):
@@ -43,7 +43,7 @@ class OverlapMetric:
         differences. In the returned image, darker areas indicate greater differences in the
         overlap whereas lighter areas indicate more similarity.
         """
-        cr1, cr2 = Overlayer.get_overlap_regions(self.img_a, self.img_b, offset)
+        cr1, cr2 = Overlayer.get_overlap_regions(self.img1, self.img2, offset)
 
         absdiff_img = cv2.absdiff(cr1.img, cr2.img)
         metric = np.sum(absdiff_img) / absdiff_img.size

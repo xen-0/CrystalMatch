@@ -112,7 +112,7 @@ class CrystalMatchControl(QGroupBox):
         self._display_results(match_set)
 
     def _display_image_regions(self):
-        img1 = self._aligned_images.img_a
+        img1 = self._aligned_images.img1
         region_size = self._config.region_size
 
         for i, point in enumerate(self._selected_points):

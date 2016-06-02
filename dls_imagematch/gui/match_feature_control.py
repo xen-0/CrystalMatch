@@ -50,12 +50,12 @@ class FeatureMatchControl(QGroupBox):
 
     def _fn_begin_matching(self):
         """ Begin the feature matching process for the two selected images. """
-        img_a, img_b = self._prepare_images()
+        img1, img2 = self._prepare_images()
 
         method = self._cmbo_method.currentText()
         adapt = self._cmbo_adapt.currentText()
 
-        self._matcher = FeatureMatcher(img_a, img_b)
+        self._matcher = FeatureMatcher(img1, img2)
         FeatureMatcher.POPUP_RESULTS = self._with_popup
         try:
             self._matcher.match(method, adapt, translation_only=True)
@@ -67,14 +67,14 @@ class FeatureMatchControl(QGroupBox):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Get the selected images
-        self._img_a = self._selector_a.image()
-        self._img_b = self._selector_b.image()
+        self._img1 = self._selector_a.image()
+        self._img2 = self._selector_b.image()
 
         # Resize image B so it has the same size per pixel as image A
-        factor = self._img_b.pixel_size / self._img_a.pixel_size
-        self._img_b = self._img_b.rescale(factor)
+        factor = self._img2.pixel_size / self._img1.pixel_size
+        self._img2 = self._img2.rescale(factor)
 
-        return self._img_a.to_mono(), self._img_b.to_mono()
+        return self._img1.to_mono(), self._img2.to_mono()
 
     def _display_results(self, method, adapt):
         """ Display the results of the matching process (display overlaid image
@@ -86,6 +86,6 @@ class FeatureMatchControl(QGroupBox):
             status += " - " + adapt
         status += ")"
 
-        aligned = AlignedImages(self._img_a, self._img_b, transform.translation())
+        aligned = AlignedImages(self._img1, self._img2, transform.translation())
         self._results_frame.display_align_results(aligned, status)
         self.last_images = aligned

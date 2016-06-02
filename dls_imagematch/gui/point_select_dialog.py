@@ -23,7 +23,7 @@ class SelectorFrame(QLabel):
 
         # Load image from file
         self._aligned_images = aligned_images
-        self._selector_image = aligned_images.img_a.to_color()
+        self._selector_image = aligned_images.img1.to_color()
         self._original_size = self._selector_image.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio

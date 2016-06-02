@@ -65,25 +65,25 @@ class ConsensusMatchControl(QGroupBox):
 
     def _fn_begin_matching(self):
         """ Being the consensus matching process for the two selected images. """
-        img_a, img_b = self._prepare_images()
+        img1, img2 = self._prepare_images()
 
         # Prepare initial guess
         guess_x = float(self._txt_guess_x.text())
         guess_y = float(self._txt_guess_y.text())
-        guess = Translate(guess_x*img_a.size[0], guess_y*img_a.size[1])
+        guess = Translate(guess_x*img1.size[0], guess_y*img1.size[1])
 
         # Set grid spacing
         index = self._cmbo_grid_size.currentIndex()
         grid_size = self.GRID_SIZE_VALUES[index]
         grid = float(self._txt_grid_space.text())
-        spacing = grid * img_a.size[0]
+        spacing = grid * img1.size[0]
 
         # Clear existing image from frame
         self._results_frame.clear()
         self._results_frame.set_status_message("Performing consensus match...")
 
         # Perform matching
-        self._matcher = RegionConsensusMatcher(img_a, img_b)
+        self._matcher = RegionConsensusMatcher(img1, img2)
         self._matcher.match(guess, grid_size, spacing)
 
         self._display_results()
@@ -92,14 +92,14 @@ class ConsensusMatchControl(QGroupBox):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Get the selected images
-        self._img_a = self._selector_a.image()
-        self._img_b = self._selector_b.image()
+        self._img1 = self._selector_a.image()
+        self._img2 = self._selector_b.image()
 
         # Resize the image B so it has the same size per pixel as image A
-        factor = self._img_b.pixel_size / self._img_a.pixel_size
-        self._img_b = self._img_b.rescale(factor)
+        factor = self._img2.pixel_size / self._img1.pixel_size
+        self._img2 = self._img2.rescale(factor)
 
-        return self._img_a.to_mono(), self._img_b.to_mono()
+        return self._img1.to_mono(), self._img2.to_mono()
 
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image
@@ -108,5 +108,5 @@ class ConsensusMatchControl(QGroupBox):
         confidence = self._matcher.match_confidence
 
         status = "Consensus region match complete (agreement = {0:.2f})".format(confidence)
-        aligned = AlignedImages(self._img_a, self._img_b, translate)
+        aligned = AlignedImages(self._img1, self._img2, translate)
         self._results_frame.display_align_results(aligned, status)
