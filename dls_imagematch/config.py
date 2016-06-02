@@ -37,9 +37,9 @@ class Config:
         self.output_dir = DEFAULT_OUTPUT_DIR
 
     def _clean_values(self):
-        self.input_dir = self.input_dir.strip()
-        self.samples_dir = self.samples_dir.strip()
-        self.output_dir = self.output_dir.strip()
+        self.input_dir = str(self.input_dir).strip()
+        self.samples_dir = str(self.samples_dir).strip()
+        self.output_dir = str(self.output_dir).strip()
 
         if not self.input_dir.endswith("/"):
             self.input_dir += "/"

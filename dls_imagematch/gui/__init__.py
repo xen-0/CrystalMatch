@@ -8,5 +8,6 @@ from .match_region_control import RegionMatchControl
 from .match_feature_control import FeatureMatchControl
 from .match_consensus_control import ConsensusMatchControl
 from .match_crystal_control import CrystalMatchControl
+from .config_dialog import ConfigDialog
 
 

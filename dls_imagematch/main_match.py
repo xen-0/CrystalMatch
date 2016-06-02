@@ -82,10 +82,23 @@ class VMXiCrystalMatcher(QMainWindow):
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(QtGui.qApp.quit)
 
+        # Open options dialog
+        options_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Options', self)
+        options_action.setShortcut('Ctrl+O')
+        options_action.setStatusTip('Open Options Dialog')
+        options_action.triggered.connect(self._open_config_dialog)
+
         # Create menu bar
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu('&File')
         file_menu.addAction(exit_action)
+
+        option_menu = menu_bar.addMenu('&Option')
+        option_menu.addAction(options_action)
+
+    def _open_config_dialog(self):
+        dialog = ConfigDialog(self._config)
+        dialog.exec_()
 
 
 def main():
