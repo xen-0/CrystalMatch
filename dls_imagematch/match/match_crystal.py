@@ -20,15 +20,15 @@ class CrystalMatcher:
 
         for crystal_match in crystal_match_set.matches:
             img1_rect = crystal_match.img1_region(region_size)
-            img2_rect = self._make_image2_region(crystal_match_set.img2(),
-                                                 crystal_match_set.pixel_offset(), img1_rect)
+            img2_rect = self.make_image2_region(crystal_match_set.img2(),
+                                                crystal_match_set.pixel_offset(), img1_rect)
 
             matcher = FeatureMatcher(img1, img2, img1_rect, img2_rect)
             transform = matcher.match(method, adapt)
 
             crystal_match.set_transformation(transform)
 
-    def _make_image2_region(self, img2, align_offset, img1_rect):
+    def make_image2_region(self, img2, align_offset, img1_rect):
         # Find the center of the rectangle in image A, convert to image B coords
         center_a = img1_rect.center()
         center_b = center_a - align_offset
