@@ -1,14 +1,13 @@
+from __future__ import division
 
 from .match_feature import FeatureMatcher
 from dls_imagematch.util import Rectangle, Point
 
 
 class CrystalMatcher:
-    SEARCH_WIDTH = 200
-    SEARCH_HEIGHT = 400
 
-    def __init__(self):
-        pass
+    def __init__(self, config):
+        self._config = config
 
     def match(self, crystal_match_set, region_size):
         img1 = crystal_match_set.img1().to_mono()
@@ -34,8 +33,8 @@ class CrystalMatcher:
         center_b = center_a - align_offset
 
         # Determine size (in pixels) of the search box in image B
-        width = self.SEARCH_WIDTH / img2.pixel_size
-        height = self.SEARCH_HEIGHT / img2.pixel_size
+        width = self._config.search_width / img2.pixel_size
+        height = self._config.search_height / img2.pixel_size
 
         # Create a rectangle area of image B in which to search
         # Its tall because crystal likely to move downwards under gravity

@@ -36,6 +36,28 @@ class ConfigDialog(QtGui.QDialog):
         hbox_region_size.addWidget(self.txt_region_size)
         hbox_region_size.addStretch()
 
+        # Search Width
+        self.txt_search_width = QLineEdit()
+        self.txt_search_width.setFixedWidth(40)
+        lbl_search_width = QLabel("Xtal Search Width:")
+        lbl_search_width.setFixedWidth(LABEL_WIDTH)
+
+        hbox_search_width = QHBoxLayout()
+        hbox_search_width.addWidget(lbl_search_width)
+        hbox_search_width.addWidget(self.txt_search_width)
+        hbox_search_width.addStretch()
+
+        # Search Height
+        self.txt_search_height = QLineEdit()
+        self.txt_search_height.setFixedWidth(40)
+        lbl_search_height = QLabel("Xtal Search Height:")
+        lbl_search_height.setFixedWidth(LABEL_WIDTH)
+
+        hbox_search_height = QHBoxLayout()
+        hbox_search_height.addWidget(lbl_search_height)
+        hbox_search_height.addWidget(self.txt_search_height)
+        hbox_search_height.addStretch()
+
         # Input Directory
         self.txt_input_dir = QLineEdit()
         lbl_input_dir = QLabel("Input Directory:")
@@ -99,6 +121,8 @@ class ConfigDialog(QtGui.QDialog):
         # ----- MAIN LAYOUT -----
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_region_size)
+        vbox.addLayout(hbox_search_width)
+        vbox.addLayout(hbox_search_height)
         vbox.addLayout(hbox_input_dir)
         vbox.addLayout(hbox_output_dir)
         vbox.addLayout(hbox_samples_dir)
@@ -109,6 +133,8 @@ class ConfigDialog(QtGui.QDialog):
 
     def _update_options_display(self):
         self.txt_region_size.setText(str(self._config.region_size))
+        self.txt_search_width.setText(str(self._config.search_width))
+        self.txt_search_height.setText(str(self._config.search_height))
         self.txt_input_dir.setText(self._config.input_dir)
         self.txt_samples_dir.setText(self._config.samples_dir)
         self.txt_output_dir.setText(self._config.output_dir)
@@ -139,6 +165,8 @@ class ConfigDialog(QtGui.QDialog):
 
     def _dialog_apply_changes(self):
         self._config.region_size = self.txt_region_size.text()
+        self._config.search_width = self.txt_search_width.text()
+        self._config.search_height = self.txt_search_height.text()
         self._config.input_dir = self.txt_input_dir.text()
         self._config.samples_dir = self.txt_samples_dir.text()
         self._config.output_dir = self.txt_output_dir.text()

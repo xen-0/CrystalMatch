@@ -1,6 +1,8 @@
 import os
 
 TAG_REGION_SIZE = "region_size"
+TAG_SEARCH_WIDTH = "search_width"
+TAG_SEARCH_HEIGHT = "search_height"
 TAG_INPUT_DIR = "input_dir_root"
 TAG_SAMPLES_DIR = "samples_dir"
 TAG_OUTPUT_DIR = "output_dir"
@@ -8,6 +10,8 @@ TAG_OUTPUT_DIR = "output_dir"
 DELIMITER = "="
 
 DEFAULT_REGION_SIZE = 30
+DEFAULT_SEARCH_WIDTH = 200
+DEFAULT_SEARCH_HEIGHT = 400
 DEFAULT_INPUT_DIR = "../test-images/"
 DEFAULT_SAMPLES_DIR = "../test-images/Sample Sets/"
 DEFAULT_OUTPUT_DIR = "../test-output/"
@@ -18,6 +22,8 @@ class Config:
         self._file = file
 
         self.region_size = None
+        self.search_width = None
+        self.search_height = None
         self.input_dir = None
         self.samples_dir = None
         self.output_dir = None
@@ -32,6 +38,8 @@ class Config:
 
     def reset_all(self):
         self.region_size = DEFAULT_REGION_SIZE
+        self.search_width = DEFAULT_SEARCH_WIDTH
+        self.search_height = DEFAULT_SEARCH_HEIGHT
         self.input_dir = DEFAULT_INPUT_DIR
         self.samples_dir = DEFAULT_SAMPLES_DIR
         self.output_dir = DEFAULT_OUTPUT_DIR
@@ -55,6 +63,16 @@ class Config:
         except ValueError:
             self.region_size = DEFAULT_REGION_SIZE
 
+        try:
+            self.search_width = int(self.search_width)
+        except ValueError:
+            self.search_width = DEFAULT_SEARCH_WIDTH
+
+        try:
+            self.search_height = int(self.search_height)
+        except ValueError:
+            self.search_height = DEFAULT_SEARCH_HEIGHT
+
     def _save_to_file(self, file):
         """ Save the options to the specified file. """
         self._clean_values()
@@ -62,6 +80,8 @@ class Config:
 
         with open(file, 'w') as f:
             f.write(line.format(TAG_REGION_SIZE, self.region_size))
+            f.write(line.format(TAG_SEARCH_WIDTH, self.search_width))
+            f.write(line.format(TAG_SEARCH_HEIGHT, self.search_height))
             f.write(line.format(TAG_INPUT_DIR, self.input_dir))
             f.write(line.format(TAG_SAMPLES_DIR, self.samples_dir))
             f.write(line.format(TAG_OUTPUT_DIR, self.output_dir))
@@ -88,6 +108,10 @@ class Config:
         """ Parse a line from a config file, setting the relevant option. """
         if tag == TAG_REGION_SIZE:
             self.region_size = int(value)
+        elif tag == TAG_SEARCH_WIDTH:
+            self.search_width = int(value)
+        elif tag == TAG_SEARCH_HEIGHT:
+            self.search_height = int(value)
         elif tag == TAG_INPUT_DIR:
             self.input_dir = str(value)
         elif tag == TAG_SAMPLES_DIR:

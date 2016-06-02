@@ -23,7 +23,7 @@ class CrystalMatchControl(QGroupBox):
         self._results_frame = results_frame
         self._aligner = aligner
 
-        self._matcher = CrystalMatcher()
+        self._matcher = CrystalMatcher(config)
 
         self._aligned_images = None
         self._selected_points = []
