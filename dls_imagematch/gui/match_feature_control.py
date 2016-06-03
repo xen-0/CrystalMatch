@@ -81,10 +81,10 @@ class FeatureMatchControl(QGroupBox):
         and print the offset. """
         transform = self._matcher.net_transform
 
-        status = "Feature match complete (" + method
+        status = "Image Alignment Complete (" + method
         if adapt != '':
             status += " - " + adapt
-        status += ")"
+        status += " features)"
 
         aligned = AlignedImages(self._img1, self._img2, transform.translation())
         self._results_frame.display_align_results(aligned, status)
