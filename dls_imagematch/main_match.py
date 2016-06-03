@@ -8,7 +8,7 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 sys.path.append("..")
 
 from dls_imagematch.gui import *
-from dls_imagematch.config import Config
+from dls_imagematch.xtal_config import XtalConfig
 
 
 class VMXiCrystalMatcher(QMainWindow):
@@ -20,7 +20,7 @@ class VMXiCrystalMatcher(QMainWindow):
         self.gui_state = None
         self.matcher = None
 
-        self._config = Config(VMXiCrystalMatcher.CONFIG_FILE)
+        self._config = XtalConfig(VMXiCrystalMatcher.CONFIG_FILE)
 
         self.init_ui()
 
