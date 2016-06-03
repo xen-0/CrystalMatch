@@ -1,6 +1,6 @@
 import os
 
-from dls_imagematch.util import Color
+from .color import Color
 
 DELIMITER = "="
 
@@ -36,8 +36,12 @@ class ConfigItem:
 
 
 class IntConfigItem(ConfigItem):
-    def __init__(self, tag, default):
+    def __init__(self, tag, default, units):
         ConfigItem.__init__(self, tag, default)
+        self._units = units
+
+    def units(self):
+        return self._units
 
     def _clean(self, value):
         try:
@@ -49,7 +53,7 @@ class IntConfigItem(ConfigItem):
         self._value = self._clean(string)
 
 
-class DirConfigItem(ConfigItem):
+class DirectoryConfigItem(ConfigItem):
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
 
@@ -80,8 +84,11 @@ class Config:
         self.reset_all()
         self._load_from_file(self._file)
 
-    def _new_item(self, cls, tag, default):
-        item = cls(tag, default)
+    def _new_item(self, cls, tag, default, arg1=None):
+        if arg1 is None:
+            item = cls(tag, default)
+        else:
+            item = cls(tag, default, arg1)
         self._items.append(item)
         return item
 

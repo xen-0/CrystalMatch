@@ -4,7 +4,8 @@ import os
 from PyQt4 import QtGui
 from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, QGroupBox, QWidget
 
-from dls_imagematch.util import Color
+from .color import Color
+from .config import IntConfigItem, ColorConfigItem, DirectoryConfigItem
 
 LABEL_WIDTH = 100
 
@@ -12,15 +13,15 @@ LABEL_WIDTH = 100
 class ValueConfigControl(QWidget):
     TEXT_WIDTH = 100
 
-    def __init__(self, label, config_item, txt_width=TEXT_WIDTH, postfix=''):
+    def __init__(self, config_item, txt_width=TEXT_WIDTH):
         super(ValueConfigControl, self).__init__()
 
         self._config_item = config_item
 
-        self._init_ui(label, txt_width, postfix)
+        self._init_ui(txt_width)
 
-    def _init_ui(self, label, txt_width, postfix):
-        lbl_int = QLabel(label)
+    def _init_ui(self, txt_width):
+        lbl_int = QLabel(self._config_item.tag())
         lbl_int.setFixedWidth(LABEL_WIDTH)
 
         self.txt_value = QLineEdit()
@@ -30,7 +31,7 @@ class ValueConfigControl(QWidget):
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(lbl_int)
         hbox.addWidget(self.txt_value)
-        hbox.addWidget(QLabel(postfix))
+        hbox.addWidget(QLabel(self._config_item.units()))
         hbox.addStretch()
 
         self.setContentsMargins(0, 0, 0, 0)
@@ -47,18 +48,18 @@ class DirectoryConfigControl(QWidget):
     BUTTON_WIDTH = 80
     TEXT_WIDTH = 200
 
-    def __init__(self, label, config_item):
+    def __init__(self, config_item):
         super(DirectoryConfigControl, self).__init__()
 
         self._config_item = config_item
 
-        self._init_ui(label)
+        self._init_ui()
 
-    def _init_ui(self, label):
+    def _init_ui(self):
         self.txt_dir = QLineEdit()
         self.txt_dir.setFixedWidth(self.TEXT_WIDTH)
 
-        lbl_dir = QLabel(label)
+        lbl_dir = QLabel(self._config_item.tag())
         lbl_dir.setFixedWidth(LABEL_WIDTH)
 
         btn_show = QPushButton('View Files')
@@ -97,16 +98,16 @@ class DirectoryConfigControl(QWidget):
 class ColorConfigControl(QWidget):
     STYLE = "background-color: {};"
 
-    def __init__(self, label, config_item):
+    def __init__(self, config_item):
         super(ColorConfigControl, self).__init__()
 
         self._config_item = config_item
         self._color = None
 
-        self._init_ui(label)
+        self._init_ui()
 
-    def _init_ui(self, label):
-        lbl_color = QLabel(label)
+    def _init_ui(self):
+        lbl_color = QLabel(self._config_item.tag())
         lbl_color.setFixedWidth(LABEL_WIDTH)
         self._swatch = QPushButton("")
         self._swatch.setFixedWidth(25)
@@ -173,51 +174,30 @@ class ConfigDialog(QtGui.QDialog):
         self._groups = []
         self._config_controls = []
 
-        self._init_ui()
-        self._finalize_layout()
+        self.setWindowTitle('Config')
 
-    def _init_ui(self):
-        """ Create the basic elements of the user interface.
-        """
-        self.setGeometry(100, 100, 450, 400)
-        self.setWindowTitle('Options')
+    def auto_layout(self):
 
-        cfg = self._config
+        for item in self._config._items:
+            self.add_item(item)
 
-        # ----- CONTROLS -------
-        color_align = ColorConfigControl("Align Color:", cfg.color_align)
-        color_xtal_img1 = ColorConfigControl("Img1 Xtal Color:", cfg.color_xtal_img1)
-        color_xtal_img2 = ColorConfigControl("Img2 Xtal Color:", cfg.color_xtal_img2)
-        color_search = ColorConfigControl("Search Box Color:", cfg.color_search)
+        self.finalize_layout()
 
-        int_region_size = ValueConfigControl("Region Size:", cfg.region_size, txt_width=40, postfix='px')
-        int_search_width = ValueConfigControl("Search Width:", cfg.search_width, txt_width=40, postfix='px')
-        int_search_height = ValueConfigControl("Search Height:", cfg.search_height, txt_width=40, postfix='px')
+    def start_group(self, name):
+        group = _ConfigGroupBox(name)
+        self._groups.append(group)
 
-        dir_input = DirectoryConfigControl("Input Directory:", cfg.input_dir)
-        dir_output = DirectoryConfigControl("Output Directory:", cfg.output_dir)
-        dir_samples = DirectoryConfigControl("Samples Directory:", cfg.samples_dir)
-
-        # ----- GROUPS -------
+    def add_item(self, item):
         add = self._add_control
 
-        self._start_group("Image Alignment")
-        add(color_align)
+        if isinstance(item, IntConfigItem):
+            add(ValueConfigControl(item, txt_width=40))
+        elif isinstance(item, ColorConfigItem):
+            add(ColorConfigControl(item))
+        elif isinstance(item, DirectoryConfigItem):
+            add(DirectoryConfigControl(item))
 
-        self._start_group("Xtal Search")
-        add(int_region_size)
-        add(int_search_width)
-        add(int_search_height)
-        add(color_xtal_img1)
-        add(color_xtal_img2)
-        add(color_search)
-
-        self._start_group("Directories")
-        add(dir_input)
-        add(dir_output)
-        add(dir_samples)
-
-    def _finalize_layout(self):
+    def finalize_layout(self):
         hbox_btns = self._make_buttons()
 
         # ----- MAIN LAYOUT -----
@@ -250,13 +230,9 @@ class ConfigDialog(QtGui.QDialog):
 
         return hbox
 
-    def _start_group(self, name):
-        group = _ConfigGroupBox(name)
-        self._groups.append(group)
-
     def _add_control(self, control):
         if len(self._groups) == 0:
-            self._start_group("Unknown Group")
+            self.start_group("Config Group")
 
         group = self._groups[-1]
         group.add_control(control)

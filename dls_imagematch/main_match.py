@@ -97,7 +97,7 @@ class VMXiCrystalMatcher(QMainWindow):
         option_menu.addAction(options_action)
 
     def _open_config_dialog(self):
-        dialog = ConfigDialog(self._config)
+        dialog = XtalConfigDialog(self._config)
         dialog.exec_()
 
 

@@ -1,5 +1,5 @@
 from dls_imagematch.util import  Color
-from dls_imagematch.util.config import Config, IntConfigItem, DirConfigItem, ColorConfigItem
+from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem
 
 
 class XtalConfig(Config):
@@ -8,15 +8,15 @@ class XtalConfig(Config):
 
         new = self._new_item
 
-        self.region_size = new(IntConfigItem, "region_size", default=30)
-        self.search_width = new(IntConfigItem, "search_width", default=200)
-        self.search_height = new(IntConfigItem, "search_height", default=400)
-        self.input_dir = new(DirConfigItem, "input_dir_root", default="../test-images/")
-        self.samples_dir = new(DirConfigItem, "samples_dir", default="../test-images/Sample Sets/")
-        self.output_dir = new(DirConfigItem, "output_dir", default="../test-output/")
-        self.color_align = new(ColorConfigItem, "color_align", Color.Purple())
-        self.color_search = new(ColorConfigItem, "color_search", Color.Orange())
-        self.color_xtal_img1 = new(ColorConfigItem, "color_xtal_img1", Color.Green())
-        self.color_xtal_img2 = new(ColorConfigItem, "color_xtal_img2", Color.Red())
+        self.region_size = new(IntConfigItem, "Region Size", default=30, arg1='px')
+        self.search_width = new(IntConfigItem, "Search Width", default=200, arg1='px')
+        self.search_height = new(IntConfigItem, "Search Height", default=400, arg1='px')
+        self.input_dir = new(DirectoryConfigItem, "Input Directory", default="../test-images/")
+        self.samples_dir = new(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
+        self.output_dir = new(DirectoryConfigItem, "Output Directory", default="../test-output/")
+        self.color_align = new(ColorConfigItem, "Align Color", Color.Purple())
+        self.color_search = new(ColorConfigItem, "Search Box Color", Color.Orange())
+        self.color_xtal_img1 = new(ColorConfigItem, "Img1 Xtal Color", Color.Green())
+        self.color_xtal_img2 = new(ColorConfigItem, "Img2 Xtal Color", Color.Red())
 
         self.initialize()
