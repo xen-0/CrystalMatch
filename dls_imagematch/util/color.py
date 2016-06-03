@@ -2,11 +2,42 @@ from random import randint
 
 
 class Color:
+    SEP = ","
+    CONSTRUCTOR_ERROR = "Values must be integers in range 0-255"
+    STRING_PARSE_ERROR = "Input string must be 3 or 4 integers (0-255) separated by '{}'".format(SEP)
+
     def __init__(self, r, g, b, a=255):
+        try:
+            r, g, b, a = int(r), int(g), int(b), int(a)
+        except ValueError:
+            raise ValueError(self.CONSTRUCTOR_ERROR)
+
+        for val in [r, g, b, a]:
+            if val < 0 or val > 255:
+                raise ValueError(self.CONSTRUCTOR_ERROR)
+
         self.r = r
         self.g = g
         self.b = b
         self.a = a
+
+    def __str__(self):
+        return "{1}{0}{2}{0}{3}{0}{4}".format(self.SEP, self.r, self.g, self.b, self.a)
+
+    @staticmethod
+    def from_string(string, sep=SEP):
+        tokens = string.split(sep)
+
+        if len(tokens) == 3:
+            r, g, b = tuple(tokens)
+            color = Color(r, g, b)
+        elif len(tokens) == 4:
+            r, g, b, a = tuple(tokens)
+            color = Color(r, g, b, a)
+        else:
+            raise ValueError(Color.STRING_PARSE_ERROR)
+
+        return color
 
     def bgra(self):
         return self.b, self.g, self.r, self.a
