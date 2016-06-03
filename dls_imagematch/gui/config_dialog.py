@@ -4,6 +4,8 @@ import os
 from PyQt4 import QtGui
 from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton
 
+from dls_imagematch.util import Color
+
 
 class ConfigDialog(QtGui.QDialog):
 
@@ -11,6 +13,9 @@ class ConfigDialog(QtGui.QDialog):
         super(ConfigDialog, self).__init__()
 
         self._config = config
+
+        self._color_align = None
+        self._color_search = None
 
         self._init_ui()
         self._update_options_display()
@@ -103,6 +108,32 @@ class ConfigDialog(QtGui.QDialog):
         hbox_samples_dir.addWidget(self.txt_samples_dir)
         hbox_samples_dir.addWidget(btn_show_samples_dir)
 
+        # Align Color
+        lbl_color_align = QLabel("Align Color:")
+        lbl_color_align.setFixedWidth(LABEL_WIDTH)
+        self.btn_color_align = QPushButton("")
+        self.btn_color_align.setFixedWidth(25)
+        self.btn_color_align.clicked.connect(self._set_color_align)
+        self.btn_color_align.setStyleSheet("background-color: black;")
+
+        hbox_color_align = QHBoxLayout()
+        hbox_color_align.addWidget(lbl_color_align)
+        hbox_color_align.addWidget(self.btn_color_align)
+        hbox_color_align.addStretch()
+
+        # Search Color
+        lbl_color_search = QLabel("Xtal Search Color:")
+        lbl_color_search.setFixedWidth(LABEL_WIDTH)
+        self.btn_color_search = QPushButton("")
+        self.btn_color_search.setFixedWidth(25)
+        self.btn_color_search.clicked.connect(self._set_color_search)
+        self.btn_color_search.setStyleSheet("background-color: black;")
+
+        hbox_color_search = QHBoxLayout()
+        hbox_color_search.addWidget(lbl_color_search)
+        hbox_color_search.addWidget(self.btn_color_search)
+        hbox_color_search.addStretch()
+
         # ----- OK /CANCEL BUTTONS -------
         btn_cancel = QtGui.QPushButton("Cancel")
         btn_cancel.pressed.connect(self._dialog_close_cancel)
@@ -129,6 +160,8 @@ class ConfigDialog(QtGui.QDialog):
         vbox.addLayout(hbox_input_dir)
         vbox.addLayout(hbox_output_dir)
         vbox.addLayout(hbox_samples_dir)
+        vbox.addLayout(hbox_color_align)
+        vbox.addLayout(hbox_color_search)
         vbox.addStretch()
         vbox.addLayout(hbox_ok_cancel)
 
@@ -141,6 +174,13 @@ class ConfigDialog(QtGui.QDialog):
         self.txt_input_dir.setText(self._config.input_dir)
         self.txt_samples_dir.setText(self._config.samples_dir)
         self.txt_output_dir.setText(self._config.output_dir)
+
+        self._color_align = self._config.color_align
+        self._color_search = self._config.color_search
+
+        style = "background-color: {};"
+        self.btn_color_align.setStyleSheet(style.format(self._color_align.to_hex()))
+        self.btn_color_search.setStyleSheet(style.format(self._color_search.to_hex()))
 
     def _open_input_dir(self):
         path = self._config.input_dir
@@ -166,15 +206,39 @@ class ConfigDialog(QtGui.QDialog):
         else:
             QMessageBox.critical(self, "File Error", "Only available on Windows")
 
-    def _dialog_apply_changes(self):
-        self._config.region_size = self.txt_region_size.text()
-        self._config.search_width = self.txt_search_width.text()
-        self._config.search_height = self.txt_search_height.text()
-        self._config.input_dir = self.txt_input_dir.text()
-        self._config.samples_dir = self.txt_samples_dir.text()
-        self._config.output_dir = self.txt_output_dir.text()
+    def _set_color_align(self):
+        color = self._get_dialog_color()
+        self._color_align = color
+        self.btn_color_align.setStyleSheet("background-color: {};".format(color.to_hex()))
 
-        self._config.update_config_file()
+    def _set_color_search(self):
+        color = self._get_dialog_color()
+        self._color_search = color
+        self.btn_color_search.setStyleSheet("background-color: {};".format(color.to_hex()))
+
+    @staticmethod
+    def _get_dialog_color():
+        qt_col = QtGui.QColorDialog.getColor()
+        if qt_col.isValid():
+            color = Color.from_qt(qt_col)
+            print(color.to_hex())
+            return color
+        else:
+            return Color.Black()
+
+    def _dialog_apply_changes(self):
+        cfg = self._config
+
+        cfg.region_size = self.txt_region_size.text()
+        cfg.search_width = self.txt_search_width.text()
+        cfg.search_height = self.txt_search_height.text()
+        cfg.input_dir = self.txt_input_dir.text()
+        cfg.samples_dir = self.txt_samples_dir.text()
+        cfg.output_dir = self.txt_output_dir.text()
+        cfg.color_align = self._color_align
+        cfg.color_search = self._color_search
+
+        cfg.update_config_file()
         self._update_options_display()
 
     def _dialog_close_ok(self):

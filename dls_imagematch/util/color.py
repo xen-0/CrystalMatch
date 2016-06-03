@@ -1,5 +1,7 @@
 from random import randint
 
+from PyQt4.QtGui import QColor
+
 
 class Color:
     SEP = ","
@@ -24,6 +26,29 @@ class Color:
     def __str__(self):
         return "{1}{0}{2}{0}{3}{0}{4}".format(self.SEP, self.r, self.g, self.b, self.a)
 
+    def bgra(self):
+        return self.b, self.g, self.r, self.a
+
+    def bgr(self):
+        return self.b, self.g, self.r
+
+    def mono(self):
+        return int(round(0.3*self.r + 0.6*self.g + 0.1*self.b))
+
+    def to_qt(self):
+        return QColor(self.r, self.g, self.b, self.a)
+
+    def to_hex(self):
+        hex_str = '#'
+        for val in [self.r, self.g, self.b]:
+            hex_str += '{:02x}'.format(val)
+
+        return hex_str
+
+    @staticmethod
+    def from_qt(qt_color):
+        return Color(qt_color.red(), qt_color.green(), qt_color.blue(), qt_color.alpha())
+
     @staticmethod
     def from_string(string, sep=SEP):
         tokens = string.split(sep)
@@ -38,15 +63,6 @@ class Color:
             raise ValueError(Color.STRING_PARSE_ERROR)
 
         return color
-
-    def bgra(self):
-        return self.b, self.g, self.r, self.a
-
-    def bgr(self):
-        return self.b, self.g, self.r
-
-    def mono(self):
-        return int(round(0.3*self.r + 0.6*self.g + 0.1*self.b))
 
     @staticmethod
     def Random():

@@ -1,13 +1,17 @@
 import os
 
+from dls_imagematch.util import Color
+
+DELIMITER = "="
+
 TAG_REGION_SIZE = "region_size"
 TAG_SEARCH_WIDTH = "search_width"
 TAG_SEARCH_HEIGHT = "search_height"
 TAG_INPUT_DIR = "input_dir_root"
 TAG_SAMPLES_DIR = "samples_dir"
 TAG_OUTPUT_DIR = "output_dir"
-
-DELIMITER = "="
+TAG_COLOR_ALIGN = "color_align"
+TAG_COLOR_SEARCH = "color_search"
 
 DEFAULT_REGION_SIZE = 30
 DEFAULT_SEARCH_WIDTH = 200
@@ -15,6 +19,8 @@ DEFAULT_SEARCH_HEIGHT = 400
 DEFAULT_INPUT_DIR = "../test-images/"
 DEFAULT_SAMPLES_DIR = "../test-images/Sample Sets/"
 DEFAULT_OUTPUT_DIR = "../test-output/"
+DEFAULT_COLOR_ALIGN = Color.Purple()
+DEFAULT_COLOR_SEARCH = Color.Orange()
 
 
 class Config:
@@ -27,6 +33,8 @@ class Config:
         self.input_dir = None
         self.samples_dir = None
         self.output_dir = None
+        self.color_align = None
+        self.color_search = None
 
         self.reset_all()
 
@@ -43,6 +51,8 @@ class Config:
         self.input_dir = DEFAULT_INPUT_DIR
         self.samples_dir = DEFAULT_SAMPLES_DIR
         self.output_dir = DEFAULT_OUTPUT_DIR
+        self.color_align = DEFAULT_COLOR_ALIGN
+        self.color_search = DEFAULT_COLOR_SEARCH
 
     def _clean_values(self):
         self.input_dir = str(self.input_dir).strip()
@@ -85,6 +95,8 @@ class Config:
             f.write(line.format(TAG_INPUT_DIR, self.input_dir))
             f.write(line.format(TAG_SAMPLES_DIR, self.samples_dir))
             f.write(line.format(TAG_OUTPUT_DIR, self.output_dir))
+            f.write(line.format(TAG_COLOR_ALIGN, self.color_align))
+            f.write(line.format(TAG_COLOR_SEARCH, self.color_search))
 
     def _load_from_file(self, file):
         """ Load options from the specified file. """
@@ -94,7 +106,6 @@ class Config:
 
         with open(file) as f:
             lines = f.readlines()
-
             for line in lines:
                 try:
                     tokens = line.strip().split(DELIMITER)
@@ -118,3 +129,7 @@ class Config:
             self.samples_dir = str(value)
         elif tag == TAG_OUTPUT_DIR:
             self.output_dir = str(value)
+        elif tag == TAG_COLOR_ALIGN:
+            self.color_align = Color.from_string(value)
+        elif tag == TAG_COLOR_SEARCH:
+            self.color_search = Color.from_string(value)
