@@ -44,16 +44,25 @@ class CrystalMatchControl(QGroupBox):
         self._btn_locate.setEnabled(False)
 
         # Selection Image Frames
-        self._frames = []
-        hbox_frames = QHBoxLayout()
+        self._frames1 = []
+        self._frames2 = []
+        hbox_frames1 = QHBoxLayout()
+        hbox_frames2 = QHBoxLayout()
         for i in range(self.NUM_FRAMES):
-            frame = QLabel()
-            frame.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
-            frame.setFixedWidth(self.FRAME_SIZE)
-            frame.setFixedHeight(self.FRAME_SIZE)
-            frame.setAlignment(Qt.AlignCenter)
-            self._frames.append(frame)
-            hbox_frames.addWidget(frame)
+            frame1 = QLabel()
+            frame1.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid red")
+            frame1.setFixedWidth(self.FRAME_SIZE)
+            frame1.setFixedHeight(self.FRAME_SIZE)
+            frame1.setAlignment(Qt.AlignCenter)
+            self._frames1.append(frame1)
+            hbox_frames1.addWidget(frame1)
+            frame2 = QLabel()
+            frame2.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid blue")
+            frame2.setFixedWidth(self.FRAME_SIZE)
+            frame2.setFixedHeight(self.FRAME_SIZE)
+            frame2.setAlignment(Qt.AlignCenter)
+            self._frames2.append(frame2)
+            hbox_frames2.addWidget(frame2)
 
         # Create widget layout
         vbox_btns = QVBoxLayout()
@@ -62,9 +71,13 @@ class CrystalMatchControl(QGroupBox):
         vbox_btns.addWidget(self._btn_locate)
         vbox_btns.addStretch(1)
 
+        vbox_frames = QVBoxLayout()
+        vbox_frames.addLayout(hbox_frames1)
+        vbox_frames.addLayout(hbox_frames2)
+
         hbox_btns = QHBoxLayout()
         hbox_btns.addLayout(vbox_btns)
-        hbox_btns.addLayout(hbox_frames)
+        hbox_btns.addLayout(vbox_frames)
         hbox_btns.addStretch(1)
 
         self.setLayout(hbox_btns)
@@ -89,7 +102,7 @@ class CrystalMatchControl(QGroupBox):
 
         if len(self._selected_points) > 0:
             self._clear_images()
-            self._display_image_regions()
+            self._display_image1_regions()
             self._display_marked_img2()
             self._btn_locate.setEnabled(True)
 
@@ -111,7 +124,7 @@ class CrystalMatchControl(QGroupBox):
 
         self._display_results(match_set)
 
-    def _display_image_regions(self):
+    def _display_image1_regions(self):
         img1 = self._aligned_images.img1
         region_size = self._config.region_size
 
@@ -121,12 +134,16 @@ class CrystalMatchControl(QGroupBox):
 
             rect = Rectangle.from_center(point, region_size, region_size)
             img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
-            img.draw_cross(img.bounds().center(), color=Color.Green(), thickness=1)
-            self._display_image(img, i)
+            img.draw_cross(img.bounds().center(), color=Color.Red(), thickness=1)
+            self._display_image(img, 1, i)
 
-    def _display_image(self, image, frame_number):
+    def _display_image(self, image, row, frame_number):
         """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
-        frame = self._frames[frame_number]
+        if row == 1:
+            frame = self._frames1[frame_number]
+        else:
+            frame = self._frames2[frame_number]
+
         frame_size = frame.size()
 
         # Convert to a QT pixmap and display
@@ -136,7 +153,7 @@ class CrystalMatchControl(QGroupBox):
 
     def _clear_images(self):
         for i in range(self.NUM_FRAMES):
-            self._frames[i].clear()
+            self._frames1[i].clear()
 
     def _display_marked_img2(self):
         match_set = CrystalMatchSet(self._aligned_images, self._selected_points)
@@ -163,6 +180,8 @@ class CrystalMatchControl(QGroupBox):
 
         img1 = crystal_match_set.img1().copy()
         img2 = crystal_match_set.img2().copy()
+
+        region_size = self._config.region_size
 
         print(status)
         for i, match in enumerate(crystal_match_set.matches):
@@ -193,6 +212,10 @@ class CrystalMatchControl(QGroupBox):
             img2.draw_cross(pixel2, Color.Green(), size=10, thickness=2)
             img2.draw_cross(px2, Color.Blue(), size=10, thickness=2)
 
+            if i < self.NUM_FRAMES:
+                rect = Rectangle.from_center(px2, region_size, region_size)
+                img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
+                img.draw_cross(img.bounds().center(), color=Color.Blue(), thickness=1)
+                self._display_image(img, 2, i)
+
         self._results_frame.display_image(img2)
-        #img1.popup()
-        #img2.popup()
