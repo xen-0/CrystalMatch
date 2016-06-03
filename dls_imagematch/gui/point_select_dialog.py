@@ -15,11 +15,12 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    def __init__(self, max_size, aligned_images, selection_rect_size):
+    def __init__(self, max_size, aligned_images, config):
         super(SelectorFrame, self).__init__()
 
         self._selected_points = []
-        self._rect_size = selection_rect_size
+        self._rect_size = config.region_size.value()
+        self._rect_color = config.color_xtal_img1.value()
 
         # Load image from file
         self._aligned_images = aligned_images
@@ -69,8 +70,8 @@ class SelectorFrame(QLabel):
 
         for point in self._selected_points:
             rect = Rectangle.from_center(point, self._rect_size, self._rect_size)
-            img_copy.draw_rectangle(rect, color=Color.Green(), thickness=1)
-            img_copy.draw_cross(point, color=Color.Green(), thickness=1, size=int(self._rect_size/2))
+            img_copy.draw_rectangle(rect, self._rect_color, thickness=1)
+            img_copy.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size/2))
 
         self._display_image(img_copy)
 
@@ -94,8 +95,7 @@ class PointSelectDialog(QDialog):
     def _init_ui(self, aligned_images, config):
         self.setWindowTitle('Select Region of Interest from Image A')
 
-        selection_region_size = config.region_size.value()
-        self._frame = SelectorFrame(1100, aligned_images, selection_region_size)
+        self._frame = SelectorFrame(1100, aligned_images, config)
 
         dialog_btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,

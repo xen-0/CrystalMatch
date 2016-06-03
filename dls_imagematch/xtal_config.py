@@ -16,5 +16,7 @@ class XtalConfig(Config):
         self.output_dir = new(DirConfigItem, "output_dir", default="../test-output/")
         self.color_align = new(ColorConfigItem, "color_align", Color.Purple())
         self.color_search = new(ColorConfigItem, "color_search", Color.Orange())
+        self.color_xtal_img1 = new(ColorConfigItem, "color_xtal_img1", Color.Green())
+        self.color_xtal_img2 = new(ColorConfigItem, "color_xtal_img2", Color.Red())
 
         self.initialize()

@@ -15,6 +15,8 @@ class CrystalMatchControl(QGroupBox):
     NUM_FRAMES = 10
     FRAME_SIZE = 75
 
+    FRAME_STYLE = "color: {0}; font-size: 20pt; text-align: center; border:1px solid {0};"
+
     def __init__(self, selector_a, selector_b, results_frame, aligner, config):
         super(CrystalMatchControl, self).__init__()
 
@@ -31,6 +33,7 @@ class CrystalMatchControl(QGroupBox):
         self._config = config
 
         self._init_ui()
+        self._clear_images()
         self.setTitle("Crystal Matching")
 
     def _init_ui(self):
@@ -50,14 +53,14 @@ class CrystalMatchControl(QGroupBox):
         hbox_frames2 = QHBoxLayout()
         for i in range(self.NUM_FRAMES):
             frame1 = QLabel()
-            frame1.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid red")
+            frame1.setStyleSheet(self.FRAME_STYLE.format("black"))
             frame1.setFixedWidth(self.FRAME_SIZE)
             frame1.setFixedHeight(self.FRAME_SIZE)
             frame1.setAlignment(Qt.AlignCenter)
             self._frames1.append(frame1)
             hbox_frames1.addWidget(frame1)
             frame2 = QLabel()
-            frame2.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid blue")
+            frame2.setStyleSheet(self.FRAME_STYLE.format("black"))
             frame2.setFixedWidth(self.FRAME_SIZE)
             frame2.setFixedHeight(self.FRAME_SIZE)
             frame2.setAlignment(Qt.AlignCenter)
@@ -112,9 +115,6 @@ class CrystalMatchControl(QGroupBox):
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
-    ''' ----------------------
-    OTHER FUNCTIONS
-    ------------------------'''
     def _perform_match(self):
         selected_img1_points = self._selected_points
         region_size = self._config.region_size.value()
@@ -124,9 +124,22 @@ class CrystalMatchControl(QGroupBox):
 
         self._display_results(match_set)
 
+    ''' ----------------------
+    SMALL IMAGE FUNCTIONS
+    ------------------------'''
+    def _clear_images(self):
+        color1 = self._config.color_xtal_img1.value().to_hex()
+        color2 = self._config.color_xtal_img2.value().to_hex()
+        for i in range(self.NUM_FRAMES):
+            self._frames1[i].clear()
+            self._frames1[i].setStyleSheet(self.FRAME_STYLE.format(color1))
+            self._frames2[i].clear()
+            self._frames2[i].setStyleSheet(self.FRAME_STYLE.format(color2))
+
     def _display_image1_regions(self):
         img1 = self._aligned_images.img1
         region_size = self._config.region_size.value()
+        color = self._config.color_xtal_img1.value()
 
         for i, point in enumerate(self._selected_points):
             if i >= self.NUM_FRAMES:
@@ -134,7 +147,7 @@ class CrystalMatchControl(QGroupBox):
 
             rect = Rectangle.from_center(point, region_size, region_size)
             img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
-            img.draw_cross(img.bounds().center(), color=Color.Red(), thickness=1)
+            img.draw_cross(img.bounds().center(), color, thickness=1)
             self._display_image(img, 1, i)
 
     def _display_image(self, image, row, frame_number):
@@ -151,11 +164,9 @@ class CrystalMatchControl(QGroupBox):
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         frame.setPixmap(scaled)
 
-    def _clear_images(self):
-        for i in range(self.NUM_FRAMES):
-            self._frames1[i].clear()
-            self._frames2[i].clear()
-
+    ''' ----------------------
+    DISPLAY RESULTS FUNCTIONS
+    ------------------------'''
     def _display_marked_img2(self):
         match_set = CrystalMatchSet(self._aligned_images, self._selected_points)
         region_size = self._config.region_size.value()
@@ -186,6 +197,9 @@ class CrystalMatchControl(QGroupBox):
 
         region_size = self._config.region_size.value()
 
+        color1 = self._config.color_xtal_img1.value()
+        color2 = self._config.color_xtal_img2.value()
+
         print(status)
         for i, match in enumerate(crystal_match_set.matches):
 
@@ -206,19 +220,19 @@ class CrystalMatchControl(QGroupBox):
 
             px2 = match.img1_point() - match._transformation.translation().to_point()
             off = crystal_match_set.pixel_offset()
-            img1.draw_cross(pixel1, Color.Red(), size=10, thickness=2)
-            img1.draw_cross(px2+off, Color.Blue(), size=10, thickness=2)
-            img1.draw_cross(pixel2+off, Color.Green(), size=10, thickness=2)
-            img1.draw_circle(pixel2+off, 30, Color.Green())
+            img1.draw_cross(pixel1, color1, size=10, thickness=2)
+            img1.draw_cross(px2+off, color2, size=10, thickness=2)
+            img1.draw_cross(pixel2+off, Color.Yellow(), size=10, thickness=2)
+            img1.draw_circle(pixel2+off, 30, Color.Yellow())
 
-            img2.draw_cross(pixel1-off, Color.Red(), size=10, thickness=2)
-            img2.draw_cross(pixel2, Color.Green(), size=10, thickness=2)
-            img2.draw_cross(px2, Color.Blue(), size=10, thickness=2)
+            img2.draw_cross(pixel1-off, color1, size=10, thickness=2)
+            img2.draw_cross(pixel2, Color.Yellow(), size=10, thickness=2)
+            img2.draw_cross(px2, color2, size=10, thickness=2)
 
             if i < self.NUM_FRAMES:
                 rect = Rectangle.from_center(px2, region_size, region_size)
                 img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
-                img.draw_cross(img.bounds().center(), color=Color.Blue(), thickness=1)
+                img.draw_cross(img.bounds().center(), color=color2, thickness=1)
                 self._display_image(img, 2, i)
 
         self._results_frame.display_image(img2)
