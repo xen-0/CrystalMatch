@@ -40,7 +40,7 @@ class VMXiCrystalMatcher(QMainWindow):
         well_selector2 = WellSelector2(selector_a, selector_b, self._config)
 
         # Main image frame - shows progress of image matching
-        image_frame = ImageFrame()
+        image_frame = ImageFrame(self._config)
 
         # Feature Matching Control
         aligner = FeatureMatchControl(selector_a, selector_b, image_frame, with_popup=False)

@@ -8,8 +8,10 @@ class ImageFrame(QGroupBox):
     """ Widget that displays an image as well as an editable status message and a readout of
     the current mouse position on the image.
     """
-    def __init__(self):
+    def __init__(self, config):
         super(ImageFrame, self).__init__()
+
+        self._config = config
 
         self._image = None
         self._scaled_size = (0, 0)
@@ -63,7 +65,8 @@ class ImageFrame(QGroupBox):
         self.last_images = aligned_images
 
         # Display image of B overlaid on A
-        self.display_image(aligned_images.overlay())
+        rect_color = self._config.color_align
+        self.display_image(aligned_images.overlay(rect_color))
         metric = aligned_images.overlap_metric()
 
         # Determine transformation in real units (um)

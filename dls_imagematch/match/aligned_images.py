@@ -1,6 +1,6 @@
 from .overlay import Overlayer
 from .metric_overlap import OverlapMetric
-from dls_imagematch.util import Image, Point
+from dls_imagematch.util import Color, Point
 
 
 class AlignedImages:
@@ -56,10 +56,10 @@ class AlignedImages:
 
         return self._real_center
 
-    def overlay(self):
+    def overlay(self, rect_color=Color.Black()):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
-            self._overlay = Overlayer.create_overlay_image(self.img1, self.img2, self.translate)
+            self._overlay = Overlayer.create_overlay_image(self.img1, self.img2, self.translate, rect_color)
 
         return self._overlay
 

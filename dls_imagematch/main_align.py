@@ -41,7 +41,7 @@ class AlignmentMain(QMainWindow):
         well_selector2 = WellSelector2(selector_a, selector_b, self._config)
 
         # Main image frame - shows progress of image matching
-        image_frame = ImageFrame()
+        image_frame = ImageFrame(self._config)
 
         # Region Matching Control
         region_match = RegionMatchControl(selector_a, selector_b, image_frame)
