@@ -154,6 +154,7 @@ class CrystalMatchControl(QGroupBox):
     def _clear_images(self):
         for i in range(self.NUM_FRAMES):
             self._frames1[i].clear()
+            self._frames2[i].clear()
 
     def _display_marked_img2(self):
         match_set = CrystalMatchSet(self._aligned_images, self._selected_points)
