@@ -65,7 +65,7 @@ class ImageFrame(QGroupBox):
         self.last_images = aligned_images
 
         # Display image of B overlaid on A
-        rect_color = self._config.color_align
+        rect_color = self._config.color_align.value()
         self.display_image(aligned_images.overlay(rect_color))
         metric = aligned_images.overlap_metric()
 

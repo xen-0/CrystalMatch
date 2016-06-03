@@ -168,15 +168,15 @@ class ConfigDialog(QtGui.QDialog):
         self.setLayout(vbox)
 
     def _update_options_display(self):
-        self.txt_region_size.setText(str(self._config.region_size))
-        self.txt_search_width.setText(str(self._config.search_width))
-        self.txt_search_height.setText(str(self._config.search_height))
-        self.txt_input_dir.setText(self._config.input_dir)
-        self.txt_samples_dir.setText(self._config.samples_dir)
-        self.txt_output_dir.setText(self._config.output_dir)
+        self.txt_region_size.setText(str(self._config.region_size.value()))
+        self.txt_search_width.setText(str(self._config.search_width.value()))
+        self.txt_search_height.setText(str(self._config.search_height.value()))
+        self.txt_input_dir.setText(self._config.input_dir.value())
+        self.txt_samples_dir.setText(self._config.samples_dir.value())
+        self.txt_output_dir.setText(self._config.output_dir.value())
 
-        self._color_align = self._config.color_align
-        self._color_search = self._config.color_search
+        self._color_align = self._config.color_align.value()
+        self._color_search = self._config.color_search.value()
 
         style = "background-color: {};"
         self.btn_color_align.setStyleSheet(style.format(self._color_align.to_hex()))
@@ -201,42 +201,42 @@ class ConfigDialog(QtGui.QDialog):
         if sys.platform == 'win32':
             try:
                 os.startfile(abspath)
-            except FileNotFoundError:
+            except OSError:
                 QMessageBox.critical(self, "File Error", "Unable to find directory: '{}".format(abspath))
         else:
             QMessageBox.critical(self, "File Error", "Only available on Windows")
 
     def _set_color_align(self):
-        color = self._get_dialog_color()
+        color = self._get_dialog_color(self._color_align)
         self._color_align = color
         self.btn_color_align.setStyleSheet("background-color: {};".format(color.to_hex()))
 
     def _set_color_search(self):
-        color = self._get_dialog_color()
+        color = self._get_dialog_color(self._color_search)
         self._color_search = color
         self.btn_color_search.setStyleSheet("background-color: {};".format(color.to_hex()))
 
     @staticmethod
-    def _get_dialog_color():
-        qt_col = QtGui.QColorDialog.getColor()
+    def _get_dialog_color(start_color):
+        color = start_color
+
+        qt_col = QtGui.QColorDialog.getColor(start_color.to_qt())
         if qt_col.isValid():
             color = Color.from_qt(qt_col)
-            print(color.to_hex())
-            return color
-        else:
-            return Color.Black()
+
+        return color
 
     def _dialog_apply_changes(self):
         cfg = self._config
 
-        cfg.region_size = self.txt_region_size.text()
-        cfg.search_width = self.txt_search_width.text()
-        cfg.search_height = self.txt_search_height.text()
-        cfg.input_dir = self.txt_input_dir.text()
-        cfg.samples_dir = self.txt_samples_dir.text()
-        cfg.output_dir = self.txt_output_dir.text()
-        cfg.color_align = self._color_align
-        cfg.color_search = self._color_search
+        cfg.region_size.set(self.txt_region_size.text())
+        cfg.search_width.set(self.txt_search_width.text())
+        cfg.search_height.set(self.txt_search_height.text())
+        cfg.input_dir.set(self.txt_input_dir.text())
+        cfg.samples_dir.set(self.txt_samples_dir.text())
+        cfg.output_dir.set(self.txt_output_dir.text())
+        cfg.color_align.set(self._color_align)
+        cfg.color_search.set(self._color_search)
 
         cfg.update_config_file()
         self._update_options_display()

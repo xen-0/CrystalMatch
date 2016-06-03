@@ -15,7 +15,7 @@ class WellSelector(QGroupBox):
         self.selector_a = selector_a
         self.selector_b = selector_b
 
-        self._samples_dir = config.samples_dir
+        self._samples_dir = config.samples_dir.value()
 
         self._init_ui()
         self.setTitle("Select Well (441350000072)")

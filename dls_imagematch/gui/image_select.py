@@ -86,7 +86,7 @@ class ImageSelector(QtGui.QGroupBox):
 
     def _open_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
-        input_dir = self._config.input_dir
+        input_dir = self._config.input_dir.value()
         filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', input_dir))
         if filepath:
             self.setFile(filepath)

@@ -94,7 +94,7 @@ class PointSelectDialog(QDialog):
     def _init_ui(self, aligned_images, config):
         self.setWindowTitle('Select Region of Interest from Image A')
 
-        selection_region_size = config.region_size
+        selection_region_size = config.region_size.value()
         self._frame = SelectorFrame(1100, aligned_images, selection_region_size)
 
         dialog_btns = QDialogButtonBox(

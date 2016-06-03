@@ -33,8 +33,8 @@ class CrystalMatcher:
         center_b = center_a - align_offset
 
         # Determine size (in pixels) of the search box in image B
-        width = self._config.search_width / img2.pixel_size
-        height = self._config.search_height / img2.pixel_size
+        width = self._config.search_width.value() / img2.pixel_size
+        height = self._config.search_height.value() / img2.pixel_size
 
         # Create a rectangle area of image B in which to search
         # Its tall because crystal likely to move downwards under gravity

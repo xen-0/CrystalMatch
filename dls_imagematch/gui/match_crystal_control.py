@@ -117,7 +117,7 @@ class CrystalMatchControl(QGroupBox):
     ------------------------'''
     def _perform_match(self):
         selected_img1_points = self._selected_points
-        region_size = self._config.region_size
+        region_size = self._config.region_size.value()
 
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
         self._matcher.match(match_set, region_size)
@@ -126,7 +126,7 @@ class CrystalMatchControl(QGroupBox):
 
     def _display_image1_regions(self):
         img1 = self._aligned_images.img1
-        region_size = self._config.region_size
+        region_size = self._config.region_size.value()
 
         for i, point in enumerate(self._selected_points):
             if i >= self.NUM_FRAMES:
@@ -158,10 +158,10 @@ class CrystalMatchControl(QGroupBox):
 
     def _display_marked_img2(self):
         match_set = CrystalMatchSet(self._aligned_images, self._selected_points)
-        region_size = self._config.region_size
+        region_size = self._config.region_size.value()
         img2 = match_set.img2().copy()
 
-        color = self._config.color_search
+        color = self._config.color_search.value()
 
         for crystal_match in match_set.matches:
             img1_rect = crystal_match.img1_region(region_size)
@@ -184,7 +184,7 @@ class CrystalMatchControl(QGroupBox):
         img1 = crystal_match_set.img1().copy()
         img2 = crystal_match_set.img2().copy()
 
-        region_size = self._config.region_size
+        region_size = self._config.region_size.value()
 
         print(status)
         for i, match in enumerate(crystal_match_set.matches):
