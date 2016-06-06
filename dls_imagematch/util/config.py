@@ -70,7 +70,7 @@ class Config:
     def _load_from_file(self, file):
         """ Load options from the config file specified in the constructor. """
         if not os.path.isfile(file):
-            self.save_to_file(file)
+            self.save_to_file()
             return
 
         with open(file) as f:
@@ -183,4 +183,14 @@ class ColorConfigItem(ConfigItem):
 
     def from_file_string(self, string):
         self._value = Color.from_string(string)
+
+
+class BoolConfigItem(ConfigItem):
+    """ Config item that stores a boolean value. """
+    def __init__(self, tag, default):
+        ConfigItem.__init__(self, tag, default)
+
+    def from_file_string(self, string):
+        self._value = True if string.lower() == 'true' else False
+        print(self._value)
 

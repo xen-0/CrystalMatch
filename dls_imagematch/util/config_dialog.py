@@ -2,10 +2,11 @@ import sys
 import os
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, QGroupBox, QWidget
+from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, \
+    QGroupBox, QWidget, QCheckBox
 
 from .color import Color
-from .config import IntConfigItem, ColorConfigItem, DirectoryConfigItem
+from .config import *
 
 
 class ConfigDialog(QtGui.QDialog):
@@ -74,6 +75,8 @@ class ConfigDialog(QtGui.QDialog):
 
         if isinstance(item, IntConfigItem):
             add(ValueConfigControl(item, txt_width=40))
+        elif isinstance(item, BoolConfigItem):
+            add(BoolConfigControl(item))
         elif isinstance(item, ColorConfigItem):
             add(ColorConfigControl(item))
         elif isinstance(item, DirectoryConfigItem):
@@ -178,6 +181,7 @@ class ConfigControl(QWidget):
     def __init__(self, item):
         super(ConfigControl, self).__init__()
         self._config_item = item
+        self.setContentsMargins(0, 0, 0, 0)
 
     def update_from_config(self):
         """ Update the value displayed in the control by reading from the ConfigItem"""
@@ -210,7 +214,6 @@ class ValueConfigControl(ConfigControl):
         hbox.addWidget(QLabel(self._config_item.units()))
         hbox.addStretch()
 
-        self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hbox)
 
     def update_from_config(self):
@@ -218,6 +221,37 @@ class ValueConfigControl(ConfigControl):
 
     def save_to_config(self):
         self._config_item.set(self.txt_value.text())
+
+
+class BoolConfigControl(ConfigControl):
+    def __init__(self, config_item):
+        ConfigControl.__init__(self, config_item)
+
+        self._init_ui()
+
+    def _init_ui(self):
+        lbl_bool = QLabel(self._config_item.tag())
+        lbl_bool.setFixedWidth(ConfigDialog.LABEL_WIDTH)
+
+        self.chk_box = QCheckBox()
+        self.chk_box.setTristate(False)
+        self.chk_box.setCheckState(self._config_item.value())
+
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.addWidget(lbl_bool)
+        hbox.addWidget(self.chk_box)
+        hbox.addStretch()
+
+        self.setLayout(hbox)
+
+    def update_from_config(self):
+        state = 2 if self._config_item.value() == True else 0
+        self.chk_box.setCheckState(state)
+
+    def save_to_config(self):
+        value = True if self.chk_box.checkState() == 2 else False
+        self._config_item.set(value)
 
 
 class DirectoryConfigControl(ConfigControl):
@@ -247,7 +281,6 @@ class DirectoryConfigControl(ConfigControl):
         hbox.addWidget(btn_show)
         hbox.addStretch()
 
-        self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hbox)
 
     def update_from_config(self):
@@ -292,7 +325,6 @@ class ColorConfigControl(ConfigControl):
         hbox.addWidget(self._swatch)
         hbox.addStretch()
 
-        self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hbox)
 
     def update_from_config(self):
