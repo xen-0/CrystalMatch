@@ -17,11 +17,9 @@ class CrystalMatchControl(QGroupBox):
 
     FRAME_STYLE = "color: {0}; font-size: 16pt; text-align: center; border:1px solid {0};"
 
-    def __init__(self, selector_a, selector_b, results_frame, config):
+    def __init__(self, results_frame, config):
         super(CrystalMatchControl, self).__init__()
 
-        self._selector_a = selector_a
-        self._selector_b = selector_b
         self._results_frame = results_frame
 
         self._matcher = CrystalMatcher(config)

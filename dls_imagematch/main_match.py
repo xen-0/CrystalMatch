@@ -46,7 +46,7 @@ class VMXiCrystalMatcher(QMainWindow):
         aligner = FeatureMatchControl(selector_a, selector_b, with_popup=False)
 
         # Secondary Matching Control
-        xtal_match = CrystalMatchControl(selector_a, selector_b, image_frame, self._config)
+        xtal_match = CrystalMatchControl(image_frame, self._config)
 
         # Connect signals
         aligner.signal_aligned.connect(xtal_match.set_aligned_images)
