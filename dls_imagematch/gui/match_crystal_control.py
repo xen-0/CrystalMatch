@@ -17,13 +17,12 @@ class CrystalMatchControl(QGroupBox):
 
     FRAME_STYLE = "color: {0}; font-size: 16pt; text-align: center; border:1px solid {0};"
 
-    def __init__(self, selector_a, selector_b, results_frame, aligner, config):
+    def __init__(self, selector_a, selector_b, results_frame, config):
         super(CrystalMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
         self._results_frame = results_frame
-        self._aligner = aligner
 
         self._matcher = CrystalMatcher(config)
 
@@ -94,14 +93,15 @@ class CrystalMatchControl(QGroupBox):
         self._clear_images()
         print("Xtal reset", self._aligned_images)
 
+    def set_aligned_images(self, aligned_images):
+        self.reset()
+        self._aligned_images = aligned_images
+
     ''' ----------------------
     BUTTON FUNCTIONS
     ------------------------'''
     def _fn_select_points(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
-        self.reset()
-        self._aligned_images = self._aligner.last_images
-
         if self._aligned_images is None:
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
             return
@@ -190,7 +190,6 @@ class CrystalMatchControl(QGroupBox):
     def _display_match_loading(self):
         total = min(len(self._selected_points), self.NUM_FRAMES)
         for i in range(total):
-            self._frames2[i]
             self._frames2[i].setText("...")
 
     ''' ----------------------

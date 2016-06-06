@@ -8,10 +8,11 @@ class AlignedImages:
     have the same real size per pixel. The translate is the distance (in pixels) that the top-left corner
     of image B should be offset from the top-left corner of image A, in order to properly align the images.
     """
-    def __init__(self, img1, img2, translate):
+    def __init__(self, img1, img2, translate, method="Unknown"):
         self.img1 = img1
         self.img2 = img2
         self.translate = translate
+        self.method = method
 
         self._real_offset = None
         self._pixel_offset = None

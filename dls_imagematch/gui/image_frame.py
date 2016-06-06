@@ -59,7 +59,7 @@ class ImageFrame(QGroupBox):
         self._lbl_cursor.setText("")
         self._frame.clear()
 
-    def display_align_results(self, aligned_images, message):
+    def display_align_results(self, aligned_images):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
         self.last_images = aligned_images
@@ -74,7 +74,7 @@ class ImageFrame(QGroupBox):
         real = aligned_images.real_offset()
         offset_msg = "x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)".format(real.x, real.y, pixel.x, pixel.y)
 
-        status = message + " (metric = " + "{0:.2f}".format(metric) + ")"
+        status = "Image Alignment (" + aligned_images.method + ") (metric = " + "{0:.2f}".format(metric) + ")"
         self.set_status_message(status, offset_msg)
 
     def set_status_message(self, line1, line2=""):

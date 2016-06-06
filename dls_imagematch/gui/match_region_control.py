@@ -1,5 +1,6 @@
 from __future__ import division
 
+from PyQt4 import QtCore
 from PyQt4.QtGui import (QPushButton, QLineEdit, QLabel, QGroupBox, QHBoxLayout)
 
 from dls_imagematch.match import RegionMatcher, AlignedImages
@@ -12,12 +13,13 @@ class RegionMatchControl(QGroupBox):
     DEFAULT_X = "0"
     DEFAULT_Y = "0"
 
-    def __init__(self, selector_a, selector_b, results_frame):
+    signal_aligned = QtCore.pyqtSignal(object)
+
+    def __init__(self, selector_a, selector_b):
         super(RegionMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._results_frame = results_frame
 
         self._img1 = None
         self._img2 = None
@@ -129,10 +131,10 @@ class RegionMatchControl(QGroupBox):
         translate = self._matcher.net_transform
 
         if self._matcher.match_complete:
-            status = "Region match complete!"
+            status = "Region match"
             self._set_is_matching(False)
         else:
-            status = "Region match in progress"
+            status = "Region match in progress..."
 
-        aligned = AlignedImages(self._img1, self._img2, translate)
-        self._results_frame.display_align_results(aligned, status)
+        aligned = AlignedImages(self._img1, self._img2, translate, status)
+        self.signal_aligned.emit(aligned)

@@ -1,5 +1,6 @@
 from __future__ import division
 
+from PyQt4 import QtCore
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QLineEdit, QLabel, QComboBox
 
 from dls_imagematch.match import RegionConsensusMatcher, AlignedImages
@@ -9,7 +10,6 @@ from dls_imagematch.util import Translate
 class ConsensusMatchControl(QGroupBox):
     """ Widget that allows control of the Consensus Matching process.
     """
-
     DEFAULT_X = "0"
     DEFAULT_Y = "0"
     DEFAULT_GRID_SPACE = "0.05"
@@ -17,12 +17,13 @@ class ConsensusMatchControl(QGroupBox):
     GRID_SIZE_NAMES = ["3x3", "5x5", "7x7", "9x9"]
     GRID_SIZE_VALUES = [1, 2, 3, 4]
 
-    def __init__(self, selector_a, selector_b, results_frame):
+    signal_aligned = QtCore.pyqtSignal(object)
+
+    def __init__(self, selector_a, selector_b):
         super(ConsensusMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._results_frame = results_frame
         self._matcher = None
 
         self._init_ui()
@@ -78,10 +79,6 @@ class ConsensusMatchControl(QGroupBox):
         grid = float(self._txt_grid_space.text())
         spacing = grid * img1.size[0]
 
-        # Clear existing image from frame
-        self._results_frame.clear()
-        self._results_frame.set_status_message("Performing consensus match...")
-
         # Perform matching
         self._matcher = RegionConsensusMatcher(img1, img2)
         self._matcher.match(guess, grid_size, spacing)
@@ -107,6 +104,6 @@ class ConsensusMatchControl(QGroupBox):
         translate = self._matcher.match_transform
         confidence = self._matcher.match_confidence
 
-        status = "Consensus region match complete (agreement = {0:.2f})".format(confidence)
-        aligned = AlignedImages(self._img1, self._img2, translate)
-        self._results_frame.display_align_results(aligned, status)
+        method = "Consensus region match [agreement = {0:.2f}]".format(confidence)
+        aligned = AlignedImages(self._img1, self._img2, translate, method)
+        self.signal_aligned.emit(aligned)

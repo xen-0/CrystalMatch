@@ -44,13 +44,18 @@ class AlignmentMain(QMainWindow):
         image_frame = ImageFrame(self._config)
 
         # Region Matching Control
-        region_match = RegionMatchControl(selector_a, selector_b, image_frame)
+        region_match = RegionMatchControl(selector_a, selector_b)
 
         # Consensus Match
-        consensus_match = ConsensusMatchControl(selector_a, selector_b, image_frame)
+        consensus_match = ConsensusMatchControl(selector_a, selector_b)
 
         # Feature Matching Control
-        feature_match = FeatureMatchControl(selector_a, selector_b, image_frame)
+        feature_match = FeatureMatchControl(selector_a, selector_b)
+
+        # Connect Signals
+        region_match.signal_aligned.connect(image_frame.display_align_results)
+        consensus_match.signal_aligned.connect(image_frame.display_align_results)
+        feature_match.signal_aligned.connect(image_frame.display_align_results)
 
         # Create layout
         vbox_img_selection = QVBoxLayout()

@@ -10,14 +10,13 @@ from dls_imagematch.match import FeatureMatchException
 class FeatureMatchControl(QGroupBox):
     """ Widget that allows control of the Feature Matching process.
     """
-    signal_aligned = QtCore.pyqtSignal()
+    signal_aligned = QtCore.pyqtSignal(object)
 
-    def __init__(self, selector_a, selector_b, results_frame, with_popup=True):
+    def __init__(self, selector_a, selector_b, with_popup=True):
         super(FeatureMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-        self._results_frame = results_frame
         self._matcher = None
         self._with_popup = with_popup
 
@@ -62,10 +61,11 @@ class FeatureMatchControl(QGroupBox):
         FeatureMatcher.POPUP_RESULTS = self._with_popup
         try:
             self._matcher.match(method, adapt, translation_only=True)
-            self._display_results(method, adapt)
-            self.signal_aligned.emit()
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
+
+        self._display_results(method, adapt)
+        self.signal_aligned.emit(self.last_images)
 
     def _prepare_images(self):
         """ Load the selected images to be matched, scale them appropriately and
@@ -85,11 +85,10 @@ class FeatureMatchControl(QGroupBox):
         and print the offset. """
         transform = self._matcher.net_transform
 
-        status = "Image Alignment Complete (" + method
+        align_method = "Feature matching - " + method
         if adapt != '':
-            status += " - " + adapt
-        status += " features)"
+            align_method += " with " + adapt
 
-        aligned = AlignedImages(self._img1, self._img2, transform.translation())
-        self._results_frame.display_align_results(aligned, status)
+        aligned = AlignedImages(self._img1, self._img2, transform.translation(), align_method)
+
         self.last_images = aligned
