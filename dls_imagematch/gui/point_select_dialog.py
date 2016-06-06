@@ -124,7 +124,10 @@ class PointSelectDialog(QDialog):
     def get_points(filename, config):
         """ Display a dialog and return the result to the caller. """
         dialog = PointSelectDialog(filename, config)
-        _ = dialog.exec_()
+        result_ok = dialog.exec_()
 
-        points = dialog.selected_points()
+        points = []
+        if result_ok:
+            points = dialog.selected_points()
+
         return points

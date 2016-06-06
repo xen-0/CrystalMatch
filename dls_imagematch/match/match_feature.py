@@ -127,7 +127,7 @@ class FeatureMatcher:
             try:
                 method_matches = FeatureMatcher._find_matches_for_method(img1, img2, method, adaptation)
                 matches.extend(method_matches)
-                print("{} - {} matches".format(method, len(method_matches)))
+                # print("{} - {} matches".format(method, len(method_matches)))
             except FeatureMatchException:
                 print(method + " - fail")
 

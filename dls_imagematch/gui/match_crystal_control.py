@@ -15,7 +15,7 @@ class CrystalMatchControl(QGroupBox):
     NUM_FRAMES = 10
     FRAME_SIZE = 75
 
-    FRAME_STYLE = "color: {0}; font-size: 20pt; text-align: center; border:1px solid {0};"
+    FRAME_STYLE = "color: {0}; font-size: 16pt; text-align: center; border:1px solid {0};"
 
     def __init__(self, selector_a, selector_b, results_frame, aligner, config):
         super(CrystalMatchControl, self).__init__()
@@ -39,10 +39,12 @@ class CrystalMatchControl(QGroupBox):
     def _init_ui(self):
         """ Create all the display elements of the widget. """
         # Matching function buttons
-        self._btn_region = QPushButton("Select Region")
+        self._btn_region = QPushButton("Select")
+        self._btn_region.setFixedHeight(self.FRAME_SIZE)
         self._btn_region.clicked.connect(self._fn_select_points)
 
-        self._btn_locate = QPushButton("Perform Match")
+        self._btn_locate = QPushButton("Match")
+        self._btn_locate.setFixedHeight(self.FRAME_SIZE)
         self._btn_locate.clicked.connect(self._fn_perform_match)
         self._btn_locate.setEnabled(False)
 
@@ -98,12 +100,14 @@ class CrystalMatchControl(QGroupBox):
         self.reset()
         self._aligned_images = self._aligner.last_images
 
-        if self._aligned_images is not None:
-            self._selected_points = PointSelectDialog.get_points(self._aligned_images, self._config)
-        else:
+        if self._aligned_images is None:
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
+            return
 
-        if len(self._selected_points) > 0:
+        result_ok, points = self.get_points(self._aligned_images, self._config)
+
+        if result_ok:
+            self._selected_points = points
             self._clear_images()
             self._display_image1_regions()
             self._display_marked_img2()
@@ -119,10 +123,25 @@ class CrystalMatchControl(QGroupBox):
         selected_img1_points = self._selected_points
         region_size = self._config.region_size.value()
 
+        self._display_match_loading()
+
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
         self._matcher.match(match_set, region_size)
 
         self._display_results(match_set)
+        self._btn_locate.setEnabled(False)
+
+    @staticmethod
+    def get_points(filename, config):
+        """ Display a dialog and return the result to the caller. """
+        dialog = PointSelectDialog(filename, config)
+        result_ok = dialog.exec_()
+
+        points = []
+        if result_ok:
+            points = dialog.selected_points()
+
+        return result_ok, points
 
     ''' ----------------------
     SMALL IMAGE FUNCTIONS
@@ -132,8 +151,10 @@ class CrystalMatchControl(QGroupBox):
         color2 = self._config.color_xtal_img2.value().to_hex()
         for i in range(self.NUM_FRAMES):
             self._frames1[i].clear()
+            self._frames1[i].setText(str(i+1))
             self._frames1[i].setStyleSheet(self.FRAME_STYLE.format(color1))
             self._frames2[i].clear()
+            self._frames2[i].setText(str(i+1))
             self._frames2[i].setStyleSheet(self.FRAME_STYLE.format(color2))
 
     def _display_image1_regions(self):
@@ -163,6 +184,12 @@ class CrystalMatchControl(QGroupBox):
         pixmap = image.to_qt_pixmap()
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         frame.setPixmap(scaled)
+
+    def _display_match_loading(self):
+        total = min(len(self._selected_points), self.NUM_FRAMES)
+        for i in range(total):
+            self._frames2[i]
+            self._frames2[i].setText("...")
 
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
@@ -206,13 +233,13 @@ class CrystalMatchControl(QGroupBox):
             pixel1, real1 = match.img1_point(), match.img1_point_real()
             pixel2, real2 = match.img2_point(), match.img2_point_real()
 
-            beam_position = "Beam Position: x={0:.2f} um, " \
-                            "y={1:.2f} um ({2} px, {3} px)".format(real2.x, real2.y, pixel2.x, pixel2.y)
+            beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
+                            "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
 
-            delta_pixel = pixel2 - pixel1 - crystal_match_set.pixel_offset()
-            delta_real = real2 - real1 - crystal_match_set.real_offset()
+            delta_pixel = pixel2 - pixel1 + crystal_match_set.pixel_offset()
+            delta_real = real2 - real1 + crystal_match_set.real_offset()
             delta = "Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
-                    "{3} px)".format(delta_real.x, delta_real.y, delta_pixel.x, delta_pixel.y)
+                    "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
             print("-- Match {} --".format(i))
             print(beam_position)
