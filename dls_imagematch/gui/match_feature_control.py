@@ -1,5 +1,6 @@
 from __future__ import division
 
+from PyQt4 import QtCore
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox
 
 from dls_imagematch.match import FeatureMatcher, AlignedImages
@@ -9,6 +10,8 @@ from dls_imagematch.match import FeatureMatchException
 class FeatureMatchControl(QGroupBox):
     """ Widget that allows control of the Feature Matching process.
     """
+    signal_aligned = QtCore.pyqtSignal()
+
     def __init__(self, selector_a, selector_b, results_frame, with_popup=True):
         super(FeatureMatchControl, self).__init__()
 
@@ -60,6 +63,7 @@ class FeatureMatchControl(QGroupBox):
         try:
             self._matcher.match(method, adapt, translation_only=True)
             self._display_results(method, adapt)
+            self.signal_aligned.emit()
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 

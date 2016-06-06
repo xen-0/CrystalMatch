@@ -1,5 +1,6 @@
 from __future__ import division
 
+from PyQt4 import QtCore
 from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
 
 from dls_imagematch.util import File
@@ -12,6 +13,8 @@ class WellSelector2(QGroupBox):
 
     The path of an image is expected to be: plate_xxx/batch_yy/well_zz_profile_1.jpg
     """
+    signal_selected = QtCore.pyqtSignal()
+
     def __init__(self, selector_a, selector_b, config):
         super(WellSelector2, self).__init__()
 
@@ -124,3 +127,5 @@ class WellSelector2(QGroupBox):
         # Set pixel sizes
         self.selector_a.setPixelSize(1.0)
         self.selector_b.setPixelSize(1.0)
+
+        self.signal_selected.emit()

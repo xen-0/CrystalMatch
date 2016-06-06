@@ -91,6 +91,8 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = None
         self._selected_points = []
         self._btn_locate.setEnabled(False)
+        self._clear_images()
+        print("Xtal reset", self._aligned_images)
 
     ''' ----------------------
     BUTTON FUNCTIONS

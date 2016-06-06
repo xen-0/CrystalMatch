@@ -33,8 +33,8 @@ class VMXiCrystalMatcher(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        selector_a = ImageSelector("Select Image A", self._config)
-        selector_b = ImageSelector("Select Image B", self._config)
+        selector_a = ImageSelector("Select Image 1", self._config)
+        selector_b = ImageSelector("Select Image 2", self._config)
 
         # Plate well selector (example data set)
         well_selector2 = WellSelector2(selector_a, selector_b, self._config)
@@ -46,7 +46,13 @@ class VMXiCrystalMatcher(QMainWindow):
         aligner = FeatureMatchControl(selector_a, selector_b, image_frame, with_popup=False)
 
         # Secondary Matching Control
-        secondary_match = CrystalMatchControl(selector_a, selector_b, image_frame, aligner, self._config)
+        xtal_match = CrystalMatchControl(selector_a, selector_b, image_frame, aligner, self._config)
+
+        # Connect signals
+        aligner.signal_aligned.connect(xtal_match.reset)
+        well_selector2.signal_selected.connect(xtal_match.reset)
+        well_selector2.signal_selected.connect(image_frame.clear)
+
 
         # Create layout
         vbox_img_selection = QVBoxLayout()
@@ -57,7 +63,7 @@ class VMXiCrystalMatcher(QMainWindow):
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
-        vbox_matching.addWidget(secondary_match)
+        vbox_matching.addWidget(xtal_match)
         vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)
 
