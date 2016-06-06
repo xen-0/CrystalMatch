@@ -35,8 +35,8 @@ class ImageSelector(QtGui.QGroupBox):
         # Selection Image Frames
         self._frame = QLabel("No Image Selected")
         self._frame.setStyleSheet("color: red; font-size: 20pt; text-align: center; border:1px solid black")
-        self._frame.setFixedWidth(300)
-        self._frame.setFixedHeight(300)
+        self._frame.setFixedWidth(350)
+        self._frame.setFixedHeight(350)
         self._frame.setAlignment(Qt.AlignCenter)
 
         # Selection pixel size

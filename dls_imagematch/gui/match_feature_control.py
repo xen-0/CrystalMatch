@@ -23,7 +23,7 @@ class FeatureMatchControl(QGroupBox):
         self.last_images = None
 
         self._init_ui()
-        self.setTitle("Feature Matching")
+        self.setTitle("Image Alignment (Feature Matching)")
 
     def _init_ui(self):
         """ Create all the display elements of the widget. """

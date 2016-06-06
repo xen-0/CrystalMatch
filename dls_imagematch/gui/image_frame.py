@@ -3,6 +3,8 @@ from __future__ import division
 from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QEvent
 
+from dls_imagematch.match import AlignedImages
+
 
 class ImageFrame(QGroupBox):
     """ Widget that displays an image as well as an editable status message and a readout of
@@ -62,6 +64,9 @@ class ImageFrame(QGroupBox):
     def display_align_results(self, aligned_images):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
+        if not isinstance(aligned_images, AlignedImages):
+            raise ValueError("Argument must be instance of {}".format(AlignedImages.__name__))
+
         self.last_images = aligned_images
 
         # Display image of B overlaid on A

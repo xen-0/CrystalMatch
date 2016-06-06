@@ -57,12 +57,12 @@ class VMXiCrystalMatcher(QMainWindow):
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(well_selector2)
-        vbox_img_selection.addWidget(aligner)
         vbox_img_selection.addWidget(selector_a)
         vbox_img_selection.addWidget(selector_b)
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
+        vbox_matching.addWidget(aligner)
         vbox_matching.addWidget(xtal_match)
         vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)
