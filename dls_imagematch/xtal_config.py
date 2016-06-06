@@ -8,7 +8,7 @@ class XtalConfig(Config):
 
         add = self.add
 
-        self.region_size = add(IntConfigItem, "Region Size", default=30, extra_arg='px')
+        self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
         self.search_height = add(IntConfigItem, "Search Height", default=400, extra_arg='px')
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
