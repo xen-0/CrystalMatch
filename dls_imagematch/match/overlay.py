@@ -5,7 +5,7 @@ from dls_imagematch.util import Image, Rectangle, Point, Color
 
 class Overlayer:
     @staticmethod
-    def create_overlay_image(img1, img2, transform, rect_color=Color.Black()):
+    def create_overlay_image(img1, img2, offset, rect_color=Color.Black()):
         """ For the two images, A and B, where the position of B is offset from that of A, overlay
         image B onto image A at the appropriate position. The overlaid area will ve a blending of the
         two images. A rectangle will be drawn around the area.
@@ -14,7 +14,6 @@ class Overlayer:
         background = img1.copy()
 
         # Get overlapping regions of images
-        offset = transform.to_point()
         overlap_a, overlap_b = Overlayer.get_overlap_regions(img1, img2, offset)
         if overlap_a is None or overlap_b is None:
             return background

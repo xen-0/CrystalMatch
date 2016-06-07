@@ -243,7 +243,7 @@ class CrystalMatchControl(QGroupBox):
             print(beam_position)
             print(delta)
 
-            px2 = match.img1_point() - match._transformation.translation().to_point()
+            px2 = match.img1_point() - match._transformation.translation()
             off = crystal_match_set.pixel_offset()
             img1.draw_cross(pixel1, color1, size=10, thickness=2)
             img1.draw_cross(px2+off, color2, size=10, thickness=2)

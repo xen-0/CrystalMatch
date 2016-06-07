@@ -7,7 +7,7 @@ from multiprocessing import Pool
 from functools import partial
 
 from .match_region import RegionMatcher
-from dls_imagematch.util import Translate
+from dls_imagematch.util import Point
 
 
 class RegionConsensusMatcher:
@@ -78,7 +78,7 @@ class RegionConsensusMatcher:
         starting_points = []
         for del_x in grid:
             for del_y in grid:
-                trans = Translate(cx + del_x, cy + del_y)
+                trans = Point(cx + del_x, cy + del_y)
                 starting_points.append(trans)
 
         return starting_points

@@ -54,6 +54,10 @@ class Point:
         """ Distance between the two points. """
         return (self - p).length()
 
+    def scale(self, factor):
+        """ Returns a scaled version of the Point (from the origin). """
+        return Point(self.x*factor, self.y*factor)
+
     def intify(self):
         """ Return a new point which is the same as this but with (rounded) integer coordinates. """
         return Point(int(round(self.x, 0)), int(round(self.y, 0)))

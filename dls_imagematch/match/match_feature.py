@@ -3,7 +3,7 @@ from __future__ import division
 import cv2
 import numpy as np
 
-from dls_imagematch.util import Translate, Image, Color, Point
+from dls_imagematch.util import Image, Color, Point
 from .transformation import Transformation
 
 
@@ -227,7 +227,7 @@ class FeatureMatcher:
         x = -np.median([d.x for d in deltas])
         y = -np.median([d.y for d in deltas])
 
-        return Translate(x, y)
+        return Point(x, y)
 
     def _calculate_homography(self, matches):
         """ See:

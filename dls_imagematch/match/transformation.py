@@ -20,7 +20,7 @@ class Transformation:
 
     def transform_image(self, image, output_size):
         if self._translation_only:
-            offset = self._translation.to_point()
+            offset = self._translation
             warped = Image.blank(output_size[0], output_size[1], image.channels)
             warped.paste(image, offset)
         else:
@@ -31,7 +31,7 @@ class Transformation:
 
     def inverse_transform_image(self, image, output_size):
         if self._translation_only:
-            offset = - self._translation.to_point()
+            offset = - self._translation
             warped = Image.blank(output_size[0], output_size[1], image.channels)
             warped.paste(image, offset)
         else:
@@ -42,7 +42,7 @@ class Transformation:
 
     def transform_points(self, points):
         if self._translation_only:
-            transformed = [p + self._translation.to_point() for p in points]
+            transformed = [p + self._translation for p in points]
         else:
             np_array = self._points_to_np_array(points)
             transformed = cv2.perspectiveTransform(np_array, self._homography)
@@ -52,7 +52,7 @@ class Transformation:
 
     def inverse_transform_points(self, points):
         if self._translation_only:
-            transformed = [p - self._translation.to_point() for p in points]
+            transformed = [p - self._translation for p in points]
         else:
             np_array = self._points_to_np_array(points)
             transformed = cv2.perspectiveTransform(np_array, self._homography_inverse)

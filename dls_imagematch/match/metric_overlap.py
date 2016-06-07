@@ -22,7 +22,7 @@ class OverlapMetric:
         transforms = self.trial_transforms.compose_with(starting_transform)
 
         for transform in transforms:
-            offset = transform.to_point().intify()
+            offset = transform.intify()
             metric = self.calculate_overlap_metric(offset)
             metrics.append(metric)
 

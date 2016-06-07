@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QLineEdit, QLabel, QComboBox
 
 from dls_imagematch.match import RegionConsensusMatcher, AlignedImages
-from dls_imagematch.util import Translate
+from dls_imagematch.util import Point
 
 
 class ConsensusMatchControl(QGroupBox):
@@ -71,7 +71,7 @@ class ConsensusMatchControl(QGroupBox):
         # Prepare initial guess
         guess_x = float(self._txt_guess_x.text())
         guess_y = float(self._txt_guess_y.text())
-        guess = Translate(guess_x*img1.size[0], guess_y*img1.size[1])
+        guess = Point(guess_x*img1.size[0], guess_y*img1.size[1])
 
         # Set grid spacing
         index = self._cmbo_grid_size.currentIndex()

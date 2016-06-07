@@ -1,10 +1,11 @@
 from __future__ import division
-from dls_imagematch.util.translate import Translate
+
+from dls_imagematch.util import Point
 
 
 class TrialTransforms:
     def __init__(self):
-        self.transforms = [Translate(0,0)]
+        self.transforms = [Point(0, 0)]
 
     def add_kings(self, distance):
         king_transforms = _king_trs(distance)
@@ -12,7 +13,7 @@ class TrialTransforms:
 
     def compose_with(self, transformation):
         """ Compose all of the transformations with some other supplied transformation. """
-        return [transformation.offset(tr) for tr in self.transforms]
+        return [transformation + tr for tr in self.transforms]
 
 
 def _floatify_args(fn):  # A decorator.
@@ -37,14 +38,14 @@ def _king_trs(distance):
 
     return [
         # Horizontal/vertical moves.
-        Translate(+dx, 0),
-        Translate(-dx, 0),
-        Translate(0, +dy),
-        Translate(0, -dy),
+        Point(+dx, 0),
+        Point(-dx, 0),
+        Point(0, +dy),
+        Point(0, -dy),
 
         # Diagonal moves.
-        Translate(+dx, +dy),
-        Translate(-dx, +dy),
-        Translate(+dx, -dy),
-        Translate(-dx, -dy),
+        Point(+dx, +dy),
+        Point(-dx, +dy),
+        Point(+dx, -dy),
+        Point(-dx, -dy),
     ]

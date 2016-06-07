@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import (QPushButton, QLineEdit, QLabel, QGroupBox, QHBoxLayout)
 
 from dls_imagematch.match import RegionMatcher, AlignedImages
-from dls_imagematch.util import Translate
+from dls_imagematch.util import Point
 
 
 class RegionMatchControl(QGroupBox):
@@ -106,7 +106,7 @@ class RegionMatchControl(QGroupBox):
 
         guess_x = float(self._txt_guess_x.text())
         guess_y = float(self._txt_guess_y.text())
-        guess = Translate(guess_x*img1.size[0], guess_y*img1.size[1])
+        guess = Point(guess_x*img1.size[0], guess_y*img1.size[1])
 
         self._matcher = RegionMatcher(img1, img2, guess)
         self._fn_next_frame()
