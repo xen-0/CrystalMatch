@@ -19,7 +19,7 @@ class OverlapMetric:
         """
         metrics = []
 
-        transforms = self.trial_transforms.compose_with(starting_transform)
+        transforms = [starting_transform + tr for tr in self.trial_transforms]
 
         for transform in transforms:
             offset = transform.intify()

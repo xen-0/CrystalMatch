@@ -1,7 +1,7 @@
 from __future__ import division
 
 from dls_imagematch.match.metric_overlap import OverlapMetric
-from dls_imagematch.match.trials import TrialTransforms
+from dls_imagematch.util import Point
 
 
 class RegionMatcher:
@@ -112,9 +112,29 @@ class RegionMatcher:
         scale_img_mov = self.img2.freq_range(self._freq_range, scale).rescale(scale)
 
         # Choose the transform candidates for this working size.
-        trial_transforms = TrialTransforms()
-        trial_transforms.add_kings(1)
-        trial_transforms.add_kings(2)
+        trial_transforms = [Point(0, 0)]
+        trial_transforms.extend(self._king_offsets(1))
+        trial_transforms.extend(self._king_offsets(2))
 
         # Metric calculator which determines how good of a match a given transformation is
         self._metric_calc = OverlapMetric(scale_img_ref, scale_img_mov, trial_transforms)
+
+    @staticmethod
+    def _king_offsets(distance):
+        """ Create a set of offsets that are the moves available to a King on a chess board. """
+        dx = float(distance)
+        dy = float(distance)
+
+        return [
+            # Horizontal/vertical moves.
+            Point(+dx, 0),
+            Point(-dx, 0),
+            Point(0, +dy),
+            Point(0, -dy),
+
+            # Diagonal moves.
+            Point(+dx, +dy),
+            Point(-dx, +dy),
+            Point(+dx, -dy),
+            Point(-dx, -dy),
+        ]
