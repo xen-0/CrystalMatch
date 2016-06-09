@@ -1,11 +1,10 @@
 import sys
 import os
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, \
-    QGroupBox, QWidget, QCheckBox
+    QGroupBox, QWidget, QCheckBox, QComboBox
 
-from .color import Color
 from .config import *
 
 
@@ -77,6 +76,8 @@ class ConfigDialog(QtGui.QDialog):
             add(ValueConfigControl(item, txt_width=40))
         elif isinstance(item, BoolConfigItem):
             add(BoolConfigControl(item))
+        elif isinstance(item, EnumConfigItem):
+            add(EnumConfigControl(item))
         elif isinstance(item, ColorConfigItem):
             add(ColorConfigControl(item))
         elif isinstance(item, DirectoryConfigItem):
@@ -204,23 +205,23 @@ class ValueConfigControl(ConfigControl):
         lbl_int = QLabel(self._config_item.tag())
         lbl_int.setFixedWidth(ConfigDialog.LABEL_WIDTH)
 
-        self.txt_value = QLineEdit()
-        self.txt_value.setFixedWidth(txt_width)
+        self._txt_value = QLineEdit()
+        self._txt_value.setFixedWidth(txt_width)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(lbl_int)
-        hbox.addWidget(self.txt_value)
+        hbox.addWidget(self._txt_value)
         hbox.addWidget(QLabel(self._config_item.units()))
         hbox.addStretch()
 
         self.setLayout(hbox)
 
     def update_from_config(self):
-        self.txt_value.setText(str(self._config_item.value()))
+        self._txt_value.setText(str(self._config_item.value()))
 
     def save_to_config(self):
-        self._config_item.set(self.txt_value.text())
+        self._config_item.set(self._txt_value.text())
 
 
 class BoolConfigControl(ConfigControl):
@@ -233,24 +234,60 @@ class BoolConfigControl(ConfigControl):
         lbl_bool = QLabel(self._config_item.tag())
         lbl_bool.setFixedWidth(ConfigDialog.LABEL_WIDTH)
 
-        self.chk_box = QCheckBox()
-        self.chk_box.setTristate(False)
-        self.chk_box.setCheckState(self._config_item.value())
+        self._chk_box = QCheckBox()
+        self._chk_box.setTristate(False)
+        self._chk_box.setCheckState(self._config_item.value())
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(lbl_bool)
-        hbox.addWidget(self.chk_box)
+        hbox.addWidget(self._chk_box)
         hbox.addStretch()
 
         self.setLayout(hbox)
 
     def update_from_config(self):
         state = 2 if self._config_item.value() == True else 0
-        self.chk_box.setCheckState(state)
+        self._chk_box.setCheckState(state)
 
     def save_to_config(self):
-        value = True if self.chk_box.checkState() == 2 else False
+        value = True if self._chk_box.checkState() == 2 else False
+        self._config_item.set(value)
+
+
+class EnumConfigControl(ConfigControl):
+    def __init__(self, config_item):
+        ConfigControl.__init__(self, config_item)
+
+        self._init_ui()
+
+    def _init_ui(self):
+        lbl_enum = QLabel(self._config_item.tag())
+        lbl_enum.setFixedWidth(ConfigDialog.LABEL_WIDTH)
+
+        self._cmbo_enum = QComboBox()
+        self._cmbo_enum.addItems(self._config_item.enum_names)
+
+        selected = self._config_item.value()
+        index = self._cmbo_enum.findText(selected, QtCore.Qt.MatchFixedString)
+        self._cmbo_enum.setCurrentIndex(index)
+
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.addWidget(lbl_enum)
+        hbox.addWidget(self._cmbo_enum)
+        hbox.addStretch()
+
+        self.setLayout(hbox)
+
+    def update_from_config(self):
+        selected = self._config_item.value()
+        index = self._cmbo_enum.findText(selected, QtCore.Qt.MatchFixedString)
+        index = max(0, index)
+        self._cmbo_enum.setCurrentIndex(index)
+
+    def save_to_config(self):
+        value = self._cmbo_enum.currentText()
         self._config_item.set(value)
 
 
@@ -264,8 +301,8 @@ class DirectoryConfigControl(ConfigControl):
         self._init_ui()
 
     def _init_ui(self):
-        self.txt_dir = QLineEdit()
-        self.txt_dir.setFixedWidth(self.TEXT_WIDTH)
+        self._txt_dir = QLineEdit()
+        self._txt_dir.setFixedWidth(self.TEXT_WIDTH)
 
         lbl_dir = QLabel(self._config_item.tag())
         lbl_dir.setFixedWidth(ConfigDialog.LABEL_WIDTH)
@@ -277,20 +314,20 @@ class DirectoryConfigControl(ConfigControl):
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(lbl_dir)
-        hbox.addWidget(self.txt_dir)
+        hbox.addWidget(self._txt_dir)
         hbox.addWidget(btn_show)
         hbox.addStretch()
 
         self.setLayout(hbox)
 
     def update_from_config(self):
-        self.txt_dir.setText(self._config_item.value())
+        self._txt_dir.setText(self._config_item.value())
 
     def save_to_config(self):
-        self._config_item.set(self.txt_dir.text())
+        self._config_item.set(self._txt_dir.text())
 
     def _open_directory(self):
-        path = self.txt_dir.text()
+        path = self._txt_dir.text()
         path = os.path.abspath(path)
 
         if sys.platform == 'win32':

@@ -192,5 +192,26 @@ class BoolConfigItem(ConfigItem):
 
     def from_file_string(self, string):
         self._value = True if string.lower() == 'true' else False
-        print(self._value)
+
+
+class EnumConfigItem(ConfigItem):
+    """ Config item that stores an enum value. Constructor takes parameter 'enum_names' which should
+    be a list of strings."""
+    def __init__(self, tag, default, enum_names):
+        ConfigItem.__init__(self, tag, default)
+        self.enum_names = enum_names
+
+        if default not in enum_names:
+            self._default = self.enum_names[0]
+
+    def from_file_string(self, string):
+        self._value = self._clean(string)
+
+    def _clean(self, value):
+        value = str(value).strip()
+        if value not in self.enum_names:
+            value = self._default
+        return value
+
+
 
