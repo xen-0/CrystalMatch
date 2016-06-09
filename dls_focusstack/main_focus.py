@@ -7,16 +7,21 @@ from os.path import isfile, join
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QApplication, QAction)
 
+from dls_imagematch.util import ConfigDialog
+from dls_focusstack.focus_config import FocusConfig
 from dls_focusstack.gui import ImageList, ImageFrame
-from dls_focusstack.focus import focus_stack
+from dls_focusstack.focus import FocusStack
 
 sys.path.append("..")
 
 
-class FocusStacker(QMainWindow):
+class FocusStackerMain(QMainWindow):
+    CONFIG_FILE = "../focus-config.ini"
 
     def __init__(self):
-        super(FocusStacker, self).__init__()
+        super(FocusStackerMain, self).__init__()
+
+        self._config = FocusConfig(FocusStackerMain.CONFIG_FILE)
 
         self.init_ui()
 
@@ -64,16 +69,31 @@ class FocusStacker(QMainWindow):
         load_action.setStatusTip('Load Images')
         load_action.triggered.connect(self._fn_load_images)
 
+        # Open options dialog
+        options_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Options', self)
+        options_action.setShortcut('Ctrl+O')
+        options_action.setStatusTip('Open Options Dialog')
+        options_action.triggered.connect(self._open_config_dialog)
+
         # Create menu bar
         menu_bar = self.menuBar()
+
         file_menu = menu_bar.addMenu('&File')
         file_menu.addAction(load_action)
         file_menu.addAction(exit_action)
+
+        option_menu = menu_bar.addMenu('&Option')
+        option_menu.addAction(options_action)
 
     def _fn_load_images(self):
         # Choose target folder
         folder_path = str(QtGui.QFileDialog.getExistingDirectory(self, 'Choose directory'))
         self.open_folder(folder_path)
+
+    def _open_config_dialog(self):
+        dialog = ConfigDialog(self._config)
+        dialog.auto_layout()
+        dialog.exec_()
 
     def open_folder(self, folder_path):
         # Get list of all files in folder
@@ -92,9 +112,12 @@ class FocusStacker(QMainWindow):
         images = self._image_list.get_checked_images()
 
         if len(images) > 1:
-            merged = focus_stack(images)
+            stacker = FocusStack(images)
+            merged = stacker.composite()
             self._frame.display_image(merged)
-            merged.save("../test-output/merged.png")
+            merged.save("../test-output/focus/merged.png")
+            merged.popup()
+            print("Complete")
 
 
 
@@ -102,7 +125,7 @@ class FocusStacker(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    ex = FocusStacker()
+    ex = FocusStackerMain()
     sys.exit(app.exec_())
 
 

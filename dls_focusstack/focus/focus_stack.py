@@ -38,116 +38,87 @@ import numpy as np
 import cv2
 
 from dls_imagematch.util import Image
-
-def findHomography(image_1_kp, image_2_kp, matches):
-    image_1_points = np.zeros((len(matches), 1, 2), dtype=np.float32)
-    image_2_points = np.zeros((len(matches), 1, 2), dtype=np.float32)
-
-    for i in range(0,len(matches)):
-        image_1_points[i] = image_1_kp[matches[i].queryIdx].pt
-        image_2_points[i] = image_2_kp[matches[i].trainIdx].pt
+from dls_imagematch.match import FeatureMatcher
 
 
-    homography, mask = cv2.findHomography(image_1_points, image_2_points, cv2.RANSAC, ransacReprojThreshold=2.0)
+class FocusStack:
+    def __init__(self, images):
+        self._images = images
 
-    return homography
-
-
-#
-#   Align the images so they overlap properly...
-#
-#
-def align_images(images):
-
-    #   SIFT generally produces better results, but it is not FOSS, so chose the feature detector
-    #   that suits the needs of your project.  ORB does OK
-    use_sift = True
-
-    outimages = []
-
-    if use_sift:
-        detector = cv2.SIFT()
-    else:
-        detector = cv2.ORB(1000)
-
-    #   We assume that image 0 is the "base" image and align everything to it
-    print "Detecting features of base image"
-    outimages.append(images[0])
-    image1gray = cv2.cvtColor(images[0],cv2.COLOR_BGR2GRAY)
-    image_1_kp, image_1_desc = detector.detectAndCompute(image1gray, None)
-
-    for i in range(1,len(images)):
-        print "Aligning image {}".format(i)
-        image_i_kp, image_i_desc = detector.detectAndCompute(images[i], None)
-
-        if use_sift:
-            bf = cv2.BFMatcher()
-            # This returns the top two matches for each feature point (list of list)
-            pairMatches = bf.knnMatch(image_i_desc,image_1_desc, k=2)
-            rawMatches = []
-            for m,n in pairMatches:
-                if m.distance < 0.7*n.distance:
-                    rawMatches.append(m)
+    def composite(self, with_align=True):
+        """ Finds the points of best focus in all images and produces a merged result """
+        if with_align:
+            images = self._align_images(self._images)
         else:
-            bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-            rawMatches = bf.match(image_i_desc, image_1_desc)
+            images = self._images
 
-        sortMatches = sorted(rawMatches, key=lambda x: x.distance)
-        matches = sortMatches[0:128]
+        laplacians = self._compute_laplacians(images)
+
+        focused_image = self._determine_focused_pixels(images, laplacians)
+
+        return focused_image
+
+    @staticmethod
+    def _align_images(images):
+        aligned_images = []
+
+        # TODO - Frame-by-frame alignment where each frame is aligned with the previous one. This will mean
+        # TODO - that the transform for a frame needs to be the product of all transforms that proceeded it
+
+        img1 = images[0]
+        for i in range(1, len(images)):
+            print("Aligning image {}/{}".format(i+1, len(images)))
+            #img1 = images[i-1]
+            img2 = images[i]
+            FeatureMatcher.POPUP_RESULTS = False
+            matcher = FeatureMatcher(img1, img2)
+
+
+            transform = matcher.match("SURF", "")
+            transformed_img = transform.inverse_transform_image(img2, img2.size)
+            transformed_img.save("../test-output/focus/aligned{}.png".format(i))
+            #transformed_img.popup()
+
+            aligned_images.append(transformed_img)
+
+        return aligned_images
+
+    @staticmethod
+    def _compute_laplacians(images):
+        """ Compute the gradient map of the image """
+        # YOU SHOULD TUNE THESE VALUES TO SUIT YOUR NEEDS
+        kernel_size = 5         # Size of the laplacian window
+        blur_size = 5           # How big of a kernal to use for the gaussian blur
+                                # Generally, keeping these two values the same or very close works well
+                                # Also, odd numbers, please...
+
+        print("Computing the laplacian of the blurred images")
+        laps = []
+        for i in range(len(images)):
+            print "Lap {}".format(i)
+            img = images[i].to_mono().img
+            blurred = cv2.GaussianBlur(img, (blur_size, blur_size), 0)
+            result = cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
+            laps.append(result)
+
+        laps = np.asarray(laps)
+        print "Shape of array of laplacians = {}".format(laps.shape)
+
+        return laps
+
+    @staticmethod
+    def _determine_focused_pixels(images, laplacians):
+        output = np.zeros(shape=images[0].img.shape, dtype=images[0].img.dtype)
+
+        height, width = images[0].img.shape
+        for y in range(0, height):
+            for x in range(0, width):
+                yxlaps = abs(laplacians[:, y, x])
+                index = (np.where(yxlaps == max(yxlaps)))[0][0]
+                output[y, x] = images[index].img[y, x]
+
+        return Image(output)
 
 
 
-        hom = findHomography(image_i_kp, image_1_kp, matches)
-        newimage = cv2.warpPerspective(images[i], hom, (images[i].shape[1], images[i].shape[0]), flags=cv2.INTER_LINEAR)
-
-        outimages.append(newimage)
-        # If you find that there's a large amount of ghosting, it may be because one or more of the input
-        # images gets misaligned.  Outputting the aligned images may help diagnose that.
-        #cv2.imwrite("aligned{}.png".format(i), newimage)
-
-
-
-    return outimages
-
-#
-#   Compute the gradient map of the image
-def doLap(image):
-
-    # YOU SHOULD TUNE THESE VALUES TO SUIT YOUR NEEDS
-    kernel_size = 5         # Size of the laplacian window
-    blur_size = 5           # How big of a kernal to use for the gaussian blur
-                            # Generally, keeping these two values the same or very close works well
-                            # Also, odd numbers, please...
-
-    blurred = cv2.GaussianBlur(image, (blur_size,blur_size), 0)
-    return cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
-
-#
-#   This routine finds the points of best focus in all images and produces a merged result...
-#
-def focus_stack(images):
-
-    unimages = [image.img for image in images]
-
-    images = align_images(unimages)
-    #images = unimages
-
-    print "Computing the laplacian of the blurred images"
-    laps = []
-    for i in range(len(images)):
-        print "Lap {}".format(i)
-        laps.append(doLap(cv2.cvtColor(images[i],cv2.COLOR_BGR2GRAY)))
-
-    laps = np.asarray(laps)
-    print "Shape of array of laplacians = {}".format(laps.shape)
-
-    output = np.zeros(shape=images[0].shape, dtype=images[0].dtype)
-
-    for y in range(0,images[0].shape[0]):
-        for x in range(0, images[0].shape[1]):
-            yxlaps = abs(laps[:, y, x])
-            index = (np.where(yxlaps == max(yxlaps)))[0][0]
-            output[y,x] = images[index][y,x]
-
-    return Image(output)
 
