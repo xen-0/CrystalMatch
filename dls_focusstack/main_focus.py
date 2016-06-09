@@ -7,9 +7,8 @@ from os.path import isfile, join
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
-from dls_imagematch.util import ConfigDialog
 from dls_focusstack.focus_config import FocusConfig
-from dls_focusstack.gui import ImageList, ImageFrame
+from dls_focusstack.gui import *
 from dls_focusstack.focus import FocusStack
 
 sys.path.append("..")
@@ -77,7 +76,7 @@ class FocusStackerMain(QMainWindow):
         options_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Options', self)
         options_action.setShortcut('Ctrl+O')
         options_action.setStatusTip('Open Options Dialog')
-        options_action.triggered.connect(self._open_config_dialog)
+        options_action.triggered.connect(self._fn_config_dialog)
 
         # Create menu bar
         menu_bar = self.menuBar()
@@ -94,9 +93,8 @@ class FocusStackerMain(QMainWindow):
         folder_path = str(QtGui.QFileDialog.getExistingDirectory(self, 'Choose directory'))
         self.open_folder(folder_path)
 
-    def _open_config_dialog(self):
-        dialog = ConfigDialog(self._config)
-        dialog.auto_layout()
+    def _fn_config_dialog(self):
+        dialog = FocusConfigDialog(self._config)
         dialog.exec_()
 
     def open_folder(self, folder_path):
@@ -122,7 +120,7 @@ class FocusStackerMain(QMainWindow):
             print("Complete")
 
             self._frame.display_image(merged)
-            merged.save("../test-output/focus/merged.png")
+            merged.save("{}merged.png".format(self._config.output_dir.value()))
             merged.popup()
 
 
