@@ -12,7 +12,7 @@ from dls_imagematch.xtal_config import XtalConfig
 
 
 class AlignmentMain(QMainWindow):
-    CONFIG_FILE = "../config.ini"
+    CONFIG_FILE = "../xtal-config.ini"
 
     def __init__(self):
         super(AlignmentMain, self).__init__()
