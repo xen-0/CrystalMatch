@@ -1,39 +1,3 @@
-"""
-
-Simple Focus Stacker
-
-    Author:     Charles McGuinness (charles@mcguinness.us)
-    Copyright:  Copyright 2015 Charles McGuinness
-    License:    Apache License 2.0
-
-
-This code will take a series of images and merge them so that each
-pixel is taken from the image with the sharpest focus at that location.
-
-The logic is roughly the following:
-
-1.  Align the images.  Changing the focus on a lens, even
-    if the camera remains fixed, causes a mild zooming on the images.
-    We need to correct the images so they line up perfectly on top
-    of each other.
-
-2.  Perform a gaussian blur on all images
-
-3.  Compute the laplacian on the blurred image to generate a gradient map
-
-4.  Create a blank output image with the same size as the original input
-    images
-
-4.  For each pixel [x,y] in the output image, copy the pixel [x,y] from
-    the input image which has the largest gradient [x,y]
-    
-
-This algorithm was inspired by the high-level description given at
-
-http://stackoverflow.com/questions/15911783/what-are-some-common-focus-stacking-algorithms
-
-"""
-
 import numpy as np
 import cv2
 
