@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QApplication, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
 from dls_imagematch.util import ConfigDialog
 from dls_focusstack.focus_config import FocusConfig
@@ -25,7 +25,7 @@ class FocusStackerMain(QMainWindow):
 
         self.init_ui()
 
-        self.open_folder("../focusstack/Input/ring")
+        self.open_folder(self._config.input_dir.value())
 
     def init_ui(self):
         """ Create all elements of the user interface. """
@@ -40,14 +40,18 @@ class FocusStackerMain(QMainWindow):
 
         self._image_list.signal_selected.connect(self._frame.display_image)
 
-        btn_go = QtGui.QPushButton("Go")
+        btn_go = QtGui.QPushButton("Start")
+        btn_go.setFixedHeight(50)
+        btn_go.setStyleSheet("font-size: 20pt;")
         btn_go.clicked.connect(self.do_stacking)
 
+        vbox_left = QVBoxLayout()
+        vbox_left.addWidget(btn_go)
+        vbox_left.addWidget(self._image_list)
 
         hbox_main = QHBoxLayout()
         hbox_main.setSpacing(10)
-        hbox_main.addWidget(self._image_list)
-        hbox_main.addWidget(btn_go)
+        hbox_main.addLayout(vbox_left)
         hbox_main.addWidget(self._frame)
         hbox_main.addStretch(1)
 
@@ -112,15 +116,14 @@ class FocusStackerMain(QMainWindow):
         images = self._image_list.get_checked_images()
 
         if len(images) > 1:
-            stacker = FocusStack(images)
+            stacker = FocusStack(images, self._config)
             merged = stacker.composite()
+
+            print("Complete")
+
             self._frame.display_image(merged)
             merged.save("../test-output/focus/merged.png")
             merged.popup()
-            print("Complete")
-
-
-
 
 
 def main():
