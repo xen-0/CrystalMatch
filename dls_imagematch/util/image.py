@@ -15,6 +15,8 @@ class Image:
     def __init__(self, img, pixel_size=0):
         self.img = img
 
+        self.file = None
+
         # The size of the image in number of pixels
         shape = img.shape
         self.width = shape[1]
@@ -40,8 +42,10 @@ class Image:
     @staticmethod
     def from_file(filename, pixel_size=0):
         """ Create a new image by reading from file. """
-        img = cv2.imread(filename)
-        return Image(img, pixel_size)
+        raw_img = cv2.imread(filename)
+        image = Image(raw_img, pixel_size)
+        image.file = filename
+        return image
 
     @staticmethod
     def blank(width, height, channels=3, color=Color.Black()):
