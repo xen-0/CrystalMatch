@@ -8,12 +8,12 @@ class Rectangle:
     are based on a coordinate system as viewed on a computer monitor with x increasing to the right and y
     increasing downwards.
     """
-    def __init__(self, pt1, pt2):
+    def __init__(self, corner1, corner2):
         """ Create a rectangle from any two diagonally opposite corner points. """
-        self.x1 = min(pt1.x, pt2.x)
-        self.y1 = min(pt1.y, pt2.y)
-        self.x2 = max(pt1.x, pt2.x)
-        self.y2 = max(pt1.y, pt2.y)
+        self.x1 = min(corner1.x, corner2.x)
+        self.y1 = min(corner1.y, corner2.y)
+        self.x2 = max(corner1.x, corner2.x)
+        self.y2 = max(corner1.y, corner2.y)
 
     def __str__(self):
         """ String representation of the rectangle, giving the top-left and bottom-right
