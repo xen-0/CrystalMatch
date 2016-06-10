@@ -65,7 +65,7 @@ class ImageFrame(QGroupBox):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
         if not isinstance(aligned_images, AlignedImages):
-            raise ValueError("Argument must be instance of {}".format(AlignedImages.__name__))
+            raise TypeError("Argument must be instance of {}".format(AlignedImages.__name__))
 
         self.last_images = aligned_images
 
