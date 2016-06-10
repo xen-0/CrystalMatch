@@ -1,9 +1,10 @@
 from __future__ import division
 
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore
+from PyQt4.QtCore import Qt, QThread
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
-from dls_imagematch.gui import PointSelectDialog
+from dls_imagematch.gui import PointSelectDialog, ProgressDialog
 from dls_imagematch.util import Color, Rectangle
 from dls_imagematch.match import CrystalMatcher, CrystalMatchSet, FeatureMatchException
 
@@ -122,10 +123,14 @@ class CrystalMatchControl(QGroupBox):
         selected_img1_points = self._selected_points
         region_size = self._config.region_size.value()
 
-        self._display_match_loading()
-
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
-        self._matcher.match(match_set, region_size)
+
+        # Create task thread and progress dialog
+        progress = ProgressDialog("Crystal Matching In Progress")
+        match_task = _MatchTaskThread(self._matcher, match_set, region_size)
+        match_task.taskFinished.connect(progress.on_finished)
+        match_task.start()
+        progress.exec_()
 
         self._display_results(match_set)
         self._btn_locate.setEnabled(False)
@@ -184,11 +189,6 @@ class CrystalMatchControl(QGroupBox):
         scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         frame.setPixmap(scaled)
 
-    def _display_match_loading(self):
-        total = min(len(self._selected_points), self.NUM_FRAMES)
-        for i in range(total):
-            self._frames2[i].setText("...")
-
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
     ------------------------'''
@@ -227,6 +227,8 @@ class CrystalMatchControl(QGroupBox):
 
         print(status)
         for i, match in enumerate(crystal_match_set.matches):
+            if not match.is_match_found():
+                continue
 
             pixel1, real1 = match.img1_point(), match.img1_point_real()
             pixel2, real2 = match.img2_point(), match.img2_point_real()
@@ -261,3 +263,17 @@ class CrystalMatchControl(QGroupBox):
                 self._display_image(img, 2, i)
 
         self._results_frame.display_image(img2)
+
+
+class _MatchTaskThread(QThread):
+    taskFinished = QtCore.pyqtSignal()
+
+    def __init__(self, matcher, xtal_set, region_size):
+        super(_MatchTaskThread, self).__init__()
+        self._matcher = matcher
+        self._xtal_set = xtal_set
+        self._region_size = region_size
+
+    def run(self):
+        self._matcher.match(self._xtal_set, self._region_size)
+        self.taskFinished.emit()
