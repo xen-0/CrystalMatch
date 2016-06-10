@@ -43,6 +43,10 @@ class Image:
     def from_file(filename, pixel_size=0):
         """ Create a new image by reading from file. """
         raw_img = cv2.imread(filename)
+
+        if raw_img is None:
+            raise ValueError("Could not read specified Image File")
+
         image = Image(raw_img, pixel_size)
         image.file = filename
         return image
