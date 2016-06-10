@@ -33,36 +33,41 @@ class AlignmentMain(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        selector_a = ImageSelector("Select Image A", self._config)
-        selector_b = ImageSelector("Select Image B", self._config)
+        selector1 = ImageSelector("Select Image A", self._config)
+        selector2 = ImageSelector("Select Image B", self._config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelector(selector_a, selector_b, self._config)
-        well_selector2 = WellSelector2(selector_a, selector_b, self._config)
+        well_selector = WellSelector(self._config)
+        well_selector2 = WellSelector2(self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
 
         # Region Matching Control
-        region_match = RegionMatchControl(selector_a, selector_b)
+        region_match = RegionMatchControl(selector1, selector2)
 
         # Consensus Match
-        consensus_match = ConsensusMatchControl(selector_a, selector_b)
+        consensus_match = ConsensusMatchControl(selector1, selector2)
 
         # Feature Matching Control
-        feature_match = FeatureMatchControl(selector_a, selector_b)
+        feature_match = FeatureMatchControl(selector1, selector2)
 
         # Connect Signals
         region_match.signal_aligned.connect(image_frame.display_align_results)
         consensus_match.signal_aligned.connect(image_frame.display_align_results)
         feature_match.signal_aligned.connect(image_frame.display_align_results)
 
+        well_selector.signal_image1_selected.connect(selector1.set_image)
+        well_selector.signal_image2_selected.connect(selector2.set_image)
+        well_selector2.signal_image1_selected.connect(selector1.set_image)
+        well_selector2.signal_image2_selected.connect(selector2.set_image)
+
         # Create layout
         vbox_img_selection = QVBoxLayout()
         vbox_img_selection.addWidget(well_selector)
         vbox_img_selection.addWidget(well_selector2)
-        vbox_img_selection.addWidget(selector_a)
-        vbox_img_selection.addWidget(selector_b)
+        vbox_img_selection.addWidget(selector1)
+        vbox_img_selection.addWidget(selector2)
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()

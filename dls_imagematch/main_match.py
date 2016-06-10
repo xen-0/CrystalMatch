@@ -33,17 +33,17 @@ class VMXiCrystalMatcher(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        selector_a = ImageSelector("Select Image 1", self._config)
-        selector_b = ImageSelector("Select Image 2", self._config)
+        selector1 = ImageSelector("Select Image 1", self._config)
+        selector2 = ImageSelector("Select Image 2", self._config)
 
         # Plate well selector (example data set)
-        well_selector2 = WellSelector2(selector_a, selector_b, self._config)
+        well_selector = WellSelector2(self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
 
         # Feature Matching Control
-        aligner = FeatureMatchControl(selector_a, selector_b, with_popup=False)
+        aligner = FeatureMatchControl(selector1, selector2, with_popup=False)
 
         # Secondary Matching Control
         xtal_match = CrystalMatchControl(image_frame, self._config)
@@ -51,14 +51,18 @@ class VMXiCrystalMatcher(QMainWindow):
         # Connect signals
         aligner.signal_aligned.connect(xtal_match.set_aligned_images)
         aligner.signal_aligned.connect(image_frame.display_align_results)
-        well_selector2.signal_selected.connect(xtal_match.reset)
-        well_selector2.signal_selected.connect(image_frame.clear)
+
+        well_selector.signal_image1_selected.connect(selector1.set_image)
+        well_selector.signal_image2_selected.connect(selector2.set_image)
+
+        well_selector.signal_image1_selected.connect(xtal_match.reset)
+        well_selector.signal_image1_selected.connect(image_frame.clear)
 
         # Create layout
         vbox_img_selection = QVBoxLayout()
-        vbox_img_selection.addWidget(well_selector2)
-        vbox_img_selection.addWidget(selector_a)
-        vbox_img_selection.addWidget(selector_b)
+        vbox_img_selection.addWidget(well_selector)
+        vbox_img_selection.addWidget(selector1)
+        vbox_img_selection.addWidget(selector2)
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
@@ -78,7 +82,7 @@ class VMXiCrystalMatcher(QMainWindow):
         self.setCentralWidget(main_widget)
         self.show()
 
-        well_selector2._select_well()
+        well_selector._well_selected()
 
     def init_menu_bar(self):
         """Create and populate the menu bar. """

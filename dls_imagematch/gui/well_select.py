@@ -1,6 +1,9 @@
 from __future__ import division
 
+from PyQt4 import QtCore
 from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
+
+from dls_imagematch.util import Image
 
 
 class WellSelector(QGroupBox):
@@ -9,11 +12,11 @@ class WellSelector(QGroupBox):
     """
     SET_FACTOR = 6.55
 
-    def __init__(self, selector_a, selector_b, config):
-        super(WellSelector, self).__init__()
+    signal_image1_selected = QtCore.pyqtSignal(object)
+    signal_image2_selected = QtCore.pyqtSignal(object)
 
-        self.selector_a = selector_a
-        self.selector_b = selector_b
+    def __init__(self, config):
+        super(WellSelector, self).__init__()
 
         self._samples_dir = config.samples_dir.value()
 
@@ -51,15 +54,18 @@ class WellSelector(QGroupBox):
         row = self._cmbo_row.currentText()
         col = self._cmbo_col.currentText()
 
-        file_a, file_b = self._get_441350000072_files(row, col, self._samples_dir)
-        self.selector_a.setFile(file_a)
-        self.selector_b.setFile(file_b)
+        file1, file2 = self._get_441350000072_files(row, col, self._samples_dir)
 
         # Set pixel sizes
         pixel_size_a = 1.0
         pixel_size_b = pixel_size_a / WellSelector.SET_FACTOR
-        self.selector_a.setPixelSize(pixel_size_a)
-        self.selector_b.setPixelSize(pixel_size_b)
+
+        image1 = Image.from_file(file1, pixel_size_a)
+        image2 = Image.from_file(file2, pixel_size_b)
+
+        self.signal_image1_selected.emit(image1)
+        self.signal_image2_selected.emit(image2)
+
 
     @staticmethod
     def _get_441350000072_files(row, col, dir):
