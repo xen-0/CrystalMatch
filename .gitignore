@@ -1,7 +1,7 @@
 .idea
 test-images
 test-output
-focusstack
+test-focusstack
 scratchpad.py
 *config.ini
 
