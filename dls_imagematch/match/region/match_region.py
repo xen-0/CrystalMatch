@@ -1,6 +1,6 @@
 from __future__ import division
 
-from dls_imagematch.match.metric_overlap import OverlapMetric
+from ..metric_overlap import OverlapMetric
 from dls_imagematch.util import Point
 
 
@@ -85,9 +85,7 @@ class RegionMatcher:
         self._iteration += 1
 
         scaled_transform = self.net_transform.scale(self._scale)
-
-        scaled_transform, min_reached = \
-            self._metric_calc.best_transform(scaled_transform)
+        scaled_transform, min_reached = self._metric_calc.best_transform(scaled_transform)
 
         self.net_transform = scaled_transform.scale(1/self._scale)
 
@@ -122,19 +120,12 @@ class RegionMatcher:
     @staticmethod
     def _king_offsets(distance):
         """ Create a set of offsets that are the moves available to a King on a chess board. """
-        dx = float(distance)
-        dy = float(distance)
+        delta = float(distance)
+        grid = [-delta, 0, delta]
 
-        return [
-            # Horizontal/vertical moves.
-            Point(+dx, 0),
-            Point(-dx, 0),
-            Point(0, +dy),
-            Point(0, -dy),
+        points = []
+        for x in grid:
+            for y in grid:
+                points.append(Point(x, y))
 
-            # Diagonal moves.
-            Point(+dx, +dy),
-            Point(-dx, +dy),
-            Point(+dx, -dy),
-            Point(-dx, -dy),
-        ]
+        return points
