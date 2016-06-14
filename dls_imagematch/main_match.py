@@ -43,7 +43,7 @@ class VMXiCrystalMatcher(QMainWindow):
         image_frame = ImageFrame(self._config)
 
         # Feature Matching Control
-        aligner = FeatureMatchControl(selector1, selector2, with_popup=False)
+        aligner = FeatureMatchControl(selector1, selector2)
 
         # Secondary Matching Control
         xtal_match = CrystalMatchControl(image_frame, self._config)

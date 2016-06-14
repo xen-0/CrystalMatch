@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox
 
-from dls_imagematch.match import FeatureMatcher, AlignedImages
+from dls_imagematch.match import FeatureMatcher, FeatureDetector, AlignedImages
 from dls_imagematch.match import FeatureMatchException
 
 
@@ -12,13 +12,12 @@ class FeatureMatchControl(QGroupBox):
     """
     signal_aligned = QtCore.pyqtSignal(object)
 
-    def __init__(self, selector_a, selector_b, with_popup=True):
+    def __init__(self, selector_a, selector_b):
         super(FeatureMatchControl, self).__init__()
 
         self._selector_a = selector_a
         self._selector_b = selector_b
         self._matcher = None
-        self._with_popup = with_popup
 
         self.last_images = None
 
@@ -29,10 +28,10 @@ class FeatureMatchControl(QGroupBox):
         """ Create all the display elements of the widget. """
         # Feature Detector method
         self._cmbo_method = QComboBox()
-        self._cmbo_method.addItems(FeatureMatcher.DETECTOR_TYPES)
+        self._cmbo_method.addItems(FeatureDetector.types())
 
         self._cmbo_adapt = QComboBox()
-        self._cmbo_adapt.addItems(FeatureMatcher.ADAPTATION_TYPE)
+        self._cmbo_adapt.addItems(FeatureDetector.adaptations())
 
         # Matching function buttons
         self._btn_begin = QPushButton("Align Images")
@@ -58,13 +57,13 @@ class FeatureMatchControl(QGroupBox):
         adapt = self._cmbo_adapt.currentText()
 
         self._matcher = FeatureMatcher(img1, img2)
-        FeatureMatcher.POPUP_RESULTS = self._with_popup
+        self._matcher.set_detector(method, adapt)
         try:
-            self._matcher.match(method, adapt, translation_only=True)
+            transform = self._matcher.match_translation_only()
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
-        self._display_results(method, adapt)
+        self._display_results(transform, method, adapt)
         self.signal_aligned.emit(self.last_images)
 
     def _prepare_images(self):
@@ -80,11 +79,9 @@ class FeatureMatchControl(QGroupBox):
 
         return self._img1.to_mono(), self._img2.to_mono()
 
-    def _display_results(self, method, adapt):
+    def _display_results(self, transform, method, adapt):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        transform = self._matcher.net_transform
-
         align_method = "Feature matching - " + method
         if adapt != '':
             align_method += " with " + adapt

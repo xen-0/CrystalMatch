@@ -1,6 +1,6 @@
 from __future__ import division
 
-from .match_feature import FeatureMatcher
+from dls_imagematch.match.feature.matcher import FeatureMatcher
 from dls_imagematch.util import Rectangle, Point
 
 
@@ -15,15 +15,16 @@ class CrystalMatcher:
 
         method = "Consensus"
         adapt = ''
-        FeatureMatcher.POPUP_RESULTS = True
 
         for crystal_match in crystal_match_set.matches:
             img1_rect = crystal_match.img1_region(region_size)
             img2_rect = self.make_image2_region(crystal_match_set.img2(),
                                                 crystal_match_set.pixel_offset(), img1_rect)
 
+            # TODO: Handle normal failure gracefully (i.e. not enough matches)
             matcher = FeatureMatcher(img1, img2, img1_rect, img2_rect)
-            transform = matcher.match(method, adapt)
+            matcher.set_detector(method, adapt)
+            transform = matcher.match()
 
             crystal_match.set_transformation(transform)
 

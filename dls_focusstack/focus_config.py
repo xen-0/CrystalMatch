@@ -1,6 +1,6 @@
 from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, EnumConfigItem
 
-from dls_imagematch.match import FeatureMatcher
+from dls_imagematch.match import FeatureMatcher, FeatureDetector
 
 
 class FocusConfig(Config):
@@ -9,8 +9,8 @@ class FocusConfig(Config):
 
         add = self.add
 
-        methods = FeatureMatcher.DETECTOR_TYPES
-        adapt = FeatureMatcher.ADAPTATION_TYPE
+        methods = FeatureDetector.types()
+        adapt = FeatureDetector.adaptations()
 
         self.align_method = add(EnumConfigItem, "Alignment Method", default="SURF", extra_arg=methods)
         self.align_adapt = add(EnumConfigItem, "Alignment Adaption", default="", extra_arg=adapt)

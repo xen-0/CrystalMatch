@@ -42,10 +42,10 @@ class FocusStack:
             print("Aligning image {}/{}".format(i+1, len(images)))
             #img1 = images[i-1]
             img2 = images[i]
-            FeatureMatcher.POPUP_RESULTS = False
             matcher = FeatureMatcher(img1, img2)
+            matcher.set_detector(method, adapt)
 
-            transform = matcher.match(method, adapt)
+            transform = matcher.match()
             transformed_img = transform.inverse_transform_image(img2, img2.size)
             transformed_img.save("{}aligned{}.png".format(out_dir, i))
             #transformed_img.popup()
