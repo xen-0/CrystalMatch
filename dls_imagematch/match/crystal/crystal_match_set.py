@@ -1,6 +1,6 @@
 from dls_imagematch.util import Rectangle
-from .transformation import Transformation
-from .aligned_images import AlignedImages
+from dls_imagematch.match.transformation import Transformation
+from dls_imagematch.match.aligned_images import AlignedImages
 
 
 class CrystalMatchSet:
@@ -65,6 +65,9 @@ class _CrystalMatch:
         self._img2_point = None
         self._pixel_size = pixel_size
         self._transformation = None
+
+    def pixel_size(self):
+        return self._pixel_size
 
     def img1_point(self):
         """ The user-specified location of the crystal in Image 1 (in pixels). """

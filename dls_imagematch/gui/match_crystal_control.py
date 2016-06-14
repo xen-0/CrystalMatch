@@ -194,16 +194,12 @@ class CrystalMatchControl(QGroupBox):
     ------------------------'''
     def _display_marked_img2(self):
         match_set = CrystalMatchSet(self._aligned_images, self._selected_points)
-        region_size = self._config.region_size.value()
         img2 = match_set.img2().copy()
 
         color = self._config.color_search.value()
 
         for crystal_match in match_set.matches:
-            img1_rect = crystal_match.img1_region(region_size)
-            img2_rect = self._matcher.make_image2_region(match_set.img2(),
-                                                match_set.pixel_offset(), img1_rect)
-
+            img2_rect = self._matcher.make_search_region(match_set, crystal_match)
             img2.draw_rectangle(img2_rect, color)
 
         status = "Ready for Crystal Matching"
