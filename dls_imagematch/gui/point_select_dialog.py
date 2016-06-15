@@ -29,6 +29,16 @@ class SelectorFrame(QLabel):
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
         #  but must be no larger than the maximum size
+        self._display_size = self._calculate_display_size(max_size)
+        self._display_scale = self._original_size[0] / self._display_size[0]
+
+        self.setMaximumWidth(self._display_size[0])
+        self.setMaximumHeight(self._display_size[1])
+
+        # Display the Image
+        self._display_image(self._selector_image)
+
+    def _calculate_display_size(self, max_size):
         w, h = self._selector_image.size
         if w > h:
             width = max_size
@@ -36,14 +46,8 @@ class SelectorFrame(QLabel):
         else:
             height = max_size
             width = int(w / h * max_size)
-        self._display_size = (width, height)
-        self._display_scale = self._original_size[0] / self._display_size[0]
 
-        self.setMaximumWidth(width)
-        self.setMaximumHeight(height)
-
-        # Display the Image
-        self._display_image(self._selector_image)
+        return width, height
 
     def get_points(self):
         return self._selected_points
@@ -67,13 +71,15 @@ class SelectorFrame(QLabel):
 
     def _refresh_image(self):
         img_copy = self._selector_image.copy()
-
         for point in self._selected_points:
-            rect = Rectangle.from_center(point, self._rect_size, self._rect_size)
-            img_copy.draw_rectangle(rect, self._rect_color, thickness=1)
-            img_copy.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size/2))
+            self._draw_point_rectangle(img_copy, point)
 
         self._display_image(img_copy)
+
+    def _draw_point_rectangle(self, img, point):
+        rect = Rectangle.from_center(point, self._rect_size, self._rect_size)
+        img.draw_rectangle(rect, self._rect_color, thickness=1)
+        img.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size / 2))
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a

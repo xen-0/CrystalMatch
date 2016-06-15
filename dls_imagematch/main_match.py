@@ -82,7 +82,7 @@ class VMXiCrystalMatcher(QMainWindow):
         self.setCentralWidget(main_widget)
         self.show()
 
-        well_selector._well_selected()
+        well_selector._emit_well_selected_signal()
 
     def init_menu_bar(self):
         """Create and populate the menu bar. """

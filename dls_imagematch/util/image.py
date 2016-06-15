@@ -2,6 +2,8 @@ from __future__ import division
 import cv2
 import numpy as np
 import math
+
+from PyQt4 import Qt
 from PyQt4.QtGui import QImage, QPixmap
 
 from .rectangle import Rectangle, Point
@@ -266,12 +268,15 @@ class Image:
 
         return Image(grain_extract, self.pixel_size)
 
-    def to_qt_pixmap(self):
+    def to_qt_pixmap(self, scale=None):
         width, height = self.size
         bytes_per_line = 3 * width
         rgb = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
-        qImg = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        return QPixmap.fromImage(qImg)
+        q_img = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_img)
 
+        if scale is not None:
+            pixmap = pixmap.scaled(scale, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
+        return pixmap
 

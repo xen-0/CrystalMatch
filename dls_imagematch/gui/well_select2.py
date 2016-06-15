@@ -1,7 +1,7 @@
 from __future__ import division
 
 from PyQt4 import QtCore
-from PyQt4.QtGui import (QPushButton, QHBoxLayout, QComboBox, QGroupBox)
+from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 
 from dls_imagematch.util import File, Image
 
@@ -45,7 +45,7 @@ class WellSelector2(QGroupBox):
         self._cmbo_batch2 = QComboBox()
         self._cmbo_batch2.activated[str].connect(self._refresh_well_list)
         self._cmbo_well = QComboBox()
-        self._cmbo_well.activated[str].connect(self._well_selected)
+        self._cmbo_well.activated[str].connect(self._emit_well_selected_signal)
 
         # Create layout
         hbox_well_select = QHBoxLayout()
@@ -66,15 +66,17 @@ class WellSelector2(QGroupBox):
         plate_dir = self._samples_dir + self._cmbo_plate.currentText()
         batch_folders = File.get_sub_dirs(str(plate_dir), startswith="batch_")
 
-        for folder in batch_folders:
-            folder = folder.split("\\")[-1]
-            self._cmbo_batch1.addItem(folder)
-            self._cmbo_batch2.addItem(folder)
-
+        self._populate_batch_lists(batch_folders)
         self._cmbo_batch1.setCurrentIndex(0)
         self._cmbo_batch2.setCurrentIndex(self._cmbo_batch2.count()-1)
 
         self._refresh_well_list()
+
+    def _populate_batch_lists(self, folders):
+        for folder in folders:
+            folder = folder.split("\\")[-1]
+            self._cmbo_batch1.addItem(folder)
+            self._cmbo_batch2.addItem(folder)
 
     def _refresh_well_list(self):
         """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
@@ -82,11 +84,26 @@ class WellSelector2(QGroupBox):
         current_selection = self._cmbo_well.currentText()
         self._cmbo_well.clear()
 
+        files = self._get_well_files_list()
+        self._populate_well_list(files)
+        self._set_selected_well(current_selection)
+        self._emit_well_selected_signal()
+
+    def _populate_well_list(self, files):
+        for f in files:
+            well = str(f[:7])
+            self._cmbo_well.addItem(well)
+
+    def _set_selected_well(self, text):
+        index = self._cmbo_well.findText(text)
+        if index != -1:
+            self._cmbo_well.setCurrentIndex(index)
+
+    def _get_well_files_list(self):
         plate_dir = self._samples_dir + self._cmbo_plate.currentText()
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
         batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
 
-        # Get the list of well images.
         files1 = File.get_files(str(batch_dir1))
         files1 = [f.split("/")[-1] for f in files1]
         files2 = File.get_files(str(batch_dir2))
@@ -95,20 +112,9 @@ class WellSelector2(QGroupBox):
         # Find the set of images that both batches have in common
         common = list(set(files1).intersection(files2))
         common.sort()
+        return common
 
-        # Populate the well list
-        for f in common:
-            well = str(f[:7])
-            self._cmbo_well.addItem(well)
-
-        # Set the well selection to the same as previously selected
-        index = self._cmbo_well.findText(current_selection)
-        if index != -1:
-            self._cmbo_well.setCurrentIndex(index)
-
-        self._well_selected()
-
-    def _well_selected(self):
+    def _emit_well_selected_signal(self):
         """ Select a well from the dataset to use for matching. Display the
         corresponding images in slot A and B. """
         plate_dir = self._samples_dir + self._cmbo_plate.currentText()

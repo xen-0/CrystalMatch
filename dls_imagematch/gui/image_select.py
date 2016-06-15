@@ -122,9 +122,8 @@ class ImageSelector(QtGui.QGroupBox):
         if image is None:
             self._frame.setText("No Image Selected")
         else:
-            pixmap = image.to_qt_pixmap()
-            scaled = pixmap.scaled(self._frame.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self._frame.setPixmap(scaled)
+            pixmap = image.to_qt_pixmap(self._frame.size())
+            self._frame.setPixmap(pixmap)
 
     def _display_filename_label(self, filepath):
         """ Display the filename in the filename label. """

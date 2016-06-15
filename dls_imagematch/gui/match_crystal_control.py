@@ -31,7 +31,7 @@ class CrystalMatchControl(QGroupBox):
         self._config = config
 
         self._init_ui()
-        self._clear_images()
+        self._clear_all_frames()
         self.setTitle("Crystal Matching")
 
     def _init_ui(self):
@@ -52,18 +52,10 @@ class CrystalMatchControl(QGroupBox):
         hbox_frames1 = QHBoxLayout()
         hbox_frames2 = QHBoxLayout()
         for i in range(self.NUM_FRAMES):
-            frame1 = QLabel()
-            frame1.setStyleSheet(self.FRAME_STYLE.format("black"))
-            frame1.setFixedWidth(self.FRAME_SIZE)
-            frame1.setFixedHeight(self.FRAME_SIZE)
-            frame1.setAlignment(Qt.AlignCenter)
+            frame1 = self._ui_make_image_frame()
+            frame2 = self._ui_make_image_frame()
             self._frames1.append(frame1)
             hbox_frames1.addWidget(frame1)
-            frame2 = QLabel()
-            frame2.setStyleSheet(self.FRAME_STYLE.format("black"))
-            frame2.setFixedWidth(self.FRAME_SIZE)
-            frame2.setFixedHeight(self.FRAME_SIZE)
-            frame2.setAlignment(Qt.AlignCenter)
             self._frames2.append(frame2)
             hbox_frames2.addWidget(frame2)
 
@@ -85,11 +77,19 @@ class CrystalMatchControl(QGroupBox):
 
         self.setLayout(hbox_btns)
 
+    def _ui_make_image_frame(self):
+        frame = QLabel()
+        frame.setStyleSheet(self.FRAME_STYLE.format("black"))
+        frame.setFixedWidth(self.FRAME_SIZE)
+        frame.setFixedHeight(self.FRAME_SIZE)
+        frame.setAlignment(Qt.AlignCenter)
+        return frame
+
     def reset(self):
         self._aligned_images = None
         self._selected_points = []
         self._btn_locate.setEnabled(False)
-        self._clear_images()
+        self._clear_all_frames()
 
     def set_aligned_images(self, aligned_images):
         self.reset()
@@ -104,62 +104,57 @@ class CrystalMatchControl(QGroupBox):
             QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
             return
 
-        result_ok, points = self.get_points(self._aligned_images, self._config)
-
+        result_ok, points = self._get_points_from_user_selection()
         if result_ok:
-            self._selected_points = points
-            self._clear_images()
-            self._display_image1_regions()
-            self._display_marked_img2()
-            self._btn_locate.setEnabled(True)
+            self._set_selected_points(points)
+
+    def _get_points_from_user_selection(self):
+        """ Display a dialog and return the result to the caller. """
+        dialog = PointSelectDialog(self._aligned_images, self._config)
+        result_ok = dialog.exec_()
+
+        points = []
+        if result_ok:
+            points = dialog.selected_points()
+        return result_ok, points
+
+    def _set_selected_points(self, points):
+        self._selected_points = points
+        self._clear_all_frames()
+        self._display_image1_regions()
+        self._display_marked_img2()
+        self._btn_locate.setEnabled(True)
 
     def _fn_perform_match(self):
-        try:
-            self._perform_match()
-        except FeatureMatchException as e:
-            QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
-
-    def _perform_match(self):
         selected_img1_points = self._selected_points
         region_size = self._config.region_size.value()
-
         match_set = CrystalMatchSet(self._aligned_images, selected_img1_points)
 
-        # Create task thread and progress dialog
+        self._perform_matching_task(match_set, region_size)
+        self._display_results(match_set)
+        self._btn_locate.setEnabled(False)
+
+    def _perform_matching_task(self, match_set, region_size):
         progress = ProgressDialog("Crystal Matching In Progress")
         match_task = _MatchTaskThread(self._matcher, match_set, region_size)
         match_task.taskFinished.connect(progress.on_finished)
         match_task.start()
         progress.exec_()
 
-        self._display_results(match_set)
-        self._btn_locate.setEnabled(False)
-
-    @staticmethod
-    def get_points(filename, config):
-        """ Display a dialog and return the result to the caller. """
-        dialog = PointSelectDialog(filename, config)
-        result_ok = dialog.exec_()
-
-        points = []
-        if result_ok:
-            points = dialog.selected_points()
-
-        return result_ok, points
-
     ''' ----------------------
     SMALL IMAGE FUNCTIONS
     ------------------------'''
-    def _clear_images(self):
+    def _clear_all_frames(self):
         color1 = self._config.color_xtal_img1.value().to_hex()
         color2 = self._config.color_xtal_img2.value().to_hex()
         for i in range(self.NUM_FRAMES):
-            self._frames1[i].clear()
-            self._frames1[i].setText(str(i+1))
-            self._frames1[i].setStyleSheet(self.FRAME_STYLE.format(color1))
-            self._frames2[i].clear()
-            self._frames2[i].setText(str(i+1))
-            self._frames2[i].setStyleSheet(self.FRAME_STYLE.format(color2))
+            self._clear_frame(self._frames1[i], i, color1)
+            self._clear_frame(self._frames2[i], i, color2)
+
+    def _clear_frame(self, frame, number, color_hex):
+        frame.clear()
+        frame.setText(str(number + 1))
+        frame.setStyleSheet(self.FRAME_STYLE.format(color_hex))
 
     def _display_image1_regions(self):
         img1 = self._aligned_images.img1
@@ -173,21 +168,17 @@ class CrystalMatchControl(QGroupBox):
             rect = Rectangle.from_center(point, region_size, region_size)
             img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
             img.draw_cross(img.bounds().center(), color, thickness=1)
-            self._display_image(img, 1, i)
+            self._display_image_in_frame(img, 1, i)
 
-    def _display_image(self, image, row, frame_number):
+    def _display_image_in_frame(self, image, row, frame_number):
         """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
         if row == 1:
             frame = self._frames1[frame_number]
         else:
             frame = self._frames2[frame_number]
 
-        frame_size = frame.size()
-
-        # Convert to a QT pixmap and display
-        pixmap = image.to_qt_pixmap()
-        scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        frame.setPixmap(scaled)
+        pixmap = image.to_qt_pixmap(frame.size())
+        frame.setPixmap(pixmap)
 
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
@@ -256,7 +247,7 @@ class CrystalMatchControl(QGroupBox):
                 rect = Rectangle.from_center(px2, region_size, region_size)
                 img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
                 img.draw_cross(img.bounds().center(), color=color2, thickness=1)
-                self._display_image(img, 2, i)
+                self._display_image_in_frame(img, 2, i)
 
         self._results_frame.display_image(img2)
 

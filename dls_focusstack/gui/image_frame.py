@@ -38,10 +38,5 @@ class ImageFrame(QGroupBox):
     def display_image(self, image):
         """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
         self._image = image
-        frame_size = self._frame.size()
-
-        # Convert to a QT pixmap and display
-        pixmap = image.to_qt_pixmap()
-        scaled = pixmap.scaled(frame_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self._frame.setPixmap(scaled)
-
+        pixmap = image.to_qt_pixmap(self._frame.size())
+        self._frame.setPixmap(pixmap)

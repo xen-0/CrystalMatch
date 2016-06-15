@@ -68,21 +68,12 @@ class ConsensusMatchControl(QGroupBox):
         """ Being the consensus matching process for the two selected images. """
         img1, img2 = self._prepare_images()
 
-        # Prepare initial guess
-        guess_x = float(self._txt_guess_x.text())
-        guess_y = float(self._txt_guess_y.text())
-        guess = Point(guess_x*img1.size[0], guess_y*img1.size[1])
+        guess = self._get_initial_guess(img1.size)
+        grid_size = self._get_grid_size()
+        spacing = self._get_grid_spacing(img1.size)
 
-        # Set grid spacing
-        index = self._cmbo_grid_size.currentIndex()
-        grid_size = self.GRID_SIZE_VALUES[index]
-        grid = float(self._txt_grid_space.text())
-        spacing = grid * img1.size[0]
-
-        # Perform matching
         self._matcher = RegionConsensusMatcher(img1, img2)
         self._matcher.match(guess, grid_size, spacing)
-
         self._display_results()
 
     def _prepare_images(self):
@@ -97,6 +88,22 @@ class ConsensusMatchControl(QGroupBox):
         self._img2 = self._img2.rescale(factor)
 
         return self._img1.to_mono(), self._img2.to_mono()
+
+    def _get_initial_guess(self, img1_size):
+        guess_x = float(self._txt_guess_x.text())
+        guess_y = float(self._txt_guess_y.text())
+        guess = Point(guess_x * img1_size[0], guess_y * img1_size[1])
+        return guess
+
+    def _get_grid_size(self):
+        index = self._cmbo_grid_size.currentIndex()
+        grid_size = self.GRID_SIZE_VALUES[index]
+        return grid_size
+
+    def _get_grid_spacing(self, img1_size):
+        grid = float(self._txt_grid_space.text())
+        spacing = grid * img1_size[0]
+        return spacing
 
     def _display_results(self):
         """ Display the results of the matching process (display overlaid image

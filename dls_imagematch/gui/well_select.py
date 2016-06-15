@@ -62,10 +62,8 @@ class WellSelector(QGroupBox):
 
         image1 = Image.from_file(file1, pixel_size_a)
         image2 = Image.from_file(file2, pixel_size_b)
-
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)
-
 
     @staticmethod
     def _get_441350000072_files(row, col, dir):
