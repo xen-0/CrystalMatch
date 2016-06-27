@@ -244,7 +244,7 @@ class CrystalMatchControl(QGroupBox):
             img2.draw_cross(px2, color2, size=10, thickness=2)
 
             if i < self.NUM_FRAMES:
-                rect = Rectangle.from_center(px2, region_size, region_size)
+                rect = Rectangle.from_center(pixel2, region_size, region_size)
                 img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
                 img.draw_cross(img.bounds().center(), color=color2, thickness=1)
                 self._display_image_in_frame(img, 2, i)
