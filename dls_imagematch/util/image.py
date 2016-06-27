@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import math
 
-from PyQt4 import Qt
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QImage, QPixmap
 
 from .rectangle import Rectangle, Point
