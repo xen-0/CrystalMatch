@@ -143,7 +143,7 @@ class IntConfigItem(ConfigItem):
     """ Config item that stores an integer. Constructor may also take a 'units' parameter which is a
     string that represents the units of the value. This can be used in the UI.
     """
-    def __init__(self, tag, default, units):
+    def __init__(self, tag, default, units=""):
         ConfigItem.__init__(self, tag, default)
         self._units = units
 
