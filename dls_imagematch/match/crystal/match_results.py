@@ -101,6 +101,6 @@ class _CrystalMatch:
         trans = feature_result.transform
         self._img2_point = trans.transform_points([self._img1_point])[0]
 
-    def match_image(self):
-        return self._feature_result.match_image()
+    def matches_image(self):
+        return self._feature_result.matches_image()
 

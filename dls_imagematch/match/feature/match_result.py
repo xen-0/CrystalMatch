@@ -16,10 +16,6 @@ class FeatureMatchResult:
         img = FeaturePainter.draw_matches(self.img1, self.img2, self.matches)
         return img
 
-        # factor = 1000 / img.width
-        # out = img.rescale(factor)
-        # out.popup("Matches")
-
     def keypoints_image1(self):
         keypoints = [m._kp1 for m in self.matches]
         img = FeaturePainter.draw_keypoints(self.img1, keypoints)

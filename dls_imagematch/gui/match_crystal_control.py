@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4 import QtCore
 from PyQt4.QtCore import Qt, QThread
-from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
+from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QWidget
 
 from dls_imagematch.gui import PointSelectDialog, ProgressDialog
 from dls_imagematch.util import Color, Rectangle
@@ -24,6 +24,7 @@ class CrystalMatchControl(QGroupBox):
         self._results_frame = results_frame
 
         self._matcher = CrystalMatcher(config)
+        self._match_results = None
 
         self._aligned_images = None
         self._selected_points = []
@@ -83,10 +84,12 @@ class CrystalMatchControl(QGroupBox):
         frame.setFixedWidth(self.FRAME_SIZE)
         frame.setFixedHeight(self.FRAME_SIZE)
         frame.setAlignment(Qt.AlignCenter)
+        frame.installEventFilter(self)
         return frame
 
     def reset(self):
         self._aligned_images = None
+        self._match_results = None
         self._selected_points = []
         self._btn_locate.setEnabled(False)
         self._clear_all_frames()
@@ -180,6 +183,24 @@ class CrystalMatchControl(QGroupBox):
         frame.setPixmap(pixmap)
 
     ''' ----------------------
+    FRAME CLICK EVENT FILTER
+    ------------------------'''
+    def eventFilter(self, source, event):
+        """ Catches events on the image frame and re-directs mouse movements to the reporting function. """
+        if event.type() == QtCore.QEvent.MouseButtonDblClick and source in self._frames2:
+            index = self._frames2.index(source)
+            self._frame_double_clicked(index)
+            return False
+
+        return QWidget.eventFilter(self, source, event)
+
+    def _frame_double_clicked(self, index):
+        if self._match_results is not None and self._match_results.num() > index:
+            result = self._match_results.get_match(index)
+            match_image = result.matches_image()
+            match_image.popup("Matches")
+
+    ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
     ------------------------'''
     def _display_marked_img2(self):
@@ -196,6 +217,7 @@ class CrystalMatchControl(QGroupBox):
         self._results_frame.display_image(img2)
 
     def _display_results(self, crystal_match_set):
+        self._match_results = crystal_match_set
         status = "Crystal matching complete"
 
         self._results_frame.clear()

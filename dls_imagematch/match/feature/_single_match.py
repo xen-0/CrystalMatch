@@ -13,10 +13,16 @@ class SingleFeatureMatch:
         self._offset2 = Point(0, 0)
 
     def point1(self):
-        return Point(self._kp1.pt[0], self._kp1.pt[1]) + self._offset1
+        return self.img_point1() + self._offset1
 
     def point2(self):
-        return Point(self._kp2.pt[0], self._kp2.pt[1]) + self._offset2
+        return self.img_point2() + self._offset2
+
+    def img_point1(self):
+        return Point(self._kp1.pt[0], self._kp1.pt[1])
+
+    def img_point2(self):
+        return Point(self._kp2.pt[0], self._kp2.pt[1])
 
     def set_offsets(self, offset1, offset2):
         self._offset1 = offset1
