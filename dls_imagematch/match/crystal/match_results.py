@@ -3,11 +3,11 @@ from dls_imagematch.match.transformation import Transformation
 from dls_imagematch.match.aligned_images import AlignedImages
 
 
-class CrystalMatchSet:
+class CrystalMatchResults:
     """ Represents a pair of images with a set of crystal location matches between them. The client
     specifies a list of points in Image 1 which are to be matched in Image 2, and later supplies a
     transformation which calculates the point in Image 2 from that in Image 1. """
-    def __init__(self, aligned_images, img1_points):
+    def __init__(self, aligned_images):
         """ Initialize a new CrystalMatchSet object.
 
         Parameters
@@ -20,10 +20,6 @@ class CrystalMatchSet:
 
         self._aligned_images = aligned_images
         self.matches = []
-
-        pixel_size = aligned_images.img1.pixel_size
-        for point in img1_points:
-            self.matches.append(_CrystalMatch(point, pixel_size))
 
     def num(self):
         """ The number of crystal matches in the set. """

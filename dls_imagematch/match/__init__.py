@@ -1,4 +1,4 @@
-from dls_imagematch.match.crystal.crystal_match_set import CrystalMatchSet
+from dls_imagematch.match.crystal.match_results import CrystalMatchResults
 from dls_imagematch.match.crystal.matcher import CrystalMatcher
 from dls_imagematch.match.feature import FeatureMatcher, FeatureDetector, FeatureMatchException
 from dls_imagematch.match.region.match_consensus import RegionConsensusMatcher
