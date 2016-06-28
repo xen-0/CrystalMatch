@@ -6,6 +6,7 @@ import numpy as np
 from dls_imagematch.util import Point
 from dls_imagematch.match.transformation import Transformation
 from dls_imagematch.match.translation import Translation
+from .match_result import FeatureMatchResult
 
 from .exception import FeatureMatchException
 from ._single_match import SingleFeatureMatch
@@ -41,13 +42,22 @@ class FeatureMatcher:
     def match(self):
         matches = self._find_matches()
         if self._has_enough_matches_for_full_transform(matches):
-            return self._calculate_full_transform(matches)
+            transform = self._calculate_full_transform(matches)
         else:
-            return self._calculate_translation_only_transform(matches)
+            transform = self._calculate_translation_only_transform(matches)
+
+        return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
         matches = self._find_matches()
-        return self._calculate_translation_only_transform(matches)
+        transform = self._calculate_translation_only_transform(matches)
+        return self._create_result_object(matches, transform)
+
+    def _create_result_object(self, matches, transform):
+        result = FeatureMatchResult(self.img1, self.img2, matches, transform)
+        result.method = self._detector.detector
+        result.method_adapt = self._detector.adaptation
+        return result
 
     def _find_matches(self):
         if self._detector.is_consensus_type():

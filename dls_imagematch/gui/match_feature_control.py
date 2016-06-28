@@ -59,11 +59,11 @@ class FeatureMatchControl(QGroupBox):
         self._matcher = FeatureMatcher(img1, img2)
         self._matcher.set_detector(method, adapt)
         try:
-            transform = self._matcher.match_translation_only()
+            match_result = self._matcher.match_translation_only()
         except FeatureMatchException as e:
             QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
 
-        self._display_results(transform, method, adapt)
+        self._display_results(match_result)
         self.signal_aligned.emit(self.last_images)
 
     def _prepare_images(self):
@@ -79,13 +79,14 @@ class FeatureMatchControl(QGroupBox):
 
         return self._img1.to_mono(), self._img2.to_mono()
 
-    def _display_results(self, transform, method, adapt):
+    def _display_results(self, match_result):
         """ Display the results of the matching process (display overlaid image
         and print the offset. """
-        align_method = "Feature matching - " + method
-        if adapt != '':
-            align_method += " with " + adapt
+        align_method = "Feature matching - " + match_result.method
+        if match_result.method_adapt != '':
+            align_method += " with " + match_result.method_adapt
 
-        aligned = AlignedImages(self._img1, self._img2, transform.translation(), align_method)
+        translation = match_result.transform.translation()
+        aligned = AlignedImages(self._img1, self._img2, translation, align_method)
 
         self.last_images = aligned

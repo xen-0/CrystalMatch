@@ -29,13 +29,10 @@ class FeaturePainter:
             # Draw a line between the two points
             out.draw_line(point1, point2, color=Color.Blue(), thickness=1)
 
-        # Resize so that it fits on the screen
-        factor = 1000 / out.width
-        out = out.rescale(factor)
-        out.popup("Matches")
+        return out
 
     @staticmethod
-    def _draw_keypoints(img, keypoints):
+    def draw_keypoints(img, keypoints):
         """ Draw the list of keypoints to the specified image and display it as a popup window. """
         marked_img = cv2.drawKeypoints(img.img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        Image(marked_img).popup("Keypoints")
+        return Image(marked_img)

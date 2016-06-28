@@ -54,10 +54,11 @@ class CrystalMatcher:
         try:
             matcher.set_detector("Consensus")
             if translation_only:
-                transform = matcher.match_translation_only()
+                result = matcher.match_translation_only()
             else:
-                transform = matcher.match()
-            crystal_match.set_transformation(transform)
+                result = matcher.match()
+
+            crystal_match.set_feature_match_result(result)
         except FeatureMatchException:
             pass
 
