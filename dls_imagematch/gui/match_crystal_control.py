@@ -232,16 +232,13 @@ class CrystalMatchControl(QGroupBox):
             print(beam_position)
             print(delta)
 
-            px2 = match.img1_point() - match._transformation.translation()
             off = crystal_match_set.pixel_offset()
             img1.draw_cross(pixel1, color1, size=10, thickness=2)
-            img1.draw_cross(px2+off, color2, size=10, thickness=2)
-            img1.draw_cross(pixel2+off, Color.Yellow(), size=10, thickness=2)
-            img1.draw_circle(pixel2+off, 30, Color.Yellow())
+            img1.draw_cross(pixel2+off, color2, size=10, thickness=2)
+            img1.draw_circle(pixel2+off, 30, color2)
 
             img2.draw_cross(pixel1-off, color1, size=10, thickness=2)
-            img2.draw_cross(pixel2, Color.Yellow(), size=10, thickness=2)
-            img2.draw_cross(px2, color2, size=10, thickness=2)
+            img2.draw_cross(pixel2, color2, size=10, thickness=2)
 
             if i < self.NUM_FRAMES:
                 rect = Rectangle.from_center(pixel2, region_size, region_size)
