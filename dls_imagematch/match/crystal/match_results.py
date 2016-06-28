@@ -97,9 +97,7 @@ class _CrystalMatch:
     def set_transformation(self, transformation):
         """ Set the transformation which maps the crystal location from Image 1 onto the
         same crystal location on Image 2. """
-        if not isinstance(transformation, Transformation):
-            raise TypeError("Argument must be instance of {}".format(Transformation.__name__))
-
         self._transformation = transformation
         self._img2_point = transformation.transform_points([self._img1_point])[0]
+        print(self._img1_point, self._img2_point)
 

@@ -49,11 +49,14 @@ class CrystalMatcher:
         height = self._config.search_height.value() / pixel_size
         return width, height
 
-    @staticmethod
-    def _perform_match(matcher, crystal_match):
+    def _perform_match(self, matcher, crystal_match):
+        translation_only = self._config.match_translation_only.value()
         try:
             matcher.set_detector("Consensus")
-            transform = matcher.match()
+            if translation_only:
+                transform = matcher.match_translation_only()
+            else:
+                transform = matcher.match()
             crystal_match.set_transformation(transform)
         except FeatureMatchException:
             pass

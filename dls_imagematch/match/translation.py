@@ -21,9 +21,9 @@ class Translation:
         return warped
 
     def transform_points(self, points):
-        transformed = [p + self._translation for p in points]
+        transformed = [p - self._translation for p in points]
         return transformed
 
     def inverse_transform_points(self, points):
-        transformed = [p - self._translation for p in points]
+        transformed = [p + self._translation for p in points]
         return transformed

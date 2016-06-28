@@ -1,5 +1,5 @@
 from dls_imagematch.util import  Color
-from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem
+from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, BoolConfigItem
 
 
 class XtalConfig(Config):
@@ -11,6 +11,7 @@ class XtalConfig(Config):
         self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
         self.search_height = add(IntConfigItem, "Search Height", default=400, extra_arg='px')
+        self.match_translation_only = add(BoolConfigItem, "Translation Only", default=False)
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")
