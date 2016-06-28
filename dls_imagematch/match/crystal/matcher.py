@@ -1,6 +1,6 @@
 from __future__ import division
 
-from ..feature import FeatureMatcher, FeatureMatchException
+from ..feature import BoundedFeatureMatcher, FeatureMatchException
 from dls_imagematch.util import Rectangle, Point
 
 
@@ -16,7 +16,7 @@ class CrystalMatcher:
             img1_rect = crystal_match.img1_region(region_size)
             img2_rect = self.make_search_region(crystal_match_set, crystal_match)
 
-            matcher = FeatureMatcher(img1, img2, img1_rect, img2_rect)
+            matcher = BoundedFeatureMatcher(img1, img2, img1_rect, img2_rect)
             self._perform_match(matcher, crystal_match)
 
     def make_search_region(self, xtal_match_set, xtal_match):

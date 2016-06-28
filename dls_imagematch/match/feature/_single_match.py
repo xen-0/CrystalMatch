@@ -9,12 +9,18 @@ class SingleFeatureMatch:
         self._match = match
         self._kp1 = kp1
         self._kp2 = kp2
+        self._offset1 = Point(0, 0)
+        self._offset2 = Point(0, 0)
 
     def point1(self):
-        return Point(self._kp1.pt[0], self._kp1.pt[1])
+        return Point(self._kp1.pt[0], self._kp1.pt[1]) + self._offset1
 
     def point2(self):
-        return Point(self._kp2.pt[0], self._kp2.pt[1])
+        return Point(self._kp2.pt[0], self._kp2.pt[1]) + self._offset2
+
+    def set_offsets(self, offset1, offset2):
+        self._offset1 = offset1
+        self._offset2 = offset2
 
     @staticmethod
     def matches_from_raw(raw_matches, keypoints1, keypoints2):
