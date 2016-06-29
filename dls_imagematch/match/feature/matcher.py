@@ -2,6 +2,7 @@ from __future__ import division
 
 import cv2
 import numpy as np
+from itertools import izip
 
 from dls_imagematch.util import Point
 from dls_imagematch.match.transformation import Transformation
@@ -142,6 +143,10 @@ class FeatureMatcher:
             img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
 
             homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
+
+            for match, mask in izip(matches, mask):
+                if mask:
+                    match.remove_from_transformation()
 
         return homography
 

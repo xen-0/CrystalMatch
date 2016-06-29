@@ -12,8 +12,7 @@ class FeatureMatchResult:
         self.method_adapt = None
 
     def matches_image(self):
-        # Resize so that it fits on the screen
-        img = FeaturePainter.draw_matches(self.img1, self.img2, self.matches)
+        img = FeaturePainter.draw_matches(self.img1, self.img2, self._filtered_matches())
         return img
 
     def keypoints_image1(self):
@@ -25,3 +24,6 @@ class FeatureMatchResult:
         keypoints = [m._kp2 for m in self.matches]
         img = FeaturePainter.draw_keypoints(self.img2, keypoints)
         return img
+
+    def _filtered_matches(self):
+        return [m for m in self.matches if m.is_in_transformation()]

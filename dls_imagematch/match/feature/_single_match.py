@@ -11,6 +11,13 @@ class SingleFeatureMatch:
         self._kp2 = kp2
         self._offset1 = Point(0, 0)
         self._offset2 = Point(0, 0)
+        self._included_in_transformation = True
+
+    def distance(self):
+        return self._match.distance
+
+    def is_in_transformation(self):
+        return self._included_in_transformation
 
     def point1(self):
         return self.img_point1() + self._offset1
@@ -27,6 +34,9 @@ class SingleFeatureMatch:
     def set_offsets(self, offset1, offset2):
         self._offset1 = offset1
         self._offset2 = offset2
+
+    def remove_from_transformation(self):
+        self._included_in_transformation = False
 
     @staticmethod
     def matches_from_raw(raw_matches, keypoints1, keypoints2):

@@ -6,7 +6,7 @@ from dls_imagematch.util import Point, Image, Color
 
 
 class FeaturePainter:
-    MAX_IMAGE_SIZE = 1000
+    MAX_IMAGE_SIZE = 900
 
     @staticmethod
     def draw_matches(img1, img2, matches):
@@ -47,11 +47,8 @@ class FeaturePainter:
     @staticmethod
     def _rescale_to_max_size(image, max_size=MAX_IMAGE_SIZE):
         width, height = image.width, image.height
-        print(width, height)
         factor = max_size / max(width, height)
         rescaled = image.rescale(factor)
-        print(rescaled.width, rescaled.height)
-        print(factor)
         return rescaled, factor
 
     @staticmethod
