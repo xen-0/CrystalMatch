@@ -60,9 +60,16 @@ class CrystalMatchControl(QGroupBox):
             self._frames2.append(frame2)
             hbox_frames2.addWidget(frame2)
 
+        # Display matches buttons
+        self._show_matches_btns = []
+        hbox_show_btns = QHBoxLayout()
+        for i in range(self.NUM_FRAMES):
+            btn = self._ui_make_show_matches_button(i)
+            self._show_matches_btns.append(btn)
+            hbox_show_btns.addWidget(btn)
+
         # Create widget layout
         vbox_btns = QVBoxLayout()
-        vbox_btns.addStretch(1)
         vbox_btns.addWidget(self._btn_region)
         vbox_btns.addWidget(self._btn_locate)
         vbox_btns.addStretch(1)
@@ -70,6 +77,7 @@ class CrystalMatchControl(QGroupBox):
         vbox_frames = QVBoxLayout()
         vbox_frames.addLayout(hbox_frames1)
         vbox_frames.addLayout(hbox_frames2)
+        vbox_frames.addLayout(hbox_show_btns)
 
         hbox_btns = QHBoxLayout()
         hbox_btns.addLayout(vbox_btns)
@@ -84,8 +92,14 @@ class CrystalMatchControl(QGroupBox):
         frame.setFixedWidth(self.FRAME_SIZE)
         frame.setFixedHeight(self.FRAME_SIZE)
         frame.setAlignment(Qt.AlignCenter)
-        frame.installEventFilter(self)
         return frame
+
+    def _ui_make_show_matches_button(self, i):
+        btn = QPushButton("Matches")
+        btn.setEnabled(False)
+        btn.setFixedWidth(self.FRAME_SIZE)
+        btn.clicked.connect(lambda: self._show_matches_dialog(i))
+        return btn
 
     def reset(self):
         self._aligned_images = None
@@ -152,6 +166,7 @@ class CrystalMatchControl(QGroupBox):
         for i in range(self.NUM_FRAMES):
             self._clear_frame(self._frames1[i], i, color1)
             self._clear_frame(self._frames2[i], i, color2)
+            self._show_matches_btns[i].setEnabled(False)
 
     def _clear_frame(self, frame, number, color_hex):
         frame.clear()
@@ -182,19 +197,7 @@ class CrystalMatchControl(QGroupBox):
         pixmap = image.to_qt_pixmap(frame.size())
         frame.setPixmap(pixmap)
 
-    ''' ----------------------
-    FRAME CLICK EVENT FILTER
-    ------------------------'''
-    def eventFilter(self, source, event):
-        """ Catches events on the image frame and re-directs mouse movements to the reporting function. """
-        if event.type() == QtCore.QEvent.MouseButtonDblClick and source in self._frames2:
-            index = self._frames2.index(source)
-            self._frame_double_clicked(index)
-            return False
-
-        return QWidget.eventFilter(self, source, event)
-
-    def _frame_double_clicked(self, index):
+    def _show_matches_dialog(self, index):
         if self._match_results is not None and self._match_results.num() > index:
             result = self._match_results.get_match(index)
             match_image = result.matches_image()
@@ -264,6 +267,7 @@ class CrystalMatchControl(QGroupBox):
                 img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
                 img.draw_cross(img.bounds().center(), color=color2, thickness=1)
                 self._display_image_in_frame(img, 2, i)
+                self._show_matches_btns[i].setEnabled(True)
 
         self._results_frame.display_image(img2)
 
