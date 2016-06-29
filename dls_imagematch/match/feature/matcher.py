@@ -145,7 +145,7 @@ class FeatureMatcher:
             homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
 
             for match, mask in izip(matches, mask):
-                if mask:
+                if not mask:
                     match.remove_from_transformation()
 
         return homography
