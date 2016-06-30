@@ -11,8 +11,10 @@ class FeatureMatchResult:
         self.method = None
         self.method_adapt = None
 
-    def matches_image(self):
-        img = FeaturePainter.draw_matches(self.img1, self.img2, self._filtered_matches())
+    def matches_image(self, matches=None):
+        if matches is None:
+            matches = self._filtered_matches()
+        img = FeaturePainter.draw_matches(self.img1, self.img2, matches)
         return img
 
     def keypoints_image1(self):
