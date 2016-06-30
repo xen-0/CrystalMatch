@@ -9,7 +9,7 @@ class FeaturePainter:
     MAX_IMAGE_SIZE = 900
 
     @staticmethod
-    def draw_matches(img1, img2, matches):
+    def draw_matches(img1, img2, matches, highlight_matches=[]):
         """ Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
         Makes an image that is a side-by-side of the two images, with detected features highlighted and lines
         drawn between matching features in the two images.
@@ -41,6 +41,16 @@ class FeaturePainter:
 
             # Draw a line between the two points
             out.draw_line(point1, point2, color=Color.Blue(), thickness=1)
+
+        for match in highlight_matches:
+            point1 = (match.img_point1() + img1_pos) * factor
+            point2 = (match.img_point2() + img2_pos) * factor
+            # Draw a small circle at both co-ordinates
+            out.draw_circle(point=point1, radius=4, color=Color.Yellow(), thickness=2)
+            out.draw_circle(point=point2, radius=4, color=Color.Yellow(), thickness=2)
+
+            # Draw a line between the two points
+            out.draw_line(point1, point2, color=Color.Yellow(), thickness=2)
 
         return out
 
