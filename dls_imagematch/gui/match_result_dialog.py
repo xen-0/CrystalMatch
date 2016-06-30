@@ -55,7 +55,7 @@ class FeatureMatchResultDialog(QDialog):
         barcodes from the selected record in the barcode table. By default, valid barcodes are
         highlighted green, invalid barcodes are highlighted red, and empty slots are grey.
         """
-        matches = match_result.feature_matches().matches
+        matches = match_result.matches
         num_results = len(matches)
         self._table.clearContents()
         self._table.setRowCount(num_results)

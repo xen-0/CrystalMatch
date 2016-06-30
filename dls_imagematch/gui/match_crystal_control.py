@@ -203,11 +203,8 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is not None and self._match_results.num() > index:
             result = self._match_results.get_match(index)
 
-            dialog = FeatureMatchResultDialog(result)
+            dialog = FeatureMatchResultDialog(result.feature_matches())
             dialog.exec_()
-
-            #match_image = result.matches_image()
-            #match_image.popup("Matches")
 
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
