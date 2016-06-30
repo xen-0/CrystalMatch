@@ -79,7 +79,6 @@ class FeatureMatcher:
                 matches.extend(method_matches)
             except FeatureMatchException:
                 pass
-
         return matches
 
     def _find_matches_for_method(self, method):
@@ -87,11 +86,11 @@ class FeatureMatcher:
         keypoints2, descriptors2 = method.detect_features(self.img2)
 
         raw_matches = self._brute_force_match(method, descriptors1, descriptors2)
-        matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2)
+        matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2, method)
         return matches
 
-    def _matches_from_raw(self, raw_matches, keypoints1, keypoints2):
-        matches = SingleFeatureMatch.matches_from_raw(raw_matches, keypoints1, keypoints2)
+    def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
+        matches = SingleFeatureMatch.matches_from_raw(raw_matches, keypoints1, keypoints2, method)
         return matches
 
     def _brute_force_match(self, method, descriptors_1, descriptors_2):
@@ -179,8 +178,8 @@ class BoundedFeatureMatcher(FeatureMatcher):
         self.img1_offset = img1_rect.top_left()
         self.img2_offset = img2_rect.top_left()
 
-    def _matches_from_raw(self, raw_matches, keypoints1, keypoints2):
-        matches = SingleFeatureMatch.matches_from_raw(raw_matches, keypoints1, keypoints2)
+    def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
+        matches = SingleFeatureMatch.matches_from_raw(raw_matches, keypoints1, keypoints2, method)
         for match in matches:
             match.set_offsets(self.img1_offset, self.img2_offset)
 

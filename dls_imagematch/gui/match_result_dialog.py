@@ -1,7 +1,7 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QTableWidget
+from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget
 
 
 class FeatureMatchResultDialog(QDialog):
@@ -26,8 +26,12 @@ class FeatureMatchResultDialog(QDialog):
 
         self._table = self._ui_create_table()
 
+        vbox_table = QVBoxLayout()
+        vbox_table.addWidget(self._table)
+        vbox_table.addStretch(1)
+
         hbox = QHBoxLayout()
-        hbox.addWidget(self._table)
+        hbox.addLayout(vbox_table)
         hbox.addWidget(self._frame)
         hbox.addStretch()
 
@@ -35,13 +39,14 @@ class FeatureMatchResultDialog(QDialog):
 
     def _ui_create_table(self):
         table = QTableWidget()
-        table.setFixedWidth(210)
+        table.setFixedWidth(300)
         table.setFixedHeight(600)
-        table.setColumnCount(2)
+        table.setColumnCount(3)
         table.setRowCount(10)
-        table.setHorizontalHeaderLabels(['Distance', 'Included'])
+        table.setHorizontalHeaderLabels(['Method', 'Distance', 'Included'])
         table.setColumnWidth(0, 80)
         table.setColumnWidth(1, 80)
+        table.setColumnWidth(2, 80)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         return table
 
@@ -63,7 +68,7 @@ class FeatureMatchResultDialog(QDialog):
         for n, match in enumerate(matches):
             distance = '{:.3f}'.format(match.distance())
             included = 'X' if match.is_in_transformation() else ''
-            items = [distance, included]
+            items = [match.method(), distance, included]
 
             for m, item in enumerate(items):
                 new_item = QtGui.QTableWidgetItem(str(item))
