@@ -104,3 +104,6 @@ class _CrystalMatch:
     def matches_image(self):
         return self._feature_result.matches_image()
 
+    def feature_matches(self):
+        return self._feature_result
+

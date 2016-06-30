@@ -4,9 +4,11 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt, QThread
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QWidget
 
+from .match_result_dialog import FeatureMatchResultDialog
 from dls_imagematch.gui import PointSelectDialog, ProgressDialog
-from dls_imagematch.util import Color, Rectangle
-from dls_imagematch.match import CrystalMatcher, CrystalMatchResults, FeatureMatchException
+from dls_imagematch.util import Rectangle
+from dls_imagematch.match import CrystalMatcher
+
 
 
 class CrystalMatchControl(QGroupBox):
@@ -200,8 +202,12 @@ class CrystalMatchControl(QGroupBox):
     def _show_matches_dialog(self, index):
         if self._match_results is not None and self._match_results.num() > index:
             result = self._match_results.get_match(index)
-            match_image = result.matches_image()
-            match_image.popup("Matches")
+
+            dialog = FeatureMatchResultDialog(result)
+            dialog.exec_()
+
+            #match_image = result.matches_image()
+            #match_image.popup("Matches")
 
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
