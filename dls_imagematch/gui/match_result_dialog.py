@@ -66,7 +66,7 @@ class FeatureMatchResultDialog(QDialog):
     def _ui_create_table(self):
         table = QTableWidget()
         table.setFixedWidth(300)
-        table.setFixedHeight(600)
+        table.setFixedHeight(700)
         table.setColumnCount(4)
         table.setRowCount(10)
         table.setHorizontalHeaderLabels(['Index', 'Method', 'Distance', 'Included'])
@@ -90,9 +90,9 @@ class FeatureMatchResultDialog(QDialog):
         return box
 
     def _ui_create_filters(self):
-        label_width = 80
+        label_width = 90
 
-        lbl_highlight = QLabel("Highlight Selected:")
+        lbl_highlight = QLabel("Highlight Selected")
         lbl_highlight.setFixedWidth(label_width)
         self._chk_highlight_selected = QCheckBox()
         self._chk_highlight_selected.setTristate(False)
