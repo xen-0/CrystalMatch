@@ -7,59 +7,85 @@ from dls_imagematch.util import Rectangle, Point
 
 
 class CrystalMatcher:
-    def __init__(self, config):
-        self._config = config
+    DEFAULT_REGION_SIZE = 50
+    DEFAULT_WIDTH = 200
+    DEFAULT_HEIGHT = 400
+    DEFAULT_TRANSLATION_ONLY = False
 
-    def match(self, aligned_images, selected_img1_points, region_size):
+    def __init__(self, aligned_images):
+        self._aligned_images = aligned_images
+        self._img1 = aligned_images.img1.to_mono()
+        self._img2 = aligned_images.img2.to_mono()
+        self._pixel_size = self._img1.pixel_size
 
-        img1 = aligned_images.img1.to_mono()
-        img2 = aligned_images.img2.to_mono()
-        pixel_size = img1.pixel_size
+        self._region_size_real = self.DEFAULT_REGION_SIZE
+        self._search_width_real = self.DEFAULT_WIDTH
+        self._search_height_real = self.DEFAULT_HEIGHT
+        self._translation_only = self.DEFAULT_TRANSLATION_ONLY
 
-        match_results = CrystalMatchResults(aligned_images)
+    def set_real_region_size(self, size):
+        self._region_size_real = size
 
-        for point in selected_img1_points:
-            img1_rect = self.make_target_region(point, region_size)
-            img2_rect = self.make_search_region(aligned_images, point)
+    def set_real_search_size(self, width, height):
+        self._search_width_real = width
+        self._search_height_real = height
 
-            matcher = BoundedFeatureMatcher(img1, img2, img1_rect, img2_rect)
-            result = SingleCrystalMatch(point, pixel_size)
-            self._perform_match(matcher, result)
+    def set_translation_only(self, translation_only):
+        self._translation_only = translation_only
+
+    def match(self, img1_points):
+        images = self._aligned_images
+        match_results = CrystalMatchResults(images)
+
+        for point in img1_points:
+            result = self._match_single_point(point)
             match_results.matches.append(result)
 
         return match_results
 
-    def make_target_region(self, center, region_size):
-        return Rectangle.from_center(center, region_size, region_size)
+    def _match_single_point(self, point):
+        img1_rect = self.make_target_region(point)
+        img2_rect = self.make_search_region(point)
 
-    def make_search_region(self, aligned_images, img1_point):
-        """ Define a rectangle on image B in which to search for the matching crystal. Its narrow and tall
-        as the crystal is likely to move downwards under the effect of gravity. """
-        pixel_size = aligned_images.img1.pixel_size
-        search_width, search_height = self._search_size(pixel_size)
+        feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, img1_rect, img2_rect)
+        result = SingleCrystalMatch(point, self._pixel_size)
+        self._perform_match(feature_matcher, result)
 
-        img2_point = img1_point - aligned_images.pixel_offset()
-        top_left = img2_point - Point(search_width/2, search_height/4)
-        rect = Rectangle.from_corner(top_left, search_width, search_height)
+        return result
 
-        rect = rect.intersection(aligned_images.img2.bounds())
-        return rect
-
-    def _search_size(self, pixel_size):
-        width = self._config.search_width.value() / pixel_size
-        height = self._config.search_height.value() / pixel_size
-        return width, height
-
-    def _perform_match(self, matcher, crystal_match):
-        translation_only = self._config.match_translation_only.value()
+    def _perform_match(self, feature_matcher, crystal_match):
         try:
-            matcher.set_detector("Consensus")
-            if translation_only:
-                result = matcher.match_translation_only()
+            feature_matcher.set_detector("Consensus")
+            if self._translation_only:
+                result = feature_matcher.match_translation_only()
             else:
-                result = matcher.match()
+                result = feature_matcher.match()
 
             crystal_match.set_feature_match_result(result)
         except FeatureMatchException:
             pass
 
+    def make_target_region(self, center):
+        size = self._region_size_pixels()
+        return Rectangle.from_center(center, size, size)
+
+    def make_search_region(self, img1_point):
+        """ Define a rectangle on image B in which to search for the matching crystal. Its narrow and tall
+        as the crystal is likely to move downwards under the effect of gravity. """
+        images = self._aligned_images
+        search_width, search_height = self._search_size_pixels()
+
+        img2_point = img1_point - images.pixel_offset()
+        top_left = img2_point - Point(search_width/2, search_height/4)
+        rect = Rectangle.from_corner(top_left, search_width, search_height)
+
+        rect = rect.intersection(images.img2.bounds())
+        return rect
+
+    def _region_size_pixels(self):
+        return self._region_size_real / self._pixel_size
+
+    def _search_size_pixels(self):
+        width = self._search_width_real / self._pixel_size
+        height = self._search_height_real / self._pixel_size
+        return width, height

@@ -25,7 +25,6 @@ class CrystalMatchControl(QGroupBox):
 
         self._results_frame = results_frame
 
-        self._matcher = CrystalMatcher(config)
         self._match_results = None
 
         self._aligned_images = None
@@ -149,18 +148,31 @@ class CrystalMatchControl(QGroupBox):
 
     def _fn_perform_match(self):
         selected_img1_points = self._selected_points
-        region_size = self._config.region_size.value()
 
-        self._perform_matching_task(self._aligned_images, selected_img1_points, region_size)
+        self._perform_matching_task(selected_img1_points)
         self._btn_locate.setEnabled(False)
 
-    def _perform_matching_task(self, aligned_images, selected_points, region_size):
+    def _perform_matching_task(self, selected_points):
+        matcher = self._create_crystal_matcher()
+
         progress = ProgressDialog("Crystal Matching In Progress")
-        match_task = _MatchTaskThread(self._matcher, aligned_images, selected_points, region_size)
+        match_task = _MatchTaskThread(matcher, selected_points)
         match_task.task_finished.connect(progress.on_finished)
         match_task.task_results.connect(self._display_results)
         match_task.start()
         progress.exec_()
+
+    def _create_crystal_matcher(self):
+        region_size = self._config.region_size.value()
+        search_width = self._config.search_width.value()
+        search_height = self._config.search_height.value()
+        translation_only = self._config.match_translation_only.value()
+
+        matcher = CrystalMatcher(self._aligned_images)
+        matcher.set_real_region_size(region_size)
+        matcher.set_real_search_size(search_width, search_height)
+        matcher.set_translation_only(translation_only)
+        return matcher
 
     ''' ----------------------
     SMALL IMAGE FUNCTIONS
@@ -216,8 +228,10 @@ class CrystalMatchControl(QGroupBox):
         img2 = self._aligned_images.img2.copy()
         color = self._config.color_search.value()
 
+        matcher = self._create_crystal_matcher()
+
         for point in self._selected_points:
-            img2_rect = self._matcher.make_search_region(self._aligned_images, point)
+            img2_rect = matcher.make_search_region(point)
             img2.draw_rectangle(img2_rect, color)
 
         status = "Ready for Crystal Matching"
@@ -282,14 +296,12 @@ class _MatchTaskThread(QThread):
     task_finished = QtCore.pyqtSignal()
     task_results = QtCore.pyqtSignal(object)
 
-    def __init__(self, matcher, aligned_images, selected_points, region_size):
+    def __init__(self, matcher, selected_points):
         super(_MatchTaskThread, self).__init__()
         self._matcher = matcher
-        self._aligned_images = aligned_images
         self._selected_points = selected_points
-        self._region_size = region_size
 
     def run(self):
-        match_results = self._matcher.match(self._aligned_images, self._selected_points, self._region_size)
+        match_results = self._matcher.match(self._selected_points)
         self.task_finished.emit()
         self.task_results.emit(match_results)
