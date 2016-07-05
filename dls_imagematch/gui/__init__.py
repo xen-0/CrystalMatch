@@ -1,5 +1,5 @@
 from .crystal.match_control import CrystalMatchControl
-from .crystal.point_select_dialog import PointSelectDialog
+from .crystal._point_select_dialog import PointSelectDialog
 from .image_frame import ImageFrame
 from .image_select import ImageSelector
 from .match_consensus_control import ConsensusMatchControl

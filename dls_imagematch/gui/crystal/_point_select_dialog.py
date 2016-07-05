@@ -15,14 +15,14 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    def __init__(self, max_size, aligned_images, max_points, config):
+    def __init__(self, max_size, aligned_images, max_points, region_size, select_color):
         super(SelectorFrame, self).__init__()
 
         self._max_points = max_points
 
         self._selected_points = []
-        self._rect_size = config.region_size.value()
-        self._rect_color = config.color_xtal_img1.value()
+        self._rect_size = region_size
+        self._rect_color = select_color
 
         # Load image from file
         self._aligned_images = aligned_images
@@ -98,14 +98,14 @@ class PointSelectDialog(QDialog):
     """ Dialog that displays the Region Selector Frame and stores the result so that it may be
     retrieved by the caller.
     """
-    def __init__(self, aligned_images, max_points, config):
-        super(PointSelectDialog, self).__init__()
-        self._init_ui(aligned_images, max_points, config)
+    def __init__(self, parent, aligned_images, max_points, region_size, select_color):
+        super(PointSelectDialog, self).__init__(parent)
+        self._init_ui(aligned_images, max_points, region_size, select_color)
 
-    def _init_ui(self, aligned_images, max_points, config):
+    def _init_ui(self, aligned_images, max_points, region_size, select_color):
         self.setWindowTitle('Select Region of Interest from Image A')
 
-        self._frame = SelectorFrame(1100, aligned_images, max_points, config)
+        self._frame = SelectorFrame(1100, aligned_images, max_points, region_size, select_color)
 
         dialog_btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,

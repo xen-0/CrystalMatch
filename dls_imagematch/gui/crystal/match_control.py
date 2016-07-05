@@ -5,7 +5,7 @@ from PyQt4.QtCore import Qt, QThread
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
 from ..progress_dialog import ProgressDialog
-from .point_select_dialog import PointSelectDialog
+from ._point_select_dialog import PointSelectDialog
 from .single_match_dialog import SingleCrystalDialog
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.util import Rectangle
@@ -130,7 +130,9 @@ class CrystalMatchControl(QGroupBox):
     def _get_points_from_user_selection(self):
         """ Display a dialog and return the result to the caller. """
         max_points = self.NUM_FRAMES
-        dialog = PointSelectDialog(self._aligned_images, max_points, self._config)
+        size = self._config.region_size.value()
+        color = self._config.color_xtal_img1.value()
+        dialog = PointSelectDialog(self, self._aligned_images, max_points, size, color)
         result_ok = dialog.exec_()
 
         points = []
@@ -204,7 +206,7 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is not None and self._match_results.num() > index:
             result = self._match_results.get_match(index)
 
-            dialog = SingleCrystalDialog(self._aligned_images, result.feature_matches())
+            dialog = SingleCrystalDialog(self._aligned_images, result.feature_matches(), self._config)
             dialog.exec_()
 
     ''' ----------------------

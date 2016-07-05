@@ -1,23 +1,24 @@
+from __future__ import division
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget, QCheckBox, QGroupBox, QComboBox
+from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget, QCheckBox, QGroupBox, QComboBox
 
 
-class FeatureMatchResultDialog(QDialog):
+class FeatureMatchDetailPane(QWidget):
     ALL = "All"
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
 
     def __init__(self, match_result):
-        super(FeatureMatchResultDialog, self).__init__()
+        super(FeatureMatchDetailPane, self).__init__()
 
-        self._match_result = match_result
-
-        self._matches = match_result.matches
-        self._filtered_matches = self._matches
+        self._match_result = None
+        self._matches = []
+        self._filtered_matches = []
         self._selected_matches = []
 
+        # UI elements
         self._frame = None
         self._table = None
         self._cmbo_include = None
@@ -25,9 +26,7 @@ class FeatureMatchResultDialog(QDialog):
 
         self._init_ui()
 
-        self._ui_populate_method_dropdown(match_result)
-
-        self._changed_filters()
+        self.set_match_result(match_result)
 
     def _init_ui(self):
         self.setWindowTitle('Feature Match Result')
@@ -149,6 +148,15 @@ class FeatureMatchResultDialog(QDialog):
         self._cmbo_methods.addItem("{} ({})".format(self.ALL, len(matches)), self.ALL)
         for key, value in methods.iteritems():
             self._cmbo_methods.addItem("{} ({})".format(key, value), key)
+
+    def set_match_result(self, match_result):
+        self._match_result = match_result
+        self._matches = match_result.matches
+        self._filtered_matches = self._matches
+        self._selected_matches = []
+
+        self._ui_populate_method_dropdown(match_result)
+        self._changed_filters()
 
     def _changed_filters(self):
         self._update_selected_matches()
