@@ -145,6 +145,7 @@ class FeatureMatchDetailPane(QWidget):
             else:
                 methods[key] = 1
 
+        self._cmbo_methods.clear()
         self._cmbo_methods.addItem("{} ({})".format(self.ALL, len(matches)), self.ALL)
         for key, value in methods.iteritems():
             self._cmbo_methods.addItem("{} ({})".format(key, value), key)
