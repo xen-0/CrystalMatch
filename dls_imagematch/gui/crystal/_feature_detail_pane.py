@@ -10,10 +10,10 @@ class FeatureMatchDetailPane(QWidget):
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
 
-    def __init__(self, match_result):
+    def __init__(self, feature_match):
         super(FeatureMatchDetailPane, self).__init__()
 
-        self._match_result = None
+        self._feature_match = None
         self._matches = []
         self._filtered_matches = []
         self._selected_matches = []
@@ -26,7 +26,7 @@ class FeatureMatchDetailPane(QWidget):
 
         self._init_ui()
 
-        self.set_match_result(match_result)
+        self.set_feature_match(feature_match)
 
     def _init_ui(self):
         self.setWindowTitle('Feature Match Result')
@@ -134,8 +134,8 @@ class FeatureMatchDetailPane(QWidget):
 
         return box
 
-    def _ui_populate_method_dropdown(self, match_result):
-        matches = match_result.matches
+    def _ui_populate_method_dropdown(self, feature_match):
+        matches = feature_match.matches
         methods = {}
 
         for match in matches:
@@ -149,13 +149,13 @@ class FeatureMatchDetailPane(QWidget):
         for key, value in methods.iteritems():
             self._cmbo_methods.addItem("{} ({})".format(key, value), key)
 
-    def set_match_result(self, match_result):
-        self._match_result = match_result
-        self._matches = match_result.matches
+    def set_feature_match(self, feature_match):
+        self._feature_match = feature_match
+        self._matches = feature_match.matches
         self._filtered_matches = self._matches
         self._selected_matches = []
 
-        self._ui_populate_method_dropdown(match_result)
+        self._ui_populate_method_dropdown(feature_match)
         self._changed_filters()
 
     def _changed_filters(self):
@@ -171,7 +171,7 @@ class FeatureMatchDetailPane(QWidget):
 
     def _update_image(self):
         highlighted = self._get_highlighted_matches()
-        image = self._match_result.matches_image(self._filtered_matches, highlighted)
+        image = self._feature_match.matches_image(self._filtered_matches, highlighted)
 
         pixmap = image.to_qt_pixmap(self._frame.size())
         self._frame.setPixmap(pixmap)
@@ -203,7 +203,7 @@ class FeatureMatchDetailPane(QWidget):
                 self._table.setItemSelected(table_item, True)
 
     def _update_filtered_matches(self):
-        matches = self._match_result.matches
+        matches = self._feature_match.matches
         matches = self._filter_matches_by_include(matches)
         matches = self._filter_matches_by_method(matches)
         self._filtered_matches = matches

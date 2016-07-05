@@ -1,9 +1,6 @@
 from __future__ import division
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget, QCheckBox, QGroupBox, QComboBox, \
-    QPushButton, QMessageBox, QLineEdit
+from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
 
 from _feature_detail_pane import FeatureMatchDetailPane
 from _point_select_dialog import PointSelectDialog
@@ -11,13 +8,13 @@ from _point_select_dialog import PointSelectDialog
 
 class SingleCrystalDialog(QDialog):
 
-    def __init__(self, aligned_images, match_result, config):
+    def __init__(self, aligned_images, feature_match, config):
         super(SingleCrystalDialog, self).__init__()
 
         self._config = config
 
         self._aligned_images = aligned_images
-        self._match_result = match_result
+        self._match_result = feature_match
 
         # UI elements
         self._details_pane = None
@@ -25,13 +22,13 @@ class SingleCrystalDialog(QDialog):
         self.hbox_search_w = None
         self.hbox_search_h = None
 
-        self._init_ui(match_result)
+        self._init_ui(feature_match)
 
-    def _init_ui(self, match_result):
+    def _init_ui(self, feature_match):
         self.setWindowTitle('Feature Match Result')
 
         select_controls = self._ui_controls()
-        self._details_pane = FeatureMatchDetailPane(match_result)
+        self._details_pane = FeatureMatchDetailPane(feature_match)
 
         hbox = QHBoxLayout()
         hbox.addWidget(select_controls)
