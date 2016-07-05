@@ -6,7 +6,7 @@ from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel
 
 from ..progress_dialog import ProgressDialog
 from .point_select_dialog import PointSelectDialog
-from .match_result_dialog import FeatureMatchResultDialog
+from .single_match_dialog import SingleCrystalDialog
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.util import Rectangle
 
@@ -204,7 +204,7 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is not None and self._match_results.num() > index:
             result = self._match_results.get_match(index)
 
-            dialog = FeatureMatchResultDialog(result.feature_matches())
+            dialog = SingleCrystalDialog(self._aligned_images, result.feature_matches())
             dialog.exec_()
 
     ''' ----------------------

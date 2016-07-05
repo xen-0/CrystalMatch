@@ -4,14 +4,15 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget, QCheckBox, QGroupBox, QComboBox
 
 
-class FeatureMatchResultDialog(QDialog):
+class SingleCrystalDialog(QDialog):
     ALL = "All"
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
 
-    def __init__(self, match_result):
-        super(FeatureMatchResultDialog, self).__init__()
+    def __init__(self, aligned_images, match_result):
+        super(SingleCrystalDialog, self).__init__()
 
+        self._aligned_images = aligned_images
         self._match_result = match_result
 
         self._matches = match_result.matches
