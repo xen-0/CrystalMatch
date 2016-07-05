@@ -15,8 +15,10 @@ class SelectorFrame(QLabel):
     display a different image. The frame only allows selection of single rectangle at a time. Drawing
     another rectangle will replace the first one.
     """
-    def __init__(self, max_size, aligned_images, config):
+    def __init__(self, max_size, aligned_images, max_points, config):
         super(SelectorFrame, self).__init__()
+
+        self._max_points = max_points
 
         self._selected_points = []
         self._rect_size = config.region_size.value()
@@ -67,6 +69,8 @@ class SelectorFrame(QLabel):
 
     def _add_point(self, point):
         self._selected_points.append(point)
+        if len(self._selected_points) > self._max_points:
+            self._selected_points = self._selected_points[-self._max_points:]
         self._refresh_image()
 
     def _refresh_image(self):
@@ -94,14 +98,14 @@ class PointSelectDialog(QDialog):
     """ Dialog that displays the Region Selector Frame and stores the result so that it may be
     retrieved by the caller.
     """
-    def __init__(self, aligned_images, config):
+    def __init__(self, aligned_images, max_points, config):
         super(PointSelectDialog, self).__init__()
-        self._init_ui(aligned_images, config)
+        self._init_ui(aligned_images, max_points, config)
 
-    def _init_ui(self, aligned_images, config):
+    def _init_ui(self, aligned_images, max_points, config):
         self.setWindowTitle('Select Region of Interest from Image A')
 
-        self._frame = SelectorFrame(1100, aligned_images, config)
+        self._frame = SelectorFrame(1100, aligned_images, max_points, config)
 
         dialog_btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
@@ -125,15 +129,3 @@ class PointSelectDialog(QDialog):
 
     def selected_points(self):
         return self._frame.get_points()
-
-    @staticmethod
-    def get_points(filename, config):
-        """ Display a dialog and return the result to the caller. """
-        dialog = PointSelectDialog(filename, config)
-        result_ok = dialog.exec_()
-
-        points = []
-        if result_ok:
-            points = dialog.selected_points()
-
-        return points
