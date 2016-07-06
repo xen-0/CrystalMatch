@@ -1,12 +1,8 @@
 from __future__ import division
 
 import cv2
-import numpy as np
-from itertools import izip
 
-from dls_imagematch.util import Point
-from dls_imagematch.match.transformation import Transformation
-from dls_imagematch.match.translation import Translation
+from .homography import MatchHomographyCalculator
 from .match_result import FeatureMatchResult
 
 from .exception import FeatureMatchException
@@ -27,7 +23,6 @@ class FeatureMatcher:
     """
     _MIN_MATCHES = 1
     _MAX_MATCHES = 200
-    _MIN_HOMOGRAPHY_MATCHES = 4
 
     def __init__(self, img1, img2):
         """ Feature Matching between two images. If rectangular regions are provided, the routine will
@@ -40,19 +35,14 @@ class FeatureMatcher:
     def set_detector(self, method, adaptation=""):
         self._detector = FeatureDetector(method, adaptation)
 
-    def match(self):
+    def match(self, translation_only=False):
         matches = self._find_matches()
-        if self._has_enough_matches_for_full_transform(matches):
-            transform = self._calculate_full_transform(matches)
-        else:
-            transform = self._calculate_translation_only_transform(matches)
-
+        homography = MatchHomographyCalculator()
+        transform = homography.calculate_transform(matches, translation_only)
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
-        matches = self._find_matches()
-        transform = self._calculate_translation_only_transform(matches)
-        return self._create_result_object(matches, transform)
+        return self.match(translation_only=True)
 
     def _create_result_object(self, matches, transform):
         result = FeatureMatchResult(self.img1, self.img2, matches, transform)
@@ -106,51 +96,6 @@ class FeatureMatcher:
         top_matches = sorted(matches, key=lambda x: x.distance)[:self._MAX_MATCHES]
 
         return top_matches
-
-    def _calculate_full_transform(self, matches):
-        homography = self._calculate_homography(matches)
-        return Transformation(homography)
-
-    def _calculate_translation_only_transform(self, matches):
-        translation = self._calculate_median_translation(matches)
-        return Translation(translation)
-
-    def _calculate_median_translation(self, matches):
-        """ For a set of feature matches between two images, find the average (median) translation that maps
-        one image to the other. """
-        deltas = [m.point2() - m.point1() for m in matches]
-        x = -np.median([d.x for d in deltas])
-        y = -np.median([d.y for d in deltas])
-
-        return Point(x, y)
-
-    def _calculate_homography(self, matches):
-        """ See:
-        http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
-
-        The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
-        inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
-        there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
-        use the default method (method=0).
-        """
-        homography = None
-
-        if self._has_enough_matches_for_full_transform(matches):
-            img1_pts = [m.point1().tuple() for m in matches]
-            img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
-            img2_pts = [m.point2().tuple() for m in matches]
-            img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
-
-            homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
-
-            for match, mask in izip(matches, mask):
-                if not mask:
-                    match.remove_from_transformation()
-
-        return homography
-
-    def _has_enough_matches_for_full_transform(self, matches):
-        return len(matches) >= self._MIN_HOMOGRAPHY_MATCHES
 
     def _has_minimum_number_of_matches(self, matches):
         return len(matches) >= self._MIN_MATCHES
