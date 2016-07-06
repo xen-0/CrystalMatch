@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QTableWidget, QCheckBox, QGroupBox, QComboBox
 
@@ -9,6 +9,8 @@ class FeatureMatchDetailPane(QWidget):
     ALL = "All"
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
+
+    signal_image_change = QtCore.pyqtSignal(object)
 
     def __init__(self, feature_match):
         super(FeatureMatchDetailPane, self).__init__()
@@ -19,7 +21,6 @@ class FeatureMatchDetailPane(QWidget):
         self._selected_matches = []
 
         # UI elements
-        self._frame = None
         self._table = None
         self._cmbo_include = None
         self._cmbo_methods = None
@@ -29,9 +30,6 @@ class FeatureMatchDetailPane(QWidget):
         self.set_feature_match(feature_match)
 
     def _init_ui(self):
-        self.setWindowTitle('Feature Match Result')
-
-        frame = self._ui_create_frame()
         table = self._ui_create_table()
         filters = self._ui_create_filters()
 
@@ -40,24 +38,7 @@ class FeatureMatchDetailPane(QWidget):
         vbox_table.addWidget(table)
         vbox_table.addStretch(1)
 
-        hbox = QHBoxLayout()
-        hbox.addLayout(vbox_table)
-        hbox.addWidget(frame)
-        hbox.addStretch()
-
-        self.setLayout(hbox)
-
-    def _ui_create_frame(self):
-        self._frame = QLabel()
-        self._frame.setFixedSize(800, 800)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(self._frame)
-        vbox.addStretch(1)
-
-        box = QGroupBox("Match Image")
-        box.setLayout(vbox)
-        return box
+        self.setLayout(vbox_table)
 
     def _ui_create_table(self):
         table = QTableWidget()
@@ -173,9 +154,7 @@ class FeatureMatchDetailPane(QWidget):
     def _update_image(self):
         highlighted = self._get_highlighted_matches()
         image = self._feature_match.matches_image(self._filtered_matches, highlighted)
-
-        pixmap = image.to_qt_pixmap(self._frame.size())
-        self._frame.setPixmap(pixmap)
+        self.signal_image_change.emit(image)
 
     def _update_table(self):
         matches = self._filtered_matches
