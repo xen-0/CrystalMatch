@@ -3,10 +3,10 @@ from __future__ import division
 import cv2
 
 from .homography import MatchHomographyCalculator
-from .match_result import FeatureMatchResult
+from .result import FeatureMatchResult
 
 from .exception import FeatureMatchException
-from ._single_match import SingleFeatureMatch
+from .match import SingleFeatureMatch
 from .detector import FeatureDetector
 
 
@@ -80,7 +80,7 @@ class FeatureMatcher:
         return matches
 
     def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
-        matches = SingleFeatureMatch.matches_from_raw(raw_matches, keypoints1, keypoints2, method)
+        matches = SingleFeatureMatch.from_cv2_matches(raw_matches, keypoints1, keypoints2, method)
         return matches
 
     def _brute_force_match(self, method, descriptors_1, descriptors_2):
