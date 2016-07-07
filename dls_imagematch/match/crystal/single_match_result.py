@@ -56,8 +56,5 @@ class SingleCrystalMatch:
         trans = feature_result.transform
         self._img2_point = trans.transform_points([self._img1_point])[0]
 
-    def matches_image(self):
-        return self._feature_result.matches_image()
-
     def feature_matches(self):
         return self._feature_result
