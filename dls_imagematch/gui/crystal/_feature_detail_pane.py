@@ -10,9 +10,10 @@ class FeatureMatchDetailPane(QWidget):
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
 
-    signal_image_change = QtCore.pyqtSignal(object)
+    signal_matches_selected = QtCore.pyqtSignal(object)
+    signal_matches_filtered = QtCore.pyqtSignal(object)
 
-    def __init__(self, feature_match):
+    def __init__(self):
         super(FeatureMatchDetailPane, self).__init__()
 
         self._feature_match = None
@@ -26,8 +27,6 @@ class FeatureMatchDetailPane(QWidget):
         self._cmbo_methods = None
 
         self._init_ui()
-
-        self.set_feature_match(feature_match)
 
     def _init_ui(self):
         table = self._ui_create_table()
@@ -115,8 +114,36 @@ class FeatureMatchDetailPane(QWidget):
 
         return box
 
-    def _ui_populate_method_dropdown(self, feature_match):
-        matches = feature_match.matches
+    def set_feature_match(self, feature_match):
+        self._feature_match = feature_match
+        self._matches = feature_match.matches
+        self._filtered_matches = self._matches
+        self._selected_matches = []
+
+        self._update_method_dropdown(self._matches)
+        self._changed_filters()
+
+    def clear_all(self):
+        self._feature_match = None
+        self._matches = []
+        self._filtered_matches = []
+        self._selected_matches = []
+
+        self._update_method_dropdown(self._matches)
+        self._changed_filters()
+
+    def _changed_filters(self):
+        self._update_selected_matches()
+        self._update_filtered_matches()
+
+        self._update_table()
+        self.signal_matches_filtered.emit(self._filtered_matches)
+
+    def _changed_selection(self):
+        self._update_selected_matches()
+        self.signal_matches_selected.emit(self._selected_matches)
+
+    def _update_method_dropdown(self, matches):
         methods = {}
 
         for match in matches:
@@ -130,31 +157,6 @@ class FeatureMatchDetailPane(QWidget):
         self._cmbo_methods.addItem("{} ({})".format(self.ALL, len(matches)), self.ALL)
         for key, value in methods.iteritems():
             self._cmbo_methods.addItem("{} ({})".format(key, value), key)
-
-    def set_feature_match(self, feature_match):
-        self._feature_match = feature_match
-        self._matches = feature_match.matches
-        self._filtered_matches = self._matches
-        self._selected_matches = []
-
-        self._ui_populate_method_dropdown(feature_match)
-        self._changed_filters()
-
-    def _changed_filters(self):
-        self._update_selected_matches()
-        self._update_filtered_matches()
-
-        self._update_table()
-        self._update_image()
-
-    def _changed_selection(self):
-        self._update_selected_matches()
-        self._update_image()
-
-    def _update_image(self):
-        highlighted = self._get_highlighted_matches()
-        image = self._feature_match.matches_image(self._filtered_matches, highlighted)
-        self.signal_image_change.emit(image)
 
     def _update_table(self):
         matches = self._filtered_matches
@@ -183,7 +185,7 @@ class FeatureMatchDetailPane(QWidget):
                 self._table.setItemSelected(table_item, True)
 
     def _update_filtered_matches(self):
-        matches = self._feature_match.matches
+        matches = self._matches
         matches = self._filter_matches_by_include(matches)
         matches = self._filter_matches_by_method(matches)
         self._filtered_matches = matches

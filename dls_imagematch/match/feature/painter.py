@@ -39,6 +39,9 @@ class FeaturePainter:
         self._create_background_image()
 
     # -------- FUNCTIONALITY -------------------
+    def background_image(self):
+        return self._background_image
+
     def _create_background_image(self):
         self._calculate_image_positions()
 

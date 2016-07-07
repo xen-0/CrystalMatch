@@ -2,14 +2,19 @@ from __future__ import division
 
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox
 
+from dls_imagematch.match.feature import FeaturePainter
+
 
 class FeatureMatchDetailFrame(QWidget):
 
     def __init__(self):
         super(FeatureMatchDetailFrame, self).__init__()
 
-        # UI elements
         self._frame = None
+
+        self._painter = None
+        self._matches = []
+        self._highlighted_matches = []
 
         self._init_ui()
 
@@ -34,7 +39,27 @@ class FeatureMatchDetailFrame(QWidget):
         box.setLayout(vbox)
         return box
 
-    def display_image(self, image):
+    def set_new_images(self, img1, img2):
+        self._matches = []
+        self._highlighted_matches = []
+
+        self._painter = FeaturePainter(img1, img2)
+        background_image = self._painter.background_image()
+        self._display_image(background_image)
+
+    def display_matches(self, matches):
+        self._matches = matches
+        self._update_image()
+
+    def display_highlights(self, highlights):
+        self._highlighted_matches = highlights
+        self._update_image()
+
+    def _update_image(self):
+        image = self._painter.draw_matches(self._matches, self._highlighted_matches)
+        self._display_image(image)
+
+    def _display_image(self, image):
         pixmap = image.to_qt_pixmap(self._frame.size())
         self._frame.setPixmap(pixmap)
 
