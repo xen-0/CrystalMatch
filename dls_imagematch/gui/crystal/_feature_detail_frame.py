@@ -73,11 +73,11 @@ class FeatureMatchDetailFrame(QWidget):
             return
 
         image = self._painter.background_image()
+        image = self._painter.draw_matches(self._matches, self._highlighted_matches, image)
 
         if self._img1_point is not None and self._img2_point is not None:
             image = self._painter.draw_transform_points(self._img1_point, self._img2_point, image)
 
-        image = self._painter.draw_matches(self._matches, self._highlighted_matches, image)
         self._display_image(image)
 
     def _display_image(self, image):

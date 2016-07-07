@@ -13,7 +13,7 @@ from dls_imagematch.match import CrystalMatcher
 class SingleCrystalDialog(QDialog):
     LABEL_WIDTH = 100
 
-    def __init__(self, aligned_images, crystal_match, config):
+    def __init__(self, aligned_images, selected_point, config):
         super(SingleCrystalDialog, self).__init__()
 
         self._config = config
@@ -29,10 +29,9 @@ class SingleCrystalDialog(QDialog):
 
         self._init_ui()
 
-        if crystal_match is not None:
-            feature_match = crystal_match.feature_matches()
-            self._set_feature_match_result(feature_match)
-            self._set_point_value(crystal_match.img1_point())
+        if selected_point is not None:
+            self._set_point_value(selected_point)
+            self._fn_perform_match()
 
     def _init_ui(self):
         self.setWindowTitle('Single Crystal Matching')
@@ -167,7 +166,7 @@ class SingleCrystalDialog(QDialog):
         crystal_match = results.get_match(0)
         feature_match = crystal_match.feature_matches()
         self._set_feature_match_result(feature_match)
-        self._set_transform_points(crystal_match)
+        self._set_transform_points(crystal_match, matcher)
 
     def _create_crystal_matcher(self):
         region_size = self._region_size()
@@ -186,9 +185,10 @@ class SingleCrystalDialog(QDialog):
         self._details_pane.set_feature_match(feature_match)
         self._details_pane.set_enabled(True)
 
-    def _set_transform_points(self, crystal_match):
-        pass
-        #self._frame.display_points(crystal_match.img1_point(), crystal_match.img2_point())
+    def _set_transform_points(self, crystal_match, matcher):
+        point1 = crystal_match.img1_point() - matcher.make_target_region(self._point).top_left()
+        point2 = crystal_match.img2_point() - matcher.make_search_region(self._point).top_left()
+        self._frame.display_points(point1, point2)
 
     # ----- INTERNAL ACCESSORS -------------
     def _set_point_value(self, point):

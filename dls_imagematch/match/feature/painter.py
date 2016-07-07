@@ -90,8 +90,8 @@ class FeaturePainter:
         point2 = self._point_to_img_coords(img2_point, 2)
         print(point1, point2)
 
-        img.draw_cross(point1, Color.Yellow(), size=10, thickness=2)
-        img.draw_cross(point2, Color.Yellow(), size=10, thickness=2)
+        img.draw_cross(point1, Color.Green(), size=10, thickness=2)
+        img.draw_cross(point2, Color.Green(), size=10, thickness=2)
 
         return img
 

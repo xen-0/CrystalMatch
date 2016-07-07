@@ -221,11 +221,11 @@ class CrystalMatchControl(QGroupBox):
             return
 
         if self._match_results is None or self._match_results.num() <= index:
-            result = None
+            point = None
         else:
-            result = self._match_results.get_match(index)
+            point = self._match_results.get_match(index).img1_point()
 
-        dialog = SingleCrystalDialog(self._aligned_images, result, self._config)
+        dialog = SingleCrystalDialog(self._aligned_images, point, self._config)
         dialog.exec_()
 
     ''' ----------------------
