@@ -152,7 +152,6 @@ class FeatureMatchDetailPane(QWidget):
         self.signal_matches_filtered.emit(self._filtered_matches)
 
     def _changed_selection(self):
-        print("--Changed Selection")
         self._update_selected_matches()
         self.signal_matches_selected.emit(self._selected_matches)
 

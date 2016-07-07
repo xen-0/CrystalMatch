@@ -97,7 +97,6 @@ class CrystalMatchControl(QGroupBox):
 
     def _ui_make_show_matches_button(self, i):
         btn = QPushButton("Matches")
-        btn.setEnabled(False)
         btn.setFixedWidth(self.FRAME_SIZE)
         btn.clicked.connect(lambda: self._show_matches_dialog(i))
         return btn
@@ -119,12 +118,15 @@ class CrystalMatchControl(QGroupBox):
     def _fn_select_points(self):
         """ For a completed primary matching procedure, select a sub-region (feature) to track. """
         if self._aligned_images is None:
-            QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
+            self._show_perform_alignment_message()
             return
 
         result_ok, points = self._get_points_from_user_selection()
         if result_ok:
             self._set_selected_points(points)
+
+    def _show_perform_alignment_message(self):
+        QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
 
     def _get_points_from_user_selection(self):
         """ Display a dialog and return the result to the caller. """
@@ -183,7 +185,6 @@ class CrystalMatchControl(QGroupBox):
         for i in range(self.NUM_FRAMES):
             self._clear_frame(self._frames1[i], i, color1)
             self._clear_frame(self._frames2[i], i, color2)
-            self._show_matches_btns[i].setEnabled(False)
 
     def _clear_frame(self, frame, number, color_hex):
         frame.clear()
@@ -215,11 +216,17 @@ class CrystalMatchControl(QGroupBox):
         frame.setPixmap(pixmap)
 
     def _show_matches_dialog(self, index):
-        if self._match_results is not None and self._match_results.num() > index:
-            result = self._match_results.get_match(index)
+        if self._aligned_images is None:
+            self._show_perform_alignment_message()
+            return
 
-            dialog = SingleCrystalDialog(self._aligned_images, result.feature_matches(), self._config)
-            dialog.exec_()
+        if self._match_results is None or self._match_results.num() <= index:
+            result = None
+        else:
+            result = self._match_results.get_match(index).feature_matches()
+
+        dialog = SingleCrystalDialog(self._aligned_images, result, self._config)
+        dialog.exec_()
 
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
@@ -287,7 +294,6 @@ class CrystalMatchControl(QGroupBox):
                 img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
                 img.draw_cross(img.bounds().center(), color=color2, thickness=1)
                 self._display_image_in_frame(img, 2, i)
-                self._show_matches_btns[i].setEnabled(True)
 
         self._results_frame.display_image(img2)
 

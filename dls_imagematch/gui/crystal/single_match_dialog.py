@@ -27,7 +27,9 @@ class SingleCrystalDialog(QDialog):
         self.hbox_search_h = None
 
         self._init_ui()
-        self._set_feature_match_result(feature_match)
+
+        if feature_match is not None:
+            self._set_feature_match_result(feature_match)
 
     def _init_ui(self):
         self.setWindowTitle('Single Crystal Matching')
@@ -35,6 +37,7 @@ class SingleCrystalDialog(QDialog):
         select_controls = self._ui_create_search()
         match_controls = self._ui_create_match()
         self._details_pane = FeatureMatchDetailPane()
+        self._details_pane.set_enabled(False)
         self._frame = FeatureMatchDetailFrame()
 
         self._details_pane.signal_matches_filtered.connect(self._frame.display_matches)
