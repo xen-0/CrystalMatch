@@ -86,12 +86,13 @@ class FeaturePainter:
         if img is None:
             img = self._background_image.copy()
 
-        point1 = self._point_to_img_coords(img1_point, 1)
-        point2 = self._point_to_img_coords(img2_point, 2)
-        print(point1, point2)
+        if img1_point is not None:
+            point1 = self._point_to_img_coords(img1_point, 1)
+            img.draw_cross(point1, Color.Green(), size=10, thickness=2)
 
-        img.draw_cross(point1, Color.Green(), size=10, thickness=2)
-        img.draw_cross(point2, Color.Green(), size=10, thickness=2)
+        if img2_point is not None:
+            point2 = self._point_to_img_coords(img2_point, 2)
+            img.draw_cross(point2, Color.Green(), size=10, thickness=2)
 
         return img
 

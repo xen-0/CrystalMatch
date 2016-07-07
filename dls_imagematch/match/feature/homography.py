@@ -15,16 +15,19 @@ class MatchHomographyCalculator:
     def __init__(self):
         pass
 
-    def calculate_transform(self, matches, translation_only=False):
+    def calculate_transform(self, matches, translation_only=False, mark_unused=True):
         can_do_transform = self._has_enough_matches_for_full_transform(matches)
 
         if translation_only or not can_do_transform:
             transform = self._calculate_median_translation(matches)
         else:
-            homography = self._calculate_homography(matches)
+            homography, mask = self._calculate_homography(matches)
             transform = Transformation(homography)
+            if mark_unused:
+                self._mark_unused_matches(matches, mask)
 
         return transform
+
 
     @staticmethod
     def _calculate_median_translation(matches):
@@ -55,9 +58,8 @@ class MatchHomographyCalculator:
             img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
 
             homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
-            self._mark_unused_matches(matches, mask)
 
-        return homography
+        return homography, mask
 
     def _has_enough_matches_for_full_transform(self, matches):
         return len(matches) >= self._MIN_HOMOGRAPHY_MATCHES

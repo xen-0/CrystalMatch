@@ -8,6 +8,7 @@ from _feature_detail_frame import FeatureMatchDetailFrame
 from _point_select_dialog import PointSelectDialog
 
 from dls_imagematch.match import CrystalMatcher
+from dls_imagematch.match.feature import MatchHomographyCalculator
 
 
 class SingleCrystalDialog(QDialog):
@@ -43,6 +44,7 @@ class SingleCrystalDialog(QDialog):
 
         self._details_pane.signal_matches_filtered.connect(self._frame.display_matches)
         self._details_pane.signal_matches_selected.connect(self._frame.display_highlights)
+        self._details_pane.signal_matches_filtered.connect(self._set_transform_points_from_filtered_matches)
 
         vbox = QVBoxLayout()
         vbox.addWidget(match_controls)
@@ -161,12 +163,12 @@ class SingleCrystalDialog(QDialog):
                 self._set_point_value(points[0])
 
     def _fn_perform_match(self):
-        matcher = self._create_crystal_matcher()
-        results = matcher.match([self._point])
+        self._matcher = self._create_crystal_matcher()
+        results = self._matcher.match([self._point])
         crystal_match = results.get_match(0)
         feature_match = crystal_match.feature_matches()
         self._set_feature_match_result(feature_match)
-        self._set_transform_points(crystal_match, matcher)
+        self._set_transform_points_from_match(crystal_match)
 
     def _create_crystal_matcher(self):
         region_size = self._region_size()
@@ -185,9 +187,22 @@ class SingleCrystalDialog(QDialog):
         self._details_pane.set_feature_match(feature_match)
         self._details_pane.set_enabled(True)
 
-    def _set_transform_points(self, crystal_match, matcher):
-        point1 = crystal_match.img1_point() - matcher.make_target_region(self._point).top_left()
-        point2 = crystal_match.img2_point() - matcher.make_search_region(self._point).top_left()
+    def _set_transform_points_from_match(self, crystal_match):
+        point1 = crystal_match.img1_point() - self._matcher.make_target_region(self._point).top_left()
+        point2 = crystal_match.img2_point() - self._matcher.make_search_region(self._point).top_left()
+        self._frame.display_points(point1, point2)
+
+    def _set_transform_points_from_filtered_matches(self, matches):
+        point1 = self._point - self._matcher.make_target_region(self._point).top_left()
+        point2 = None
+
+        good_matches = [mat for mat in matches if mat.is_in_transformation()]
+        if len(good_matches) > 0:
+            homo = MatchHomographyCalculator()
+            transform = homo.calculate_transform(good_matches, translation_only=False, mark_unused=False)
+            transformed_point = transform.transform_points([self._point])[0]
+            point2 = transformed_point - self._matcher.make_search_region(self._point).top_left()
+
         self._frame.display_points(point1, point2)
 
     # ----- INTERNAL ACCESSORS -------------
