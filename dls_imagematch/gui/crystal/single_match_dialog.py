@@ -1,6 +1,7 @@
 from __future__ import division
 
-from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit, QCheckBox
+from PyQt4 import QtCore
+from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit, QCheckBox, QSlider
 
 from _feature_detail_pane import FeatureMatchDetailPane
 from _feature_detail_frame import FeatureMatchDetailFrame
@@ -12,7 +13,7 @@ from dls_imagematch.match import CrystalMatcher
 class SingleCrystalDialog(QDialog):
     LABEL_WIDTH = 100
 
-    def __init__(self, aligned_images, feature_match, config):
+    def __init__(self, aligned_images, crystal_match, config):
         super(SingleCrystalDialog, self).__init__()
 
         self._config = config
@@ -22,20 +23,21 @@ class SingleCrystalDialog(QDialog):
         # UI elements
         self._details_pane = None
         self._frame = None
-        self._txt_region_size = None
+        self._slider_region_size = None
         self.hbox_search_w = None
         self.hbox_search_h = None
 
         self._init_ui()
 
-        if feature_match is not None:
+        if crystal_match is not None:
+            feature_match = crystal_match.feature_matches()
             self._set_feature_match_result(feature_match)
+            self._set_point_value(crystal_match.img1_point())
 
     def _init_ui(self):
         self.setWindowTitle('Single Crystal Matching')
 
-        select_controls = self._ui_create_search()
-        match_controls = self._ui_create_match()
+        match_controls = self._ui_create_search()
         self._details_pane = FeatureMatchDetailPane()
         self._details_pane.set_enabled(False)
         self._frame = FeatureMatchDetailFrame()
@@ -44,7 +46,6 @@ class SingleCrystalDialog(QDialog):
         self._details_pane.signal_matches_selected.connect(self._frame.display_highlights)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(select_controls)
         vbox.addWidget(match_controls)
         vbox.addStretch(1)
 
@@ -57,31 +58,33 @@ class SingleCrystalDialog(QDialog):
         self.setLayout(hbox)
 
     def _ui_create_search(self):
-        grp_box = QGroupBox("Select Crystal")
+        grp_box = QGroupBox("Perform Crystal Matching")
 
-        btn_select_point = QPushButton("Select Crystal")
+        lbl_select_point = QLabel("Selected Point")
+        lbl_select_point.setFixedWidth(self.LABEL_WIDTH)
+
+        self._txt_point = QLineEdit()
+        self._txt_point.setFixedWidth(200)
+        self._txt_point.setEnabled(False)
+
+        btn_select_point = QPushButton("Select")
         btn_select_point.clicked.connect(self._fn_select_crystal_point)
-        btn_select_point.setFixedWidth(80)
+        btn_select_point.setFixedWidth(50)
 
-        region_size = str(self._config.region_size.value())
-        self._txt_region_size, hbox_region = self._ui_txt_box("Region Size", region_size)
+        hbox_select = QHBoxLayout()
+        hbox_select.addWidget(lbl_select_point)
+        hbox_select.addWidget(self._txt_point)
+        hbox_select.addWidget(btn_select_point)
+        hbox_select.addStretch(1)
 
-        vbox = QVBoxLayout()
-        vbox.addLayout(hbox_region)
-        vbox.addWidget(btn_select_point)
-        vbox.addStretch()
+        region_size = self._config.region_size.value()
+        self._slider_region_size, hbox_region = self._ui_slider("Region Size", region_size, 20, 150)
 
-        grp_box.setLayout(vbox)
-        return grp_box
+        search_width = self._config.search_width.value()
+        self._slider_search_width, hbox_search_w = self._ui_slider("Search Width", search_width, 100, 500)
 
-    def _ui_create_match(self):
-        grp_box = QGroupBox("Perform Crystal Match")
-
-        search_width = str(self._config.search_width.value())
-        self._txt_search_width, hbox_search_w = self._ui_txt_box("Search Width", search_width)
-
-        search_height = str(self._config.search_height.value())
-        self._txt_search_height, hbox_search_h = self._ui_txt_box("Search Height", search_height)
+        search_height = self._config.search_height.value()
+        self._slider_search_height, hbox_search_h = self._ui_slider("Search Height", search_height, 100, 800)
 
         trans_only = str(self._config.match_translation_only.value())
         self._chk_translation, hbox_trans = self._ui_check_box("Translation Only", trans_only)
@@ -91,6 +94,8 @@ class SingleCrystalDialog(QDialog):
         btn_perform_match.setFixedWidth(80)
 
         vbox = QVBoxLayout()
+        vbox.addLayout(hbox_select)
+        vbox.addLayout(hbox_region)
         vbox.addLayout(hbox_search_w)
         vbox.addLayout(hbox_search_h)
         vbox.addLayout(hbox_trans)
@@ -100,17 +105,28 @@ class SingleCrystalDialog(QDialog):
         grp_box.setLayout(vbox)
         return grp_box
 
-    def _ui_txt_box(self, label, initial_value):
-        lbl = QLabel(label)
-        lbl.setFixedWidth(self.LABEL_WIDTH)
-        txt = QLineEdit(initial_value)
+    def _ui_slider(self, label, initial, min, max):
+        lbl_name = QLabel(label)
+        lbl_name.setFixedWidth(self.LABEL_WIDTH)
+
+        txt_value = QLineEdit(str(initial))
+        txt_value.setFixedWidth(50)
+        txt_value.setEnabled(False)
+
+        slider = QSlider(QtCore.Qt.Horizontal, self)
+        slider.setRange(min, max)
+        slider.setFocusPolicy(QtCore.Qt.NoFocus)
+        slider.setValue(initial)
+        slider.valueChanged[int].connect(lambda x: txt_value.setText(str(x)))
+        slider.setFixedWidth(200)
 
         hbox = QHBoxLayout()
-        hbox.addWidget(lbl)
-        hbox.addWidget(txt)
-        hbox.addStretch()
+        hbox.addWidget(lbl_name)
+        hbox.addWidget(slider)
+        hbox.addWidget(txt_value)
+        hbox.addStretch(1)
 
-        return txt, hbox
+        return slider, hbox
 
     def _ui_check_box(self, label, initial_value):
         lbl = QLabel(label)
@@ -143,20 +159,15 @@ class SingleCrystalDialog(QDialog):
         if result_ok:
             points = dialog.selected_points()
             if len(points) == 1:
-                self._set_crystal_point(points[0])
+                self._set_point_value(points[0])
 
-    def _set_crystal_point(self, point):
-        self._point = point
+    def _fn_perform_match(self):
         matcher = self._create_crystal_matcher()
-        rect1 = matcher.make_target_region(point)
-        rect2 = matcher.make_search_region(point)
-        img1 = self._aligned_images.img1.crop(rect1)
-        img2 = self._aligned_images.img2.crop(rect2)
-
-        self._frame.clear()
-        self._details_pane.clear_all()
-        self._details_pane.set_enabled(False)
-        self._frame.set_new_images(img1, img2)
+        results = matcher.match([self._point])
+        crystal_match = results.get_match(0)
+        feature_match = crystal_match.feature_matches()
+        self._set_feature_match_result(feature_match)
+        self._set_transform_points(crystal_match)
 
     def _create_crystal_matcher(self):
         region_size = self._region_size()
@@ -170,14 +181,6 @@ class SingleCrystalDialog(QDialog):
         matcher.set_translation_only(translation_only)
         return matcher
 
-    def _fn_perform_match(self):
-        matcher = self._create_crystal_matcher()
-        results = matcher.match([self._point])
-        crystal_match = results.get_match(0)
-        feature_match = crystal_match.feature_matches()
-        self._set_feature_match_result(feature_match)
-        self._set_transform_points(crystal_match)
-
     def _set_feature_match_result(self, feature_match):
         self._frame.set_new_images(feature_match.img1, feature_match.img2)
         self._details_pane.set_feature_match(feature_match)
@@ -188,22 +191,26 @@ class SingleCrystalDialog(QDialog):
         #self._frame.display_points(crystal_match.img1_point(), crystal_match.img2_point())
 
     # ----- INTERNAL ACCESSORS -------------
+    def _set_point_value(self, point):
+        self._point = point
+        self._txt_point.setText("x={}, y={}".format(int(point.x), int(point.y)))
+
     def _region_size(self):
-        text = self._txt_region_size.text()
+        text = self._slider_region_size.value()
         try:
             return int(text)
         except ValueError:
             return self._config.region_size.value()
 
     def _search_width(self):
-        text = self._txt_search_width.text()
+        text = self._slider_search_width.value()
         try:
             return int(text)
         except ValueError:
             return self._config.search_width.value()
 
     def _search_height(self):
-        text = self._txt_search_height.text()
+        text = self._slider_search_height.value()
         try:
             return int(text)
         except ValueError:
