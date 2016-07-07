@@ -25,6 +25,7 @@ class FeatureMatchDetailPane(QWidget):
         self._table = None
         self._cmbo_include = None
         self._cmbo_methods = None
+        self._chk_highlight_selected = None
 
         self._init_ui()
 
@@ -129,17 +130,29 @@ class FeatureMatchDetailPane(QWidget):
         self._filtered_matches = []
         self._selected_matches = []
 
-        self._update_method_dropdown(self._matches)
+        self._clear_selection()
+        self._update_method_dropdown([])
         self._changed_filters()
+
+    def _clear_selection(self):
+        self._table.selectionModel().clearSelection()
+
+    def set_enabled(self, enabled):
+        self._cmbo_include.setEnabled(enabled)
+        self._cmbo_methods.setEnabled(enabled)
+        self._chk_highlight_selected.setEnabled(enabled)
+        self._table.setEnabled(enabled)
 
     def _changed_filters(self):
         self._update_selected_matches()
         self._update_filtered_matches()
+        self._clear_selection()
 
         self._update_table()
         self.signal_matches_filtered.emit(self._filtered_matches)
 
     def _changed_selection(self):
+        print("--Changed Selection")
         self._update_selected_matches()
         self.signal_matches_selected.emit(self._selected_matches)
 

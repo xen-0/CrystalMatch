@@ -40,7 +40,7 @@ class FeaturePainter:
 
     # -------- FUNCTIONALITY -------------------
     def background_image(self):
-        return self._background_image
+        return self._background_image.copy()
 
     def _create_background_image(self):
         self._calculate_image_positions()
@@ -82,25 +82,38 @@ class FeaturePainter:
         rescaled = image.rescale(factor)
         return rescaled, factor
 
-    def draw_matches(self, matches, highlight_matches=[]):
+    def draw_transform_points(self, img1_point, img2_point, img=None):
+        if img is None:
+            img = self._background_image.copy()
+
+        point1 = self._point_to_img_coords(img1_point, 1)
+        point2 = self._point_to_img_coords(img2_point, 2)
+        print(point1, point2)
+
+        img.draw_cross(point1, Color.Yellow(), size=10, thickness=2)
+        img.draw_cross(point2, Color.Yellow(), size=10, thickness=2)
+
+        return img
+
+    def draw_matches(self, matches, highlight_matches=[], img=None):
         """ Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
         Makes an image that is a side-by-side of the two images, with detected features highlighted and lines
         drawn between matching features in the two images.
         """
-        img = self._background_image.copy()
-
-        # For each pair of points we have between both images draw circles, then connect a line between them
-        for match in matches:
-            self._draw_match(img, match, Color.Blue(), thickness=1, radius=4)
+        if img is None:
+            img = self._background_image.copy()
 
         for match in highlight_matches:
             self._draw_match(img, match, Color.Yellow(), thickness=2, radius=4)
 
+        for match in matches:
+            self._draw_match(img, match, Color.Blue(), thickness=1, radius=4)
+
         return img
 
     def _draw_match(self, img, match, color, thickness, radius):
-        point1 = (match.img_point1() + self._img1_position) * self._scale_factor
-        point2 = (match.img_point2() + self._img2_position) * self._scale_factor
+        point1 = self._point_to_img_coords(match.img_point1(), 1)
+        point2 = self._point_to_img_coords(match.img_point2(), 2)
 
         # Draw a small circle at both co-ordinates
         img.draw_circle(point1, radius, color, thickness)
@@ -108,6 +121,12 @@ class FeaturePainter:
 
         # Draw a line between the two points
         img.draw_line(point1, point2, color, thickness)
+
+    def _point_to_img_coords(self, point, img_num):
+        img_position = self._img1_position
+        if img_num == 2:
+            img_position = self._img2_position
+        return (point + img_position) * self._scale_factor
 
     @staticmethod
     def draw_keypoints(img, keypoints):

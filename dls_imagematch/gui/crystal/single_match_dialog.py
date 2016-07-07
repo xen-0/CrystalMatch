@@ -84,7 +84,7 @@ class SingleCrystalDialog(QDialog):
         self._chk_translation, hbox_trans = self._ui_check_box("Translation Only", trans_only)
 
         btn_perform_match = QPushButton("Perform Match")
-        btn_perform_match.clicked.connect(self._fn_select_crystal_point)
+        btn_perform_match.clicked.connect(self._fn_perform_match)
         btn_perform_match.setFixedWidth(80)
 
         vbox = QVBoxLayout()
@@ -144,11 +144,16 @@ class SingleCrystalDialog(QDialog):
 
     def _set_crystal_point(self, point):
         self._point = point
-
         matcher = self._create_crystal_matcher()
-        results = matcher.match([point])
-        feature_match = results.get_match(0).feature_matches()
-        self._set_feature_match_result(feature_match)
+        rect1 = matcher.make_target_region(point)
+        rect2 = matcher.make_search_region(point)
+        img1 = self._aligned_images.img1.crop(rect1)
+        img2 = self._aligned_images.img2.crop(rect2)
+
+        self._frame.clear()
+        self._details_pane.clear_all()
+        self._details_pane.set_enabled(False)
+        self._frame.set_new_images(img1, img2)
 
     def _create_crystal_matcher(self):
         region_size = self._region_size()
@@ -162,11 +167,24 @@ class SingleCrystalDialog(QDialog):
         matcher.set_translation_only(translation_only)
         return matcher
 
+    def _fn_perform_match(self):
+        matcher = self._create_crystal_matcher()
+        results = matcher.match([self._point])
+        crystal_match = results.get_match(0)
+        feature_match = crystal_match.feature_matches()
+        self._set_feature_match_result(feature_match)
+        self._set_transform_points(crystal_match)
+
     def _set_feature_match_result(self, feature_match):
         self._frame.set_new_images(feature_match.img1, feature_match.img2)
         self._details_pane.set_feature_match(feature_match)
+        self._details_pane.set_enabled(True)
 
-    # -----
+    def _set_transform_points(self, crystal_match):
+        pass
+        #self._frame.display_points(crystal_match.img1_point(), crystal_match.img2_point())
+
+    # ----- INTERNAL ACCESSORS -------------
     def _region_size(self):
         text = self._txt_region_size.text()
         try:

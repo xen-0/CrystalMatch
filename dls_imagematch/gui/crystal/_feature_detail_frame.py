@@ -15,6 +15,8 @@ class FeatureMatchDetailFrame(QWidget):
         self._painter = None
         self._matches = []
         self._highlighted_matches = []
+        self._img1_point = None
+        self._img2_point = None
 
         self._init_ui()
 
@@ -39,13 +41,24 @@ class FeatureMatchDetailFrame(QWidget):
         box.setLayout(vbox)
         return box
 
-    def set_new_images(self, img1, img2):
+    def clear(self):
+        self._painter = None
         self._matches = []
         self._highlighted_matches = []
+        self._img1_point = None
+        self._img2_point = None
+
+    def set_new_images(self, img1, img2):
+        self.clear()
 
         self._painter = FeaturePainter(img1, img2)
         background_image = self._painter.background_image()
         self._display_image(background_image)
+
+    def display_points(self, img1_point, img2_point):
+        self._img1_point = img1_point
+        self._img2_point = img2_point
+        self._update_image()
 
     def display_matches(self, matches):
         self._matches = matches
@@ -56,7 +69,15 @@ class FeatureMatchDetailFrame(QWidget):
         self._update_image()
 
     def _update_image(self):
-        image = self._painter.draw_matches(self._matches, self._highlighted_matches)
+        if self._painter is None:
+            return
+
+        image = self._painter.background_image()
+
+        if self._img1_point is not None and self._img2_point is not None:
+            image = self._painter.draw_transform_points(self._img1_point, self._img2_point, image)
+
+        image = self._painter.draw_matches(self._matches, self._highlighted_matches, image)
         self._display_image(image)
 
     def _display_image(self, image):
