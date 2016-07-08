@@ -5,10 +5,10 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox
 from dls_imagematch.match.feature import FeaturePainter
 
 
-class FeatureMatchDetailFrame(QWidget):
+class CrystalMatchFrame(QWidget):
 
     def __init__(self):
-        super(FeatureMatchDetailFrame, self).__init__()
+        super(CrystalMatchFrame, self).__init__()
 
         self._frame = None
 

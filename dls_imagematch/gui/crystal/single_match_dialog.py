@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit, QCheckBox, QSlider
 
 from _feature_detail_pane import FeatureMatchDetailPane
-from _feature_detail_frame import FeatureMatchDetailFrame
+from _crystal_match_frame import CrystalMatchFrame
 from _point_select_dialog import PointSelectDialog
 
 from dls_imagematch.match import CrystalMatcher
@@ -40,7 +40,7 @@ class SingleCrystalDialog(QDialog):
         match_controls = self._ui_create_search()
         self._details_pane = FeatureMatchDetailPane()
         self._details_pane.set_enabled(False)
-        self._frame = FeatureMatchDetailFrame()
+        self._frame = CrystalMatchFrame()
 
         self._details_pane.signal_matches_filtered.connect(self._frame.display_matches)
         self._details_pane.signal_matches_selected.connect(self._frame.display_highlights)
