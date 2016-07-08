@@ -38,7 +38,8 @@ class FeatureMatcher:
     def match(self, translation_only=False):
         matches = self._find_matches()
         homography = MatchHomographyCalculator()
-        transform = homography.calculate_transform(matches, translation_only)
+        homography.set_translation_only(translation_only)
+        transform = homography.calculate_transform(matches)
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):

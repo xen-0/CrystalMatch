@@ -199,7 +199,8 @@ class SingleCrystalDialog(QDialog):
         good_matches = [mat for mat in matches if mat.is_in_transformation()]
         if len(good_matches) > 0:
             homo = MatchHomographyCalculator()
-            transform = homo.calculate_transform(good_matches, translation_only=False, mark_unused=False)
+            homo.set_mark_unused(False)
+            transform = homo.calculate_transform(good_matches)
             transformed_point = transform.transform_points([self._point])[0]
             point2 = transformed_point - self._matcher.make_search_region(self._point).top_left()
 

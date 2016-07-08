@@ -10,24 +10,58 @@ from dls_imagematch.match.translation import Translation
 
 
 class MatchHomographyCalculator:
+    """ For explanation of homography calculation and definition of methods, see:
+    http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
+
+    The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
+    inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
+    there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
+    use the default method (method=0).
+    """
     _MIN_HOMOGRAPHY_MATCHES = 4
 
-    def __init__(self):
-        pass
+    _DEFAULT_RANSAC_THRESHOLD = 5.0
 
-    def calculate_transform(self, matches, translation_only=False, mark_unused=True):
+    INCLUDE_ALL = 0
+    RANSAC = cv2.RANSAC
+    LMEDS = cv2.LMEDS
+
+    METHOD_NAMES = ["LMEDS", "RANSAC", "Include All"]
+    METHOD_VALUES = [LMEDS, RANSAC, INCLUDE_ALL]
+
+    def __init__(self):
+        self._mark_unused = True
+        self._translation_only = False
+        self._method = self.RANSAC
+        self._ransac_threshold = self._DEFAULT_RANSAC_THRESHOLD
+
+    def set_translation_only(self, translation_only):
+        self._translation_only = translation_only
+
+    def set_mark_unused(self, mark_unused):
+        self._mark_unused = mark_unused
+
+    def set_homography_method(self, method):
+        if method not in self.METHOD_VALUES:
+            raise ValueError("Not a valid homography method")
+
+        self._method = method
+
+    def set_ransac_threshold(self, threshold):
+        self._ransac_threshold = threshold
+
+    def calculate_transform(self, matches):
         can_do_transform = self._has_enough_matches_for_full_transform(matches)
 
-        if translation_only or not can_do_transform:
+        if self._translation_only or not can_do_transform:
             transform = self._calculate_median_translation(matches)
         else:
             homography, mask = self._calculate_homography(matches)
             transform = Transformation(homography)
-            if mark_unused:
+            if self._mark_unused:
                 self._mark_unused_matches(matches, mask)
 
         return transform
-
 
     @staticmethod
     def _calculate_median_translation(matches):
@@ -41,14 +75,6 @@ class MatchHomographyCalculator:
         return Translation(point)
 
     def _calculate_homography(self, matches):
-        """ See:
-        http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
-
-        The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
-        inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
-        there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
-        use the default method (method=0).
-        """
         homography = None
 
         if self._has_enough_matches_for_full_transform(matches):
@@ -57,7 +83,7 @@ class MatchHomographyCalculator:
             img2_pts = [m.point2().tuple() for m in matches]
             img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
 
-            homography, mask = cv2.findHomography(img1_pts, img2_pts, cv2.LMEDS)
+            homography, mask = cv2.findHomography(img1_pts, img2_pts, self._method, self._ransac_threshold)
 
         return homography, mask
 
