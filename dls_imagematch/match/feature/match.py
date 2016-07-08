@@ -45,8 +45,8 @@ class SingleFeatureMatch:
         self._offset1 = offset1
         self._offset2 = offset2
 
-    def remove_from_transformation(self):
-        self._included_in_transformation = False
+    def set_in_transformation(self, in_transformation):
+        self._included_in_transformation = in_transformation
 
     @staticmethod
     def from_cv2_matches(cv2_matches, keypoints1, keypoints2, detector):

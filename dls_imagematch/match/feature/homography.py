@@ -110,5 +110,5 @@ class MatchHomographyCalculator:
     @staticmethod
     def _mark_unused_matches(matches, mask):
         for match, mask in izip(matches, mask):
-            if not mask:
-                match.remove_from_transformation()
+            in_transform = mask == 1
+            match.set_in_transformation(in_transform)
