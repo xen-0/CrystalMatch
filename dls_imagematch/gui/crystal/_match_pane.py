@@ -18,7 +18,7 @@ class CrystalMatchPane(QWidget):
 
     LABEL_WIDTH = 100
 
-    def __init__(self, aligned_images, selected_point, config):
+    def __init__(self, aligned_images, config):
         super(CrystalMatchPane, self).__init__()
 
         self._config = config
@@ -32,10 +32,6 @@ class CrystalMatchPane(QWidget):
         self._slider_region_size = None
 
         self._init_ui()
-
-        if selected_point is not None:
-            self._set_point_value(selected_point)
-            self._fn_perform_match()
 
     def _init_ui(self):
         pane = self._ui_create_pane()
@@ -89,6 +85,11 @@ class CrystalMatchPane(QWidget):
 
         grp_box.setLayout(vbox)
         return grp_box
+
+    def set_starting_point(self, point):
+        if point is not None:
+            self._set_point_value(point)
+            self._fn_perform_match()
 
     def _fn_select_crystal_point(self):
         max_points = 1

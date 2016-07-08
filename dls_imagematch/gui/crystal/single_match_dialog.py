@@ -26,12 +26,14 @@ class SingleCrystalDialog(QDialog):
         self._frame = None
         self._slider_region_size = None
 
-        self._init_ui(selected_point)
+        self._init_ui()
 
-    def _init_ui(self, selected_point):
+        self._match_pane.set_starting_point(selected_point)
+
+    def _init_ui(self):
         self.setWindowTitle('Single Crystal Matching')
 
-        self._match_pane = CrystalMatchPane(self._aligned_images, selected_point, self._config)
+        self._match_pane = CrystalMatchPane(self._aligned_images, self._config)
 
         self._filter_pane = FilterPane()
         self._filter_pane.setEnabled(False)
