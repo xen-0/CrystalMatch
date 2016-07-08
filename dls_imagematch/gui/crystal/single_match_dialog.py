@@ -7,6 +7,7 @@ from _filter_pane import FeatureMatchDetailPane
 from _matches_table import FeatureMatchTable
 from _crystal_match_frame import CrystalMatchFrame
 from _point_select_dialog import PointSelectDialog
+from _slider import Slider
 
 
 from dls_imagematch.match import CrystalMatcher
@@ -93,13 +94,13 @@ class SingleCrystalDialog(QDialog):
         hbox_select.addStretch(1)
 
         region_size = self._config.region_size.value()
-        self._slider_region_size, hbox_region = self._ui_slider("Region Size", region_size, 20, 150)
+        self._slider_region_size = Slider("Region Size", region_size, 20, 150)
 
         search_width = self._config.search_width.value()
-        self._slider_search_width, hbox_search_w = self._ui_slider("Search Width", search_width, 100, 500)
+        self._slider_search_width = Slider("Search Width", search_width, 100, 500)
 
         search_height = self._config.search_height.value()
-        self._slider_search_height, hbox_search_h = self._ui_slider("Search Height", search_height, 100, 800)
+        self._slider_search_height = Slider("Search Height", search_height, 100, 800)
 
         trans_only = str(self._config.match_translation_only.value())
         self._chk_translation, hbox_trans = self._ui_check_box("Translation Only", trans_only)
@@ -110,38 +111,15 @@ class SingleCrystalDialog(QDialog):
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_select)
-        vbox.addLayout(hbox_region)
-        vbox.addLayout(hbox_search_w)
-        vbox.addLayout(hbox_search_h)
+        vbox.addWidget(self._slider_region_size)
+        vbox.addWidget(self._slider_search_width)
+        vbox.addWidget(self._slider_search_height)
         vbox.addLayout(hbox_trans)
         vbox.addWidget(btn_perform_match)
         vbox.addStretch()
 
         grp_box.setLayout(vbox)
         return grp_box
-
-    def _ui_slider(self, label, initial, min, max):
-        lbl_name = QLabel(label)
-        lbl_name.setFixedWidth(self.LABEL_WIDTH)
-
-        txt_value = QLineEdit(str(initial))
-        txt_value.setFixedWidth(50)
-        txt_value.setEnabled(False)
-
-        slider = QSlider(QtCore.Qt.Horizontal, self)
-        slider.setRange(min, max)
-        slider.setFocusPolicy(QtCore.Qt.NoFocus)
-        slider.setValue(initial)
-        slider.valueChanged[int].connect(lambda x: txt_value.setText(str(x)))
-        slider.setFixedWidth(200)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(lbl_name)
-        hbox.addWidget(slider)
-        hbox.addWidget(txt_value)
-        hbox.addStretch(1)
-
-        return slider, hbox
 
     def _ui_check_box(self, label, initial_value):
         lbl = QLabel(label)
