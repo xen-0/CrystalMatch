@@ -3,9 +3,11 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit, QCheckBox, QSlider
 
-from _feature_detail_pane import FeatureMatchDetailPane
+from _filter_pane import FeatureMatchDetailPane
+from _matches_table import FeatureMatchTable
 from _crystal_match_frame import CrystalMatchFrame
 from _point_select_dialog import PointSelectDialog
+
 
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.match.feature import MatchHomographyCalculator
@@ -22,7 +24,8 @@ class SingleCrystalDialog(QDialog):
         self._aligned_images = aligned_images
 
         # UI elements
-        self._details_pane = None
+        self._filter_pane = None
+        self._table = None
         self._frame = None
         self._slider_region_size = None
         self.hbox_search_w = None
@@ -38,21 +41,32 @@ class SingleCrystalDialog(QDialog):
         self.setWindowTitle('Single Crystal Matching')
 
         match_controls = self._ui_create_search()
-        self._details_pane = FeatureMatchDetailPane()
-        self._details_pane.set_enabled(False)
+
+        self._filter_pane = FeatureMatchDetailPane()
+        self._filter_pane.setEnabled(False)
+
+        self._table = FeatureMatchTable()
+        self._table.setEnabled(False)
+
         self._frame = CrystalMatchFrame()
 
-        self._details_pane.signal_matches_filtered.connect(self._frame.display_matches)
-        self._details_pane.signal_matches_selected.connect(self._frame.display_highlights)
-        self._details_pane.signal_matches_filtered.connect(self._set_transform_points_from_filtered_matches)
+        self._filter_pane.signal_matches_filtered.connect(self._frame.display_matches)
+        self._filter_pane.signal_matches_filtered.connect(self._table.display_matches)
+        self._table.signal_matches_selected.connect(self._frame.display_highlights)
+        self._filter_pane.signal_matches_filtered.connect(self._set_transform_points_from_filtered_matches)
 
         vbox = QVBoxLayout()
         vbox.addWidget(match_controls)
         vbox.addStretch(1)
 
+        vbox2 = QVBoxLayout()
+        vbox2.addWidget(self._filter_pane)
+        vbox2.addWidget(self._table)
+        vbox2.addStretch(1)
+
         hbox = QHBoxLayout()
         hbox.addLayout(vbox)
-        hbox.addWidget(self._details_pane)
+        hbox.addLayout(vbox2)
         hbox.addWidget(self._frame)
         hbox.addStretch()
 
@@ -184,8 +198,8 @@ class SingleCrystalDialog(QDialog):
 
     def _set_feature_match_result(self, feature_match):
         self._frame.set_new_images(feature_match.img1, feature_match.img2)
-        self._details_pane.set_feature_match(feature_match)
-        self._details_pane.set_enabled(True)
+        self._filter_pane.set_feature_match(feature_match)
+        self._filter_pane.set_enabled(True)
 
     def _set_transform_points_from_match(self, crystal_match):
         point1 = crystal_match.img1_point() - self._matcher.make_target_region(self._point).top_left()
