@@ -1,7 +1,7 @@
 from __future__ import division
 
 from PyQt4 import QtCore
-from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QCheckBox, QGroupBox, QComboBox
+from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 
 class FeatureMatchDetailPane(QWidget):
@@ -21,7 +21,6 @@ class FeatureMatchDetailPane(QWidget):
         # UI elements
         self._cmbo_include = None
         self._cmbo_methods = None
-        self._chk_highlight_selected = None
 
         self._init_ui()
 
@@ -37,18 +36,6 @@ class FeatureMatchDetailPane(QWidget):
     def _ui_create_filters(self):
         label_width = 90
 
-        lbl_highlight = QLabel("Highlight Selected")
-        lbl_highlight.setFixedWidth(label_width)
-        self._chk_highlight_selected = QCheckBox()
-        self._chk_highlight_selected.setTristate(False)
-        self._chk_highlight_selected.setCheckState(2)
-        self._chk_highlight_selected.stateChanged.connect(self._changed_filters)
-
-        hbox1 = QHBoxLayout()
-        hbox1.addWidget(lbl_highlight)
-        hbox1.addWidget(self._chk_highlight_selected)
-        hbox1.addStretch(1)
-
         lbl_include = QLabel("Include")
         lbl_include.setFixedWidth(label_width)
         self._cmbo_include = QComboBox()
@@ -61,7 +48,7 @@ class FeatureMatchDetailPane(QWidget):
         hbox2.addWidget(self._cmbo_include)
         hbox2.addStretch(1)
 
-        lbl_method = QLabel("Method")
+        lbl_method = QLabel("Detector")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
         self._cmbo_methods.setFixedWidth(100)
@@ -73,7 +60,6 @@ class FeatureMatchDetailPane(QWidget):
         hbox3.addStretch(1)
 
         vbox = QVBoxLayout()
-        vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
         vbox.addLayout(hbox3)
         vbox.addStretch(1)
@@ -100,11 +86,6 @@ class FeatureMatchDetailPane(QWidget):
         self._clear_selection()
         self._update_method_dropdown([])
         self._changed_filters()
-
-    def set_enabled(self, enabled):
-        self._cmbo_include.setEnabled(enabled)
-        self._cmbo_methods.setEnabled(enabled)
-        self._chk_highlight_selected.setEnabled(enabled)
 
     def _changed_filters(self):
         self._update_filtered_matches()

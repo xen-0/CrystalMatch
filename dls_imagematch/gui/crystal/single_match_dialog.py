@@ -149,7 +149,6 @@ class SingleCrystalDialog(QDialog):
     def _set_feature_match_result(self, feature_match):
         self._frame.set_new_images(feature_match.img1, feature_match.img2)
         self._filter_pane.set_feature_match(feature_match)
-        self._filter_pane.set_enabled(True)
 
     def _set_transform_points_from_match(self, crystal_match):
         point1 = crystal_match.img1_point() - self._matcher.make_target_region(self._point).top_left()
