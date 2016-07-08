@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 
-class FeatureMatchDetailPane(QWidget):
+class FilterPane(QWidget):
     ALL = "All"
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
@@ -12,7 +12,7 @@ class FeatureMatchDetailPane(QWidget):
     signal_matches_filtered = QtCore.pyqtSignal(object)
 
     def __init__(self):
-        super(FeatureMatchDetailPane, self).__init__()
+        super(FilterPane, self).__init__()
 
         self._feature_match = None
         self._matches = []
