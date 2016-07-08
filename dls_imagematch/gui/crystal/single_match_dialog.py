@@ -29,8 +29,6 @@ class SingleCrystalDialog(QDialog):
         self._table = None
         self._frame = None
         self._slider_region_size = None
-        self.hbox_search_w = None
-        self.hbox_search_h = None
 
         self._init_ui()
 
@@ -102,9 +100,6 @@ class SingleCrystalDialog(QDialog):
         search_height = self._config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 100, 800)
 
-        trans_only = str(self._config.match_translation_only.value())
-        self._chk_translation, hbox_trans = self._ui_check_box("Translation Only", trans_only)
-
         btn_perform_match = QPushButton("Perform Match")
         btn_perform_match.clicked.connect(self._fn_perform_match)
         btn_perform_match.setFixedWidth(80)
@@ -114,32 +109,11 @@ class SingleCrystalDialog(QDialog):
         vbox.addWidget(self._slider_region_size)
         vbox.addWidget(self._slider_search_width)
         vbox.addWidget(self._slider_search_height)
-        vbox.addLayout(hbox_trans)
         vbox.addWidget(btn_perform_match)
         vbox.addStretch()
 
         grp_box.setLayout(vbox)
         return grp_box
-
-    def _ui_check_box(self, label, initial_value):
-        lbl = QLabel(label)
-        lbl.setFixedWidth(self.LABEL_WIDTH)
-
-        if initial_value == True:
-            state = 2
-        else:
-            state = 0
-
-        chkbox = QCheckBox()
-        chkbox.setCheckState(state)
-        chkbox.setTristate(False)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(lbl)
-        hbox.addWidget(chkbox)
-        hbox.addStretch()
-
-        return chkbox, hbox
 
     def _fn_select_crystal_point(self):
         max_points = 1
@@ -166,12 +140,10 @@ class SingleCrystalDialog(QDialog):
         region_size = self._region_size()
         search_width = self._search_width()
         search_height = self._search_height()
-        translation_only = self._translation_only()
 
         matcher = CrystalMatcher(self._aligned_images)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
-        matcher.set_translation_only(translation_only)
         return matcher
 
     def _set_feature_match_result(self, feature_match):
@@ -223,6 +195,3 @@ class SingleCrystalDialog(QDialog):
             return int(text)
         except ValueError:
             return self._config.search_height.value()
-
-    def _translation_only(self):
-        return self._chk_translation.checkState() > 0
