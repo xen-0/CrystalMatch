@@ -10,34 +10,47 @@ from dls_imagematch.match.translation import Translation
 
 
 class MatchHomographyCalculator:
-    """ For explanation of homography calculation and definition of methods, see:
-    http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
+    """ For a set of matches which map points between two images, this class finds the approximate
+    transformation that will map any point in the first image to the equivalent point in the second.
+    The transformation can include translation, rotation, scale, and skew components.
 
-    The method RANSAC can handle practically any ratio of outliers but it needs a threshold to distinguish
-    inliers from outliers. The method LMeDS does not need any threshold but it works correctly only when
-    there are more than 50% of inliers. Finally, if there are no outliers and the noise is rather small,
-    use the default method (method=0).
+    Clients can choose from four different methods:
+    * INCLUDE_ALL - the transform will be calculated using all of the matches. This will
+        be less reliable if there are many outliers.
+    * LMEDS - uses the least median of squares method to automatically cull outliers. This method
+        only works correctly when > 50% of matches are inliers.
+    * RANSAC - uses the random sample consensus method to cull outliers. This uses an error threshold
+        to distinguish outliers from inliers (can be set by the client).
+    * TRANSLATION - calculate a translation only transformation by simply taking the median x and y
+        components of the matches.
+
+    Note: at least 4 matches are required to calculate a full transformation. If there are fewer than
+    this, the class will fall back on the TRANSLATION method.
+
+    If the 'mark unused' flag is set, the methods LMEDS and RANSAC will mark any outlier match objects
+    as being unused.
+
+    For more information on homography calculation and definition of methods, see:
+    http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
     """
     _MIN_HOMOGRAPHY_MATCHES = 4
 
     _DEFAULT_RANSAC_THRESHOLD = 5.0
 
+    TRANSLATION = -1
     INCLUDE_ALL = 0
     RANSAC = cv2.RANSAC
     LMEDS = cv2.LMEDS
 
-    METHOD_NAMES = ["LMEDS", "RANSAC", "Include All"]
-    METHOD_VALUES = [LMEDS, RANSAC, INCLUDE_ALL]
+    METHOD_NAMES = ["LMEDS", "RANSAC", "Include All", "Translation Only"]
+    METHOD_VALUES = [LMEDS, RANSAC, INCLUDE_ALL, TRANSLATION]
 
     def __init__(self):
         self._mark_unused = True
-        self._translation_only = False
         self._method = self.RANSAC
         self._ransac_threshold = self._DEFAULT_RANSAC_THRESHOLD
 
-    def set_translation_only(self, translation_only):
-        self._translation_only = translation_only
-
+    # -------- CONFIGURATION -------------------
     def set_mark_unused(self, mark_unused):
         self._mark_unused = mark_unused
 
@@ -50,31 +63,34 @@ class MatchHomographyCalculator:
     def set_ransac_threshold(self, threshold):
         self._ransac_threshold = threshold
 
+    # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
+        translation_only = self._method == self.TRANSLATION
         can_do_transform = self._has_enough_matches_for_full_transform(matches)
 
-        if self._translation_only or not can_do_transform:
-            transform = self._calculate_median_translation(matches)
+        if translation_only or not can_do_transform:
+            transform, mask = self._calculate_median_translation(matches)
         else:
-            homography, mask = self._calculate_homography(matches)
-            transform = Transformation(homography)
-            if self._mark_unused:
-                self._mark_unused_matches(matches, mask)
+            transform, mask = self._calculate_full_transform(matches)
+
+        if self._mark_unused:
+            self._mark_unused_matches(matches, mask)
 
         return transform
 
     @staticmethod
     def _calculate_median_translation(matches):
-        """ For a set of feature matches between two images, find the average (median) translation that maps
-        one image to the other. """
         deltas = [m.point2() - m.point1() for m in matches]
         x = -np.median([d.x for d in deltas])
         y = -np.median([d.y for d in deltas])
         point = Point(x, y)
 
-        return Translation(point)
+        mask = [1] * len(matches)
+        transform = Translation(point)
 
-    def _calculate_homography(self, matches):
+        return transform, mask
+
+    def _calculate_full_transform(self, matches):
         homography = None
 
         if self._has_enough_matches_for_full_transform(matches):
@@ -85,7 +101,8 @@ class MatchHomographyCalculator:
 
             homography, mask = cv2.findHomography(img1_pts, img2_pts, self._method, self._ransac_threshold)
 
-        return homography, mask
+        transform = Transformation(homography)
+        return transform, mask
 
     def _has_enough_matches_for_full_transform(self, matches):
         return len(matches) >= self._MIN_HOMOGRAPHY_MATCHES
