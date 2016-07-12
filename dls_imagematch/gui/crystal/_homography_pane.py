@@ -5,7 +5,7 @@ from itertools import izip
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
-from dls_imagematch.match.feature import MatchHomographyCalculator
+from dls_imagematch.match.feature import HomographyCalculator
 from ._slider import Slider
 
 
@@ -43,8 +43,8 @@ class HomographyPane(QWidget):
         self._cmbo_methods.setFixedWidth(120)
         self._cmbo_methods.currentIndexChanged.connect(self._refresh_transform)
 
-        names = MatchHomographyCalculator.METHOD_NAMES
-        values = MatchHomographyCalculator.METHOD_VALUES
+        names = HomographyCalculator.METHOD_NAMES
+        values = HomographyCalculator.METHOD_VALUES
         for name, value in izip(names, values):
             self._cmbo_methods.addItem(name, value)
 
@@ -89,11 +89,11 @@ class HomographyPane(QWidget):
 
     def _create_homography_calc(self):
         method_index = self._cmbo_methods.currentIndex()
-        method = MatchHomographyCalculator.METHOD_VALUES[method_index]
+        method = HomographyCalculator.METHOD_VALUES[method_index]
 
         threshold = self._slider_threshold.value()
 
-        homo = MatchHomographyCalculator()
+        homo = HomographyCalculator()
         homo.set_homography_method(method)
         homo.set_ransac_threshold(threshold)
         return homo
