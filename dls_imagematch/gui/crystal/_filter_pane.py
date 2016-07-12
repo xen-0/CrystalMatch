@@ -111,7 +111,6 @@ class FilterPane(QWidget):
 
     def _update_method_dropdown(self):
         index = self._cmbo_methods.currentIndex()
-        print(index)
 
         matches = self._filter_matches_by_include(self._matches)
         methods = {method: 0 for method in self._match_methods}

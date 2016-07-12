@@ -19,10 +19,10 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.color_align)
 
         self.start_group("Xtal Search")
-        add(cfg.match_translation_only)
         add(cfg.region_size)
         add(cfg.search_width)
         add(cfg.search_height)
+        add(cfg.match_homo)
         add(cfg.color_xtal_img1)
         add(cfg.color_xtal_img2)
         add(cfg.color_search)

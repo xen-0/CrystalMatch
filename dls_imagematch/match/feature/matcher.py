@@ -26,6 +26,7 @@ class FeatureMatcher:
 
     def __init__(self, img1, img2):
         self._detector = FeatureDetector()
+        self._homo_method = None
 
         self.img1 = img1
         self.img2 = img2
@@ -34,19 +35,22 @@ class FeatureMatcher:
     def set_detector(self, method, adaptation=""):
         self._detector = FeatureDetector(method, adaptation)
 
+    def set_homography_method(self, method):
+        self._homo_method = method
+
     # -------- FUNCTIONALITY -------------------
-    def match(self, translation_only=False):
+    def match(self):
         matches = self._find_matches()
 
         homography = MatchHomographyCalculator()
-        if translation_only:
-            homography.set_homography_method(MatchHomographyCalculator.TRANSLATION)
+        homography.set_homography_method(self._homo_method)
 
         transform = homography.calculate_transform(matches)
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
-        return self.match(translation_only=True)
+        self.set_homography_method(MatchHomographyCalculator.TRANSLATION)
+        return self.match()
 
     def _create_result_object(self, matches, transform):
         result = FeatureMatchResult(self.img1, self.img2, matches, transform)

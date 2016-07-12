@@ -35,8 +35,6 @@ class MatchHomographyCalculator:
     """
     _MIN_HOMOGRAPHY_MATCHES = 4
 
-    _DEFAULT_RANSAC_THRESHOLD = 5.0
-
     TRANSLATION = -1
     INCLUDE_ALL = 0
     RANSAC = cv2.RANSAC
@@ -45,9 +43,17 @@ class MatchHomographyCalculator:
     METHOD_NAMES = ["LMEDS", "RANSAC", "Include All", "Translation Only"]
     METHOD_VALUES = [LMEDS, RANSAC, INCLUDE_ALL, TRANSLATION]
 
+    _DEFAULT_METHOD = RANSAC
+    _DEFAULT_RANSAC_THRESHOLD = 5.0
+
+    @staticmethod
+    def METHOD_FROM_NAME(name):
+        index = MatchHomographyCalculator.METHOD_NAMES.index(name)
+        return MatchHomographyCalculator.METHOD_VALUES[index]
+
     def __init__(self):
         self._mark_unused = True
-        self._method = self.RANSAC
+        self._method = self._DEFAULT_METHOD
         self._ransac_threshold = self._DEFAULT_RANSAC_THRESHOLD
 
     # -------- CONFIGURATION -------------------
@@ -55,20 +61,24 @@ class MatchHomographyCalculator:
         self._mark_unused = mark_unused
 
     def set_homography_method(self, method):
-        if method not in self.METHOD_VALUES:
+        if method is None:
+            self._method = self._DEFAULT_METHOD
+        elif method in self.METHOD_NAMES:
+            self._method = self.METHOD_FROM_NAME(method)
+        elif method in self.METHOD_VALUES:
+            self._method = method
+        else:
             raise ValueError("Not a valid homography method")
-
-        self._method = method
 
     def set_ransac_threshold(self, threshold):
         self._ransac_threshold = threshold
 
     # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
-        translation_only = self._method == self.TRANSLATION
+        use_translation = self._method == self.TRANSLATION
         can_do_transform = self._has_enough_matches_for_full_transform(matches)
 
-        if translation_only or not can_do_transform:
+        if use_translation or not can_do_transform:
             transform, mask = self._calculate_median_translation(matches)
         else:
             transform, mask = self._calculate_full_transform(matches)

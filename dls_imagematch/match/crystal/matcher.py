@@ -10,7 +10,6 @@ class CrystalMatcher:
     DEFAULT_REGION_SIZE = 50
     DEFAULT_WIDTH = 200
     DEFAULT_HEIGHT = 400
-    DEFAULT_TRANSLATION_ONLY = False
 
     def __init__(self, aligned_images):
         self._aligned_images = aligned_images
@@ -21,8 +20,9 @@ class CrystalMatcher:
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
-        self._translation_only = self.DEFAULT_TRANSLATION_ONLY
+        self._homography_method = None
 
+    # -------- CONFIGURATION -------------------
     def set_real_region_size(self, size):
         self._region_size_real = size
 
@@ -30,9 +30,10 @@ class CrystalMatcher:
         self._search_width_real = width
         self._search_height_real = height
 
-    def set_translation_only(self, translation_only):
-        self._translation_only = translation_only
+    def set_homography_method(self, method):
+        self._homography_method = method
 
+    # -------- FUNCTIONALITY -------------------
     def match(self, img1_points):
         images = self._aligned_images
         match_results = CrystalMatchResults(images)
@@ -56,11 +57,9 @@ class CrystalMatcher:
     def _perform_match(self, feature_matcher, crystal_match):
         try:
             feature_matcher.set_detector("Consensus")
-            if self._translation_only:
-                result = feature_matcher.match_translation_only()
-            else:
-                result = feature_matcher.match()
+            feature_matcher.set_homography_method(self._homography_method)
 
+            result = feature_matcher.match()
             crystal_match.set_feature_match_result(result)
         except FeatureMatchException:
             pass
