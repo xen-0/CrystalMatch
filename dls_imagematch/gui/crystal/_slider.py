@@ -2,11 +2,12 @@ from PyQt4 import QtGui, QtCore
 
 
 class Slider(QtGui.QWidget):
+    signal_value_changed = QtCore.pyqtSignal(int)
+
     def __init__(self, name, initial, min_val, max_val):
         super(Slider, self).__init__()
         self._min = int(min_val)
         self._max = int(max_val)
-        self._callback = None
         self._init_ui(name, int(initial))
 
     def _init_ui(self, name, initial):
@@ -46,8 +47,7 @@ class Slider(QtGui.QWidget):
             if self._txt_value.text() != str(value):
                 self._txt_value.setText(str(value))
 
-            if self._callback is not None:
-                self._callback()
+            self.signal_value_changed.emit(int(value))
 
         except ValueError as e:
             print("Value is not an integer: " + str(value))

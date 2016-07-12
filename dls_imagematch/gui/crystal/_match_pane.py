@@ -8,13 +8,11 @@ from _slider import Slider
 
 
 from dls_imagematch.match import CrystalMatcher
-from dls_imagematch.match.feature import MatchHomographyCalculator
 
 
 class CrystalMatchPane(QWidget):
-    signal_match_performed = QtCore.pyqtSignal(object)
+    signal_new_crystal_match = QtCore.pyqtSignal(object, object)
     signal_new_images = QtCore.pyqtSignal(object, object)
-    signal_new_points = QtCore.pyqtSignal(object, object)
 
     LABEL_WIDTH = 100
 
@@ -105,14 +103,10 @@ class CrystalMatchPane(QWidget):
                 self._set_point_value(points[0])
 
     def _fn_perform_match(self):
-        self._matcher = self._create_crystal_matcher()
-        results = self._matcher.match([self._point])
+        matcher = self._create_crystal_matcher()
+        results = matcher.match([self._point])
         crystal_match = results.get_match(0)
-        feature_match = crystal_match.feature_matches()
-
-        self._emit_new_match_signal(feature_match)
-
-        self._set_transform_points_from_match(crystal_match)
+        self._emit_new_match_signal(crystal_match, matcher)
 
     def _create_crystal_matcher(self):
         region_size = self._slider_region_size.value()
@@ -124,31 +118,11 @@ class CrystalMatchPane(QWidget):
         matcher.set_real_search_size(search_width, search_height)
         return matcher
 
-    def _emit_new_match_signal(self, feature_match):
+    def _emit_new_match_signal(self, crystal_match, matcher):
+        feature_match = crystal_match.feature_matches()
+
         self.signal_new_images.emit(feature_match.img1, feature_match.img2)
-        self.signal_match_performed.emit(feature_match)
-
-    def _emit_new_points_signal(self, point1, point2):
-        self.signal_new_points.emit(point1, point2)
-
-    def _set_transform_points_from_match(self, crystal_match):
-        point1 = crystal_match.img1_point() - self._matcher.make_target_region(self._point).top_left()
-        point2 = crystal_match.img2_point() - self._matcher.make_search_region(self._point).top_left()
-        self._emit_new_points_signal(point1, point2)
-
-    def set_transform_points_from_filtered_matches(self, matches):
-        point1 = self._point - self._matcher.make_target_region(self._point).top_left()
-        point2 = None
-
-        good_matches = [mat for mat in matches if mat.is_in_transformation()]
-        if len(good_matches) > 0:
-            homo = MatchHomographyCalculator()
-            homo.set_mark_unused(False)
-            transform = homo.calculate_transform(good_matches)
-            transformed_point = transform.transform_points([self._point])[0]
-            point2 = transformed_point - self._matcher.make_search_region(self._point).top_left()
-
-        self._emit_new_points_signal(point1, point2)
+        self.signal_new_crystal_match.emit(crystal_match, matcher)
 
     def _set_point_value(self, point):
         self._point = point

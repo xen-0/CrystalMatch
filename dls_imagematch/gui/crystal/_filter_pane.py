@@ -14,7 +14,6 @@ class FilterPane(QWidget):
     def __init__(self):
         super(FilterPane, self).__init__()
 
-        self._feature_match = None
         self._matches = []
         self._filtered_matches = []
 
@@ -64,28 +63,29 @@ class FilterPane(QWidget):
         vbox.addLayout(hbox3)
         vbox.addStretch(1)
 
-        box = QGroupBox("Filter")
+        box = QGroupBox("Display")
         box.setLayout(vbox)
 
         return box
 
-    def set_feature_match(self, feature_match):
+    def set_matches(self, matches):
         self.setEnabled(True)
-        self._feature_match = feature_match
-        self._matches = feature_match.matches
+        self._matches = matches
         self._filtered_matches = self._matches
 
         self._update_method_dropdown(self._matches)
         self._changed_filters()
 
     def clear_all(self):
-        self._feature_match = None
         self._matches = []
         self._filtered_matches = []
 
         self._clear_selection()
         self._update_method_dropdown([])
         self._changed_filters()
+
+    def refresh(self):
+        self._update_filtered_matches()
 
     def _changed_filters(self):
         self._update_filtered_matches()

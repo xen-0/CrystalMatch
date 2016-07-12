@@ -7,6 +7,7 @@ from _match_pane import CrystalMatchPane
 from _filter_pane import FilterPane
 from _matches_table import FeatureMatchTable
 from _crystal_match_frame import CrystalMatchFrame
+from _homography_pane import HomographyPane
 
 
 class SingleCrystalDialog(QDialog):
@@ -21,12 +22,13 @@ class SingleCrystalDialog(QDialog):
 
         # UI elements
         self._match_pane = None
+        self._homo_pane = None
         self._filter_pane = None
         self._table = None
         self._frame = None
-        self._slider_region_size = None
 
         self._init_ui()
+        self._connect_components()
 
         self._match_pane.set_starting_point(selected_point)
 
@@ -34,6 +36,8 @@ class SingleCrystalDialog(QDialog):
         self.setWindowTitle('Single Crystal Matching')
 
         self._match_pane = CrystalMatchPane(self._aligned_images, self._config)
+
+        self._homo_pane = HomographyPane()
 
         self._filter_pane = FilterPane()
         self._filter_pane.setEnabled(False)
@@ -43,22 +47,13 @@ class SingleCrystalDialog(QDialog):
 
         self._frame = CrystalMatchFrame()
 
-        self._match_pane.signal_match_performed.connect(self._filter_pane.set_feature_match)
-        self._match_pane.signal_new_images.connect(self._frame.set_new_images)
-        self._match_pane.signal_new_points.connect(self._frame.display_points)
-
-        self._filter_pane.signal_matches_filtered.connect(self._frame.display_matches)
-        self._filter_pane.signal_matches_filtered.connect(self._table.display_matches)
-        self._filter_pane.signal_matches_filtered.connect(self._match_pane.set_transform_points_from_filtered_matches)
-
-        self._table.signal_matches_selected.connect(self._frame.display_highlights)
-
         vbox = QVBoxLayout()
         vbox.addWidget(self._match_pane)
+        vbox.addWidget(self._homo_pane)
+        vbox.addWidget(self._filter_pane)
         vbox.addStretch(1)
 
         vbox2 = QVBoxLayout()
-        vbox2.addWidget(self._filter_pane)
         vbox2.addWidget(self._table)
         vbox2.addStretch(1)
 
@@ -69,3 +64,15 @@ class SingleCrystalDialog(QDialog):
         hbox.addStretch()
 
         self.setLayout(hbox)
+
+    def _connect_components(self):
+        self._match_pane.signal_new_crystal_match.connect(self._homo_pane.set_crystal_match)
+        self._match_pane.signal_new_images.connect(self._frame.set_new_images)
+
+        self._homo_pane.signal_updated_matches.connect(self._filter_pane.set_matches)
+        self._homo_pane.signal_new_points.connect(self._frame.display_points)
+
+        self._filter_pane.signal_matches_filtered.connect(self._frame.display_matches)
+        self._filter_pane.signal_matches_filtered.connect(self._table.display_matches)
+
+        self._table.signal_matches_selected.connect(self._frame.display_highlights)

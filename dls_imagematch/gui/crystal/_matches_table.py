@@ -32,7 +32,7 @@ class FeatureMatchTable(QWidget):
     def _ui_create_table(self):
         table = QTableWidget()
         table.setFixedWidth(300)
-        table.setFixedHeight(700)
+        table.setFixedHeight(900)
         table.setColumnCount(4)
         table.setRowCount(10)
         table.setHorizontalHeaderLabels(['Index', 'Method', 'Distance', 'Included'])
