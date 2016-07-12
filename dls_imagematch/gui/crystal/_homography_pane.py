@@ -40,7 +40,7 @@ class HomographyPane(QWidget):
         lbl_method = QLabel("Method")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
-        self._cmbo_methods.setFixedWidth(100)
+        self._cmbo_methods.setFixedWidth(120)
         self._cmbo_methods.currentIndexChanged.connect(self._refresh_transform)
 
         names = MatchHomographyCalculator.METHOD_NAMES

@@ -6,8 +6,10 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QC
 
 class FilterPane(QWidget):
     ALL = "All"
+    ALL_MATCHES = "All Matches"
     GOOD_MATCHES = "Good Matches"
     BAD_MATCHES = "Bad Matches"
+    NO_MATCHES = "No Matches"
 
     signal_matches_filtered = QtCore.pyqtSignal(object)
 
@@ -16,6 +18,7 @@ class FilterPane(QWidget):
 
         self._matches = []
         self._filtered_matches = []
+        self._match_methods = []
 
         # UI elements
         self._cmbo_include = None
@@ -38,9 +41,9 @@ class FilterPane(QWidget):
         lbl_include = QLabel("Include")
         lbl_include.setFixedWidth(label_width)
         self._cmbo_include = QComboBox()
-        self._cmbo_include.setFixedWidth(100)
-        self._cmbo_include.addItems([self.ALL, self.GOOD_MATCHES, self.BAD_MATCHES, "None"])
-        self._cmbo_include.currentIndexChanged.connect(self._changed_filters)
+        self._cmbo_include.setFixedWidth(120)
+        self._cmbo_include.addItems([self.ALL_MATCHES, self.GOOD_MATCHES, self.BAD_MATCHES, self.NO_MATCHES])
+        self._cmbo_include.currentIndexChanged.connect(self._include_selection_changed)
 
         hbox2 = QHBoxLayout()
         hbox2.addWidget(lbl_include)
@@ -50,8 +53,9 @@ class FilterPane(QWidget):
         lbl_method = QLabel("Detector")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
-        self._cmbo_methods.setFixedWidth(100)
-        self._cmbo_methods.currentIndexChanged.connect(self._changed_filters)
+        self._cmbo_methods.setFixedWidth(120)
+        self._cmbo_methods.addItem(self.ALL, self.ALL)
+        self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 
         hbox3 = QHBoxLayout()
         hbox3.addWidget(lbl_method)
@@ -72,8 +76,10 @@ class FilterPane(QWidget):
         self.setEnabled(True)
         self._matches = matches
         self._filtered_matches = self._matches
+        self._match_methods = self._get_match_methods(matches)
 
-        self._update_method_dropdown(self._matches)
+        self._update_include_dropdown()
+        self._update_method_dropdown()
         self._changed_filters()
 
     def clear_all(self):
@@ -84,27 +90,58 @@ class FilterPane(QWidget):
         self._update_method_dropdown([])
         self._changed_filters()
 
-    def refresh(self):
-        self._update_filtered_matches()
-
     def _changed_filters(self):
         self._update_filtered_matches()
         self.signal_matches_filtered.emit(self._filtered_matches)
 
-    def _update_method_dropdown(self, matches):
-        methods = {}
+    def _update_include_dropdown(self):
+        index = self._cmbo_include.currentIndex()
+
+        all_count = len(self._matches)
+        good_count = len([m for m in self._matches if m.is_in_transformation()])
+        bad_count = all_count - good_count
+
+        self._cmbo_include.clear()
+        self._cmbo_include.addItem("{} ({})".format(self.ALL_MATCHES, all_count), self.ALL_MATCHES)
+        self._cmbo_include.addItem("{} ({})".format(self.GOOD_MATCHES, good_count), self.GOOD_MATCHES)
+        self._cmbo_include.addItem("{} ({})".format(self.BAD_MATCHES, bad_count), self.BAD_MATCHES)
+        self._cmbo_include.addItem(self.NO_MATCHES, self.NO_MATCHES)
+
+        self._cmbo_include.setCurrentIndex(index)
+
+    def _update_method_dropdown(self):
+        index = self._cmbo_methods.currentIndex()
+        print(index)
+
+        matches = self._filter_matches_by_include(self._matches)
+        methods = {method: 0 for method in self._match_methods}
 
         for match in matches:
             key = match.method()
-            if key in methods:
-                methods[key] += 1
-            else:
-                methods[key] = 1
+            methods[key] += 1
 
         self._cmbo_methods.clear()
         self._cmbo_methods.addItem("{} ({})".format(self.ALL, len(matches)), self.ALL)
-        for key, value in methods.iteritems():
-            self._cmbo_methods.addItem("{} ({})".format(key, value), key)
+        for method in self._match_methods:
+            count = methods[method]
+            self._cmbo_methods.addItem("{} ({})".format(method, count), method)
+
+        self._cmbo_methods.setCurrentIndex(index)
+
+    def _get_match_methods(self, matches):
+        methods = []
+        for match in matches:
+            method = match.method()
+            if method not in methods:
+                methods.append(method)
+        return methods
+
+    def _include_selection_changed(self):
+        self._update_method_dropdown()
+        self._changed_filters()
+
+    def _method_selection_changed(self):
+        self._changed_filters()
 
     def _update_filtered_matches(self):
         matches = self._matches
@@ -116,8 +153,10 @@ class FilterPane(QWidget):
         if self._cmbo_include is None:
             return []
 
-        include = self._cmbo_include.currentText()
-        if include == self.ALL:
+        index = self._cmbo_include.currentIndex()
+        include = self._cmbo_include.itemData(index).toString()
+
+        if include == self.ALL_MATCHES:
             matches = matches
         elif include == self.GOOD_MATCHES:
             matches = [m for m in matches if m.is_in_transformation()]
