@@ -62,23 +62,27 @@ class CrystalMatchPane(QWidget):
 
         region_size = self._config.region_size.value()
         self._slider_region_size = Slider("Region Size", region_size, 20, 150)
+        self._slider_region_size.signal_value_changed.connect(self._enable_refresh)
 
         search_width = self._config.search_width.value()
         self._slider_search_width = Slider("Search Width", search_width, 100, 500)
+        self._slider_search_width.signal_value_changed.connect(self._enable_refresh)
 
         search_height = self._config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 100, 800)
+        self._slider_search_height.signal_value_changed.connect(self._enable_refresh)
 
-        btn_perform_match = QPushButton("Perform Match")
-        btn_perform_match.clicked.connect(self._fn_perform_match)
-        btn_perform_match.setFixedWidth(80)
+        self._btn_perform_match = QPushButton("Refresh")
+        self._btn_perform_match.clicked.connect(self._fn_perform_match)
+        self._btn_perform_match.setFixedWidth(80)
+        self._btn_perform_match.setEnabled(False)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_select)
         vbox.addWidget(self._slider_region_size)
         vbox.addWidget(self._slider_search_width)
         vbox.addWidget(self._slider_search_height)
-        vbox.addWidget(btn_perform_match)
+        vbox.addWidget(self._btn_perform_match)
         vbox.addStretch()
 
         grp_box.setLayout(vbox)
@@ -101,12 +105,14 @@ class CrystalMatchPane(QWidget):
             points = dialog.selected_points()
             if len(points) == 1:
                 self._set_point_value(points[0])
+                self._fn_perform_match()
 
     def _fn_perform_match(self):
         matcher = self._create_crystal_matcher()
         results = matcher.match([self._point])
         crystal_match = results.get_match(0)
         self._emit_new_match_signal(crystal_match, matcher)
+        self._btn_perform_match.setEnabled(False)
 
     def _create_crystal_matcher(self):
         region_size = self._slider_region_size.value()
@@ -127,4 +133,8 @@ class CrystalMatchPane(QWidget):
     def _set_point_value(self, point):
         self._point = point
         self._txt_point.setText("x={}, y={}".format(int(point.x), int(point.y)))
+
+    def _enable_refresh(self):
+        if self._point is not None:
+            self._btn_perform_match.setEnabled(True)
 
