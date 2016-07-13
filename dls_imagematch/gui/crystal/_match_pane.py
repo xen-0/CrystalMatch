@@ -114,6 +114,8 @@ class CrystalMatchPane(QWidget):
         self._emit_new_match_signal(crystal_match, matcher)
         self._btn_perform_match.setEnabled(False)
 
+        coherence = crystal_match.feature_matches().calculate_coherence()
+
     def _create_crystal_matcher(self):
         region_size = self._slider_region_size.value()
         search_width = self._slider_search_width.value()
