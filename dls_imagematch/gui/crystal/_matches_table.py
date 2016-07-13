@@ -8,6 +8,8 @@ from PyQt4.QtGui import QWidget, QVBoxLayout, QTableWidget, QGroupBox
 class FeatureMatchTable(QWidget):
     signal_matches_selected = QtCore.pyqtSignal(object)
 
+    COLUMNS = ['Index', 'Method', 'KP Dist', 'Good?', 'Error']
+
     def __init__(self):
         super(FeatureMatchTable, self).__init__()
 
@@ -31,15 +33,14 @@ class FeatureMatchTable(QWidget):
 
     def _ui_create_table(self):
         table = QTableWidget()
-        table.setFixedWidth(300)
+        table.setFixedWidth(320)
         table.setFixedHeight(900)
-        table.setColumnCount(4)
         table.setRowCount(10)
-        table.setHorizontalHeaderLabels(['Index', 'Method', 'Distance', 'Included'])
-        table.setColumnWidth(0, 80)
-        table.setColumnWidth(1, 80)
-        table.setColumnWidth(2, 80)
-        table.setColumnWidth(3, 80)
+        table.setColumnCount(len(self.COLUMNS))
+        table.setHorizontalHeaderLabels(self.COLUMNS)
+        for i in range(len(self.COLUMNS)):
+            table.setColumnWidth(i, 65)
+
         table.setColumnHidden(0, True)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         table.currentItemChanged.connect(self._changed_selection)
@@ -92,7 +93,8 @@ class FeatureMatchTable(QWidget):
     def _populate_row(self, match, row, index, selected):
         distance = '{:.3f}'.format(match.distance())
         included = 'X' if match.is_in_transformation() else ''
-        items = [index, match.method(), distance, included]
+        error = '{:.3f}'.format(match.reprojection_error())
+        items = [index, match.method(), distance, included, error]
 
         for col, item in enumerate(items):
             table_item = QtGui.QTableWidgetItem(str(item))
