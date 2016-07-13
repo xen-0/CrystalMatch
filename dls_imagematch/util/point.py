@@ -40,7 +40,7 @@ class Point:
 
     def __str__(self):
         """ Human-readable string representation. """
-        return "({}, {})".format(self.x, self.y)
+        return "({:.2f}, {:.2f})".format(self.x, self.y)
 
     def __repr__(self):
         """ Unambiguous string representation. """
