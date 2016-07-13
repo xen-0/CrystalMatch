@@ -5,6 +5,7 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QP
 
 from _point_select_dialog import PointSelectDialog
 from _slider import Slider
+from dls_imagematch.util import Point
 
 
 from dls_imagematch.match import CrystalMatcher
@@ -30,6 +31,7 @@ class CrystalMatchPane(QWidget):
         self._slider_region_size = None
 
         self._init_ui()
+        self._set_point_value(aligned_images.img1.bounds().center())
 
     def _init_ui(self):
         pane = self._ui_create_pane()
@@ -46,9 +48,12 @@ class CrystalMatchPane(QWidget):
         lbl_select_point = QLabel("Selected Point")
         lbl_select_point.setFixedWidth(self.LABEL_WIDTH)
 
-        self._txt_point = QLineEdit()
-        self._txt_point.setFixedWidth(200)
-        self._txt_point.setEnabled(False)
+        self._txt_point_x = QLineEdit("0")
+        self._txt_point_x.setFixedWidth(70)
+        self._txt_point_x.textChanged.connect(self._point_x_text_changed)
+        self._txt_point_y = QLineEdit("0")
+        self._txt_point_y.setFixedWidth(70)
+        self._txt_point_y.textChanged.connect(self._point_y_text_changed)
 
         btn_select_point = QPushButton("Select")
         btn_select_point.clicked.connect(self._fn_select_crystal_point)
@@ -56,26 +61,25 @@ class CrystalMatchPane(QWidget):
 
         hbox_select = QHBoxLayout()
         hbox_select.addWidget(lbl_select_point)
-        hbox_select.addWidget(self._txt_point)
+        hbox_select.addWidget(QLabel("X="))
+        hbox_select.addWidget(self._txt_point_x)
+        hbox_select.addWidget(QLabel("Y="))
+        hbox_select.addWidget(self._txt_point_y)
         hbox_select.addWidget(btn_select_point)
         hbox_select.addStretch(1)
 
         region_size = self._config.region_size.value()
         self._slider_region_size = Slider("Region Size", region_size, 20, 150)
-        self._slider_region_size.signal_value_changed.connect(self._enable_refresh)
 
         search_width = self._config.search_width.value()
         self._slider_search_width = Slider("Search Width", search_width, 100, 500)
-        self._slider_search_width.signal_value_changed.connect(self._enable_refresh)
 
         search_height = self._config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 100, 800)
-        self._slider_search_height.signal_value_changed.connect(self._enable_refresh)
 
         self._btn_perform_match = QPushButton("Refresh")
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
         self._btn_perform_match.setFixedWidth(80)
-        self._btn_perform_match.setEnabled(False)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_select)
@@ -109,12 +113,10 @@ class CrystalMatchPane(QWidget):
 
     def _fn_perform_match(self):
         matcher = self._create_crystal_matcher()
+        print(self._point)
         results = matcher.match([self._point])
         crystal_match = results.get_match(0)
         self._emit_new_match_signal(crystal_match, matcher)
-        self._btn_perform_match.setEnabled(False)
-
-        coherence = crystal_match.feature_matches().calculate_coherence()
 
     def _create_crystal_matcher(self):
         region_size = self._slider_region_size.value()
@@ -133,10 +135,28 @@ class CrystalMatchPane(QWidget):
         self.signal_new_crystal_match.emit(crystal_match, matcher)
 
     def _set_point_value(self, point):
-        self._point = point
-        self._txt_point.setText("x={}, y={}".format(int(point.x), int(point.y)))
+        self._point = point.intify()
 
-    def _enable_refresh(self):
-        if self._point is not None:
-            self._btn_perform_match.setEnabled(True)
+        if self._txt_point_x.text() != str(self._point.x):
+            self._txt_point_x.setText(str(self._point.x))
 
+        if self._txt_point_y.text() != str(self._point.y):
+            self._txt_point_y.setText(str(self._point.y))
+
+    def _point_x_text_changed(self):
+        x = self._txt_point_x.text()
+        try:
+            x = int(x)
+            if x != self._point.x:
+                self._set_point_value(Point(x, self._point.y))
+        except ValueError:
+            pass
+
+    def _point_y_text_changed(self):
+        y = self._txt_point_y.text()
+        try:
+            y = int(y)
+            if y != self._point.y:
+                self._set_point_value(Point(self._point.x, y))
+        except ValueError:
+            pass
