@@ -11,18 +11,11 @@ class FeatureMatchResult:
         self.method = None
         self.method_adapt = None
 
-    def calculate_coherence(self):
+        self.coherence = self._calculate_coherence()
 
+    def _calculate_coherence(self):
         good_matches = [m for m in self.matches if m.is_in_transformation()]
-
-        total = 0
-        distances = []
-        for match in good_matches:
-            point1 = match.point1()
-            point2 = match.point2()
-            projected_point2 = self.transform.transform_points([point1])[0]
-            distance = point2.distance_to(projected_point2)
-            distances.append(distance)
+        distances = [m.reprojection_error() for m in good_matches]
 
         total = sum(distances) / len(good_matches)
         print("Coherence: {:.3f}".format(total))
