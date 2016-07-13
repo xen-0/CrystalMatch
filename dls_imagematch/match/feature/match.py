@@ -12,10 +12,17 @@ class SingleFeatureMatch:
         self._method = method
         self._offset1 = Point(0, 0)
         self._offset2 = Point(0, 0)
+        self._point2_projected = None
         self._included_in_transformation = True
 
     def method(self):
         return self._method
+
+    def reprojection_error(self):
+        if self._point2_projected is not None:
+            return self.point2().distance_to(self._point2_projected)
+        else:
+            return Point(1e6, 1e6)
 
     def is_in_transformation(self):
         return self._included_in_transformation
@@ -35,6 +42,9 @@ class SingleFeatureMatch:
     def point2(self):
         return self.img_point2() + self._offset2
 
+    def point2_projected(self):
+        return self._point2_projected
+
     def img_point1(self):
         return Point(self._kp1.pt[0], self._kp1.pt[1])
 
@@ -44,6 +54,9 @@ class SingleFeatureMatch:
     def set_offsets(self, offset1, offset2):
         self._offset1 = offset1
         self._offset2 = offset2
+
+    def set_point2_projected(self, point):
+        self._point2_projected = point
 
     def set_in_transformation(self, in_transformation):
         self._included_in_transformation = in_transformation
