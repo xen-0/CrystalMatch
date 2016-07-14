@@ -81,8 +81,6 @@ class HomographyCalculator:
 
         self._set_matches_reprojection_error(matches, transform)
         self._mark_unused_matches(matches, mask)
-        for match in [m for m in matches if m.is_in_transformation()]:
-            print(str(match.point1()), match.reprojection_error())
 
         return transform
 
@@ -120,12 +118,6 @@ class HomographyCalculator:
         for match, mask in izip(matches, mask):
             in_transform = mask == 1
             match.set_in_transformation(in_transform)
-
-        print("+" * 50)
-        for match in matches:
-            if match.is_in_transformation():
-                print("{}, {}, {}".format(match.point2(), match.point2_projected(), match.reprojection_error()))
-        print("-" * 50)
 
     @staticmethod
     def _set_matches_reprojection_error(matches, transform):

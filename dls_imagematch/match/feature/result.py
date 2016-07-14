@@ -19,5 +19,4 @@ class FeatureMatchResult:
 
         total = sum(distances) / len(good_matches)
         print("Coherence: {:.3f}".format(total))
-        print(sorted(distances))
         return total
