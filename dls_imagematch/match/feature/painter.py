@@ -96,6 +96,25 @@ class FeaturePainter:
 
         return img
 
+    def draw_transform_quads(self, quad1, quad2, img=None):
+        if img is None:
+            img = self._background_image.copy()
+
+        f1 = lambda x: self._point_to_img_coords(x, 1)
+        f2 = lambda x: self._point_to_img_coords(x, 2)
+
+        img.draw_line(f2(quad2[0]), f2(quad2[1]), Color.Orange(), 2)
+        img.draw_line(f2(quad2[1]), f2(quad2[2]), Color.Orange(), 2)
+        img.draw_line(f2(quad2[2]), f2(quad2[3]), Color.Orange(), 2)
+        img.draw_line(f2(quad2[3]), f2(quad2[0]), Color.Orange(), 2)
+
+        img.draw_line(f1(quad1[0]), f1(quad1[1]), Color.Orange(), 2)
+        img.draw_line(f1(quad1[1]), f1(quad1[2]), Color.Orange(), 2)
+        img.draw_line(f1(quad1[2]), f1(quad1[3]), Color.Orange(), 2)
+        img.draw_line(f1(quad1[3]), f1(quad1[0]), Color.Orange(), 2)
+
+        return img
+
     def draw_matches(self, matches, highlight_matches=[], img=None):
         """ Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
         Makes an image that is a side-by-side of the two images, with detected features highlighted and lines

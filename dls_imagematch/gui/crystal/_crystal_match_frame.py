@@ -17,6 +17,8 @@ class CrystalMatchFrame(QWidget):
         self._highlighted_matches = []
         self._img1_point = None
         self._img2_point = None
+        self._quad1 = None
+        self._quad2 = None
 
         self._init_ui()
 
@@ -47,6 +49,8 @@ class CrystalMatchFrame(QWidget):
         self._highlighted_matches = []
         self._img1_point = None
         self._img2_point = None
+        self._quad1 = None
+        self._quad2 = None
 
     def set_new_images(self, img1, img2):
         self.clear()
@@ -58,6 +62,11 @@ class CrystalMatchFrame(QWidget):
     def display_points(self, img1_point, img2_point):
         self._img1_point = img1_point
         self._img2_point = img2_point
+        self._update_image()
+
+    def display_transformed_square(self, quad1, quad2):
+        self._quad1 = quad1
+        self._quad2 = quad2
         self._update_image()
 
     def display_matches(self, matches):
@@ -73,6 +82,10 @@ class CrystalMatchFrame(QWidget):
             return
 
         image = self._painter.background_image()
+
+        if self._quad1 is not None and self._quad2 is not None:
+            image = self._painter.draw_transform_quads(self._quad1, self._quad2, image)
+
         image = self._painter.draw_matches(self._matches, self._highlighted_matches, image)
 
         if self._img1_point is not None and self._img2_point is not None:

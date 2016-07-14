@@ -6,11 +6,13 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 from dls_imagematch.match.feature import HomographyCalculator
+from dls_imagematch.util import Point
 from ._slider import Slider
 
 
 class HomographyPane(QWidget):
     signal_new_points = QtCore.pyqtSignal(object, object)
+    signal_new_quads = QtCore.pyqtSignal(object, object)
     signal_updated_matches = QtCore.pyqtSignal(object)
 
     def __init__(self):
@@ -76,16 +78,31 @@ class HomographyPane(QWidget):
         if self._matcher is None:
             return
 
-        point1 = self._img1_point - self._matcher.make_target_region(self._img1_point).top_left()
+        target_region_tl = self._matcher.make_target_region(self._img1_point).top_left()
+        search_region_tl = self._matcher.make_search_region(self._img1_point).top_left()
+
+        point1 = self._img1_point - target_region_tl
         point2 = None
+        quad1 = []
+        quad2 = []
 
         if len(self._matches) > 0:
             homo = self._create_homography_calc()
             transform = homo.calculate_transform(self._matches)
             transformed_point = transform.transform_points([self._img1_point])[0]
-            point2 = transformed_point - self._matcher.make_search_region(self._img1_point).top_left()
+            point2 = transformed_point - search_region_tl
+
+            p1 = self._img1_point
+
+            def trans(x, y):
+                return transform.transform_points([p1 + Point(x, y)])[0] - search_region_tl
+
+            w = point1.x
+            quad1 = [Point(0, 0), Point(2*w, 0), Point(2*w, 2*w), Point(0, 2*w)]
+            quad2 = [trans(-w, -w), trans(w, -w), trans(w, w), trans(-w, w)]
 
         self._emit_new_points_signal(point1, point2)
+        self._emit_new_quads(quad1, quad2)
 
     def _create_homography_calc(self):
         method_index = self._cmbo_methods.currentIndex()
@@ -101,3 +118,6 @@ class HomographyPane(QWidget):
     def _emit_new_points_signal(self, point1, point2):
         self.signal_new_points.emit(point1, point2)
         self.signal_updated_matches.emit(self._matches)
+
+    def _emit_new_quads(self, quad1, quad2):
+        self.signal_new_quads.emit(quad1, quad2)

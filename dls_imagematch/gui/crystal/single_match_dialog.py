@@ -71,6 +71,7 @@ class SingleCrystalDialog(QDialog):
 
         self._homo_pane.signal_updated_matches.connect(self._filter_pane.set_matches)
         self._homo_pane.signal_new_points.connect(self._frame.display_points)
+        self._homo_pane.signal_new_quads.connect(self._frame.display_transformed_square)
 
         self._filter_pane.signal_matches_filtered.connect(self._frame.display_matches)
         self._filter_pane.signal_matches_filtered.connect(self._table.display_matches)
