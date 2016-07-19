@@ -9,7 +9,7 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
 from gui import *
-from config.xtal_config import XtalConfig
+from config import XtalConfig, XtalConfigDialog
 
 
 class VMXiCrystalMatcher(QMainWindow):
@@ -83,7 +83,8 @@ class VMXiCrystalMatcher(QMainWindow):
         self.setCentralWidget(main_widget)
         self.show()
 
-        well_selector._emit_well_selected_signal()
+        if well_selector.is_sample_dir_valid():
+            well_selector._emit_well_selected_signal()
 
     def init_menu_bar(self):
         """Create and populate the menu bar. """

@@ -1,5 +1,7 @@
 from __future__ import division
 
+import os
+
 from PyQt4 import QtCore
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 
@@ -19,25 +21,21 @@ class WellSelector2(QGroupBox):
     def __init__(self, config):
         super(WellSelector2, self).__init__()
 
-        self._samples_dir = config.samples_dir.value()
-
         self._init_ui()
         self.setTitle("Select Plate")
 
+        self._samples_dir = None
+
+        self._set_samples_directory(config.samples_dir.value())
         self._refresh_batch_lists()
         self._refresh_well_list()
 
     def _init_ui(self):
         """ Create all the display elements of the widget. """
-        # Get list of plate directories
-        plate_folders = File.get_sub_dirs(self._samples_dir, startswith="plate_")
 
         # Row dropdown box
         self._cmbo_plate = QComboBox()
         self._cmbo_plate.activated[str].connect(self._refresh_batch_lists)
-        for folder in plate_folders:
-            folder = folder.split("/")[-1]
-            self._cmbo_plate.addItem(folder)
 
         # Column dropdown box
         self._cmbo_batch1 = QComboBox()
@@ -57,9 +55,28 @@ class WellSelector2(QGroupBox):
 
         self.setLayout(hbox_well_select)
 
+    def _set_samples_directory(self, directory):
+        self._samples_dir = directory
+
+        if not self.is_sample_dir_valid():
+            return
+
+        # Get list of plate directories
+        plate_folders = File.get_sub_dirs(directory, startswith="plate_")
+
+        for folder in plate_folders:
+            folder = folder.split("/")[-1]
+            self._cmbo_plate.addItem(folder)
+
+    def is_sample_dir_valid(self):
+        return self._samples_dir is not None and os.path.exists(self._samples_dir)
+
     def _refresh_batch_lists(self):
         """ Called when a plate is selected in the plate dropdown; displays a list of the available batches
         in the batch dropdowns. """
+        if not self.is_sample_dir_valid():
+            return
+
         self._cmbo_batch1.clear()
         self._cmbo_batch2.clear()
 
@@ -81,6 +98,9 @@ class WellSelector2(QGroupBox):
     def _refresh_well_list(self):
         """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
         wells in the well dropdown. """
+        if not self.is_sample_dir_valid():
+            return
+
         current_selection = self._cmbo_well.currentText()
         self._cmbo_well.clear()
 
@@ -130,4 +150,3 @@ class WellSelector2(QGroupBox):
 
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)
-
