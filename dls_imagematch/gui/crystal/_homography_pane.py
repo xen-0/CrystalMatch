@@ -1,7 +1,5 @@
 from __future__ import division
 
-from itertools import izip
-
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
@@ -47,7 +45,7 @@ class HomographyPane(QWidget):
 
         names = HomographyCalculator.METHOD_NAMES
         values = HomographyCalculator.METHOD_VALUES
-        for name, value in izip(names, values):
+        for name, value in zip(names, values):
             self._cmbo_methods.addItem(name, value)
 
         self._slider_threshold = Slider("RANSAC Threshold", 5.0, 1.0, 20.0)

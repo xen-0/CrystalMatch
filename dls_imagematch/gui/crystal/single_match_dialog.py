@@ -1,13 +1,12 @@
 from __future__ import division
 
-from PyQt4 import QtCore
-from PyQt4.QtGui import QDialog, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit, QCheckBox, QSlider
+from PyQt4.QtGui import QDialog, QHBoxLayout, QVBoxLayout
 
-from _match_pane import CrystalMatchPane
-from _filter_pane import FilterPane
-from _matches_table import FeatureMatchTable
-from _crystal_match_frame import CrystalMatchFrame
-from _homography_pane import HomographyPane
+from ._match_pane import CrystalMatchPane
+from ._filter_pane import FilterPane
+from ._matches_table import FeatureMatchTable
+from ._crystal_match_frame import CrystalMatchFrame
+from ._homography_pane import HomographyPane
 
 
 class SingleCrystalDialog(QDialog):

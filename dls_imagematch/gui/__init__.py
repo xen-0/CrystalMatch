@@ -8,7 +8,6 @@ from .match_region_control import RegionMatchControl
 from .progress_dialog import ProgressDialog
 from .well_select import WellSelector
 from .well_select2 import WellSelector2
-from .xtal_config_dialog import XtalConfigDialog
 
 
 
