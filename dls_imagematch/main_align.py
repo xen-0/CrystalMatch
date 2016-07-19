@@ -7,8 +7,8 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 
 sys.path.append("..")
 
-from dls_imagematch.gui import *
-from dls_imagematch.xtal_config import XtalConfig
+from gui import *
+from config.xtal_config import XtalConfig
 
 
 class AlignmentMain(QMainWindow):

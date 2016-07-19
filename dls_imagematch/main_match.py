@@ -1,14 +1,15 @@
 from __future__ import division
 
 import sys
+from os.path import dirname
+from sys import path
+path.append(dirname(path[0]))
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
-sys.path.append("..")
-
-from dls_imagematch.gui import *
-from dls_imagematch.xtal_config import XtalConfig
+from gui import *
+from config.xtal_config import XtalConfig
 
 
 class VMXiCrystalMatcher(QMainWindow):
