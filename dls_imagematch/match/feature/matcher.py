@@ -2,7 +2,7 @@ from __future__ import division
 
 import cv2
 
-from .homography import HomographyCalculator
+from .transform_calc import TransformCalculator
 from .result import FeatureMatchResult
 
 from .exception import FeatureMatchException
@@ -42,14 +42,14 @@ class FeatureMatcher:
     def match(self):
         matches = self._find_matches()
 
-        homography = HomographyCalculator()
+        homography = TransformCalculator()
         homography.set_homography_method(self._homo_method)
 
         transform = homography.calculate_transform(matches)
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
-        self.set_homography_method(HomographyCalculator.TRANSLATION)
+        self.set_homography_method(TransformCalculator.TRANSLATION)
         return self.match()
 
     def _create_result_object(self, matches, transform):

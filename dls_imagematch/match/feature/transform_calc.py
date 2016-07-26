@@ -7,7 +7,7 @@ from dls_imagematch.util import Point
 from ..transform import HomographyTransformation, Translation, AffineTransformation2D, AffineTransformation3D
 
 
-class HomographyCalculator:
+class TransformCalculator:
     """ For a set of matches which map points between two images, this class finds the approximate
     transformation that will map any point in the first image to the equivalent point in the second.
     The transformation can include translation, rotation, scale, and skew components.
@@ -46,8 +46,8 @@ class HomographyCalculator:
 
     @staticmethod
     def METHOD_FROM_NAME(name):
-        index = HomographyCalculator.METHOD_NAMES.index(name)
-        return HomographyCalculator.METHOD_VALUES[index]
+        index = TransformCalculator.METHOD_NAMES.index(name)
+        return TransformCalculator.METHOD_VALUES[index]
 
     def __init__(self):
         self._method = self._DEFAULT_METHOD

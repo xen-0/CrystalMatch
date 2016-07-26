@@ -2,7 +2,7 @@ from dls_imagematch.util import Color
 from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, \
     BoolConfigItem, EnumConfigItem
 
-from dls_imagematch.match.feature import HomographyCalculator
+from dls_imagematch.match.feature import TransformCalculator
 
 
 class XtalConfig(Config):
@@ -11,7 +11,7 @@ class XtalConfig(Config):
 
         add = self.add
 
-        homo_methods = HomographyCalculator.METHOD_NAMES
+        homo_methods = TransformCalculator.METHOD_NAMES
 
         self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')

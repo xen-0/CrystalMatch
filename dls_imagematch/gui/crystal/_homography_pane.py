@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
-from dls_imagematch.match.feature import HomographyCalculator
+from dls_imagematch.match.feature import TransformCalculator
 from dls_imagematch.util import Point
 from ._slider import Slider
 
@@ -43,8 +43,8 @@ class HomographyPane(QWidget):
         self._cmbo_methods.setFixedWidth(120)
         self._cmbo_methods.currentIndexChanged.connect(self._refresh_transform)
 
-        names = HomographyCalculator.METHOD_NAMES
-        values = HomographyCalculator.METHOD_VALUES
+        names = TransformCalculator.METHOD_NAMES
+        values = TransformCalculator.METHOD_VALUES
         for name, value in zip(names, values):
             self._cmbo_methods.addItem(name, value)
 
@@ -104,11 +104,11 @@ class HomographyPane(QWidget):
 
     def _create_homography_calc(self):
         method_index = self._cmbo_methods.currentIndex()
-        method = HomographyCalculator.METHOD_VALUES[method_index]
+        method = TransformCalculator.METHOD_VALUES[method_index]
 
         threshold = self._slider_threshold.value()
 
-        homo = HomographyCalculator()
+        homo = TransformCalculator()
         homo.set_homography_method(method)
         homo.set_ransac_threshold(threshold)
         return homo
