@@ -70,12 +70,12 @@ class TransformCalculator:
     # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
         use_translation = self._method == self.TRANSLATION
-        can_do_transform = self._has_enough_matches_for_full_transform(matches)
+        can_do_transform = self._has_enough_matches_for_homography_transform(matches)
 
         if use_translation or not can_do_transform:
             transform, mask = self._calculate_median_translation(matches)
         else:
-            transform, mask = self._calculate_full_transform(matches)
+            transform, mask = self._calculate_homography_transform(matches)
 
         self._set_matches_reprojection_error(matches, transform)
         self._mark_unused_matches(matches, mask)
@@ -94,44 +94,75 @@ class TransformCalculator:
 
         return transform, mask
 
-    def _calculate_full_transform(self, matches):
+    def _calculate_homography_transform(self, matches):
         transform = None
         mask = [1] * len(matches)
 
-        if self._has_enough_matches_for_full_transform(matches):
-            img1_pts = [m.point1().tuple() for m in matches]
-            img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
-            img2_pts = [m.point2().tuple() for m in matches]
-            img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
-            homography, mask = cv2.findHomography(img1_pts, img2_pts, self._method, self._ransac_threshold)
+        if self._has_enough_matches_for_homography_transform(matches):
+            img1_pts, img2_pts = self._get_np_2d_points(matches)
+            homo_method = self.get_homography_method_code()
+            homography, mask = cv2.findHomography(img1_pts, img2_pts, homo_method, self._ransac_threshold)
             transform = HomographyTransformation(homography)
 
         return transform, mask
 
-    def _calculate_affine(self, matches):
+    def _calculate_affine_2d_transform(self, matches):
         transform = None
         mask = [1] * len(matches)
 
-        if self._has_enough_matches_for_full_transform(matches):
-            # AFFINE 3D - WITH RANSAC
-            img1_pts_3d = [[m.point1().x, m.point1().y, 0] for m in matches]
-            img1_pts_3d = np.float32(img1_pts_3d).reshape(-1, 1, 3)
-            img2_pts_3d = [[m.point2().x, m.point2().y, 0] for m in matches]
-            img2_pts_3d = np.float32(img2_pts_3d).reshape(-1, 1, 3)
-            _, affine_3d, inliers = cv2.estimateAffine3D(img1_pts_3d, img2_pts_3d)
-            affine_3d = np.array([affine_3d[0], affine_3d[1], affine_3d[2], [0, 0, 0, 1]], np.float32)
-            transform = AffineTransformation3D(affine_3d)
-            mask = [i[0] for i in inliers]
-
-            # RIGID AFFINE
-            # affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=True)
-            # affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
-            # transform = AffineTransformation2D(affine)
+        if self._has_enough_matches_for_homography_transform(matches):
+            img1_pts, img2_pts = self._get_np_2d_points(matches)
+            affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=True)
+            affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
+            transform = AffineTransformation2D(affine)
 
         return transform, mask
 
-    def _has_enough_matches_for_full_transform(self, matches):
+    def _calculate_affine_3d_transform(self, matches):
+        transform = None
+        mask = [1] * len(matches)
+
+        if self._has_enough_matches_for_homography_transform(matches):
+            img1_pts, img2_pts = self._get_np_3d_points(matches)
+            _, affine_3d, inliers = cv2.estimateAffine3D(img1_pts, img2_pts, ransacThreshold=self._ransac_threshold)
+
+            affine_3d = np.array([affine_3d[0], affine_3d[1], affine_3d[2], [0, 0, 0, 1]], np.float32)
+            transform = AffineTransformation3D(affine_3d)
+
+            mask = [i[0] for i in inliers]
+
+        return transform, mask
+
+    def _has_enough_matches_for_homography_transform(self, matches):
         return len(matches) >= self._MIN_HOMOGRAPHY_MATCHES
+
+    def get_homography_method_code(self):
+        method = self._method
+
+        if method == self.HOMO_INCLUDE_ALL:
+            return 0
+        elif method == self.HOMO_LMEDS:
+            return cv2.LMEDS
+        elif method == self.HOMO_RANSAC:
+            return cv2.RANSAC
+        else:
+            return -1
+
+    @staticmethod
+    def _get_np_2d_points(matches):
+        img1_pts = [m.point1().tuple() for m in matches]
+        img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
+        img2_pts = [m.point2().tuple() for m in matches]
+        img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
+        return img1_pts, img2_pts
+
+    @staticmethod
+    def _get_np_3d_points(matches):
+        img1_pts_3d = [[m.point1().x, m.point1().y, 0] for m in matches]
+        img1_pts_3d = np.float32(img1_pts_3d).reshape(-1, 1, 3)
+        img2_pts_3d = [[m.point2().x, m.point2().y, 0] for m in matches]
+        img2_pts_3d = np.float32(img2_pts_3d).reshape(-1, 1, 3)
+        return img1_pts_3d, img2_pts_3d
 
     @staticmethod
     def _mark_unused_matches(matches, mask):
