@@ -6,7 +6,7 @@ from ._match_pane import CrystalMatchPane
 from ._filter_pane import FilterPane
 from ._matches_table import FeatureMatchTable
 from ._crystal_match_frame import CrystalMatchFrame
-from ._homography_pane import HomographyPane
+from ._transform_pane import TransformPane
 
 
 class SingleCrystalDialog(QDialog):
@@ -36,7 +36,7 @@ class SingleCrystalDialog(QDialog):
 
         self._match_pane = CrystalMatchPane(self._aligned_images, self._config)
 
-        self._homo_pane = HomographyPane()
+        self._homo_pane = TransformPane()
 
         self._filter_pane = FilterPane()
         self._filter_pane.setEnabled(False)

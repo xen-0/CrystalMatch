@@ -36,12 +36,12 @@ class FilterPane(QWidget):
         self.setLayout(vbox_table)
 
     def _ui_create_filters(self):
-        label_width = 90
+        label_width = 100
 
         lbl_include = QLabel("Include")
         lbl_include.setFixedWidth(label_width)
         self._cmbo_include = QComboBox()
-        self._cmbo_include.setFixedWidth(120)
+        self._cmbo_include.setFixedWidth(150)
         self._cmbo_include.addItems([self.ALL_MATCHES, self.GOOD_MATCHES, self.BAD_MATCHES, self.NO_MATCHES])
         self._cmbo_include.currentIndexChanged.connect(self._include_selection_changed)
 
@@ -53,7 +53,7 @@ class FilterPane(QWidget):
         lbl_method = QLabel("Detector")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
-        self._cmbo_methods.setFixedWidth(120)
+        self._cmbo_methods.setFixedWidth(150)
         self._cmbo_methods.addItem(self.ALL, self.ALL)
         self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 

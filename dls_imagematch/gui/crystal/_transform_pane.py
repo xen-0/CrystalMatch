@@ -8,13 +8,13 @@ from dls_imagematch.util import Point
 from ._slider import Slider
 
 
-class HomographyPane(QWidget):
+class TransformPane(QWidget):
     signal_new_points = QtCore.pyqtSignal(object, object)
     signal_new_quads = QtCore.pyqtSignal(object, object)
     signal_updated_matches = QtCore.pyqtSignal(object)
 
     def __init__(self):
-        super(HomographyPane, self).__init__()
+        super(TransformPane, self).__init__()
 
         self._matcher = None
         self._matches = []
@@ -40,7 +40,7 @@ class HomographyPane(QWidget):
         lbl_method = QLabel("Method")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
-        self._cmbo_methods.setFixedWidth(120)
+        self._cmbo_methods.setFixedWidth(150)
         self._cmbo_methods.currentIndexChanged.connect(self._refresh_transform)
 
         names = TransformCalculator.METHOD_NAMES
@@ -61,7 +61,7 @@ class HomographyPane(QWidget):
         vbox.addWidget(self._slider_threshold)
         vbox.addStretch(1)
 
-        box = QGroupBox("Homography")
+        box = QGroupBox("Transformation")
         box.setLayout(vbox)
 
         return box
