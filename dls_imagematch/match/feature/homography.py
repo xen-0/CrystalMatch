@@ -2,11 +2,10 @@ from __future__ import division
 
 import cv2
 import numpy as np
-from itertools import izip
 
 from dls_imagematch.util import Point
-from dls_imagematch.match.transformation import Transformation
-from dls_imagematch.match.translation import Translation
+from match.transform import Translation
+from match.transform import Transformation
 
 
 class HomographyCalculator:
@@ -115,7 +114,7 @@ class HomographyCalculator:
 
     @staticmethod
     def _mark_unused_matches(matches, mask):
-        for match, mask in izip(matches, mask):
+        for match, mask in zip(matches, mask):
             in_transform = mask == 1
             match.set_in_transformation(in_transform)
 
