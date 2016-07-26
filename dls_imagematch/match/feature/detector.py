@@ -56,6 +56,8 @@ class FeatureDetector:
         return detector
 
     def _create_extractor(self):
+        """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
+        array of 64 floats (in range -1 to 1); all others are arrays of 32 ints (in range 0 to 255. """
         # Sift, Surf, and Orb have their own descriptor extraction methods.
         name = "BRIEF"
         if self.detector in ["SIFT", "SURF", "ORB"]:
