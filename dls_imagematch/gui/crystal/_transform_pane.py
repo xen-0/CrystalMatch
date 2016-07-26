@@ -25,6 +25,8 @@ class TransformPane(QWidget):
 
         self._init_ui()
 
+        self._method_selection_changed()
+
     def _init_ui(self):
         pane = self._ui_create_pane()
 
@@ -41,7 +43,7 @@ class TransformPane(QWidget):
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
         self._cmbo_methods.setFixedWidth(150)
-        self._cmbo_methods.currentIndexChanged.connect(self._refresh_transform)
+        self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 
         names = TransformCalculator.METHOD_NAMES
         values = TransformCalculator.METHOD_VALUES
@@ -70,6 +72,12 @@ class TransformPane(QWidget):
         self._matcher = matcher
         self._img1_point = crystal_match.img1_point()
         self._matches = crystal_match.feature_matches().matches
+        self._refresh_transform()
+
+    def _method_selection_changed(self):
+        method = self._get_method_value()
+        enable_slider = method in TransformCalculator.RANSAC_METHODS
+        self._slider_threshold.setEnabled(enable_slider)
         self._refresh_transform()
 
     def _refresh_transform(self):
@@ -103,15 +111,18 @@ class TransformPane(QWidget):
         self._emit_new_quads(quad1, quad2)
 
     def _create_homography_calc(self):
-        method_index = self._cmbo_methods.currentIndex()
-        method = TransformCalculator.METHOD_VALUES[method_index]
-
+        method = self._get_method_value()
         threshold = self._slider_threshold.value()
 
         homo = TransformCalculator()
         homo.set_homography_method(method)
         homo.set_ransac_threshold(threshold)
         return homo
+
+    def _get_method_value(self):
+        method_index = self._cmbo_methods.currentIndex()
+        method = TransformCalculator.METHOD_VALUES[method_index]
+        return method
 
     def _emit_new_points_signal(self, point1, point2):
         self.signal_new_points.emit(point1, point2)
