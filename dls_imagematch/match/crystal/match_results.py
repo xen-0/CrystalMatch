@@ -1,5 +1,3 @@
-from dls_imagematch.util import Rectangle
-from dls_imagematch.match.transformation import Transformation
 from dls_imagematch.match.aligned_images import AlignedImages
 
 
