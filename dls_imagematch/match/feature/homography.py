@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point
-from match.transform import Translation
-from match.transform import HomographyTransformation
+from ..transform import HomographyTransformation, Translation, AffineTransformation2D, AffineTransformation3D
 
 
 class HomographyCalculator:
@@ -35,14 +34,14 @@ class HomographyCalculator:
     _MIN_HOMOGRAPHY_MATCHES = 4
 
     TRANSLATION = -1
-    INCLUDE_ALL = 0
-    RANSAC = cv2.RANSAC
-    LMEDS = cv2.LMEDS
+    HOMO_INCLUDE_ALL = 0
+    HOMO_RANSAC = cv2.RANSAC
+    HOMO_LMEDS = cv2.LMEDS
 
-    METHOD_NAMES = ["LMEDS", "RANSAC", "Include All", "Translation Only"]
-    METHOD_VALUES = [LMEDS, RANSAC, INCLUDE_ALL, TRANSLATION]
+    METHOD_NAMES = ["Homography - RANSAC", "Homography - LMEDS", "Homography - Include All", "Translation Only"]
+    METHOD_VALUES = [HOMO_RANSAC, HOMO_LMEDS, HOMO_INCLUDE_ALL, TRANSLATION]
 
-    _DEFAULT_METHOD = RANSAC
+    _DEFAULT_METHOD = HOMO_RANSAC
     _DEFAULT_RANSAC_THRESHOLD = 5.0
 
     @staticmethod
