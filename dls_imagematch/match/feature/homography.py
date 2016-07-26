@@ -5,7 +5,7 @@ import numpy as np
 
 from dls_imagematch.util import Point
 from match.transform import Translation
-from match.transform import Transformation
+from match.transform import HomographyTransformation
 
 
 class HomographyCalculator:

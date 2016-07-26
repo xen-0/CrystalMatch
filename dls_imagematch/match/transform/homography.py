@@ -4,7 +4,7 @@ import numpy as np
 from dls_imagematch.util import Point, Image
 
 
-class Transformation:
+class HomographyTransformation:
     def __init__(self, homography_matrix):
         self._homography = homography_matrix
         self._homography_inverse = None
