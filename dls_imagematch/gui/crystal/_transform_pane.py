@@ -25,8 +25,6 @@ class TransformPane(QWidget):
 
         self._init_ui()
 
-        self._method_selection_changed()
-
     def _init_ui(self):
         pane = self._ui_create_pane()
 
@@ -39,6 +37,9 @@ class TransformPane(QWidget):
     def _ui_create_pane(self):
         label_width = 100
 
+        self._slider_threshold = Slider("RANSAC Threshold", 5.0, 1.0, 20.0)
+        self._slider_threshold.signal_value_changed.connect(self._refresh_transform)
+
         lbl_method = QLabel("Method")
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
@@ -49,9 +50,6 @@ class TransformPane(QWidget):
         values = TransformCalculator.METHOD_VALUES
         for name, value in zip(names, values):
             self._cmbo_methods.addItem(name, value)
-
-        self._slider_threshold = Slider("RANSAC Threshold", 5.0, 1.0, 20.0)
-        self._slider_threshold.signal_value_changed.connect(self._refresh_transform)
 
         hbox = QHBoxLayout()
         hbox.addWidget(lbl_method)
