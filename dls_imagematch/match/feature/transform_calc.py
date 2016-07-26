@@ -33,13 +33,22 @@ class TransformCalculator:
     """
     _MIN_HOMOGRAPHY_MATCHES = 4
 
-    TRANSLATION = -1
-    HOMO_INCLUDE_ALL = 0
-    HOMO_RANSAC = cv2.RANSAC
-    HOMO_LMEDS = cv2.LMEDS
+    TRANSLATION = 0
+    HOMO_INCLUDE_ALL = 1
+    HOMO_RANSAC = 2
+    HOMO_LMEDS = 3
+    AFFINE_2D_FULL = 4
+    AFFINE_2D_RIGID = 5
+    AFFINE_3D = 6
 
-    METHOD_NAMES = ["Homography - RANSAC", "Homography - LMEDS", "Homography - Include All", "Translation Only"]
-    METHOD_VALUES = [HOMO_RANSAC, HOMO_LMEDS, HOMO_INCLUDE_ALL, TRANSLATION]
+    METHOD_NAMES = ["Affine - Full", "Affine - Rigid", "Affine - RANSAC", "Homography - RANSAC",
+                    "Homography - LMEDS", "Homography - Include All", "Average Translation"]
+
+    METHOD_VALUES = [AFFINE_2D_FULL, AFFINE_2D_RIGID, AFFINE_3D, HOMO_RANSAC,
+                     HOMO_LMEDS, HOMO_INCLUDE_ALL, TRANSLATION]
+
+    _HOMO_METHODS = [HOMO_RANSAC, HOMO_LMEDS, HOMO_INCLUDE_ALL]
+    _AFFINE_2D_METHODS = [AFFINE_2D_FULL, AFFINE_2D_RIGID]
 
     _DEFAULT_METHOD = HOMO_RANSAC
     _DEFAULT_RANSAC_THRESHOLD = 5.0
@@ -69,13 +78,20 @@ class TransformCalculator:
 
     # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
-        use_translation = self._method == self.TRANSLATION
+        method = self._method
+        use_translation = method == self.TRANSLATION
         can_do_transform = self._has_enough_matches_for_homography_transform(matches)
 
         if use_translation or not can_do_transform:
             transform, mask = self._calculate_median_translation(matches)
-        else:
+        elif method in self._HOMO_METHODS:
             transform, mask = self._calculate_homography_transform(matches)
+        elif method in self._AFFINE_2D_METHODS:
+            transform, mask = self._calculate_affine_2d_transform(matches)
+        elif method == self.AFFINE_3D:
+            transform, mask = self._calculate_affine_3d_transform(matches)
+        else:
+            raise ValueError("Unrecognised method type")
 
         self._set_matches_reprojection_error(matches, transform)
         self._mark_unused_matches(matches, mask)
@@ -101,6 +117,7 @@ class TransformCalculator:
         if self._has_enough_matches_for_homography_transform(matches):
             img1_pts, img2_pts = self._get_np_2d_points(matches)
             homo_method = self.get_homography_method_code()
+
             homography, mask = cv2.findHomography(img1_pts, img2_pts, homo_method, self._ransac_threshold)
             transform = HomographyTransformation(homography)
 
@@ -112,7 +129,9 @@ class TransformCalculator:
 
         if self._has_enough_matches_for_homography_transform(matches):
             img1_pts, img2_pts = self._get_np_2d_points(matches)
-            affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=True)
+            use_full = self._method == self.AFFINE_2D_FULL
+
+            affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=use_full)
             affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
             transform = AffineTransformation2D(affine)
 
