@@ -96,17 +96,39 @@ class HomographyCalculator:
         return transform, mask
 
     def _calculate_full_transform(self, matches):
-        homography = None
+        transform = None
+        mask = [1] * len(matches)
 
         if self._has_enough_matches_for_full_transform(matches):
             img1_pts = [m.point1().tuple() for m in matches]
             img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
             img2_pts = [m.point2().tuple() for m in matches]
             img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
-
             homography, mask = cv2.findHomography(img1_pts, img2_pts, self._method, self._ransac_threshold)
+            transform = HomographyTransformation(homography)
 
-        transform = Transformation(homography)
+        return transform, mask
+
+    def _calculate_affine(self, matches):
+        transform = None
+        mask = [1] * len(matches)
+
+        if self._has_enough_matches_for_full_transform(matches):
+            # AFFINE 3D - WITH RANSAC
+            img1_pts_3d = [[m.point1().x, m.point1().y, 0] for m in matches]
+            img1_pts_3d = np.float32(img1_pts_3d).reshape(-1, 1, 3)
+            img2_pts_3d = [[m.point2().x, m.point2().y, 0] for m in matches]
+            img2_pts_3d = np.float32(img2_pts_3d).reshape(-1, 1, 3)
+            _, affine_3d, inliers = cv2.estimateAffine3D(img1_pts_3d, img2_pts_3d)
+            affine_3d = np.array([affine_3d[0], affine_3d[1], affine_3d[2], [0, 0, 0, 1]], np.float32)
+            transform = AffineTransformation3D(affine_3d)
+            mask = [i[0] for i in inliers]
+
+            # RIGID AFFINE
+            # affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=True)
+            # affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
+            # transform = AffineTransformation2D(affine)
+
         return transform, mask
 
     def _has_enough_matches_for_full_transform(self, matches):
