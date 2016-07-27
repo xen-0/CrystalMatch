@@ -112,8 +112,8 @@ class TransformPane(QWidget):
         quad2 = []
 
         if len(self._matches) > 0:
-            homo = self._create_homography_calc()
-            transform = homo.calculate_transform(self._matches)
+            calc = self._create_transform_calc()
+            transform = calc.calculate_transform(self._matches)
             transformed_point = transform.transform_points([self._img1_point])[0]
             point2 = transformed_point - search_region_tl
 
@@ -129,16 +129,16 @@ class TransformPane(QWidget):
         self._emit_new_points_signal(point1, point2)
         self._emit_new_quads(quad1, quad2)
 
-    def _create_homography_calc(self):
+    def _create_transform_calc(self):
         method = self._get_method_value()
         filter = self._get_filter_value()
         threshold = self._slider_threshold.value()
 
-        homo = TransformCalculator()
-        homo.set_method(method)
-        homo.set_filter(filter)
-        homo.set_ransac_threshold(threshold)
-        return homo
+        calc = TransformCalculator()
+        calc.set_method(method)
+        calc.set_filter(filter)
+        calc.set_ransac_threshold(threshold)
+        return calc
 
     def _get_method_value(self):
         return self._cmbo_methods.currentText()

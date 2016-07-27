@@ -169,12 +169,14 @@ class CrystalMatchControl(QGroupBox):
         region_size = cfg.region_size.value()
         search_width = cfg.search_width.value()
         search_height = cfg.search_height.value()
-        homo_method = cfg.match_homo.value()
+        transform_method = cfg.transform_method.value()
+        transform_filter = cfg.transform_filter.value()
 
         matcher = CrystalMatcher(self._aligned_images)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
-        matcher.set_transform_method(homo_method)
+        matcher.set_transform_method(transform_method)
+        matcher.set_transform_filter(transform_filter)
         return matcher
 
     ''' ----------------------

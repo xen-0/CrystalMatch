@@ -45,15 +45,16 @@ class TransformCalculator:
 
     FILTERS = [NO_FILTER, LMEDS, RANSAC]
 
+    DEFAULT_METHOD = AFFINE_FULL
+    DEFAULT_FILTER = RANSAC
+    DEFAULT_RANSAC_THRESHOLD = 5.0
+
     _MIN_TRANSFORM_MATCHES = 4
-    _DEFAULT_METHOD = AFFINE_FULL
-    _DEFAULT_FILTER = RANSAC
-    _DEFAULT_RANSAC_THRESHOLD = 5.0
 
     def __init__(self):
-        self._method = self._DEFAULT_METHOD
-        self._filter = self._DEFAULT_FILTER
-        self._ransac_threshold = self._DEFAULT_RANSAC_THRESHOLD
+        self._method = self.DEFAULT_METHOD
+        self._filter = self.DEFAULT_FILTER
+        self._ransac_threshold = self.DEFAULT_RANSAC_THRESHOLD
 
     # -------- CONFIGURATION -------------------
     def set_method(self, method):

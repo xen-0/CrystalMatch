@@ -11,12 +11,16 @@ class XtalConfig(Config):
 
         add = self.add
 
-        homo_methods = TransformCalculator.METHODS
+        trans_methods = TransformCalculator.METHODS
+        trans_filters = TransformCalculator.FILTERS
+        def_trans = TransformCalculator.DEFAULT_METHOD
+        def_filter = TransformCalculator.DEFAULT_FILTER
 
         self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
         self.search_height = add(IntConfigItem, "Search Height", default=400, extra_arg='px')
-        self.match_homo = add(EnumConfigItem, "Homography Method", default="LMEDS", extra_arg=homo_methods)
+        self.transform_method = add(EnumConfigItem, "Transform Method", default=def_trans, extra_arg=trans_methods)
+        self.transform_filter = add(EnumConfigItem, "Transform Filter", default=def_filter, extra_arg=trans_filters)
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")

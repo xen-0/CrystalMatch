@@ -23,11 +23,13 @@ class FeatureMatcher:
     """
     _MIN_MATCHES = 1
     _MAX_MATCHES = 200
-    _DEFAULT_TRANSFORM = TransformCalculator.TRANSLATION
+    _DEFAULT_TRANSFORM = TransformCalculator.DEFAULT_METHOD
+    _DEFAULT_FILTER = TransformCalculator.DEFAULT_FILTER
 
     def __init__(self, img1, img2):
         self._detector = FeatureDetector()
         self._transform_method = self._DEFAULT_TRANSFORM
+        self._transform_filter = self._DEFAULT_FILTER
 
         self.img1 = img1
         self.img2 = img2
@@ -42,12 +44,19 @@ class FeatureMatcher:
         else:
             self._transform_method = method
 
+    def set_transform_filter(self, filter):
+        if filter is None:
+            self._transform_filter = self._DEFAULT_FILTER
+        else:
+            self._transform_filter = filter
+
     # -------- FUNCTIONALITY -------------------
     def match(self):
         matches = self._find_matches()
 
         calc = TransformCalculator()
         calc.set_method(self._transform_method)
+        calc.set_filter(self._transform_filter)
 
         transform = calc.calculate_transform(matches)
         return self._create_result_object(matches, transform)
