@@ -31,7 +31,7 @@ class TransformCalculator:
     For more information on homography calculation and definition of methods, see:
     http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
     """
-    _MIN_HOMOGRAPHY_MATCHES = 4
+    _MIN_TRANSFORM_MATCHES = 4
 
     TRANSLATION = 0
     HOMO_INCLUDE_ALL = 1
@@ -81,7 +81,7 @@ class TransformCalculator:
     def calculate_transform(self, matches):
         method = self._method
         use_translation = method == self.TRANSLATION
-        can_do_transform = self._has_enough_matches_for_homography_transform(matches)
+        can_do_transform = self._has_enough_matches_for_transform(matches)
 
         if use_translation or not can_do_transform:
             transform, mask = self._calculate_median_translation(matches)
@@ -115,7 +115,7 @@ class TransformCalculator:
         transform = None
         mask = [1] * len(matches)
 
-        if self._has_enough_matches_for_homography_transform(matches):
+        if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_2d_points(matches)
             homo_method = self.get_homography_method_code()
 
@@ -125,10 +125,12 @@ class TransformCalculator:
         return transform, mask
 
     def _calculate_affine_2d_transform(self, matches):
+        """ Note: internally, estimateRigidTransform uses some sort of RANSAC method as a filter, but with
+        hardcoded (and not very good) parameters. """
         transform = None
         mask = [1] * len(matches)
 
-        if self._has_enough_matches_for_homography_transform(matches):
+        if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_2d_points(matches)
             use_full = self._method == self.AFFINE_2D_FULL
 
@@ -142,7 +144,7 @@ class TransformCalculator:
         transform = None
         mask = [1] * len(matches)
 
-        if self._has_enough_matches_for_homography_transform(matches):
+        if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_3d_points(matches)
             _, affine_3d, inliers = cv2.estimateAffine3D(img1_pts, img2_pts, ransacThreshold=self._ransac_threshold)
 
@@ -153,8 +155,8 @@ class TransformCalculator:
 
         return transform, mask
 
-    def _has_enough_matches_for_homography_transform(self, matches):
-        return len(matches) >= self._MIN_HOMOGRAPHY_MATCHES
+    def _has_enough_matches_for_transform(self, matches):
+        return len(matches) >= self._MIN_TRANSFORM_MATCHES
 
     def get_homography_method_code(self):
         method = self._method
