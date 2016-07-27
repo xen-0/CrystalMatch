@@ -4,7 +4,7 @@ import numpy as np
 from dls_imagematch.util import Point
 
 
-class AffineTransformation2D:
+class AffineTransformation:
     def __init__(self, affine_matrix):
         self._affine_matrix = affine_matrix
 

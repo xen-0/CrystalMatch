@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point
-from ..transform import HomographyTransformation, Translation, AffineTransformation2D, AffineTransformation3D
+from ..transform import HomographyTransformation, Translation, AffineTransformation
 
 
 class TransformCalculator:
@@ -37,19 +37,18 @@ class TransformCalculator:
     HOMO_INCLUDE_ALL = 1
     HOMO_RANSAC = 2
     HOMO_LMEDS = 3
-    AFFINE_2D_FULL = 4
-    AFFINE_2D_RIGID = 5
-    AFFINE_3D = 6
+    AFFINE_FULL = 4
+    AFFINE_RIGID = 5
 
-    METHOD_NAMES = ["Affine - Full", "Affine - Rigid", "Affine - RANSAC", "Homography - RANSAC",
+    METHOD_NAMES = ["Affine - Full", "Affine - Rigid", "Homography - RANSAC",
                     "Homography - LMEDS", "Homography - Include All", "Average Translation"]
 
-    METHOD_VALUES = [AFFINE_2D_FULL, AFFINE_2D_RIGID, AFFINE_3D, HOMO_RANSAC,
+    METHOD_VALUES = [AFFINE_FULL, AFFINE_RIGID, HOMO_RANSAC,
                      HOMO_LMEDS, HOMO_INCLUDE_ALL, TRANSLATION]
 
-    RANSAC_METHODS = [HOMO_RANSAC, AFFINE_3D]
+    RANSAC_METHODS = [HOMO_RANSAC]
     _HOMO_METHODS = [HOMO_RANSAC, HOMO_LMEDS, HOMO_INCLUDE_ALL]
-    _AFFINE_2D_METHODS = [AFFINE_2D_FULL, AFFINE_2D_RIGID]
+    _AFFINE_METHODS = [AFFINE_FULL, AFFINE_RIGID]
 
     _DEFAULT_METHOD = HOMO_RANSAC
     _DEFAULT_RANSAC_THRESHOLD = 5.0
@@ -87,10 +86,8 @@ class TransformCalculator:
             transform, mask = self._calculate_median_translation(matches)
         elif method in self._HOMO_METHODS:
             transform, mask = self._calculate_homography_transform(matches)
-        elif method in self._AFFINE_2D_METHODS:
-            transform, mask = self._calculate_affine_2d_transform(matches)
-        elif method == self.AFFINE_3D:
-            transform, mask = self._calculate_affine_3d_transform(matches)
+        elif method in self._AFFINE_METHODS:
+            transform, mask = self._calculate_affine_transform(matches)
         else:
             raise ValueError("Unrecognised method type")
 
@@ -116,7 +113,7 @@ class TransformCalculator:
         mask = [1] * len(matches)
 
         if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_2d_points(matches)
+            img1_pts, img2_pts = self._get_np_points(matches)
             homo_method = self.get_homography_method_code()
 
             homography, mask = cv2.findHomography(img1_pts, img2_pts, homo_method, self._ransac_threshold)
@@ -124,34 +121,19 @@ class TransformCalculator:
 
         return transform, mask
 
-    def _calculate_affine_2d_transform(self, matches):
+    def _calculate_affine_transform(self, matches):
         """ Note: internally, estimateRigidTransform uses some sort of RANSAC method as a filter, but with
         hardcoded (and not very good) parameters. """
         transform = None
         mask = [1] * len(matches)
 
         if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_2d_points(matches)
-            use_full = self._method == self.AFFINE_2D_FULL
+            img1_pts, img2_pts = self._get_np_points(matches)
+            use_full = self._method == self.AFFINE_FULL
 
             affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=use_full)
             affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
-            transform = AffineTransformation2D(affine)
-
-        return transform, mask
-
-    def _calculate_affine_3d_transform(self, matches):
-        transform = None
-        mask = [1] * len(matches)
-
-        if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_3d_points(matches)
-            _, affine_3d, inliers = cv2.estimateAffine3D(img1_pts, img2_pts, ransacThreshold=self._ransac_threshold)
-
-            affine_3d = np.array([affine_3d[0], affine_3d[1], affine_3d[2], [0, 0, 0, 1]], np.float32)
-            transform = AffineTransformation3D(affine_3d)
-
-            mask = [i[0] for i in inliers]
+            transform = AffineTransformation(affine)
 
         return transform, mask
 
@@ -171,20 +153,12 @@ class TransformCalculator:
             return -1
 
     @staticmethod
-    def _get_np_2d_points(matches):
+    def _get_np_points(matches):
         img1_pts = [m.point1().tuple() for m in matches]
         img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
         img2_pts = [m.point2().tuple() for m in matches]
         img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
         return img1_pts, img2_pts
-
-    @staticmethod
-    def _get_np_3d_points(matches):
-        img1_pts_3d = [[m.point1().x, m.point1().y, 0] for m in matches]
-        img1_pts_3d = np.float32(img1_pts_3d).reshape(-1, 1, 3)
-        img2_pts_3d = [[m.point2().x, m.point2().y, 0] for m in matches]
-        img2_pts_3d = np.float32(img2_pts_3d).reshape(-1, 1, 3)
-        return img1_pts_3d, img2_pts_3d
 
     @staticmethod
     def _mark_unused_matches(matches, mask):
