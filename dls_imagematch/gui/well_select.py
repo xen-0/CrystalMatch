@@ -8,7 +8,7 @@ from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 from dls_imagematch.util import File, Image
 
 
-class WellSelector2(QGroupBox):
+class WellSelector(QGroupBox):
     """ Widget that allows the user to select well images to use for matching. The data set for a plate has
     multiple image batches for which each well is imaged. The user can select a plate, a specific well on the
     plate, and two batches for image comparison.
@@ -19,7 +19,7 @@ class WellSelector2(QGroupBox):
     signal_image2_selected = QtCore.pyqtSignal(object)
 
     def __init__(self, config):
-        super(WellSelector2, self).__init__()
+        super(WellSelector, self).__init__()
 
         self._init_ui()
         self.setTitle("Select Plate")

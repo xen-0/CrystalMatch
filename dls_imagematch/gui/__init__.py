@@ -4,7 +4,7 @@ from .image_frame import ImageFrame
 from .image_select import ImageSelector
 from .match_feature_control import FeatureMatchControl
 from .progress_dialog import ProgressDialog
-from .well_select2 import WellSelector2
+from .well_select import WellSelector
 
 
 

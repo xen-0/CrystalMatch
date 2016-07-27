@@ -38,7 +38,7 @@ class VMXiCrystalMatcher(QMainWindow):
         selector2 = ImageSelector("Select Image 2", self._config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelector2(self._config)
+        well_selector = WellSelector(self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
