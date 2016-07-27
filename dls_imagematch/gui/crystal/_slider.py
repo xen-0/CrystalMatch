@@ -19,7 +19,7 @@ class Slider(QtGui.QWidget):
         self._slider.setFocusPolicy(QtCore.Qt.NoFocus)
         self._slider.setValue(initial)
         self._slider.valueChanged[int].connect(self._value_changed)
-        self._slider.setFixedWidth(200)
+        self._slider.setFixedWidth(180)
 
         self._txt_value = QtGui.QLineEdit(str(initial))
         self._txt_value.textChanged.connect(self._value_changed)

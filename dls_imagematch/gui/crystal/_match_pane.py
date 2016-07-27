@@ -47,15 +47,15 @@ class CrystalMatchPane(QWidget):
         lbl_select_point.setFixedWidth(self.LABEL_WIDTH)
 
         self._txt_point_x = QLineEdit("0")
-        self._txt_point_x.setFixedWidth(70)
+        self._txt_point_x.setFixedWidth(66)
         self._txt_point_x.textChanged.connect(self._point_x_text_changed)
         self._txt_point_y = QLineEdit("0")
-        self._txt_point_y.setFixedWidth(70)
+        self._txt_point_y.setFixedWidth(67)
         self._txt_point_y.textChanged.connect(self._point_y_text_changed)
 
         btn_select_point = QPushButton("Select")
         btn_select_point.clicked.connect(self._fn_select_crystal_point)
-        btn_select_point.setFixedWidth(50)
+        btn_select_point.setFixedWidth(52)
 
         hbox_select = QHBoxLayout()
         hbox_select.addWidget(lbl_select_point)
