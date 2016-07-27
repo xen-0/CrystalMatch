@@ -3,7 +3,7 @@ test-images
 test-output
 test-focusstack
 scratchpad.py
-*config.ini
+*.ini
 
 *.pyc
 *.zip
