@@ -21,7 +21,7 @@ class SingleCrystalDialog(QDialog):
 
         # UI elements
         self._match_pane = None
-        self._homo_pane = None
+        self._transform_pane = None
         self._filter_pane = None
         self._table = None
         self._frame = None
@@ -36,7 +36,7 @@ class SingleCrystalDialog(QDialog):
 
         self._match_pane = CrystalMatchPane(self._aligned_images, self._config)
 
-        self._homo_pane = TransformPane()
+        self._transform_pane = TransformPane()
 
         self._filter_pane = FilterPane()
         self._filter_pane.setEnabled(False)
@@ -48,7 +48,7 @@ class SingleCrystalDialog(QDialog):
 
         vbox = QVBoxLayout()
         vbox.addWidget(self._match_pane)
-        vbox.addWidget(self._homo_pane)
+        vbox.addWidget(self._transform_pane)
         vbox.addWidget(self._filter_pane)
         vbox.addStretch(1)
 
@@ -65,12 +65,12 @@ class SingleCrystalDialog(QDialog):
         self.setLayout(hbox)
 
     def _connect_components(self):
-        self._match_pane.signal_new_crystal_match.connect(self._homo_pane.set_crystal_match)
+        self._match_pane.signal_new_crystal_match.connect(self._transform_pane.set_crystal_match)
         self._match_pane.signal_new_images.connect(self._frame.set_new_images)
 
-        self._homo_pane.signal_updated_matches.connect(self._filter_pane.set_matches)
-        self._homo_pane.signal_new_points.connect(self._frame.display_points)
-        self._homo_pane.signal_new_quads.connect(self._frame.display_transformed_square)
+        self._transform_pane.signal_updated_matches.connect(self._filter_pane.set_matches)
+        self._transform_pane.signal_new_points.connect(self._frame.display_points)
+        self._transform_pane.signal_new_quads.connect(self._frame.display_transformed_square)
 
         self._filter_pane.signal_matches_filtered.connect(self._frame.display_matches)
         self._filter_pane.signal_matches_filtered.connect(self._table.display_matches)
