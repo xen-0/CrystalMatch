@@ -1,27 +1,23 @@
-from __future__ import division
-
-import sys
-from os.path import dirname
-from sys import path
-path.append(dirname(path[0]))
-
 from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
-from gui import *
 from config import XtalConfig, XtalConfigDialog
 
+from .image_select import ImageSelector
+from .well_select import WellSelector
+from .image_frame import ImageFrame
+from .match_feature_control import FeatureMatchControl
+from .crystal import CrystalMatchControl
 
-class VMXiCrystalMatcher(QMainWindow):
-    CONFIG_FILE = "../xtal-config.ini"
 
-    def __init__(self):
-        super(VMXiCrystalMatcher, self).__init__()
+class VMXiCrystalMatchMainWindow(QMainWindow):
+    def __init__(self, config_file):
+        super(VMXiCrystalMatchMainWindow, self).__init__()
 
         self.gui_state = None
         self.matcher = None
 
-        self._config = XtalConfig(VMXiCrystalMatcher.CONFIG_FILE)
+        self._config = XtalConfig(config_file)
 
         self.init_ui()
 
@@ -111,13 +107,3 @@ class VMXiCrystalMatcher(QMainWindow):
     def _open_config_dialog(self):
         dialog = XtalConfigDialog(self._config)
         dialog.exec_()
-
-
-def main():
-    app = QApplication(sys.argv)
-    ex = VMXiCrystalMatcher()
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    main()
