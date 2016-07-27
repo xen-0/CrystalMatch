@@ -22,6 +22,7 @@ class TransformPane(QWidget):
 
         # UI elements
         self._cmbo_methods = None
+        self._cmbo_filter = None
 
         self._init_ui()
 
@@ -40,11 +41,19 @@ class TransformPane(QWidget):
         self._slider_threshold = Slider("RANSAC Threshold", 5.0, 1.0, 20.0)
         self._slider_threshold.signal_value_changed.connect(self._refresh_transform)
 
-        lbl_filter = QLabel("RANSAC Pre-Filter")
+        lbl_filter = QLabel("Filter")
         lbl_filter.setFixedWidth(label_width)
-        self._chk_filter = QCheckBox()
-        self._chk_filter.setTristate(False)
-        self._chk_filter.stateChanged.connect(self._filter_changed)
+        self._cmbo_filter = QComboBox()
+        self._cmbo_filter.setFixedWidth(150)
+        self._cmbo_filter.currentIndexChanged.connect(self._filter_selection_changed)
+
+        for f in TransformCalculator.FILTERS:
+            self._cmbo_filter.addItem(f)
+
+        hbox_filter = QHBoxLayout()
+        hbox_filter.addWidget(lbl_filter)
+        hbox_filter.addWidget(self._cmbo_filter)
+        hbox_filter.addStretch(1)
 
         lbl_method = QLabel("Method")
         lbl_method.setFixedWidth(label_width)
@@ -52,20 +61,13 @@ class TransformPane(QWidget):
         self._cmbo_methods.setFixedWidth(150)
         self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 
-        names = TransformCalculator.METHOD_NAMES
-        values = TransformCalculator.METHOD_VALUES
-        for name, value in zip(names, values):
-            self._cmbo_methods.addItem(name, value)
+        for method in TransformCalculator.METHODS:
+            self._cmbo_methods.addItem(method)
 
         hbox_method = QHBoxLayout()
         hbox_method.addWidget(lbl_method)
         hbox_method.addWidget(self._cmbo_methods)
         hbox_method.addStretch(1)
-
-        hbox_filter = QHBoxLayout()
-        hbox_filter.addWidget(lbl_filter)
-        hbox_filter.addWidget(self._chk_filter)
-        hbox_filter.addStretch(1)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_method)
@@ -88,16 +90,14 @@ class TransformPane(QWidget):
         self._set_slider_enabled_state()
         self._refresh_transform()
 
-    def _filter_changed(self):
+    def _filter_selection_changed(self):
         self._set_slider_enabled_state()
         self._refresh_transform()
 
     def _set_slider_enabled_state(self):
-        method = self._get_method_value()
-        is_ransac_method = method in TransformCalculator.RANSAC_METHODS
-        is_filterable = self._get_filter_state()
-        enable = is_ransac_method or is_filterable
-        self._slider_threshold.setEnabled(enable)
+        filter = self._get_filter_value()
+        is_ransac = filter == TransformCalculator.RANSAC
+        self._slider_threshold.setEnabled(is_ransac)
 
     def _refresh_transform(self):
         if self._matcher is None:
@@ -131,22 +131,20 @@ class TransformPane(QWidget):
 
     def _create_homography_calc(self):
         method = self._get_method_value()
+        filter = self._get_filter_value()
         threshold = self._slider_threshold.value()
-        use_filter = self._get_filter_state()
 
         homo = TransformCalculator()
-        homo.set_homography_method(method)
+        homo.set_method(method)
+        homo.set_filter(filter)
         homo.set_ransac_threshold(threshold)
-        homo.enable_pre_filter(use_filter)
         return homo
 
     def _get_method_value(self):
-        method_index = self._cmbo_methods.currentIndex()
-        method = TransformCalculator.METHOD_VALUES[method_index]
-        return method
+        return self._cmbo_methods.currentText()
 
-    def _get_filter_state(self):
-        return True if self._chk_filter.checkState() == 2 else False
+    def _get_filter_value(self):
+        return self._cmbo_filter.currentText()
 
     def _emit_new_points_signal(self, point1, point2):
         self.signal_new_points.emit(point1, point2)

@@ -11,7 +11,7 @@ class XtalConfig(Config):
 
         add = self.add
 
-        homo_methods = TransformCalculator.METHOD_NAMES
+        homo_methods = TransformCalculator.METHODS
 
         self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')

@@ -23,10 +23,11 @@ class FeatureMatcher:
     """
     _MIN_MATCHES = 1
     _MAX_MATCHES = 200
+    _DEFAULT_TRANSFORM = TransformCalculator.TRANSLATION
 
     def __init__(self, img1, img2):
         self._detector = FeatureDetector()
-        self._homo_method = None
+        self._transform_method = self._DEFAULT_TRANSFORM
 
         self.img1 = img1
         self.img2 = img2
@@ -35,21 +36,24 @@ class FeatureMatcher:
     def set_detector(self, method, adaptation=""):
         self._detector = FeatureDetector(method, adaptation)
 
-    def set_homography_method(self, method):
-        self._homo_method = method
+    def set_transform_method(self, method):
+        if method is None:
+            self._transform_method = self._DEFAULT_TRANSFORM
+        else:
+            self._transform_method = method
 
     # -------- FUNCTIONALITY -------------------
     def match(self):
         matches = self._find_matches()
 
-        homography = TransformCalculator()
-        homography.set_homography_method(self._homo_method)
+        calc = TransformCalculator()
+        calc.set_method(self._transform_method)
 
-        transform = homography.calculate_transform(matches)
+        transform = calc.calculate_transform(matches)
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
-        self.set_homography_method(TransformCalculator.TRANSLATION)
+        self.set_transform_method(TransformCalculator.TRANSLATION)
         return self.match()
 
     def _create_result_object(self, matches, transform):

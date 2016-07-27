@@ -20,7 +20,7 @@ class CrystalMatcher:
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
-        self._homography_method = None
+        self._transform_method = None
 
     # -------- CONFIGURATION -------------------
     def set_real_region_size(self, size):
@@ -30,8 +30,8 @@ class CrystalMatcher:
         self._search_width_real = width
         self._search_height_real = height
 
-    def set_homography_method(self, method):
-        self._homography_method = method
+    def set_transform_method(self, method):
+        self._transform_method = method
 
     # -------- FUNCTIONALITY -------------------
     def match(self, img1_points):
@@ -57,7 +57,7 @@ class CrystalMatcher:
     def _perform_match(self, feature_matcher, crystal_match):
         try:
             feature_matcher.set_detector("Consensus")
-            feature_matcher.set_homography_method(self._homography_method)
+            feature_matcher.set_transform_method(self._transform_method)
 
             result = feature_matcher.match()
             crystal_match.set_feature_match_result(result)

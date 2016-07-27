@@ -174,7 +174,7 @@ class CrystalMatchControl(QGroupBox):
         matcher = CrystalMatcher(self._aligned_images)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
-        matcher.set_homography_method(homo_method)
+        matcher.set_transform_method(homo_method)
         return matcher
 
     ''' ----------------------

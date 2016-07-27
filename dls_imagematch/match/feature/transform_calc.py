@@ -31,53 +31,43 @@ class TransformCalculator:
     For more information on homography calculation and definition of methods, see:
     http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
     """
-    TRANSLATION = 0
-    HOMO_INCLUDE_ALL = 1
-    HOMO_RANSAC = 2
-    HOMO_LMEDS = 3
-    AFFINE_FULL = 4
-    AFFINE_RIGID = 5
+    TRANSLATION = "Average Translation"
+    HOMOGRAPHY = "Homography"
+    AFFINE_FULL = "Affine - Full (6 DoF)"
+    AFFINE_RIGID = "Affine - Rigid (5 DoF)"
 
-    METHOD_NAMES = ["Affine - Full (6 DoF)", "Affine - Rigid (5 DoF)", "Homography - RANSAC",
-                    "Homography - LMEDS", "Homography - Include All", "Average Translation"]
-
-    METHOD_VALUES = [AFFINE_FULL, AFFINE_RIGID, HOMO_RANSAC,
-                     HOMO_LMEDS, HOMO_INCLUDE_ALL, TRANSLATION]
-
-    RANSAC_METHODS = [HOMO_RANSAC]
-    HOMO_METHODS = [HOMO_RANSAC, HOMO_LMEDS, HOMO_INCLUDE_ALL]
+    METHODS = [AFFINE_FULL, AFFINE_RIGID, HOMOGRAPHY, TRANSLATION]
     AFFINE_METHODS = [AFFINE_FULL, AFFINE_RIGID]
 
-    _MIN_TRANSFORM_MATCHES = 4
-    _DEFAULT_METHOD = HOMO_RANSAC
-    _DEFAULT_RANSAC_THRESHOLD = 5.0
+    NO_FILTER = "None"
+    LMEDS = "LMEDS"
+    RANSAC = "RANSAC"
 
-    @staticmethod
-    def METHOD_FROM_NAME(name):
-        index = TransformCalculator.METHOD_NAMES.index(name)
-        return TransformCalculator.METHOD_VALUES[index]
+    FILTERS = [NO_FILTER, LMEDS, RANSAC]
+
+    _MIN_TRANSFORM_MATCHES = 4
+    _DEFAULT_METHOD = AFFINE_FULL
+    _DEFAULT_FILTER = RANSAC
+    _DEFAULT_RANSAC_THRESHOLD = 5.0
 
     def __init__(self):
         self._method = self._DEFAULT_METHOD
+        self._filter = self._DEFAULT_FILTER
         self._ransac_threshold = self._DEFAULT_RANSAC_THRESHOLD
-        self._use_pre_filter = False
 
     # -------- CONFIGURATION -------------------
-    def set_homography_method(self, method):
-        if method is None:
-            self._method = self._DEFAULT_METHOD
-        elif method in self.METHOD_NAMES:
-            self._method = self.METHOD_FROM_NAME(method)
-        elif method in self.METHOD_VALUES:
-            self._method = method
-        else:
-            raise ValueError("Not a valid homography method")
+    def set_method(self, method):
+        if method not in self.METHODS:
+            raise ValueError("Not a valid transformation method: '{}'".format(method))
+        self._method = method
+
+    def set_filter(self, filter):
+        if filter not in self.FILTERS:
+            raise ValueError("Not a valid filter: '{}'".format(filter))
+        self._filter = filter
 
     def set_ransac_threshold(self, threshold):
         self._ransac_threshold = threshold
-
-    def enable_pre_filter(self, enable):
-        self._use_pre_filter = enable
 
     # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
@@ -87,7 +77,7 @@ class TransformCalculator:
 
         if use_translation or not can_do_transform:
             transform, mask = self._calculate_median_translation(matches)
-        elif method in self.HOMO_METHODS:
+        elif method == self.HOMOGRAPHY:
             transform, mask = self._calculate_homography_transform(matches)
         elif method in self.AFFINE_METHODS:
             transform, mask = self._calculate_affine_transform(matches)
@@ -116,7 +106,7 @@ class TransformCalculator:
 
         if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_points(matches)
-            homo_method = self.get_homography_method_code()
+            homo_method = self._get_filter_code()
 
             homography, new_mask = cv2.findHomography(img1_pts, img2_pts, homo_method, self._ransac_threshold)
             mask = self._combine_masks(mask, new_mask)
@@ -146,7 +136,7 @@ class TransformCalculator:
     def _pre_filter(self, matches):
         mask = [True] * len(matches)
 
-        if self._use_pre_filter:
+        if self._filter != self.NO_FILTER:
             mask = self._make_pre_filter_mask(matches)
             matches = [m for (m, i) in zip(matches, mask) if i]
 
@@ -157,19 +147,19 @@ class TransformCalculator:
 
         if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_points(matches)
-            _, mask = cv2.findHomography(img1_pts, img2_pts, cv2.RANSAC, self._ransac_threshold)
+            filter = self._get_filter_code()
+            _, mask = cv2.findHomography(img1_pts, img2_pts, filter, self._ransac_threshold)
             mask = self._sanitize_mask(mask)
 
         return mask
 
-    def get_homography_method_code(self):
-        method = self._method
-
-        if method == self.HOMO_INCLUDE_ALL:
+    def _get_filter_code(self):
+        filter = self._filter
+        if filter == self.NO_FILTER:
             return 0
-        elif method == self.HOMO_LMEDS:
+        elif filter == self.LMEDS:
             return cv2.LMEDS
-        elif method == self.HOMO_RANSAC:
+        elif filter == self.RANSAC:
             return cv2.RANSAC
         else:
             return -1
