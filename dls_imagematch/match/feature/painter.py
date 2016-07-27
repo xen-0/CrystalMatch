@@ -124,11 +124,13 @@ class FeaturePainter:
             img = self._background_image.copy()
 
         for match in matches:
-            self._draw_match(img, match, Color.Blue(), thickness=1, radius=4)
+            color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
+            self._draw_match(img, match, color, thickness=1, radius=4)
 
         for match in highlight_matches:
             self._draw_match(img, match, Color.Yellow(), thickness=2, radius=4)
-            self._draw_match(img, match, Color.Blue(), thickness=1, radius=4)
+            color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
+            self._draw_match(img, match, color, thickness=1, radius=4)
 
         return img
 

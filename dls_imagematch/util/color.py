@@ -106,3 +106,6 @@ class Color:
 
     @staticmethod
     def Purple(): return Color(128, 0, 255)
+
+    @staticmethod
+    def SlateGray(): return Color(108, 123, 139)
