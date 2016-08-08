@@ -256,6 +256,8 @@ class BoolConfigControl(ConfigControl):
 
 
 class EnumConfigControl(ConfigControl):
+    COMBO_WIDTH = 150
+
     def __init__(self, config_item):
         ConfigControl.__init__(self, config_item)
 
@@ -266,6 +268,7 @@ class EnumConfigControl(ConfigControl):
         lbl_enum.setFixedWidth(ConfigDialog.LABEL_WIDTH)
 
         self._cmbo_enum = QComboBox()
+        self._cmbo_enum.setFixedWidth(self.COMBO_WIDTH)
         self._cmbo_enum.addItems(self._config_item.enum_names)
 
         selected = self._config_item.value()

@@ -8,15 +8,18 @@ _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under
 
 
 class FeatureDetector:
-    _DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Consensus", "Dense", "SimpleBlob"]
-    _ADAPTATION_TYPE = ["", "Grid", "Pyramid"]
+    DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Consensus", "Dense", "SimpleBlob"]
+    ADAPTATION_TYPES = ["", "Grid", "Pyramid"]
     _CONSENSUS_DETECTORS = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS"]
 
-    def __init__(self, detector=_DETECTOR_TYPES[0], adaptation=_ADAPTATION_TYPE[0]):
+    DEFAULT_DETECTOR = DETECTOR_TYPES[0]
+    DEFAULT_ADAPTATION = ADAPTATION_TYPES[0]
 
-        if detector not in self._DETECTOR_TYPES:
+    def __init__(self, detector=DEFAULT_DETECTOR, adaptation=DEFAULT_ADAPTATION):
+
+        if detector not in self.DETECTOR_TYPES:
             raise ValueError("No such feature matching detector available: " + detector)
-        elif adaptation not in self._ADAPTATION_TYPE:
+        elif adaptation not in self.ADAPTATION_TYPES:
             raise ValueError("No such feature matching adaptation available: " + adaptation)
 
         self.detector = str(detector)
@@ -80,8 +83,8 @@ class FeatureDetector:
 
     @staticmethod
     def types():
-        return FeatureDetector._DETECTOR_TYPES
+        return FeatureDetector.DETECTOR_TYPES
 
     @staticmethod
     def adaptations():
-        return FeatureDetector._ADAPTATION_TYPE
+        return FeatureDetector.ADAPTATION_TYPES

@@ -9,8 +9,8 @@ class FocusConfig(Config):
 
         add = self.add
 
-        methods = FeatureDetector.types()
-        adapt = FeatureDetector.adaptations()
+        methods = FeatureDetector.DETECTOR_TYPES
+        adapt = FeatureDetector.ADAPTATION_TYPES
 
         self.align_method = add(EnumConfigItem, "Alignment Method", default="SURF", extra_arg=methods)
         self.align_adapt = add(EnumConfigItem, "Alignment Adaption", default="", extra_arg=adapt)

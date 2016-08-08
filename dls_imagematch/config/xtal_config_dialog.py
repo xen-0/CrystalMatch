@@ -20,14 +20,18 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.color_xtal_img2)
         add(cfg.color_search)
 
+        self.start_group("Directories")
+        add(cfg.input_dir)
+        add(cfg.output_dir)
+        add(cfg.samples_dir)
+
+        self.start_group("Image Alignment")
+        add(cfg.align_detector)
+        add(cfg.align_adapt)
+
         self.start_group("Xtal Search")
         add(cfg.region_size)
         add(cfg.search_width)
         add(cfg.search_height)
         add(cfg.transform_method)
         add(cfg.transform_filter)
-
-        self.start_group("Directories")
-        add(cfg.input_dir)
-        add(cfg.output_dir)
-        add(cfg.samples_dir)
