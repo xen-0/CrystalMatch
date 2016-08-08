@@ -1,4 +1,4 @@
-from match.align import AlignedImages
+from ..align import AlignedImages
 
 
 class CrystalMatchResults:
