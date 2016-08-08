@@ -6,7 +6,7 @@ from config import XtalConfig, XtalConfigDialog
 from .image_select import ImageSelector
 from .well_select import WellSelector
 from .image_frame import ImageFrame
-from .match_feature_control import FeatureMatchControl
+from .image_aligner import ImageAlignControl
 from .crystal import CrystalMatchControl
 
 
@@ -40,7 +40,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         image_frame = ImageFrame(self._config)
 
         # Feature Matching Control
-        aligner = FeatureMatchControl(selector1, selector2)
+        aligner = ImageAlignControl(selector1, selector2)
 
         # Secondary Matching Control
         xtal_match = CrystalMatchControl(image_frame, self._config)
