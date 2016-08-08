@@ -1,4 +1,4 @@
-from dls_imagematch.match.aligned_images import AlignedImages
+from match.align import AlignedImages
 
 
 class CrystalMatchResults:

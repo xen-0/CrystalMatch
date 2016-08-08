@@ -1,6 +1,6 @@
-from .overlay import Overlayer
-from .metric_overlap import OverlapMetric
 from dls_imagematch.util import Color, Point
+from .metric_overlap import OverlapMetric
+from .overlay import Overlayer
 
 
 class AlignedImages:
