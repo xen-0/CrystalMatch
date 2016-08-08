@@ -1,6 +1,6 @@
 import os
 
-from util.color import Color
+from util.image import Color
 
 
 class Config:

@@ -1,13 +1,14 @@
 from __future__ import division
-import cv2
-import numpy as np
+
 import math
 
+import cv2
+import numpy as np
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QImage, QPixmap
 
-from .rectangle import Rectangle, Point
 from .color import Color
+from util.rectangle import Rectangle, Point
 
 
 class Image:
