@@ -62,7 +62,7 @@ class WellSelector(QGroupBox):
             return
 
         # Get list of plate directories
-        plate_folders = File.get_sub_dirs(directory, startswith="plate_")
+        plate_folders = self.get_sub_dirs(directory, startswith="plate_")
 
         for folder in plate_folders:
             folder = folder.split("/")[-1]
@@ -81,7 +81,7 @@ class WellSelector(QGroupBox):
         self._cmbo_batch2.clear()
 
         plate_dir = self._samples_dir + self._cmbo_plate.currentText()
-        batch_folders = File.get_sub_dirs(str(plate_dir), startswith="batch_")
+        batch_folders = self.get_sub_dirs(str(plate_dir), startswith="batch_")
 
         self._populate_batch_lists(batch_folders)
         self._cmbo_batch1.setCurrentIndex(0)
@@ -124,9 +124,9 @@ class WellSelector(QGroupBox):
         batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
         batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
 
-        files1 = File.get_files(str(batch_dir1))
+        files1 = self.get_files(str(batch_dir1))
         files1 = [f.split("/")[-1] for f in files1]
-        files2 = File.get_files(str(batch_dir2))
+        files2 = self.get_files(str(batch_dir2))
         files2 = [f.split("/")[-1] for f in files2]
 
         # Find the set of images that both batches have in common
@@ -150,3 +150,27 @@ class WellSelector(QGroupBox):
 
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)
+
+    @staticmethod
+    def get_sub_dirs(dir, startswith="", endswith=""):
+        """ Return the full path of all immediate subdirectories in the
+        specified directory. """
+        dirs = os.listdir(dir)
+
+        if startswith != "":
+            dirs = [d for d in dirs if d.startswith(startswith)]
+
+        if endswith != "":
+            dirs = [d for d in dirs if d.endswith(endswith)]
+
+        paths = [os.path.join(dir, d) for d in dirs]
+        sub_dirs = [p for p in paths if os.path.isdir(p)]
+        return sub_dirs
+
+    @staticmethod
+    def get_files(dir):
+        """ Return a list of all files (full path) in the directory. """
+        paths = [os.path.join(dir,o) for o in os.listdir(dir)]
+        files = [p for p in paths if os.path.isfile(p)]
+
+        return files
