@@ -14,8 +14,11 @@ class XtalConfigDialog(ConfigDialog):
         cfg = self._config
         add = self.add_item
 
-        self.start_group("Image Alignment")
+        self.start_group("Colors")
         add(cfg.color_align)
+        add(cfg.color_xtal_img1)
+        add(cfg.color_xtal_img2)
+        add(cfg.color_search)
 
         self.start_group("Xtal Search")
         add(cfg.region_size)
@@ -23,9 +26,6 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.search_height)
         add(cfg.transform_method)
         add(cfg.transform_filter)
-        add(cfg.color_xtal_img1)
-        add(cfg.color_xtal_img2)
-        add(cfg.color_search)
 
         self.start_group("Directories")
         add(cfg.input_dir)
