@@ -7,8 +7,8 @@ import numpy as np
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QImage, QPixmap
 
+from util.shape import Rectangle, Point
 from .color import Color
-from util.rectangle import Rectangle, Point
 
 
 class Image:
