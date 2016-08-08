@@ -5,7 +5,7 @@ import os
 from PyQt4 import QtCore
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 
-from dls_imagematch.util import File, Image
+from dls_imagematch.util import Image
 
 
 class WellSelector(QGroupBox):
