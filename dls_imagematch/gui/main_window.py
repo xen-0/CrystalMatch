@@ -6,7 +6,7 @@ from config import XtalConfig, XtalConfigDialog
 from .image_select import ImageSelector
 from .well_select import WellSelector
 from .image_frame import ImageFrame
-from .image_aligner import ImageAlignControl
+from .auto_aligner import AutoImageAligner
 from .crystal import CrystalMatchControl
 
 
@@ -16,6 +16,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
 
         self.gui_state = None
         self.matcher = None
+        self._aligner = None
 
         self._config = XtalConfig(config_file)
 
@@ -39,15 +40,18 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
 
-        # Feature Matching Control
-        aligner = ImageAlignControl(selector1, selector2)
+        # Automatic Image Aligner
+        self._aligner = AutoImageAligner(self._config)
 
         # Secondary Matching Control
         xtal_match = CrystalMatchControl(image_frame, self._config)
 
         # Connect signals
-        aligner.signal_aligned.connect(xtal_match.set_aligned_images)
-        aligner.signal_aligned.connect(image_frame.display_align_results)
+        self._aligner.signal_aligned.connect(xtal_match.set_aligned_images)
+        self._aligner.signal_aligned.connect(image_frame.display_align_results)
+
+        selector1.signal_selected.connect(self._aligner.set_image_1)
+        selector2.signal_selected.connect(self._aligner.set_image_2)
 
         well_selector.signal_image1_selected.connect(selector1.set_image)
         well_selector.signal_image2_selected.connect(selector2.set_image)
@@ -63,7 +67,6 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
-        vbox_matching.addWidget(aligner)
         vbox_matching.addWidget(xtal_match)
         vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)

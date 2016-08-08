@@ -1,10 +1,8 @@
 from __future__ import division
 
-import os
-
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QPixmap, QLineEdit
+from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QLineEdit
 
 from dls_imagematch.util import Image, Color
 
@@ -13,6 +11,7 @@ class ImageSelector(QtGui.QGroupBox):
     """ Widget that allows the user to select and view an image and to specify a
     corresponding real pixel size in micrometers (um).
     """
+    signal_selected = QtCore.pyqtSignal(object)
 
     IMAGE_SIZE = 350
     BUTTON_TEXT = "Load Image"
@@ -81,6 +80,8 @@ class ImageSelector(QtGui.QGroupBox):
         self._display_image(image)
         self._display_filename_label(image.file)
         self._display_pixel_size(image.pixel_size)
+
+        self.signal_selected.emit(self._image)
 
     def _set_image_pixel_size(self, pixel_size):
         raw_img = self._image.img
