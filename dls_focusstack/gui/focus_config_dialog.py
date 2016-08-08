@@ -1,4 +1,4 @@
-from dls_imagematch.util.config_dialog import ConfigDialog
+from util.config.config_dialog import ConfigDialog
 
 
 class FocusConfigDialog(ConfigDialog):

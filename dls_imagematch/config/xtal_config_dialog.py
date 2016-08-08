@@ -1,11 +1,10 @@
-from dls_imagematch.util.config_dialog import ConfigDialog
+from util.config import ConfigDialog
 
 
 class XtalConfigDialog(ConfigDialog):
     def __init__(self, config):
         ConfigDialog.__init__(self, config)
 
-        #self._auto_layout()
         self._init_ui()
         self.finalize_layout()
 
