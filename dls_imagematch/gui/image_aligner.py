@@ -3,12 +3,12 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QMessageBox, QComboBox
 
-from dls_imagematch.match import FeatureMatcher, FeatureDetector, AlignedImages
-from dls_imagematch.match import FeatureMatchException
+from dls_imagematch.match.feature import FeatureDetector
+from dls_imagematch.match.align import ImageAligner, ImageAlignmentError
 
 
 class ImageAlignControl(QGroupBox):
-    """ Widget that allows control of the Feature Matching process.
+    """ Widget that allows control of the Image Alignment process.
     """
     signal_aligned = QtCore.pyqtSignal(object)
 
@@ -17,8 +17,6 @@ class ImageAlignControl(QGroupBox):
 
         self._selector_a = selector_a
         self._selector_b = selector_b
-
-        self.last_images = None
 
         self._init_ui()
         self.setTitle("Image Alignment (Feature Matching)")
@@ -33,56 +31,32 @@ class ImageAlignControl(QGroupBox):
         self._cmbo_adapt.addItems(FeatureDetector.ADAPTATION_TYPES)
 
         # Matching function buttons
-        self._btn_begin = QPushButton("Align Images")
-        self._btn_begin.clicked.connect(self._perform_feature_matching)
+        btn_begin = QPushButton("Align Images")
+        btn_begin.clicked.connect(self._perform_feature_matching)
 
         # Create widget layout
         hbox = QHBoxLayout()
         hbox.addWidget(self._cmbo_method)
         hbox.addWidget(self._cmbo_adapt)
-        hbox.addWidget(self._btn_begin)
+        hbox.addWidget(btn_begin)
         hbox.addStretch(1)
 
         self.setLayout(hbox)
 
     def _perform_feature_matching(self):
         """ Begin the feature matching process for the two selected images. """
-        img1, img2 = self._prepare_images()
+        img1 = self._selector_a.image()
+        img2 = self._selector_b.image()
 
         method = self._cmbo_method.currentText()
         adapt = self._cmbo_adapt.currentText()
 
-        matcher = FeatureMatcher(img1, img2)
-        matcher.set_detector(method, adapt)
+        aligner = ImageAligner(img1, img2)
+        aligner.set_detector_type(method)
+        aligner.set_adaptation_type(adapt)
 
         try:
-            match_result = matcher.match_translation_only()
-            self._display_results(match_result)
-            self.signal_aligned.emit(self.last_images)
-        except FeatureMatchException as e:
-            QMessageBox.critical(self, "Feature Matching Error", e.message, QMessageBox.Ok)
-
-    def _prepare_images(self):
-        """ Load the selected images to be matched, scale them appropriately and
-        convert to grayscale. """
-        # Get the selected images
-        self._img1 = self._selector_a.image()
-        self._img2 = self._selector_b.image()
-
-        # Resize image B so it has the same size per pixel as image A
-        factor = self._img2.pixel_size / self._img1.pixel_size
-        self._img2 = self._img2.rescale(factor)
-
-        return self._img1.to_mono(), self._img2.to_mono()
-
-    def _display_results(self, match_result):
-        """ Display the results of the matching process (display overlaid image
-        and print the offset. """
-        align_method = "Feature matching - " + match_result.method
-        if match_result.method_adapt != '':
-            align_method += " with " + match_result.method_adapt
-
-        translation = match_result.transform.translation()
-        aligned = AlignedImages(self._img1, self._img2, translation, align_method)
-
-        self.last_images = aligned
+            aligned_images = aligner.align()
+            self.signal_aligned.emit(aligned_images)
+        except ImageAlignmentError as ex:
+            QMessageBox.critical(self, "Image Alignment Error", str(ex), QMessageBox.Ok)
