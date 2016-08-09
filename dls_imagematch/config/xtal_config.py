@@ -1,6 +1,5 @@
-from dls_imagematch.util import Color
-from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, \
-    BoolConfigItem, EnumConfigItem
+from util import Color
+from util import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, EnumConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
 from dls_imagematch.match.feature import FeatureDetector

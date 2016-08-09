@@ -1,4 +1,4 @@
-from util.config.config_dialog import ConfigDialog
+from util.config.dialog import ConfigDialog
 
 
 class FocusConfigDialog(ConfigDialog):
