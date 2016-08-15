@@ -72,6 +72,37 @@ class IntConfigItem(ConfigItem):
             return self._default
 
 
+class RangeIntConfigItem(IntConfigItem):
+    def __init__(self, tag, default, range=[0,100]):
+        IntConfigItem.__init__(self, tag, default)
+        if len(range) != 2:
+            raise ValueError("range must be a list of 2 elements")
+
+        self._min = range[0]
+        self._max = range[1]
+
+        if not self._in_range(default):
+            raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
+
+    def min(self): return self._min
+
+    def max(self): return self._max
+
+    def _clean(self, value):
+        try:
+            val = int(value)
+        except ValueError:
+            return self._default
+
+        if self._in_range(val):
+            return val
+        else:
+            return self._default
+
+    def _in_range(self, value):
+        return self._min < value < self._max
+
+
 class DirectoryConfigItem(ConfigItem):
     """ Config item that stores a directory path (can be relative or absolute). """
     def __init__(self, tag, default):

@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QLabel, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, QWidget, QCheckBox, QComboBox
 
 from util.image import Color
+from util.widget import Slider
 
 
 class ConfigControl(QWidget):
@@ -56,6 +57,33 @@ class ValueConfigControl(ConfigControl):
 
     def save_to_config(self):
         self._config_item.set(self._txt_value.text())
+
+
+class RangeIntConfigControl(ConfigControl):
+    def __init__(self, config_item):
+        ConfigControl.__init__(self, config_item)
+
+        self._init_ui()
+
+    def _init_ui(self):
+        tag = self._config_item.tag()
+        range_min = self._config_item.min()
+        range_max = self._config_item.max()
+
+        self._sld_value = Slider(tag, range_min, range_min, range_max)
+
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.addWidget(self._sld_value)
+        hbox.addStretch()
+
+        self.setLayout(hbox)
+
+    def update_from_config(self):
+        self._sld_value.set_value(self._config_item.value())
+
+    def save_to_config(self):
+        self._config_item.set(self._sld_value.value())
 
 
 class BoolConfigControl(ConfigControl):

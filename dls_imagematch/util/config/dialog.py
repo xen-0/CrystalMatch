@@ -68,7 +68,9 @@ class ConfigDialog(QtGui.QDialog):
         The control will be added to the current group, or a new group will be created if none exists. """
         add = self._add_control
 
-        if isinstance(item, IntConfigItem):
+        if isinstance(item, RangeIntConfigItem):
+            add(RangeIntConfigControl(item))
+        elif isinstance(item, IntConfigItem):
             add(ValueConfigControl(item, txt_width=40))
         elif isinstance(item, BoolConfigItem):
             add(BoolConfigControl(item))
