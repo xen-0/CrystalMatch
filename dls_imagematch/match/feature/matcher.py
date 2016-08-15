@@ -31,6 +31,8 @@ class FeatureMatcher:
         self._transform_method = self._DEFAULT_TRANSFORM
         self._transform_filter = self._DEFAULT_FILTER
 
+        self._keypoint_distance_filter = None
+
         self.img1 = img1
         self.img2 = img2
 
@@ -49,6 +51,9 @@ class FeatureMatcher:
             self._transform_filter = self._DEFAULT_FILTER
         else:
             self._transform_filter = filter
+
+    def set_keypoint_distance_filter(self, distance_filter):
+        self._keypoint_distance_filter = distance_filter
 
     # -------- FUNCTIONALITY -------------------
     def match(self):
@@ -98,10 +103,16 @@ class FeatureMatcher:
 
         raw_matches = self._brute_force_match(method, descriptors1, descriptors2)
         matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2, method)
+        matches = self._filter_matches(matches)
         return matches
 
     def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
         matches = SingleFeatureMatch.from_cv2_matches(raw_matches, keypoints1, keypoints2, method)
+        return matches
+
+    def _filter_matches(self, matches):
+        if self._keypoint_distance_filter is not None:
+            matches = self._keypoint_distance_filter.filter(matches)
         return matches
 
     def _brute_force_match(self, method, descriptors_1, descriptors_2):
