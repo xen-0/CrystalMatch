@@ -49,6 +49,7 @@ class TransformPane(QWidget):
 
         for f in TransformCalculator.FILTERS:
             self._cmbo_filter.addItem(f)
+        self._cmbo_filter.setCurrentIndex(2)
 
         hbox_filter = QHBoxLayout()
         hbox_filter.addWidget(lbl_filter)
