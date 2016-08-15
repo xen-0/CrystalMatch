@@ -129,9 +129,6 @@ class WellSelectorFormulatrix(QGroupBox):
         files2 = self.get_files(str(batch_dir2))
         files2 = [f.split("/")[-1][:-4] for f in files2]
 
-        print(batch_dir1, files1)
-        print(batch_dir2, files2)
-
         # Find the set of images that both batches have in common
         common = list(set(files1).intersection(files2))
         common.sort()
