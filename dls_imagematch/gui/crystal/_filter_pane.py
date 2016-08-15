@@ -125,6 +125,8 @@ class FilterPane(QWidget):
             count = methods[method]
             self._cmbo_methods.addItem("{} ({})".format(method, count), method)
 
+        if index == -1 or index >= self._cmbo_methods.count():
+            index = 0
         self._cmbo_methods.setCurrentIndex(index)
 
     def _get_match_methods(self, matches):
