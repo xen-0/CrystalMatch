@@ -48,7 +48,7 @@ class Image:
         raw_img = cv2.imread(filename)
 
         if raw_img is None:
-            raise ValueError("Could not read specified Image File")
+            raise ValueError("Could not read specified Image File: {}".format(filename))
 
         image = Image(raw_img, pixel_size)
         image.file = filename

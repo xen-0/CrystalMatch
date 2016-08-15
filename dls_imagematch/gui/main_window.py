@@ -5,6 +5,7 @@ from config import XtalConfig, XtalConfigDialog
 
 from .image_select import ImageSelector
 from .well_select import WellSelector
+from .well_select_formulatrix import WellSelectorFormulatrix
 from .image_frame import ImageFrame
 from .auto_aligner import AutoImageAligner
 from .crystal import CrystalMatchControl
@@ -35,7 +36,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         selector2 = ImageSelector("Select Image 2", self._config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelector(self._config)
+        well_selector = WellSelectorFormulatrix(self._config) #WellSelector(self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
