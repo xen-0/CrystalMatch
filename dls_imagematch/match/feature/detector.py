@@ -8,10 +8,38 @@ _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under
 
 
 class FeatureDetector:
-    DETECTOR_TYPES = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS", "Consensus", "Dense", "SimpleBlob"]
-    ADAPTATION_TYPES = ["", "Grid", "Pyramid"]
-    _CONSENSUS_DETECTORS = ["ORB", "SIFT", "SURF", "BRISK", "FAST", "STAR", "MSER", "GFTT", "HARRIS"]
+    # Detector Types
+    DET_CONSENSUS = "Consensus"
+    DET_ORB = "ORB"
+    DET_SIFT = "SIFT"
+    DET_SURF = "SURF"
+    DET_BRISK = "BRISK"
+    DET_FAST = "FAST"
+    DET_STAR = "STAR"
+    DET_MSER = "MSER"
+    DET_GFTT = "GFTT"
+    DET_HARRIS = "HARRIS"
+    DET_DENSE = "Dense"
+    DET_BLOB = "SimpleBlob"
 
+    DETECTOR_TYPES = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER, DET_GFTT, DET_HARRIS,
+                      DET_CONSENSUS, DET_DENSE, DET_BLOB]
+    _CONSENSUS_DETECTORS = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER, DET_GFTT, DET_HARRIS]
+
+    # Adaptation Types
+    ADAPT_NONE = ""
+    ADAPT_GRID = "Grid"
+    ADAPT_PYRAMID = "Pyramid"
+
+    ADAPTATION_TYPES = [ADAPT_NONE, ADAPT_GRID, ADAPT_PYRAMID]
+
+    # Extractor Types
+    EXT_ORB = DET_ORB
+    EXT_SURF = DET_SURF
+    EXT_SIFT = DET_SIFT
+    EXT_BRIEF = "BRIEF"
+
+    # Defaults
     DEFAULT_DETECTOR = DETECTOR_TYPES[0]
     DEFAULT_ADAPTATION = ADAPTATION_TYPES[0]
 
@@ -26,6 +54,7 @@ class FeatureDetector:
         self.adaptation = str(adaptation)
 
     def normalization_type(self):
+        """ Keypoint normalization type for the detector method; used for matching. """
         if self.detector in ["SIFT", "SURF"]:
             return cv2.NORM_L2
         else:
@@ -62,9 +91,7 @@ class FeatureDetector:
         """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
         array of 64 floats (in range -1 to 1); all others are arrays of 32 ints (in range 0 to 255. """
         # Sift, Surf, and Orb have their own descriptor extraction methods.
-        name = "BRIEF"
-        if self.detector in ["SIFT", "SURF", "ORB"]:
-            name = self.detector
+        name = self.get_extractor_name(self.detector)
 
         try:
             extractor = cv2.DescriptorExtractor_create(name)
@@ -80,6 +107,14 @@ class FeatureDetector:
             detectors.append(method)
 
         return detectors
+
+    @staticmethod
+    def get_extractor_name(detector_name):
+        fd = FeatureDetector
+        name = fd.EXT_BRIEF
+        if detector_name in [fd.DET_ORB, fd.DET_SIFT, fd.DET_SURF]:
+            name = detector_name
+        return name
 
     @staticmethod
     def types():
