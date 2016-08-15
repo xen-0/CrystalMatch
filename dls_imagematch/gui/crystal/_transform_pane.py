@@ -5,7 +5,7 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QC
 
 from dls_imagematch.match.feature import TransformCalculator
 from dls_imagematch.util import Point
-from ._slider import Slider
+from dls_imagematch.util.widget import Slider
 
 
 class TransformPane(QWidget):

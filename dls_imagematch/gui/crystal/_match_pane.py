@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
 
 from ._point_select_dialog import PointSelectDialog
-from ._slider import Slider
+from dls_imagematch.util.widget import Slider
 from dls_imagematch.util import Point
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.match.feature import KeypointDistanceFilter
