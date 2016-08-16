@@ -8,8 +8,13 @@ _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under
 
 
 class FeatureDetector:
+    """ Uses OpenCV algorithms to detect interesting features in an image and quantify them with an
+    array of numerical descriptors.
+
+    A range of different detector methods are available, each with different properties. Each detector
+    may work more effectively on some images than on others.
+    """
     # Detector Types
-    DET_CONSENSUS = "Consensus"
     DET_ORB = "ORB"
     DET_SIFT = "SIFT"
     DET_SURF = "SURF"
@@ -22,9 +27,8 @@ class FeatureDetector:
     DET_DENSE = "Dense"
     DET_BLOB = "SimpleBlob"
 
-    DETECTOR_TYPES = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER, DET_GFTT, DET_HARRIS,
-                      DET_CONSENSUS, DET_DENSE, DET_BLOB]
-    _CONSENSUS_DETECTORS = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER, DET_GFTT, DET_HARRIS]
+    DETECTOR_TYPES = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER,
+                      DET_GFTT, DET_HARRIS, DET_DENSE, DET_BLOB]
 
     # Adaptation Types
     ADAPT_NONE = ""
@@ -44,7 +48,6 @@ class FeatureDetector:
     DEFAULT_ADAPTATION = ADAPTATION_TYPES[0]
 
     def __init__(self, detector=DEFAULT_DETECTOR, adaptation=DEFAULT_ADAPTATION):
-
         if detector not in self.DETECTOR_TYPES:
             raise FeatureMatchException("No such feature matching detector available: " + detector)
         elif adaptation not in self.ADAPTATION_TYPES:
@@ -59,9 +62,6 @@ class FeatureDetector:
             return cv2.NORM_L2
         else:
             return cv2.NORM_HAMMING
-
-    def is_consensus_type(self):
-        return self.detector == "Consensus"
 
     def detect_features(self, img):
         """ Detect interesting features in the image and generate descriptors. A keypoint identifies the
@@ -90,7 +90,6 @@ class FeatureDetector:
     def _create_extractor(self):
         """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
         array of 64 floats (in range -1 to 1); all others are arrays of 32 ints (in range 0 to 255. """
-        # Sift, Surf, and Orb have their own descriptor extraction methods.
         name = self.get_extractor_name(self.detector)
 
         try:
@@ -100,16 +99,17 @@ class FeatureDetector:
         return extractor
 
     @staticmethod
-    def get_consensus_methods(adaptation):
+    def get_all_detectors():
         detectors = []
-        for det in FeatureDetector._CONSENSUS_DETECTORS:
-            method = FeatureDetector(det, adaptation)
+        for det in FeatureDetector.DETECTOR_TYPES:
+            method = FeatureDetector(det, FeatureDetector.ADAPT_NONE)
             detectors.append(method)
-
         return detectors
 
     @staticmethod
     def get_extractor_name(detector_name):
+        """ SIFT, SURF, and ORB have their own descriptor extraction methods. All others use the BRIEF
+        extractor."""
         fd = FeatureDetector
         name = fd.EXT_BRIEF
         if detector_name in [fd.DET_ORB, fd.DET_SIFT, fd.DET_SURF]:

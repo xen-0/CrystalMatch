@@ -65,7 +65,7 @@ class CrystalMatcher:
         return result
 
     def _perform_match(self, feature_matcher, crystal_match):
-        feature_matcher.set_detector("Consensus")
+        feature_matcher.set_use_all_detectors()
         feature_matcher.set_transform_method(self._transform_method)
         feature_matcher.set_transform_filter(self._transform_filter)
 

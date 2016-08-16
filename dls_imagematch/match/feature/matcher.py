@@ -25,6 +25,7 @@ class FeatureMatcher:
     _DEFAULT_FILTER = TransformCalculator.DEFAULT_FILTER
 
     def __init__(self, img1, img2):
+        self._use_all_detectors = False
         self._detector = FeatureDetector()
         self._transform_method = self._DEFAULT_TRANSFORM
         self._transform_filter = self._DEFAULT_FILTER
@@ -35,7 +36,12 @@ class FeatureMatcher:
         self.img2 = img2
 
     # -------- CONFIGURATION -------------------
+    def set_use_all_detectors(self):
+        self._use_all_detectors = True
+        self._detector = None
+
     def set_detector(self, method, adaptation=""):
+        self._use_all_detectors = False
         self._detector = FeatureDetector(method, adaptation)
 
     def set_transform_method(self, method):
@@ -74,32 +80,38 @@ class FeatureMatcher:
 
     def _create_result_object(self, matches, transform):
         result = FeatureMatchResult(self.img1, self.img2, matches, transform)
-        result.method = self._detector.detector
-        result.method_adapt = self._detector.adaptation
+
+        if self._use_all_detectors:
+            result.method = "All"
+            result.method_adapt = ""
+        else:
+            result.method = self._detector.detector
+            result.method_adapt = self._detector.adaptation
+
         return result
 
     def _find_matches(self):
-        if self._detector.is_consensus_type():
-            matches = self._find_matches_for_consensus()
+        if self._use_all_detectors:
+            matches = self._find_matches_for_all_detectors()
         else:
-            matches = self._find_matches_for_method(self._detector)
+            matches = self._find_matches_for_detector(self._detector)
 
         return matches
 
-    def _find_matches_for_consensus(self):
+    def _find_matches_for_all_detectors(self):
         matches = []
-        for method in FeatureDetector.get_consensus_methods(self._detector.adaptation):
-            method_matches = self._find_matches_for_method(method)
-            matches.extend(method_matches)
+        for detector in FeatureDetector.get_all_detectors():
+            detector_matches = self._find_matches_for_detector(detector)
+            matches.extend(detector_matches)
 
         return matches
 
-    def _find_matches_for_method(self, method):
-        keypoints1, descriptors1 = method.detect_features(self.img1)
-        keypoints2, descriptors2 = method.detect_features(self.img2)
+    def _find_matches_for_detector(self, detector):
+        keypoints1, descriptors1 = detector.detect_features(self.img1)
+        keypoints2, descriptors2 = detector.detect_features(self.img2)
 
-        raw_matches = self._brute_force_match(method, descriptors1, descriptors2)
-        matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2, method)
+        raw_matches = self._brute_force_match(detector, descriptors1, descriptors2)
+        matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2, detector)
         matches = self._filter_matches(matches)
         return matches
 
