@@ -2,10 +2,9 @@ from __future__ import division
 
 import cv2
 
-from .transform_calc import TransformCalculator
+from .transform_calc import TransformCalculator, TransformCalculationError
 from .result import FeatureMatchResult
 
-from .exception import FeatureMatchException
 from .match import SingleFeatureMatch
 from .detector import FeatureDetector
 
@@ -21,7 +20,6 @@ class FeatureMatcher:
     does not work properly for Python - it incorrectly raises an exception. This is a widely known
     and reported problem but it doesn't seem to have been fixed yet.
     """
-    _MIN_MATCHES = 1
     _MAX_MATCHES = 200
     _DEFAULT_TRANSFORM = TransformCalculator.DEFAULT_METHOD
     _DEFAULT_FILTER = TransformCalculator.DEFAULT_FILTER
@@ -63,7 +61,11 @@ class FeatureMatcher:
         calc.set_method(self._transform_method)
         calc.set_filter(self._transform_filter)
 
-        transform = calc.calculate_transform(matches)
+        try:
+            transform = calc.calculate_transform(matches)
+        except TransformCalculationError:
+            transform = None
+
         return self._create_result_object(matches, transform)
 
     def match_translation_only(self):
@@ -82,19 +84,14 @@ class FeatureMatcher:
         else:
             matches = self._find_matches_for_method(self._detector)
 
-        if not self._has_minimum_number_of_matches(matches):
-            self._raise_insufficient_matches_exception()
-
         return matches
 
     def _find_matches_for_consensus(self):
         matches = []
         for method in FeatureDetector.get_consensus_methods(self._detector.adaptation):
-            try:
-                method_matches = self._find_matches_for_method(method)
-                matches.extend(method_matches)
-            except FeatureMatchException:
-                pass
+            method_matches = self._find_matches_for_method(method)
+            matches.extend(method_matches)
+
         return matches
 
     def _find_matches_for_method(self, method):
@@ -127,10 +124,3 @@ class FeatureMatcher:
         top_matches = sorted(matches, key=lambda x: x.distance)[:self._MAX_MATCHES]
 
         return top_matches
-
-    def _has_minimum_number_of_matches(self, matches):
-        return len(matches) >= self._MIN_MATCHES
-
-    def _raise_insufficient_matches_exception(self):
-        message = "Could not find the required minimum number of matches ({})!".format(self._MIN_MATCHES)
-        raise FeatureMatchException(message)

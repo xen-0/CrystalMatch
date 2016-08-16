@@ -1,4 +1,14 @@
 class FeatureMatchException(Exception):
-    def __init__(self, message):
-        super(FeatureMatchException, self).__init__(message)
-        self.message = message
+    pass
+
+
+class OpenCvVersionError(Exception):
+    pass
+
+
+class KeypointFilterError(Exception):
+    pass
+
+
+class TransformCalculationError(Exception):
+    pass

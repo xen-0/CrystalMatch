@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point
+from .exception import TransformCalculationError
 from ..transform import HomographyTransformation, Translation, AffineTransformation
 
 
@@ -13,20 +14,19 @@ class TransformCalculator:
     The transformation can include translation, rotation, scale, and skew components.
 
     Clients can choose from four different methods:
-    * INCLUDE_ALL - the transform will be calculated using all of the matches. This will
-        be less reliable if there are many outliers.
-    * LMEDS - uses the least median of squares method to automatically cull outliers. This method
-        only works correctly when > 50% of matches are inliers.
-    * RANSAC - uses the random sample consensus method to cull outliers. This uses an error threshold
-        to distinguish outliers from inliers (can be set by the client).
-    * TRANSLATION - calculate a translation only transformation by simply taking the median x and y
-        components of the matches.
+    * TRANSLATION - the transform will be calculated simply as the median translation.
+    * HOMOGRAPHY - a full transformation
+    * AFFINE_FULL - an affine transformation with 6 degrees of freedom
+    * AFFINE_RIGID - an affine transformation with 5 degrees of freedom - no shearing so
+        transformed shapes will maintain the same angles.
 
-    Note: at least 4 matches are required to calculate a full transformation. If there are fewer than
-    this, the class will fall back on the TRANSLATION method.
+    Note: at least 4 matches are required to calculate a full transformation.
 
-    If the 'mark unused' flag is set, the methods LMEDS and RANSAC will mark any outlier match objects
-    as being unused.
+    A filter may be used to eliminate some of the poorer matches prior to calculating the transformation.
+    The options are:
+    * NO_FILTER -
+    * LMEDS -
+    * RANSAC -
 
     For more information on homography calculation and definition of methods, see:
     http://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#findhomography
@@ -59,12 +59,12 @@ class TransformCalculator:
     # -------- CONFIGURATION -------------------
     def set_method(self, method):
         if method not in self.METHODS:
-            raise ValueError("Not a valid transformation method: '{}'".format(method))
+            raise TransformCalculationError("Not a valid transformation method: '{}'".format(method))
         self._method = method
 
     def set_filter(self, filter):
         if filter not in self.FILTERS:
-            raise ValueError("Not a valid filter: '{}'".format(filter))
+            raise TransformCalculationError("Not a valid filter: '{}'".format(filter))
         self._filter = filter
 
     def set_ransac_threshold(self, threshold):
@@ -72,21 +72,24 @@ class TransformCalculator:
 
     # -------- FUNCTIONALITY -------------------
     def calculate_transform(self, matches):
-        method = self._method
-        use_translation = method == self.TRANSLATION
-        can_do_transform = self._has_enough_matches_for_transform(matches)
+        if len(matches) == 0:
+            return None
 
-        if use_translation or not can_do_transform:
+        method = self._method
+        if method == self.TRANSLATION:
             transform, mask = self._calculate_median_translation(matches)
         elif method == self.HOMOGRAPHY:
             transform, mask = self._calculate_homography_transform(matches)
         elif method in self.AFFINE_METHODS:
             transform, mask = self._calculate_affine_transform(matches)
         else:
-            raise ValueError("Unrecognised method type")
+            raise TransformCalculationError("Unrecognised transform method type")
 
-        self._set_matches_reprojection_error(matches, transform)
-        self._mark_unused_matches(matches, mask)
+        if transform is None:
+            self._mark_all_matches_unused(matches)
+        else:
+            self._set_matches_reprojection_error(matches, transform)
+            self._mark_unused_matches(matches, mask)
 
         return transform
 
@@ -126,8 +129,10 @@ class TransformCalculator:
             use_full = self._method == self.AFFINE_FULL
 
             affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=use_full)
-            affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
-            transform = AffineTransformation(affine)
+
+            if affine is not None:
+                affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
+                transform = AffineTransformation(affine)
 
         return transform, mask
 
@@ -195,6 +200,11 @@ class TransformCalculator:
         mask = TransformCalculator._sanitize_mask(mask)
         for match, include in zip(matches, mask):
             match.set_in_transformation(include)
+
+    @staticmethod
+    def _mark_all_matches_unused(matches):
+        for match in matches:
+            match.set_in_transformation(False)
 
     @staticmethod
     def _set_matches_reprojection_error(matches, transform):

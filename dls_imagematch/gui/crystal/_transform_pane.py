@@ -109,12 +109,15 @@ class TransformPane(QWidget):
 
         point1 = self._img1_point - target_region_tl
         point2 = None
-        quad1 = []
-        quad2 = []
 
-        if len(self._matches) > 0:
-            calc = self._create_transform_calc()
-            transform = calc.calculate_transform(self._matches)
+        w = point1.x
+        quad1 = [Point(0, 0), Point(2*w, 0), Point(2*w, 2*w), Point(0, 2*w)]
+        quad2 = None
+
+        calc = self._create_transform_calc()
+        transform = calc.calculate_transform(self._matches)
+
+        if transform is not None:
             transformed_point = transform.transform_points([self._img1_point])[0]
             point2 = transformed_point - search_region_tl
 
@@ -123,8 +126,6 @@ class TransformPane(QWidget):
             def trans(x, y):
                 return transform.transform_points([p1 + Point(x, y)])[0] - search_region_tl
 
-            w = point1.x
-            quad1 = [Point(0, 0), Point(2*w, 0), Point(2*w, 2*w), Point(0, 2*w)]
             quad2 = [trans(-w, -w), trans(w, -w), trans(w, w), trans(-w, w)]
 
         self._emit_new_points_signal(point1, point2)

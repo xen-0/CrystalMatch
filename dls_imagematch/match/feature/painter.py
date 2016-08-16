@@ -100,18 +100,19 @@ class FeaturePainter:
         if img is None:
             img = self._background_image.copy()
 
-        f1 = lambda x: self._point_to_img_coords(x, 1)
-        f2 = lambda x: self._point_to_img_coords(x, 2)
+        if quad1 is not None:
+            f1 = lambda x: self._point_to_img_coords(x, 1)
+            img.draw_line(f1(quad1[0]), f1(quad1[1]), Color.Orange(), 2)
+            img.draw_line(f1(quad1[1]), f1(quad1[2]), Color.Orange(), 2)
+            img.draw_line(f1(quad1[2]), f1(quad1[3]), Color.Orange(), 2)
+            img.draw_line(f1(quad1[3]), f1(quad1[0]), Color.Orange(), 2)
 
-        img.draw_line(f2(quad2[0]), f2(quad2[1]), Color.Orange(), 2)
-        img.draw_line(f2(quad2[1]), f2(quad2[2]), Color.Orange(), 2)
-        img.draw_line(f2(quad2[2]), f2(quad2[3]), Color.Orange(), 2)
-        img.draw_line(f2(quad2[3]), f2(quad2[0]), Color.Orange(), 2)
-
-        img.draw_line(f1(quad1[0]), f1(quad1[1]), Color.Orange(), 2)
-        img.draw_line(f1(quad1[1]), f1(quad1[2]), Color.Orange(), 2)
-        img.draw_line(f1(quad1[2]), f1(quad1[3]), Color.Orange(), 2)
-        img.draw_line(f1(quad1[3]), f1(quad1[0]), Color.Orange(), 2)
+        if quad2 is not None:
+            f2 = lambda x: self._point_to_img_coords(x, 2)
+            img.draw_line(f2(quad2[0]), f2(quad2[1]), Color.Orange(), 2)
+            img.draw_line(f2(quad2[1]), f2(quad2[2]), Color.Orange(), 2)
+            img.draw_line(f2(quad2[2]), f2(quad2[3]), Color.Orange(), 2)
+            img.draw_line(f2(quad2[3]), f2(quad2[0]), Color.Orange(), 2)
 
         return img
 

@@ -1,6 +1,6 @@
 import cv2
 
-from .exception import FeatureMatchException
+from .exception import OpenCvVersionError, FeatureMatchException
 
 _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
                         "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
@@ -46,9 +46,9 @@ class FeatureDetector:
     def __init__(self, detector=DEFAULT_DETECTOR, adaptation=DEFAULT_ADAPTATION):
 
         if detector not in self.DETECTOR_TYPES:
-            raise ValueError("No such feature matching detector available: " + detector)
+            raise FeatureMatchException("No such feature matching detector available: " + detector)
         elif adaptation not in self.ADAPTATION_TYPES:
-            raise ValueError("No such feature matching adaptation available: " + adaptation)
+            raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
 
         self.detector = str(detector)
         self.adaptation = str(adaptation)
@@ -84,7 +84,7 @@ class FeatureDetector:
         try:
             detector = cv2.FeatureDetector_create(name)
         except AttributeError:
-            raise FeatureMatchException(_OPENCV_VERSION_ERROR)
+            raise OpenCvVersionError(_OPENCV_VERSION_ERROR)
         return detector
 
     def _create_extractor(self):
@@ -96,7 +96,7 @@ class FeatureDetector:
         try:
             extractor = cv2.DescriptorExtractor_create(name)
         except AttributeError:
-            raise FeatureMatchException(_OPENCV_VERSION_ERROR)
+            raise OpenCvVersionError(_OPENCV_VERSION_ERROR)
         return extractor
 
     @staticmethod

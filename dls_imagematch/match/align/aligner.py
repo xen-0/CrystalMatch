@@ -1,4 +1,4 @@
-from ..feature import FeatureDetector, FeatureMatcher, FeatureMatchException
+from ..feature import FeatureDetector, FeatureMatcher
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
 
@@ -34,10 +34,10 @@ class ImageAligner:
         matcher = FeatureMatcher(img1, img2)
         matcher.set_detector(self._detector, self._adaptation)
 
-        try:
-            match_result = matcher.match_translation_only()
-        except FeatureMatchException as e:
-            raise ImageAlignmentError("Image Alignment failed")
+        match_result = matcher.match_translation_only()
+
+        if not match_result.has_transform():
+            raise ImageAlignmentError("Image Alignment failed - no matches found")
 
         translation = match_result.transform.translation()
         description = self._get_method_description()

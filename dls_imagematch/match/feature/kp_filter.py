@@ -1,3 +1,4 @@
+from .exception import KeypointFilterError
 from .detector import FeatureDetector
 
 
@@ -60,7 +61,7 @@ class KeypointDistanceFilter:
 
     def _check_value(self, value):
         if value < self._RANGE_MIN or value > self._RANGE_MAX:
-            raise ValueError("Keypoint distance filter value must be between 1 and 100 inclusive")
+            raise KeypointFilterError("Keypoint distance filter value must be between 1 and 100 inclusive")
 
     def filter(self, matches):
         good_matches = []

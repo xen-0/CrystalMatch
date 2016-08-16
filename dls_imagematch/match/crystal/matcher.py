@@ -2,7 +2,7 @@ from __future__ import division
 
 from .match_results import CrystalMatchResults
 from .single_match_result import SingleCrystalMatch
-from ..feature import BoundedFeatureMatcher, FeatureMatchException
+from ..feature import BoundedFeatureMatcher
 from dls_imagematch.util import Rectangle, Point
 
 
@@ -65,15 +65,12 @@ class CrystalMatcher:
         return result
 
     def _perform_match(self, feature_matcher, crystal_match):
-        try:
-            feature_matcher.set_detector("Consensus")
-            feature_matcher.set_transform_method(self._transform_method)
-            feature_matcher.set_transform_filter(self._transform_filter)
+        feature_matcher.set_detector("Consensus")
+        feature_matcher.set_transform_method(self._transform_method)
+        feature_matcher.set_transform_filter(self._transform_filter)
 
-            result = feature_matcher.match()
-            crystal_match.set_feature_match_result(result)
-        except FeatureMatchException:
-            pass
+        result = feature_matcher.match()
+        crystal_match.set_feature_match_result(result)
 
     def make_target_region(self, center):
         size = self._region_size_pixels()

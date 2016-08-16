@@ -17,6 +17,9 @@ class SingleCrystalMatch:
         self._pixel_size = pixel_size
         self._feature_result = None
 
+    def is_success(self):
+        return self._img2_point is not None
+
     def pixel_size(self):
         return self._pixel_size
 
@@ -54,7 +57,8 @@ class SingleCrystalMatch:
         same crystal location on Image 2. """
         self._feature_result = feature_result
         trans = feature_result.transform
-        self._img2_point = trans.transform_points([self._img1_point])[0]
+        if trans is not None:
+            self._img2_point = trans.transform_points([self._img1_point])[0]
 
     def feature_matches(self):
         return self._feature_result

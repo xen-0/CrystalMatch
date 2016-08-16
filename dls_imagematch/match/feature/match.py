@@ -22,7 +22,7 @@ class SingleFeatureMatch:
         if self._point2_projected is not None:
             return self.point2().distance_to(self._point2_projected)
         else:
-            return Point(1e6, 1e6)
+            return 1e6
 
     def is_in_transformation(self):
         return self._included_in_transformation
