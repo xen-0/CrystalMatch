@@ -4,6 +4,7 @@ from PyQt4.QtGui import QDialog, QHBoxLayout, QVBoxLayout
 
 from ._match_pane import CrystalMatchPane
 from ._filter_pane import FilterPane
+from ._metric_pane import MetricPane
 from ._matches_table import FeatureMatchTable
 from ._crystal_match_frame import CrystalMatchFrame
 from ._transform_pane import TransformPane
@@ -23,6 +24,7 @@ class SingleCrystalDialog(QDialog):
         self._match_pane = None
         self._transform_pane = None
         self._filter_pane = None
+        self._metric_pane = None
         self._table = None
         self._frame = None
 
@@ -41,6 +43,8 @@ class SingleCrystalDialog(QDialog):
         self._filter_pane = FilterPane()
         self._filter_pane.setEnabled(False)
 
+        self._metric_pane = MetricPane()
+
         self._table = FeatureMatchTable()
         self._table.setEnabled(False)
 
@@ -50,6 +54,7 @@ class SingleCrystalDialog(QDialog):
         vbox.addWidget(self._match_pane)
         vbox.addWidget(self._transform_pane)
         vbox.addWidget(self._filter_pane)
+        vbox.addWidget(self._metric_pane)
         vbox.addStretch(1)
 
         vbox2 = QVBoxLayout()
@@ -66,8 +71,10 @@ class SingleCrystalDialog(QDialog):
 
     def _connect_components(self):
         self._match_pane.signal_new_crystal_match.connect(self._transform_pane.set_crystal_match)
+        self._match_pane.signal_new_crystal_match.connect(self._metric_pane.set_crystal_match_result)
         self._match_pane.signal_new_images.connect(self._frame.set_new_images)
 
+        self._transform_pane.signal_new_transform.connect(self._metric_pane.set_transform)
         self._transform_pane.signal_updated_matches.connect(self._filter_pane.set_matches)
         self._transform_pane.signal_new_points.connect(self._frame.display_points)
         self._transform_pane.signal_new_quads.connect(self._frame.display_transformed_square)

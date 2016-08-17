@@ -9,6 +9,7 @@ from dls_imagematch.util.widget import Slider
 
 
 class TransformPane(QWidget):
+    signal_new_transform = QtCore.pyqtSignal(object)
     signal_new_points = QtCore.pyqtSignal(object, object)
     signal_new_quads = QtCore.pyqtSignal(object, object)
     signal_updated_matches = QtCore.pyqtSignal(object)
@@ -128,6 +129,7 @@ class TransformPane(QWidget):
 
             quad2 = [trans(-w, -w), trans(w, -w), trans(w, w), trans(-w, w)]
 
+        self._emit_new_transform_signal(transform)
         self._emit_new_points_signal(point1, point2)
         self._emit_new_quads(quad1, quad2)
 
@@ -147,6 +149,9 @@ class TransformPane(QWidget):
 
     def _get_filter_value(self):
         return self._cmbo_filter.currentText()
+
+    def _emit_new_transform_signal(self, transform):
+        self.signal_new_transform.emit(transform)
 
     def _emit_new_points_signal(self, point1, point2):
         self.signal_new_points.emit(point1, point2)

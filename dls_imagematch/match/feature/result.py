@@ -14,22 +14,28 @@ class FeatureMatchResult:
         self.method = None
         self.method_adapt = None
 
-        self.coherence = self._calculate_coherence()
-
     def any_matches(self):
         return len(self.matches) > 0
 
     def has_transform(self):
         return self.transform is not None
 
-    def _calculate_coherence(self):
+    def good_matches(self):
+        return [m for m in self.matches if m.is_in_transformation()]
 
-        good_matches = [m for m in self.matches if m.is_in_transformation()]
-        distances = [m.reprojection_error() for m in good_matches]
+    def num_matches(self):
+        return len(self.matches)
 
+    def num_good_matches(self):
+        return len(self.good_matches())
+
+    def mean_transform_error(self):
+        """ Calculates the average reprojection error of all the good matches (those involved
+        in calculating the transformation)."""
+        good_matches = self.good_matches()
         if len(good_matches) == 0:
             return 0
 
-        total = sum(distances) / len(good_matches)
-        print("Coherence: {:.3f}".format(total))
+        errors = [m.reprojection_error() for m in good_matches]
+        total = sum(errors) / len(good_matches)
         return total
