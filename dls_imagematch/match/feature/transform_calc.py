@@ -110,9 +110,8 @@ class TransformCalculator:
 
         if self._has_enough_matches_for_transform(matches):
             img1_pts, img2_pts = self._get_np_points(matches)
-            homo_method = self._get_filter_code()
 
-            homography, new_mask = cv2.findHomography(img1_pts, img2_pts, homo_method, self._ransac_threshold)
+            homography, new_mask = cv2.findHomography(img1_pts, img2_pts, 0, 0)
             mask = self._combine_masks(mask, new_mask)
             transform = HomographyTransformation(homography)
 
