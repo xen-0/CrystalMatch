@@ -7,27 +7,43 @@ from .detector import Detector
 
 class OrbDetector(Detector):
     WTA_K_VALUES = [2, 3, 4]
-    SCORE_TYPE_VALUES = [cv2.ORB_HARRIS_SCORE, cv2.ORB_FAST_SCORE]
 
-    _DEFAULT_N_FEATURES = 500
+    SCORE_HARRIS = "HARRIS_SCORE"
+    SCORE_FAST = "FAST_SCORE"
+    SCORE_TYPE_NAMES = [SCORE_HARRIS, SCORE_FAST]
+
+    DEFAULT_N_FEATURES = 500
+    DEFAULT_SCALE_FACTOR = 1.2
+    DEFAULT_N_LEVELS = 8
+    DEFAULT_EDGE_THRESHOLD = 31
+    DEFAULT_FIRST_LEVEL = 0
+    DEFAULT_WTA_K = 2
+    DEFAULT_SCORE_TYPE = SCORE_HARRIS
+    DEFAULT_PATCH_SIZE = 31
 
     def __init__(self):
         Detector.__init__(self, DetectorType.ORB)
 
-        self._n_features = 500
-        self._scale_factor = 1.2
-        self._n_levels = 8
-        self._edge_threshold = 31
-        self._first_level = 0
-        self._wta_k = 2
-        self._score_type = cv2.ORB_HARRIS_SCORE
-        self._patch_size = 31
+        self._n_features = self.DEFAULT_N_FEATURES
+        self._scale_factor = self.DEFAULT_SCALE_FACTOR
+        self._n_levels = self.DEFAULT_N_LEVELS
+        self._edge_threshold = self.DEFAULT_EDGE_THRESHOLD
+        self._first_level = self.DEFAULT_FIRST_LEVEL
+        self._wta_k = self.DEFAULT_WTA_K
+        self._score_type = self.DEFAULT_SCORE_TYPE
+        self._patch_size = self.DEFAULT_PATCH_SIZE
 
     def normalization(self):
         if self._wta_k == 2:
             return cv2.NORM_HAMMING
         else:
             return cv2.NORM_HAMMING2
+
+    def _score(self):
+        if self._score_type == self.SCORE_HARRIS:
+            return cv2.ORB_HARRIS_SCORE
+        elif self._score_type == self.SCORE_FAST:
+            return cv2.ORB_FAST_SCORE
 
     # -------- CONFIGURATION ------------------
     def set_n_features(self, value):
@@ -83,8 +99,9 @@ class OrbDetector(Detector):
         """ The default HARRIS_SCORE means that Harris algorithm is used to rank features (the score is written
         to KeyPoint::score and is used to retain best nfeatures features); FAST_SCORE is alternative value of
         the parameter that produces slightly less stable keypoints, but it is a little faster to compute. """
-        if value not in self.SCORE_TYPE_VALUES:
-            raise FeatureDetectorError("ORB score type value must be one of {}".format(self.SCORE_TYPE_VALUES))
+        if value not in self.SCORE_TYPE_NAMES:
+            raise FeatureDetectorError("ORB score type value must be one of {}".format(self.SCORE_TYPE_NAMES))
+
         self._score_type = value
 
     def set_patch_size(self, value):
@@ -93,6 +110,15 @@ class OrbDetector(Detector):
         if int(value) < 1:
             raise FeatureDetectorError("ORB patch size must be positive integer")
         self._patch_size = int(value)
+
+    def set_from_config(self, config):
+        self.set_n_features(config.orb_n_features.value())
+        self.set_scale_factor(config.orb_scale_factor.value())
+        self.set_n_levels(config.orb_n_levels.value())
+        self.set_first_level(config.orb_first_level.value())
+        self.set_wta_k(config.orb_wta_k.value())
+        self.set_score_type(config.orb_score_type.value())
+        self.set_patch_size(config.orb_patch_size.value())
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
@@ -103,7 +129,7 @@ class OrbDetector(Detector):
                            edgeThreshold=self._edge_threshold,
                            firstLevel=self._first_level,
                            WTA_K=self._wta_k,
-                           scoreType=self._score_type,
+                           scoreType=self._score(),
                            patchSize=self._patch_size)
 
         return detector
