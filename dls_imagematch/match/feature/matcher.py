@@ -1,12 +1,13 @@
 from __future__ import division
 
 import cv2
+import numpy as np
 
 from .transform_calc import TransformCalculator, TransformCalculationError
 from .result import FeatureMatchResult
 
 from .match import SingleFeatureMatch
-from .detector import FeatureDetector
+from .detector_factory import DetectorFactory
 
 
 class FeatureMatcher:
@@ -26,7 +27,7 @@ class FeatureMatcher:
 
     def __init__(self, img1, img2):
         self._use_all_detectors = False
-        self._detector = FeatureDetector()
+        self._detector = None
         self._transform_method = self._DEFAULT_TRANSFORM
         self._transform_filter = self._DEFAULT_FILTER
 
@@ -42,7 +43,7 @@ class FeatureMatcher:
 
     def set_detector(self, method, adaptation=""):
         self._use_all_detectors = False
-        self._detector = FeatureDetector(method, adaptation)
+        self._detector = DetectorFactory.create(method)
 
     def set_transform_method(self, method):
         if method is None:
@@ -100,39 +101,42 @@ class FeatureMatcher:
 
     def _find_matches_for_all_detectors(self):
         matches = []
-        for detector in FeatureDetector.get_all_detectors():
+        for detector in DetectorFactory.get_all_detectors():
             detector_matches = self._find_matches_for_detector(detector)
             matches.extend(detector_matches)
 
         return matches
 
     def _find_matches_for_detector(self, detector):
-        keypoints1, descriptors1 = detector.detect_features(self.img1)
-        keypoints2, descriptors2 = detector.detect_features(self.img2)
+        features1 = detector.detect_features(self.img1)
+        features2 = detector.detect_features(self.img2)
 
-        raw_matches = self._brute_force_match(detector, descriptors1, descriptors2)
-        matches = self._matches_from_raw(raw_matches, keypoints1, keypoints2, detector)
-        matches = self._filter_matches(matches)
+        raw_matches = self._brute_force_match(detector, features1, features2)
+        matches = self._matches_from_raw(raw_matches, features1, features2, detector)
+        matches = self._filter_matches(detector, matches)
         return matches
 
-    def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
-        matches = SingleFeatureMatch.from_cv2_matches(raw_matches, keypoints1, keypoints2, method)
-        return matches
-
-    def _filter_matches(self, matches):
-        if self._keypoint_distance_filter is not None:
-            matches = self._keypoint_distance_filter.filter(matches)
-        return matches
-
-    def _brute_force_match(self, method, descriptors_1, descriptors_2):
+    def _brute_force_match(self, detector, features1, features2):
         """ For two sets of feature descriptors generated from 2 images, attempt to find all the matches,
         i.e. find features that occur in both images. """
         # TODO: Try out a FLANN based matcher
-        if len(descriptors_1) == 0 or len(descriptors_2) == 0:
+        if len(features1) == 0 or len(features2) == 0:
             return []
 
-        matcher = cv2.BFMatcher(method.normalization_type(), crossCheck=True)
-        matches = matcher.match(descriptors_1, descriptors_2)
+        descriptors1 = np.array([f.descriptor() for f in features1])
+        descriptors2 = np.array([f.descriptor() for f in features2])
+
+        matcher = cv2.BFMatcher(detector.normalization(), crossCheck=True)
+        matches = matcher.match(descriptors1, descriptors2)
         top_matches = sorted(matches, key=lambda x: x.distance)[:self._MAX_MATCHES]
 
         return top_matches
+
+    def _matches_from_raw(self, raw_matches, features1, features2, method):
+        matches = SingleFeatureMatch.from_cv2_matches(raw_matches, features1, features2, method)
+        return matches
+
+    def _filter_matches(self, detector, matches):
+        if self._keypoint_distance_filter is not None:
+            matches = self._keypoint_distance_filter.filter(detector, matches)
+        return matches

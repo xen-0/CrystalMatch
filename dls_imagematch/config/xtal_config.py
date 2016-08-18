@@ -2,7 +2,7 @@ from util import Color
 from util import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
-from dls_imagematch.match.feature import FeatureDetector
+from dls_imagematch.match.feature.detectors import Detector
 
 
 class XtalConfig(Config):
@@ -11,10 +11,10 @@ class XtalConfig(Config):
 
         add = self.add
 
-        align_detectors = FeatureDetector.DETECTOR_TYPES
-        align_adaptations = FeatureDetector.ADAPTATION_TYPES
-        def_detector = FeatureDetector.DEFAULT_DETECTOR
-        def_adaptation = FeatureDetector.DEFAULT_ADAPTATION
+        align_detectors = Detector.DETECTOR_TYPES
+        align_adaptations = Detector.ADAPTATION_TYPES
+        def_detector = Detector.DEFAULT_DETECTOR
+        def_adaptation = Detector.DEFAULT_ADAPTATION
 
         trans_methods = TransformCalculator.METHODS
         trans_filters = TransformCalculator.FILTERS

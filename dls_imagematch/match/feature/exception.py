@@ -1,3 +1,7 @@
+class FeatureDetectorError(Exception):
+    pass
+
+
 class FeatureMatchException(Exception):
     pass
 

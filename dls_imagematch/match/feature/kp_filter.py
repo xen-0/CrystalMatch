@@ -1,5 +1,5 @@
 from .exception import KeypointFilterError
-from .detector import FeatureDetector
+from .detectors.detector import Detector
 
 
 class KeypointDistanceFilter:
@@ -63,18 +63,18 @@ class KeypointDistanceFilter:
         if value < self._RANGE_MIN or value > self._RANGE_MAX:
             raise KeypointFilterError("Keypoint distance filter value must be between 1 and 100 inclusive")
 
-    def filter(self, matches):
+    def filter(self, detector, matches):
         good_matches = []
 
         for match in matches:
-            extractor = FeatureDetector.get_extractor_name(match.method())
-            if extractor == FeatureDetector.EXT_SURF:
+            extractor = detector.extractor()
+            if extractor == Detector.EXT_SURF:
                 limit = self._surf_max * self._FACTOR_SURF
-            elif extractor == FeatureDetector.EXT_SIFT:
+            elif extractor == Detector.EXT_SIFT:
                 limit = self._sift_max * self._FACTOR_SIFT
-            elif extractor == FeatureDetector.EXT_ORB:
+            elif extractor == Detector.EXT_ORB:
                 limit = self._orb_max
-            elif extractor == FeatureDetector.EXT_BRIEF:
+            elif extractor == Detector.EXT_BRIEF:
                 limit = self._brief_max
 
             if match.distance() <= limit:

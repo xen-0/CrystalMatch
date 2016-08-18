@@ -1,4 +1,3 @@
-from .detector import FeatureDetector
 from .painter import FeaturePainter
 from .transform_calc import TransformCalculator
 

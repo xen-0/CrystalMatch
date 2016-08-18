@@ -1,11 +1,12 @@
-from ..feature import FeatureDetector, FeatureMatcher
+from ..feature.detectors import Detector
+from ..feature import FeatureMatcher
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
 
 
 class ImageAligner:
-    _DEFAULT_DETECTOR = FeatureDetector.DEFAULT_DETECTOR
-    _DEFAULT_ADAPTATION = FeatureDetector.DEFAULT_ADAPTATION
+    _DEFAULT_DETECTOR = Detector.DEFAULT_DETECTOR
+    _DEFAULT_ADAPTATION = Detector.DEFAULT_ADAPTATION
 
     def __init__(self, img1, img2):
         self._img1 = img1
