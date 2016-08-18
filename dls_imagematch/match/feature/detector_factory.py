@@ -3,6 +3,7 @@ from .exception import FeatureDetectorError
 
 from .detectors import DetectorType
 from .detectors.detector import Detector
+from .detectors.detector_orb import OrbDetector
 
 
 class DetectorFactory:
@@ -11,7 +12,10 @@ class DetectorFactory:
         if type not in DetectorType.LIST_ALL:
             raise FeatureDetectorError("Unknown detector type: {}".format(type))
 
-        detector = Detector(detector=type)
+        if type == DetectorType.ORB:
+            detector = OrbDetector()
+        else:
+            detector = Detector(detector=type)
 
         return detector
 
