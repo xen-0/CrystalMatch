@@ -1,5 +1,5 @@
 from .exception import KeypointFilterError
-from .detectors.detector import Detector
+from .detectors.detector import ExtractorType
 
 
 class KeypointDistanceFilter:
@@ -68,13 +68,13 @@ class KeypointDistanceFilter:
 
         for match in matches:
             extractor = detector.extractor()
-            if extractor == Detector.EXT_SURF:
+            if extractor == ExtractorType.SURF:
                 limit = self._surf_max * self._FACTOR_SURF
-            elif extractor == Detector.EXT_SIFT:
+            elif extractor == ExtractorType.SIFT:
                 limit = self._sift_max * self._FACTOR_SIFT
-            elif extractor == Detector.EXT_ORB:
+            elif extractor == ExtractorType.ORB:
                 limit = self._orb_max
-            elif extractor == Detector.EXT_BRIEF:
+            elif extractor == ExtractorType.BRIEF:
                 limit = self._brief_max
 
             if match.distance() <= limit:

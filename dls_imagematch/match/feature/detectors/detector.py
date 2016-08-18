@@ -1,5 +1,6 @@
 import cv2
 
+from .types import DetectorType, AdaptationType, ExtractorType
 from .feature import Feature
 from ..exception import OpenCvVersionError, FeatureMatchException
 
@@ -15,42 +16,14 @@ class Detector:
     A range of different detector methods are available, each with different properties. Each detector
     may work more effectively on some images than on others.
     """
-    # Detector Types
-    DET_ORB = "ORB"
-    DET_SIFT = "SIFT"
-    DET_SURF = "SURF"
-    DET_BRISK = "BRISK"
-    DET_FAST = "FAST"
-    DET_STAR = "STAR"
-    DET_MSER = "MSER"
-    DET_GFTT = "GFTT"
-    DET_HARRIS = "HARRIS"
-    DET_DENSE = "Dense"
-    DET_BLOB = "SimpleBlob"
-
-    DETECTOR_TYPES = [DET_ORB, DET_SIFT, DET_SURF, DET_BRISK, DET_FAST, DET_STAR, DET_MSER,
-                      DET_GFTT, DET_HARRIS, DET_DENSE, DET_BLOB]
-
-    # Adaptation Types
-    ADAPT_NONE = ""
-    ADAPT_GRID = "Grid"
-    ADAPT_PYRAMID = "Pyramid"
-
-    ADAPTATION_TYPES = [ADAPT_NONE, ADAPT_GRID, ADAPT_PYRAMID]
-
-    # Extractor Types
-    EXT_ORB = DET_ORB
-    EXT_SURF = DET_SURF
-    EXT_SIFT = DET_SIFT
-    EXT_BRIEF = "BRIEF"
 
     # Defaults
-    DEFAULT_DETECTOR = DETECTOR_TYPES[0]
-    DEFAULT_ADAPTATION = ADAPTATION_TYPES[0]
+    DEFAULT_DETECTOR = DetectorType.ORB
+    DEFAULT_ADAPTATION = AdaptationType.NONE
 
     def __init__(self, detector=DEFAULT_DETECTOR):
         """ Supply a detector name to use that detector with all its default parameters. """
-        if detector not in self.DETECTOR_TYPES:
+        if detector not in DetectorType.LIST_ALL:
             raise FeatureMatchException("No such feature matching detector available: " + detector)
 
         self._detector = detector
@@ -73,7 +46,7 @@ class Detector:
 
     # -------- CONFIGURATION ------------------
     def set_adaptation(self, adaptation):
-        if adaptation not in self.ADAPTATION_TYPES:
+        if adaptation not in AdaptationType.LIST_ALL:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
         self._adaptation = adaptation
 
@@ -110,16 +83,15 @@ class Detector:
     def _default_extractor(detector_name):
         """ SIFT, SURF, and ORB have their own descriptor extraction methods. All others use the BRIEF
         extractor."""
-        det = Detector
-        name = det.EXT_BRIEF
-        if detector_name in [det.DET_ORB, det.DET_SIFT, det.DET_SURF]:
+        name = ExtractorType.BRIEF
+        if detector_name in ExtractorType.LIST_ALL:
             name = detector_name
         return name
 
     @staticmethod
     def _default_normalization(detector):
         """ Keypoint normalization type for the detector method; used for matching. """
-        if detector in [Detector.DET_SIFT, Detector.DET_SURF]:
+        if detector in [DetectorType.SIFT, DetectorType.SURF]:
             return cv2.NORM_L2
         else:
             return cv2.NORM_HAMMING

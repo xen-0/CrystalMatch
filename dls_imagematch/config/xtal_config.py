@@ -2,7 +2,7 @@ from util import Color
 from util import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
-from dls_imagematch.match.feature.detectors import Detector
+from dls_imagematch.match.feature.detectors import DetectorType, AdaptationType
 
 
 class XtalConfig(Config):
@@ -10,11 +10,6 @@ class XtalConfig(Config):
         Config.__init__(self, file)
 
         add = self.add
-
-        align_detectors = Detector.DETECTOR_TYPES
-        align_adaptations = Detector.ADAPTATION_TYPES
-        def_detector = Detector.DEFAULT_DETECTOR
-        def_adaptation = Detector.DEFAULT_ADAPTATION
 
         trans_methods = TransformCalculator.METHODS
         trans_filters = TransformCalculator.FILTERS
@@ -26,8 +21,8 @@ class XtalConfig(Config):
         self.color_xtal_img1 = add(ColorConfigItem, "Img1 Xtal Color", Color.Green())
         self.color_xtal_img2 = add(ColorConfigItem, "Img2 Xtal Color", Color.Red())
 
-        self.align_detector = add(EnumConfigItem, "Detector", default=def_detector, extra_arg=align_detectors)
-        self.align_adapt = add(EnumConfigItem, "Adaptation", default=def_adaptation, extra_arg=align_adaptations)
+        self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
+        self.align_adapt = add(EnumConfigItem, "Adaptation", default=AdaptationType.NONE, extra_arg=AdaptationType.LIST_ALL)
 
         self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
