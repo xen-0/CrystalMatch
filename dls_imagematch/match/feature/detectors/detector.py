@@ -107,14 +107,6 @@ class Detector:
         return self._create_default_extractor(self._extractor)
 
     @staticmethod
-    def get_all_default_detectors():
-        detectors = []
-        for det in Detector.DETECTOR_TYPES:
-            method = Detector(det)
-            detectors.append(method)
-        return detectors
-
-    @staticmethod
     def _default_extractor(detector_name):
         """ SIFT, SURF, and ORB have their own descriptor extraction methods. All others use the BRIEF
         extractor."""

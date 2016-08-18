@@ -16,4 +16,9 @@ class DetectorFactory:
 
     @staticmethod
     def get_all_detectors():
-        return Detector.get_all_default_detectors()
+        detectors = []
+
+        for det in Detector.DETECTOR_TYPES:
+            detector = DetectorFactory.create(det)
+            detectors.append(detector)
+        return detectors
