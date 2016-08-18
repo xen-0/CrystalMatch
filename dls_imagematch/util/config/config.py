@@ -63,6 +63,9 @@ class Config:
 
     def save_to_file(self):
         """ Save the current options to the config file specified in the constructor. """
+        if not os.path.exists(os.path.dirname(self._file)):
+            os.makedirs(os.path.dirname(self._file))
+
         with open(self._file, 'w') as f:
             for item in self._items:
                 f.write(item.to_file_string())
