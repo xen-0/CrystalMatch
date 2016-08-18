@@ -100,7 +100,64 @@ class RangeIntConfigItem(IntConfigItem):
             return self._default
 
     def _in_range(self, value):
-        return self._min < value < self._max
+        return self._min <= value <= self._max
+
+
+class FloatConfigItem(ConfigItem):
+    """ Config item that stores a float.
+    """
+    def __init__(self, tag, default):
+        ConfigItem.__init__(self, tag, default)
+
+    def from_file_string(self, string):
+        self._value = self._clean(string)
+
+    def _clean(self, value):
+        try:
+            return float(value)
+        except ValueError:
+            return self._default
+
+
+class RangeFloatConfigItem(FloatConfigItem):
+    def __init__(self, tag, default, limits=[0.0, 1.0]):
+        """ Config item that stores a float with a limited range of values. Limits must contain two ordered
+        numbers that represent the inclusive range. Either limit can be set to None, if you only want to
+        bound the float on one side. """
+        FloatConfigItem.__init__(self, tag, default)
+        if len(limits) != 2:
+            raise ValueError("range must be a list of 2 elements")
+
+        self._min = limits[0]
+        self._max = limits[1]
+
+        if not self._in_range(default):
+            raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
+
+    def min(self): return self._min
+
+    def max(self): return self._max
+
+    def _clean(self, value):
+        try:
+            val = float(value)
+        except ValueError:
+            return self._default
+
+        if self._in_range(val):
+            return val
+        else:
+            return self._default
+
+    def _in_range(self, value):
+        ok = True
+        if self._min is not None:
+            ok &= self._min <= value
+
+        if self._max is not None:
+            ok &= value <= self._max
+
+        return ok
 
 
 class DirectoryConfigItem(ConfigItem):
