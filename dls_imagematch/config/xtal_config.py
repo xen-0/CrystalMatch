@@ -2,7 +2,7 @@ from util import Color
 from util import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
-from dls_imagematch.match.feature.detectors import DetectorType, AdaptationType
+from dls_imagematch.match.feature.detector import DetectorType, AdaptationType
 
 
 class XtalConfig(Config):

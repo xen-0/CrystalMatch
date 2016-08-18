@@ -1,9 +1,9 @@
 
 from .exception import FeatureDetectorError
 
-from .detectors import DetectorType
-from .detectors.detector import Detector
-from .detectors.detector_orb import OrbDetector
+from .detector import DetectorType
+from .detector.detector import Detector
+from .detector.detector_orb import OrbDetector
 
 
 class DetectorFactory:

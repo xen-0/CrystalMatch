@@ -1,5 +1,5 @@
 from .exception import KeypointFilterError
-from .detectors.detector import ExtractorType
+from .detector.detector import ExtractorType
 
 
 class KeypointDistanceFilter:

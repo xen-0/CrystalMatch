@@ -1,4 +1,4 @@
-from ..feature.detectors import Detector
+from ..feature.detector import Detector
 from ..feature import FeatureMatcher
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
