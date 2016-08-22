@@ -24,7 +24,7 @@ class XtalConfig(Config):
         self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
         self.align_adapt = add(EnumConfigItem, "Adaptation", default=AdaptationType.NONE, extra_arg=AdaptationType.LIST_ALL)
 
-        self.region_size = add(IntConfigItem, "Region Size", default=60, extra_arg='px')
+        self.region_size = add(IntConfigItem, "Region Size", default=100, extra_arg='px')
         self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
         self.search_height = add(IntConfigItem, "Search Height", default=400, extra_arg='px')
         self.transform_method = add(EnumConfigItem, "Transform Method", default=def_trans, extra_arg=trans_methods)
