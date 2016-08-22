@@ -37,7 +37,7 @@ class SiftDetector(Detector):
             raise FeatureDetectorError("SIFT number of features must be positive integer")
         self._n_features = int(value)
 
-    def set_octave_layers(self, value):
+    def set_n_octave_layers(self, value):
         """ The number of layers in each octave. 3 is the value used in D. Lowe paper. The number of octaves
         is computed automatically from the image resolution. """
         self._n_octave_layers = int(value)
@@ -57,6 +57,13 @@ class SiftDetector(Detector):
         """ The sigma of the Gaussian applied to the input image at the octave #0. If your image is captured
         with a weak camera with soft lenses, you might want to reduce the number. """
         self._sigma = float(value)
+
+    def set_from_config(self, config):
+        self.set_n_features(config.orb_n_features.value())
+        self.set_n_octave_layers(config.n_octave_layers.value())
+        self.set_contrast_threshold(config.contrast_threshold.value())
+        self.set_edge_threshold(config.edge_threshold.value())
+        self.set_sigma(config.sigma.value())
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):

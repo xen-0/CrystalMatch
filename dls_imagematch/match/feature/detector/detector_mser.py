@@ -82,6 +82,17 @@ class MserDetector(Detector):
             raise FeatureDetectorError("MSER edge blur size must be positive integer")
         self._edge_blur_size = int(value)
 
+    def set_from_config(self, config):
+        self.set_delta(config.delta.value())
+        self.set_min_area(config.min_area.value())
+        self.set_max_area(config.max_area.value())
+        self.set_max_variation(config.max_variation.value())
+        self.set_min_diversity(config.min_diversity.value())
+        self.set_max_evolution(config.max_evolution.value())
+        self.set_area_threshold(config.area_threshold.value())
+        self.set_min_margin(config.min_margin.value())
+        self.set_edge_blur_size(config.edge_blur_size.value())
+
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
         print("Creating MSER detector")

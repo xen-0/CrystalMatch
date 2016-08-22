@@ -44,7 +44,7 @@ class SurfDetector(Detector):
             raise FeatureDetectorError("SURF number of octaves must be positive integer")
         self._n_octaves = int(value)
 
-    def set_n_octaves_layers(self, value):
+    def set_n_octave_layers(self, value):
         """ The number of images within each octave of a gaussian pyramid. """
         if int(value) < 1:
             raise FeatureDetectorError("SURF number of octave layers must be positive integer")
@@ -60,6 +60,12 @@ class SurfDetector(Detector):
         compute orientation). """
         self._upright = bool(value)
 
+    def set_from_config(self, config):
+        self.set_hessian_threshold(config.hessian_threshold.value())
+        self.set_n_octaves(config.n_octaves.value())
+        self.set_n_octave_layers(config.n_octave_layers.value())
+        self.set_extended(config.extended.value())
+        self.set_upright(config.upright.value())
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
