@@ -19,7 +19,7 @@ The following steps will help you prepare an appropriate Python environment to r
     * Upgrade pip by typing `pip install –-upgrade pip`
     * Install enum by typing `pip install enum`
     
-* The easiest way to install the other packages is to download the precompiled binaries from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>. To install each one, open cmd.exe and type `pip install filename`. Download the most recent version of each for your version of Python (2.7, 32bit), except for OpenCV (you should get version 2 if available):
+* The easiest way to install the other packages is to download the precompiled binaries from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>. To install each one, open cmd.exe and type `pip install filename`. Download the most recent version of each for your version of Python (2.7, 32bit). For OpenCV you should get version 2 rather than 3 if available, as some features may not work under version 3:
     * numpy-1.11.0+mkl-cp27-cp27m-win32.whl
     * opencv_python-2.4.12-cp27-none-win32.whl
     * PyQt4-4.11.4-cp27-none-win32.whl
