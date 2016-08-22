@@ -19,7 +19,7 @@ class SurfDetector(Detector):
     DEFAULT_UPRIGHT = False
 
     def __init__(self):
-        Detector.__init__(self, DetectorType.SIFT)
+        Detector.__init__(self, DetectorType.SURF)
 
         # SURF is not free and a licence should be obtained if using for commercial purposes
         self._is_non_free = True
