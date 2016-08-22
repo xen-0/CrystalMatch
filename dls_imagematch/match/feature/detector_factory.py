@@ -5,6 +5,7 @@ from .detector import DetectorType
 from .detector.detector import Detector
 from .detector.detector_orb import OrbDetector
 from .detector.detector_sift import SiftDetector
+from .detector.detector_surf import SurfDetector
 
 
 class DetectorFactory:
@@ -17,6 +18,8 @@ class DetectorFactory:
             detector = OrbDetector()
         elif type == DetectorType.SIFT:
             detector = SiftDetector()
+        elif type == DetectorType.SURF:
+            detector = SurfDetector()
         else:
             detector = Detector(detector=type)
 
