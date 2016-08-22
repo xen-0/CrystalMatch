@@ -26,6 +26,10 @@ class DetectorFactory:
         else:
             detector = Detector(detector=type)
 
+        if options is not None:
+            detector_options = options.get_detector_options(type)
+            detector.set_from_config(detector_options)
+
         return detector
 
     @staticmethod
