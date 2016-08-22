@@ -6,6 +6,12 @@ from .detector import Detector
 
 
 class SiftDetector(Detector):
+    """
+    See:
+    http://docs.opencv.org/3.1.0/d5/d3c/classcv_1_1xfeatures2d_1_1SIFT.html
+     or
+    http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
+    """
     DEFAULT_N_FEATURES = 500
     DEFAULT_N_OCTAVE_LAYERS = 3
     DEFAULT_CONTRAST_THRESHOLD = 0.04
