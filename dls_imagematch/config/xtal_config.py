@@ -6,8 +6,8 @@ from dls_imagematch.match.feature.detector import DetectorType, AdaptationType
 
 
 class XtalConfig(Config):
-    def __init__(self, file):
-        Config.__init__(self, file)
+    def __init__(self, config_directory):
+        Config.__init__(self, config_directory + "xtal_match.cfg")
 
         add = self.add
 
@@ -39,5 +39,6 @@ class XtalConfig(Config):
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")
 
+        self.config_dir = add(DirectoryConfigItem, "Config Directory", default=config_directory)
 
         self.initialize_from_file()

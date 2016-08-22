@@ -7,8 +7,8 @@ from .match import SingleFeatureMatch
 class BoundedFeatureMatcher(FeatureMatcher):
     """ Specialization of feature matcher which allows user to specify sub regions of the two images.
     When performing the matching operations, only features in these regions will be considered. """
-    def __init__(self, img1, img2, img1_rect, img2_rect):
-        FeatureMatcher.__init__(self, img1, img2)
+    def __init__(self, img1, img2, detector_config, img1_rect, img2_rect):
+        FeatureMatcher.__init__(self, img1, img2, detector_config)
 
         if img1_rect is None:
             img1_rect = img1.bounds()

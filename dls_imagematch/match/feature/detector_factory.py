@@ -33,19 +33,19 @@ class DetectorFactory:
         return detector
 
     @staticmethod
-    def get_all_detectors():
+    def get_all_detectors(options=None):
         detectors = []
 
         for det in DetectorType.LIST_ALL:
-            detector = DetectorFactory.create(det)
+            detector = DetectorFactory.create(det, options)
             detectors.append(detector)
         return detectors
 
     @staticmethod
-    def get_all_free_detectors():
+    def get_all_free_detectors(options=None):
         detectors = []
 
         for det in DetectorType.LIST_FREE:
-            detector = DetectorFactory.create(det)
+            detector = DetectorFactory.create(det, options)
             detectors.append(detector)
         return detectors

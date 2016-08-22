@@ -12,14 +12,14 @@ from .crystal import CrystalMatchControl
 
 
 class VMXiCrystalMatchMainWindow(QMainWindow):
-    def __init__(self, config_file):
+    def __init__(self, config_dir):
         super(VMXiCrystalMatchMainWindow, self).__init__()
 
         self.gui_state = None
         self.matcher = None
         self._aligner = None
 
-        self._config = XtalConfig(config_file)
+        self._config = XtalConfig(config_dir)
 
         self.init_ui()
 

@@ -3,6 +3,7 @@ from __future__ import division
 from .match_results import CrystalMatchResults
 from .single_match_result import SingleCrystalMatch
 from ..feature import BoundedFeatureMatcher
+from ..feature.detector import DetectorConfig
 from dls_imagematch.util import Rectangle, Point
 
 
@@ -11,11 +12,13 @@ class CrystalMatcher:
     DEFAULT_WIDTH = 200
     DEFAULT_HEIGHT = 400
 
-    def __init__(self, aligned_images):
+    def __init__(self, aligned_images, config_dir):
         self._aligned_images = aligned_images
         self._img1 = aligned_images.img1.to_mono()
         self._img2 = aligned_images.img2.to_mono()
         self._pixel_size = self._img1.pixel_size
+
+        self._config = DetectorConfig(config_dir)
 
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
@@ -56,7 +59,7 @@ class CrystalMatcher:
         img1_rect = self.make_target_region(point)
         img2_rect = self.make_search_region(point)
 
-        feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, img1_rect, img2_rect)
+        feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, self._config, img1_rect, img2_rect)
         feature_matcher.set_keypoint_distance_filter(self._keypoint_distance_filter)
 
         result = SingleCrystalMatch(point, self._pixel_size)

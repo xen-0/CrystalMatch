@@ -11,14 +11,14 @@ from gui import VMXiCrystalMatchMainWindow
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
 if IS_BUNDLED:
-    CONFIG_FILE = "./config/xtal.cfg"
+    CONFIG_DIR = "./config/"
 else:
-    CONFIG_FILE = "../config/xtal.cfg"
+    CONFIG_DIR = "../config/"
 
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    ex = VMXiCrystalMatchMainWindow(CONFIG_FILE)
+    ex = VMXiCrystalMatchMainWindow(CONFIG_DIR)
     sys.exit(app.exec_())
 
 

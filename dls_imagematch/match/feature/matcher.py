@@ -25,7 +25,7 @@ class FeatureMatcher:
     _DEFAULT_TRANSFORM = TransformCalculator.DEFAULT_METHOD
     _DEFAULT_FILTER = TransformCalculator.DEFAULT_FILTER
 
-    def __init__(self, img1, img2):
+    def __init__(self, img1, img2, detector_config=None):
         self._use_all_detectors = False
         self._detector = None
         self._transform_method = self._DEFAULT_TRANSFORM
@@ -35,6 +35,7 @@ class FeatureMatcher:
 
         self.img1 = img1
         self.img2 = img2
+        self._config = detector_config
 
     # -------- CONFIGURATION -------------------
     def set_use_all_detectors(self):
@@ -43,7 +44,7 @@ class FeatureMatcher:
 
     def set_detector(self, method, adaptation=""):
         self._use_all_detectors = False
-        self._detector = DetectorFactory.create(method)
+        self._detector = DetectorFactory.create(method, self._config)
 
     def set_transform_method(self, method):
         if method is None:
@@ -101,7 +102,7 @@ class FeatureMatcher:
 
     def _find_matches_for_all_detectors(self):
         matches = []
-        for detector in DetectorFactory.get_all_detectors():
+        for detector in DetectorFactory.get_all_detectors(self._config):
             detector_matches = self._find_matches_for_detector(detector)
             matches.extend(detector_matches)
 

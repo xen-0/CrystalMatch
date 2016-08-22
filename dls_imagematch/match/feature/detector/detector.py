@@ -55,7 +55,7 @@ class Detector:
         self._adaptation = adaptation
 
     def set_from_config(self, config):
-        raise NotImplementedError("Detector does not support setting from config")
+        pass
 
     # -------- FUNCTIONALITY -------------------
     def detect_features(self, img):
