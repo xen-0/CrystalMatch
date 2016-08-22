@@ -12,6 +12,8 @@ class DetectorType:
     BLOB = "SimpleBlob"
     
     LIST_ALL = [ORB, SIFT, SURF, BRISK, FAST, STAR, MSER, GFTT, HARRIS, DENSE, BLOB]
+    LIST_FREE = [ORB, BRISK, FAST, STAR, MSER, GFTT, HARRIS, DENSE, BLOB]
+    LIST_NON_FREE = [SIFT, SURF]
 
 
 class ExtractorType:

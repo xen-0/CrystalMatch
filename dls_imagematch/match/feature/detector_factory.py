@@ -33,3 +33,12 @@ class DetectorFactory:
             detector = DetectorFactory.create(det)
             detectors.append(detector)
         return detectors
+
+    @staticmethod
+    def get_all_free_detectors():
+        detectors = []
+
+        for det in DetectorType.LIST_FREE:
+            detector = DetectorFactory.create(det)
+            detectors.append(detector)
+        return detectors

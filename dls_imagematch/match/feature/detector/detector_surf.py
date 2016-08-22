@@ -21,6 +21,9 @@ class SurfDetector(Detector):
     def __init__(self):
         Detector.__init__(self, DetectorType.SIFT)
 
+        # SURF is not free and a licence should be obtained if using for commercial purposes
+        self._is_non_free = True
+
         self._hessian_threshold = self.DEFAULT_HESSIAN_THRESHOLD
         self._n_octaves = self.DEFAULT_N_OCTAVES
         self._n_octave_layers = self.DEFAULT_N_OCTAVE_LAYERS

@@ -21,6 +21,9 @@ class SiftDetector(Detector):
     def __init__(self):
         Detector.__init__(self, DetectorType.SIFT)
 
+        # SIFT is not free and a licence should be obtained if using for commercial purposes
+        self._is_non_free = True
+
         self._n_features = self.DEFAULT_N_FEATURES
         self._n_octave_layers = self.DEFAULT_N_OCTAVE_LAYERS
         self._contrast_threshold = self.DEFAULT_CONTRAST_THRESHOLD

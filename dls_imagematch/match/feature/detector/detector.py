@@ -30,6 +30,7 @@ class Detector:
         self._adaptation = self.DEFAULT_ADAPTATION
         self._extractor = self._default_extractor(detector)
         self._normalization = self._default_normalization(detector)
+        self._is_non_free = False
 
     # -------- ACCESSORS -----------------------
     def detector(self):
@@ -43,6 +44,9 @@ class Detector:
 
     def normalization(self):
         return self._normalization
+
+    def is_non_free(self):
+        return self._is_non_free
 
     # -------- CONFIGURATION ------------------
     def set_adaptation(self, adaptation):
