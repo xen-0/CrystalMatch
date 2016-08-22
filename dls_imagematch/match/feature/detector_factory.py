@@ -4,6 +4,7 @@ from .exception import FeatureDetectorError
 from .detector import DetectorType
 from .detector.detector import Detector
 from .detector.detector_orb import OrbDetector
+from .detector.detector_sift import SiftDetector
 
 
 class DetectorFactory:
@@ -14,6 +15,8 @@ class DetectorFactory:
 
         if type == DetectorType.ORB:
             detector = OrbDetector()
+        elif type == DetectorType.SIFT:
+            detector = SiftDetector()
         else:
             detector = Detector(detector=type)
 
