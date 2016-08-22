@@ -54,6 +54,9 @@ class Detector:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
         self._adaptation = adaptation
 
+    def set_from_config(self, config):
+        raise NotImplementedError("Detector does not support setting from config")
+
     # -------- FUNCTIONALITY -------------------
     def detect_features(self, img):
         """ Detect interesting features in the image and generate descriptors. A keypoint identifies the

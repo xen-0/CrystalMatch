@@ -1,5 +1,6 @@
 from util import Config, IntConfigItem, FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
 
+from .types import DetectorType
 from .detector_orb import OrbDetector
 from .detector_sift import SiftDetector
 from .detector_surf import SurfDetector
@@ -14,6 +15,18 @@ class DetectorConfig:
         self.sift = SiftConfig(folder + "det_sift.cfg")
         self.surf = SurfConfig(folder + "det_surf.cfg")
         self.mser = MserConfig(folder + "det_mser.cfg")
+
+    def get_detector_options(self, detector):
+        if detector == DetectorType.ORB:
+            return self.orb
+        elif detector == DetectorType.SIFT:
+            return self.sift
+        elif detector == DetectorType.SURF:
+            return self.surf
+        elif detector == DetectorType.MSER:
+            return self.mser
+
+        return None
 
 
 class OrbConfig(Config):
@@ -30,7 +43,9 @@ class OrbConfig(Config):
         self.first_level = add(IntConfigItem, "First Level", det.DEFAULT_FIRST_LEVEL)
         self.wta_k = add(EnumConfigItem, "WTA_K", det.DEFAULT_WTA_K, det.WTA_K_VALUES)
         self.score_type = add(EnumConfigItem, "Score Type", det.DEFAULT_SCORE_TYPE, det.SCORE_TYPE_NAMES)
-        self.orb_patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
+        self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
+
+        self.initialize_from_file()
 
 
 class SiftConfig(Config):
@@ -46,6 +61,8 @@ class SiftConfig(Config):
         self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD)
         self.sigma = add(FloatConfigItem, "Sigma", det.DEFAULT_SIGMA)
 
+        self.initialize_from_file()
+
 
 class SurfConfig(Config):
     def __init__(self, file_path):
@@ -59,6 +76,8 @@ class SurfConfig(Config):
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
         self.extended = add(BoolConfigItem, "Extended", det.DEFAULT_EXTENDED)
         self.upright = add(BoolConfigItem, "Upright", det.DEFAULT_UPRIGHT)
+
+        self.initialize_from_file()
 
 
 class MserConfig(Config):
@@ -77,3 +96,5 @@ class MserConfig(Config):
         self.area_threshold = add(FloatConfigItem, "Area Threshold", det.DEFAULT_AREA_THRESHOLD)
         self.min_margin = add(FloatConfigItem, "Min Margin", det.DEFAULT_MIN_MARGIN)
         self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
+
+        self.initialize_from_file()

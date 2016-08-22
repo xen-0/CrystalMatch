@@ -112,13 +112,14 @@ class OrbDetector(Detector):
         self._patch_size = int(value)
 
     def set_from_config(self, config):
-        self.set_n_features(config.orb_n_features.value())
-        self.set_scale_factor(config.orb_scale_factor.value())
-        self.set_n_levels(config.orb_n_levels.value())
-        self.set_first_level(config.orb_first_level.value())
-        self.set_wta_k(config.orb_wta_k.value())
-        self.set_score_type(config.orb_score_type.value())
-        self.set_patch_size(config.orb_patch_size.value())
+        self.set_n_features(config.n_features.value())
+        self.set_scale_factor(config.scale_factor.value())
+        self.set_n_levels(config.n_levels.value())
+        self.set_edge_threshold(config.edge_threshold.value())
+        self.set_first_level(config.first_level.value())
+        self.set_wta_k(config.wta_k.value())
+        self.set_score_type(config.score_type.value())
+        self.set_patch_size(config.patch_size.value())
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):

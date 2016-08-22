@@ -11,9 +11,9 @@ from gui import VMXiCrystalMatchMainWindow
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
 if IS_BUNDLED:
-    CONFIG_FILE = "./config/config-xtal.ini"
+    CONFIG_FILE = "./config/xtal.cfg"
 else:
-    CONFIG_FILE = "../config/config-xtal.ini"
+    CONFIG_FILE = "../config/xtal.cfg"
 
 
 def main():
