@@ -106,7 +106,7 @@ class Config:
         with open(file) as f:
             lines = f.readlines()
             for line in lines:
-                if line.startswith(self.COMMENT):
+                if line.startswith(self.COMMENT) or line.strip() == "":
                     continue
 
                 try:
