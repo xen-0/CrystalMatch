@@ -7,7 +7,7 @@ from dls_imagematch.match.feature.detector import DetectorType, AdaptationType
 
 class XtalConfig(Config):
     def __init__(self, config_directory):
-        Config.__init__(self, config_directory + "xtal_match.cfg")
+        Config.__init__(self, config_directory + "xtal_match.ini")
 
         add = self.add
 

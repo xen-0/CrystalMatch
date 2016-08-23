@@ -11,10 +11,10 @@ class DetectorConfig:
     def __init__(self, folder):
         self._folder = folder
 
-        self.orb = OrbConfig(folder + "det_orb.cfg")
-        self.sift = SiftConfig(folder + "det_sift.cfg")
-        self.surf = SurfConfig(folder + "det_surf.cfg")
-        self.mser = MserConfig(folder + "det_mser.cfg")
+        self.orb = OrbConfig(folder + "det_orb.ini")
+        self.sift = SiftConfig(folder + "det_sift.ini")
+        self.surf = SurfConfig(folder + "det_surf.ini")
+        self.mser = MserConfig(folder + "det_mser.ini")
 
     def get_detector_options(self, detector):
         if detector == DetectorType.ORB:
