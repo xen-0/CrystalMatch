@@ -11,6 +11,8 @@ class XtalConfig(Config):
 
         add = self.add
 
+        self.set_title("Crystal Matching Configuration")
+
         trans_methods = TransformCalculator.METHODS
         trans_filters = TransformCalculator.FILTERS
         def_trans = TransformCalculator.DEFAULT_METHOD

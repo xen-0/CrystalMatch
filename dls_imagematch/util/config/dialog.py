@@ -48,7 +48,10 @@ class ConfigDialog(QtGui.QDialog):
         self._groups = []
         self._config_controls = []
 
-        self.setWindowTitle('Config')
+        title = 'Config'
+        if config.title() is not None:
+            title = config.title()
+        self.setWindowTitle(title)
 
     def auto_layout(self):
         """ Automatically create controls for every option in the Config and lay them out in order. """

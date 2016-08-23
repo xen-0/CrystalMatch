@@ -37,6 +37,10 @@ class Config:
         self._comment = None
         self._items = []
 
+    def title(self): return self._title
+
+    def comment(self): return self._comment
+
     def set_title(self, title):
         self._title = title
 
