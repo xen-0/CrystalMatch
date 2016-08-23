@@ -6,10 +6,9 @@ from .detector import Detector
 
 
 class MserDetector(Detector):
-    """
-    See:
-    http://docs.opencv.org/3.1.0/d5/d3c/classcv_1_1xfeatures2d_1_1SIFT.html
-     or
+    """ Implements the MSER (Maximally stable extremal region extractor) keypoint detector.
+
+    For further details see:
     http://docs.opencv.org/2.4/modules/features2d/doc/feature_detection_and_description.html#mser
     """
     DEFAULT_DELTA = 5

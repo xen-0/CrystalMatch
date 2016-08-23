@@ -6,8 +6,11 @@ from .detector import Detector
 
 
 class SiftDetector(Detector):
-    """
-    See:
+    """ Implements the SIFT (Scale Invariant Feature Transform) keypoint detector and feature extractor
+    detailed in the paper 'Lowe, D. G., Distinctive Image Features from Scale-Invariant Keypoints,
+    International Journal of Computer Vision, 60, 2, pp. 91-110, 2004'.
+
+    For further details see:
     http://docs.opencv.org/3.1.0/d5/d3c/classcv_1_1xfeatures2d_1_1SIFT.html
      or
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html

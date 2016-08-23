@@ -6,8 +6,11 @@ from .detector import Detector
 
 
 class SurfDetector(Detector):
-    """
-    See:
+    """ Implements the SURF (Speeded Up Robust Features) keypoint detector and feature extractor
+    detailed in the paper 'Bay, H. and Tuytelaars, T. and Van Gool, L. SURF: Speeded Up Robust
+    Features, 9th European Conference on Computer Vision, 2006'.
+
+    For further details see:
     http://docs.opencv.org/3.1.0/d5/df7/classcv_1_1xfeatures2d_1_1SURF.html
      or
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html

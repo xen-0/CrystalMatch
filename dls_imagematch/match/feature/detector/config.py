@@ -36,6 +36,9 @@ class OrbConfig(Config):
         add = self.add
         det = OrbDetector
 
+        self.set_title("ORB Detector Configuration")
+        self.set_comment(det.__doc__)
+
         self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
         self.scale_factor = add(RangeFloatConfigItem, "Scale Factor", det.DEFAULT_SCALE_FACTOR, extra_arg=[1.0, None])
         self.n_levels = add(IntConfigItem, "Num Levels", det.DEFAULT_N_LEVELS)
@@ -64,6 +67,9 @@ class SiftConfig(Config):
         add = self.add
         det = SiftDetector
 
+        self.set_title("SIFT Detector Configuration")
+        self.set_comment(det.__doc__)
+
         self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
         self.contrast_threshold = add(FloatConfigItem, "Contrast Threshold", det.DEFAULT_CONTRAST_THRESHOLD)
@@ -86,6 +92,9 @@ class SurfConfig(Config):
         add = self.add
         det = SurfDetector
 
+        self.set_title("SURF Detector Configuration")
+        self.set_comment(det.__doc__)
+
         self.hessian_threshold = add(FloatConfigItem, "Hessian Threshold", det.DEFAULT_HESSIAN_THRESHOLD)
         self.n_octaves = add(IntConfigItem, "Num Octaves", det.DEFAULT_N_OCTAVES)
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
@@ -107,6 +116,9 @@ class MserConfig(Config):
 
         add = self.add
         det = MserDetector
+
+        self.set_title("MSER Detector Configuration")
+        self.set_comment(det.__doc__)
 
         self.delta = add(IntConfigItem, "Delta", det.DEFAULT_DELTA)
         self.min_area = add(IntConfigItem, "Min Area", det.DEFAULT_MIN_AREA)

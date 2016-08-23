@@ -6,6 +6,16 @@ from .detector import Detector
 
 
 class OrbDetector(Detector):
+    """ Implements the ORB (oriented BRIEF) keypoint detector and descriptor extractor,
+    described in 'Ethan Rublee, Vincent Rabaud, Kurt Konolige, Gary R. Bradski: ORB: An efficient
+    alternative to SIFT or SURF. ICCV 2011: 2564-2571'. The algorithm uses FAST in pyramids to
+    detect stable keypoints, selects the strongest features using FAST or Harris response, finds
+    their orientation using first-order moments and computes the descriptors using BRIEF (where
+    the coordinates of random point pairs (or k-tuples) are rotated according to the measured orientation).
+
+    For further details see:
+    http://docs.opencv.org/2.4/modules/features2d/doc/feature_detection_and_description.html#orb
+    """
     WTA_K_VALUES = [2, 3, 4]
 
     SCORE_HARRIS = "HARRIS_SCORE"
