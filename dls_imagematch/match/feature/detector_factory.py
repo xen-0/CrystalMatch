@@ -1,4 +1,3 @@
-
 from .exception import FeatureDetectorError
 
 from .detector import DetectorType
@@ -7,6 +6,7 @@ from .detector.detector_orb import OrbDetector
 from .detector.detector_sift import SiftDetector
 from .detector.detector_surf import SurfDetector
 from .detector.detector_mser import MserDetector
+from .detector.detector_brisk import BriskDetector
 
 
 class DetectorFactory:
@@ -23,6 +23,8 @@ class DetectorFactory:
             detector = SurfDetector()
         elif type == DetectorType.MSER:
             detector = MserDetector()
+        elif type == DetectorType.BRISK:
+            detector = BriskDetector()
         else:
             detector = Detector(detector=type)
 

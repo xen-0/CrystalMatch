@@ -5,6 +5,7 @@ from .detector_orb import OrbDetector
 from .detector_sift import SiftDetector
 from .detector_surf import SurfDetector
 from .detector_mser import MserDetector
+from .detector_brisk import BriskDetector
 
 
 class DetectorConfig:
@@ -15,6 +16,7 @@ class DetectorConfig:
         self.sift = SiftConfig(folder + "det_sift.ini")
         self.surf = SurfConfig(folder + "det_surf.ini")
         self.mser = MserConfig(folder + "det_mser.ini")
+        self.brisk = BriskConfig(folder + "det_brisk.ini")
 
     def get_detector_options(self, detector):
         if detector == DetectorType.ORB:
@@ -25,6 +27,8 @@ class DetectorConfig:
             return self.surf
         elif detector == DetectorType.MSER:
             return self.mser
+        elif detector == DetectorType.BRISK:
+            return self.brisk
 
         return None
 
@@ -139,5 +143,26 @@ class MserConfig(Config):
         self.area_threshold.set_comment(det.set_area_threshold.__doc__)
         self.min_margin.set_comment(det.set_min_margin.__doc__)
         self.edge_blur_size.set_comment(det.set_edge_blur_size.__doc__)
+
+        self.initialize_from_file()
+
+
+class BriskConfig(Config):
+    def __init__(self, file_path):
+        Config.__init__(self, file_path)
+
+        add = self.add
+        det = BriskDetector
+
+        self.set_title("BRISK Detector Configuration")
+        self.set_comment(det.__doc__)
+
+        self.thresh = add(IntConfigItem, "Threshold", det.DEFAULT_THRESH)
+        self.octaves = add(IntConfigItem, "Octaves", det.DEFAULT_OCTAVES)
+        self.pattern_scale = add(FloatConfigItem, "Pattern Scale", det.DEFAULT_PATTERN_SCALE)
+
+        self.thresh.set_comment(det.set_thresh.__doc__)
+        self.octaves.set_comment(det.set_octaves.__doc__)
+        self.pattern_scale.set_comment(det.set_pattern_scale.__doc__)
 
         self.initialize_from_file()
