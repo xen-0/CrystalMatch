@@ -20,18 +20,27 @@ class ConfigItem:
         self._value = None
         self._tag = tag
         self._default = default
+        self._comment = None
 
     def value(self):
         """ Get the value of this option. """
         return self._value
 
+    def tag(self):
+        """ Get the tag (string name) of this option. """
+        return self._tag
+
+    def comment(self):
+        """ Get the comment string for this item. """
+        return self._comment
+
     def set(self, value):
         """ Set the value of this option. """
         self._value = self._clean(value)
 
-    def tag(self):
-        """ Get the tag (string name) of this option. """
-        return self._tag
+    def set_comment(self, comment):
+        """ Set the comment string for this item. """
+        self._comment = comment
 
     def reset(self):
         """ Set the value of this option to its default. """
@@ -39,7 +48,14 @@ class ConfigItem:
 
     def to_file_string(self):
         """ Creates a string representation that can be saved to and read from file. """
-        return self.OUTPUT_LINE.format(self._tag, self._value)
+        if self._comment is not None:
+            comment_lines = self._create_comment_lines(self._comment)
+            comment = "".join(comment_lines) + "\n"
+            file_string = comment + self.OUTPUT_LINE.format(self._tag, self._value)
+        else:
+            file_string = self.OUTPUT_LINE.format(self._tag, self._value)
+
+        return file_string
 
     def from_file_string(self, value_string):
         """ Read the value from its string representation. """
@@ -48,6 +64,27 @@ class ConfigItem:
     def _clean(self, value):
         """ Perform any additional cleanup/processing on the value. Implement in subclass if needed. """
         return value
+
+    @staticmethod
+    def _create_comment_lines(string):
+        lines = ConfigItem._string_to_wrapped_lines(string, Config.LINE_LENGTH-2)
+        for i in range(len(lines)):
+            lines[i] = "\n{} ".format(Config.COMMENT) + lines[i]
+
+        return lines
+
+    @staticmethod
+    def _string_to_wrapped_lines(string, line_length):
+        words = string.split()
+        lines = [words[0]]
+
+        for word in words[1:]:
+            if len(lines[-1]) + len(word) > line_length:
+                lines.append("")
+
+            lines[-1] += " " + word
+
+        return lines
 
 
 class IntConfigItem(ConfigItem):

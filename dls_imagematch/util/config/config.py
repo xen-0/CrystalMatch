@@ -28,6 +28,8 @@ class Config:
     """
 
     DELIMITER = "="
+    COMMENT = "#"
+    LINE_LENGTH = 100
 
     def __init__(self, file):
         self._file = file
@@ -79,10 +81,13 @@ class Config:
         with open(file) as f:
             lines = f.readlines()
             for line in lines:
+                if line.startswith(self.COMMENT):
+                    continue
+
                 try:
                     self._parse_line(line)
                 except ValueError:
-                    pass
+                    print("Failed to parse config line: '{}'".format(line))
 
     def _parse_line(self, line):
         """ Parse a line from a config file, setting the value of the relevant option. """
