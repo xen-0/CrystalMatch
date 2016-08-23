@@ -2,7 +2,7 @@ import cv2
 
 from .types import DetectorType
 from ..exception import FeatureDetectorError
-from .detector import Detector
+from .detector import Detector, OPENCV_MAJOR
 
 
 class OrbDetector(Detector):
@@ -134,13 +134,18 @@ class OrbDetector(Detector):
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
         print("Creating ORB detector")
-        detector = cv2.ORB(nfeatures=self._n_features,
-                           scaleFactor=self._scale_factor,
-                           nlevels=self._n_levels,
-                           edgeThreshold=self._edge_threshold,
-                           firstLevel=self._first_level,
-                           WTA_K=self._wta_k,
-                           scoreType=self._score(),
-                           patchSize=self._patch_size)
+        if OPENCV_MAJOR == '2':
+            constructor = cv2.ORB
+        else:
+            constructor = cv2.ORB_create
+
+        detector = constructor(nfeatures=self._n_features,
+                               scaleFactor=self._scale_factor,
+                               nlevels=self._n_levels,
+                               edgeThreshold=self._edge_threshold,
+                               firstLevel=self._first_level,
+                               WTA_K=self._wta_k,
+                               scoreType=self._score(),
+                               patchSize=self._patch_size)
 
         return detector

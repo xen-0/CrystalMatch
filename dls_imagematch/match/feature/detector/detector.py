@@ -4,6 +4,8 @@ from .types import DetectorType, AdaptationType, ExtractorType
 from .feature import Feature
 from ..exception import OpenCvVersionError, FeatureMatchException
 
+OPENCV_MAJOR = cv2.__version__[0]
+
 _OPENCV_VERSION_ERROR = "Under Windows, this function only works correctly under OpenCV v2 (with Python 2.7) " \
                         "and not under OpenCV v3. This is a widely known and reported problem but it doesn't " \
                         "seem to have been fixed yet. Install Python 2.7 with OpenCV 2.4 and try again."
