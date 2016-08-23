@@ -7,7 +7,7 @@ class ConfigItem:
     This class should be sub-classed in order to handle different types of value.
     """
 
-    OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}\n"
+    OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}\n\n"
 
     def __init__(self, tag, default):
         """ Initialize a new config item.
@@ -50,7 +50,7 @@ class ConfigItem:
         """ Creates a string representation that can be saved to and read from file. """
         if self._comment is not None:
             comment_lines = self._create_comment_lines(self._comment)
-            comment = "".join(comment_lines) + "\n"
+            comment = "".join(comment_lines)
             file_string = comment + self.OUTPUT_LINE.format(self._tag, self._value)
         else:
             file_string = self.OUTPUT_LINE.format(self._tag, self._value)
@@ -69,7 +69,7 @@ class ConfigItem:
     def _create_comment_lines(string):
         lines = ConfigItem._string_to_wrapped_lines(string, Config.LINE_LENGTH-2)
         for i in range(len(lines)):
-            lines[i] = "\n{} ".format(Config.COMMENT) + lines[i]
+            lines[i] = Config.COMMENT + " " + lines[i] + "\n"
 
         return lines
 
