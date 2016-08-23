@@ -45,6 +45,15 @@ class OrbConfig(Config):
         self.score_type = add(EnumConfigItem, "Score Type", det.DEFAULT_SCORE_TYPE, det.SCORE_TYPE_NAMES)
         self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
 
+        self.n_features.set_comment(det.set_n_features.__doc__)
+        self.scale_factor.set_comment(det.set_scale_factor.__doc__)
+        self.n_levels.set_comment(det.set_n_levels.__doc__)
+        self.edge_threshold.set_comment(det.set_edge_threshold.__doc__)
+        self.first_level.set_comment(det.set_first_level.__doc__)
+        self.wta_k.set_comment(det.set_wta_k.__doc__)
+        self.score_type.set_comment(det.set_score_type.__doc__)
+        self.patch_size.set_comment(det.set_patch_size.__doc__)
+
         self.initialize_from_file()
 
 
@@ -61,6 +70,12 @@ class SiftConfig(Config):
         self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD)
         self.sigma = add(FloatConfigItem, "Sigma", det.DEFAULT_SIGMA)
 
+        self.n_features.set_comment(det.set_n_features.__doc__)
+        self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
+        self.contrast_threshold.set_comment(det.set_contrast_threshold.__doc__)
+        self.edge_threshold.set_comment(det.set_edge_threshold.__doc__)
+        self.sigma.set_comment(det.set_sigma.__doc__)
+
         self.initialize_from_file()
 
 
@@ -76,6 +91,12 @@ class SurfConfig(Config):
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
         self.extended = add(BoolConfigItem, "Extended", det.DEFAULT_EXTENDED)
         self.upright = add(BoolConfigItem, "Upright", det.DEFAULT_UPRIGHT)
+
+        self.hessian_threshold.set_comment(det.set_hessian_threshold.__doc__)
+        self.n_octaves.set_comment(det.set_n_octaves.__doc__)
+        self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
+        self.extended.set_comment(det.set_extended.__doc__)
+        self.upright.set_comment(det.set_upright.__doc__)
 
         self.initialize_from_file()
 
@@ -96,5 +117,15 @@ class MserConfig(Config):
         self.area_threshold = add(FloatConfigItem, "Area Threshold", det.DEFAULT_AREA_THRESHOLD)
         self.min_margin = add(FloatConfigItem, "Min Margin", det.DEFAULT_MIN_MARGIN)
         self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
+
+        self.delta.set_comment(det.set_delta.__doc__)
+        self.min_area.set_comment(det.set_min_area.__doc__)
+        self.max_area.set_comment(det.set_max_area.__doc__)
+        self.max_variation.set_comment(det.set_max_variation.__doc__)
+        self.min_diversity.set_comment(det.set_min_diversity.__doc__)
+        self.max_evolution.set_comment(det.set_max_evolution.__doc__)
+        self.area_threshold.set_comment(det.set_area_threshold.__doc__)
+        self.min_margin.set_comment(det.set_min_margin.__doc__)
+        self.edge_blur_size.set_comment(det.set_edge_blur_size.__doc__)
 
         self.initialize_from_file()
