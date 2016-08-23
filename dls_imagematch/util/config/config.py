@@ -33,7 +33,15 @@ class Config:
 
     def __init__(self, file):
         self._file = file
+        self._title = None
+        self._comment = None
         self._items = []
+
+    def set_title(self, title):
+        self._title = title
+
+    def set_comment(self, comment):
+        self._comment = comment
 
     def initialize_from_file(self):
         """ Open and parse the config file provided in the constructor. This should only be called after
@@ -69,8 +77,21 @@ class Config:
             os.makedirs(os.path.dirname(self._file))
 
         with open(self._file, 'w') as f:
+            f.write(self._make_file_header())
             for item in self._items:
-                f.write(item.to_file_string())
+                f.write("\n\n" + item.to_file_string())
+
+    def _make_file_header(self):
+        header = ""
+        if self._title is not None:
+            banner = "-" * 30
+            header += "# {} {} {}\n".format(banner, self._title, banner)
+
+        if self._comment is not None:
+            comment_lines = self.create_comment_lines(self._comment)
+            header += "".join(comment_lines)
+
+        return header
 
     def _load_from_file(self, file):
         """ Load options from the config file specified in the constructor. """
@@ -97,3 +118,24 @@ class Config:
             if tag == item.tag():
                 item.from_file_string(value)
                 break
+
+    @staticmethod
+    def create_comment_lines(string):
+        lines = Config._string_to_wrapped_lines(string, Config.LINE_LENGTH-2)
+        for i in range(len(lines)):
+            lines[i] = Config.COMMENT + " " + lines[i] + "\n"
+
+        return lines
+
+    @staticmethod
+    def _string_to_wrapped_lines(string, line_length):
+        words = string.split()
+        lines = [words[0]]
+
+        for word in words[1:]:
+            if len(lines[-1]) + len(word) > line_length:
+                lines.append("")
+
+            lines[-1] += " " + word
+
+        return lines

@@ -7,7 +7,7 @@ class ConfigItem:
     This class should be sub-classed in order to handle different types of value.
     """
 
-    OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}\n\n"
+    OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}"
 
     def __init__(self, tag, default):
         """ Initialize a new config item.
@@ -49,7 +49,7 @@ class ConfigItem:
     def to_file_string(self):
         """ Creates a string representation that can be saved to and read from file. """
         if self._comment is not None:
-            comment_lines = self._create_comment_lines(self._comment)
+            comment_lines = Config.create_comment_lines(self._comment)
             comment = "".join(comment_lines)
             file_string = comment + self.OUTPUT_LINE.format(self._tag, self._value)
         else:
@@ -64,27 +64,6 @@ class ConfigItem:
     def _clean(self, value):
         """ Perform any additional cleanup/processing on the value. Implement in subclass if needed. """
         return value
-
-    @staticmethod
-    def _create_comment_lines(string):
-        lines = ConfigItem._string_to_wrapped_lines(string, Config.LINE_LENGTH-2)
-        for i in range(len(lines)):
-            lines[i] = Config.COMMENT + " " + lines[i] + "\n"
-
-        return lines
-
-    @staticmethod
-    def _string_to_wrapped_lines(string, line_length):
-        words = string.split()
-        lines = [words[0]]
-
-        for word in words[1:]:
-            if len(lines[-1]) + len(word) > line_length:
-                lines.append("")
-
-            lines[-1] += " " + word
-
-        return lines
 
 
 class IntConfigItem(ConfigItem):
