@@ -90,7 +90,7 @@ class Detector:
 
     @staticmethod
     def _default_extractor(detector_name):
-        """ SIFT, SURF, and ORB have their own descriptor extraction methods. All others use the BRIEF
+        """ SIFT, SURF, BRISK, and ORB have their own descriptor extraction methods. All others use the BRIEF
         extractor."""
         name = ExtractorType.BRIEF
         if detector_name in ExtractorType.LIST_ALL:
@@ -118,7 +118,7 @@ class Detector:
     @staticmethod
     def _create_default_extractor(extractor):
         """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
-        array of 64 floats (in range -1 to 1); all others are arrays of 32 ints (in range 0 to 255. """
+        array of 64 floats (in range -1 to 1); BRISK uses 64 integers, all others are arrays of 32 ints (in range 0 to 255). """
         try:
             extractor = cv2.DescriptorExtractor_create(extractor)
         except AttributeError:

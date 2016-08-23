@@ -36,6 +36,7 @@ class XtalConfig(Config):
         self.filter_sift = add(RangeIntConfigItem, "SIFT Filter", default=25, extra_arg=[1, 100])
         self.filter_orb = add(RangeIntConfigItem, "ORB Filter", default=50, extra_arg=[1, 100])
         self.filter_brief = add(RangeIntConfigItem, "BRIEF Filter", default=50, extra_arg=[1, 100])
+        self.filter_brisk = add(RangeIntConfigItem, "BRISK Filter", default=20, extra_arg=[1, 100])
 
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")

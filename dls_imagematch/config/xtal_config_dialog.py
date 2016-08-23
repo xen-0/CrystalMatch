@@ -40,3 +40,4 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.filter_surf)
         add(cfg.filter_sift)
         add(cfg.filter_brief)
+        add(cfg.filter_brisk)

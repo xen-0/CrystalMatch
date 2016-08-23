@@ -79,16 +79,17 @@ class CrystalMatchPane(QWidget):
         filter_orb = self._config.filter_orb.value()
         self._slider_filter_orb = Slider("ORB Limit", filter_orb, 1, 100)
 
-        # note: SURF keypoint limit value should be in range 0-1 (x100 to get in 1-100 range)
         filter_surf = self._config.filter_surf.value()
         self._slider_filter_surf = Slider("SURF Limit", filter_surf, 1, 100)
 
-        # note: SIFT keypoint limit value should be in range 0-1000 (/10 to get in 1-100 range)
         filter_sift = self._config.filter_sift.value()
         self._slider_filter_sift = Slider("SIFT Limit", filter_sift, 1, 100)
 
         filter_brief = self._config.filter_brief.value()
         self._slider_filter_brief = Slider("BRIEF Limit", filter_brief, 1, 100)
+
+        filter_brisk = self._config.filter_brisk.value()
+        self._slider_filter_brisk = Slider("BRISK Limit", filter_brisk, 1, 100)
 
         self._btn_perform_match = QPushButton("Refresh")
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
@@ -103,6 +104,7 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(self._slider_filter_surf)
         vbox.addWidget(self._slider_filter_sift)
         vbox.addWidget(self._slider_filter_brief)
+        vbox.addWidget(self._slider_filter_brisk)
         vbox.addWidget(self._btn_perform_match)
         vbox.addStretch()
 
@@ -153,6 +155,7 @@ class CrystalMatchPane(QWidget):
         limit_surf = self._slider_filter_surf.value()
         limit_sift = self._slider_filter_sift.value()
         limit_brief = self._slider_filter_brief.value()
+        limit_brisk = self._slider_filter_brisk.value()
 
         kp_filter = KeypointDistanceFilter()
 
@@ -160,6 +163,7 @@ class CrystalMatchPane(QWidget):
         kp_filter.set_surf_max(limit_surf)
         kp_filter.set_sift_max(limit_sift)
         kp_filter.set_brief_max(limit_brief)
+        kp_filter.set_brisk_max(limit_brisk)
 
         return kp_filter
 

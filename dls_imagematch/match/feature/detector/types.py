@@ -21,9 +21,10 @@ class ExtractorType:
     ORB = "ORB"
     SURF = "SURF"
     SIFT = "SIFT"
+    BRISK = "BRISK"
     BRIEF = "BRIEF"
 
-    LIST_ALL = [ORB, SURF, SIFT, BRIEF]
+    LIST_ALL = [ORB, SURF, SIFT, BRIEF, BRISK]
 
 
 class AdaptationType:
