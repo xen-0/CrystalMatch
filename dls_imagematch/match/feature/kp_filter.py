@@ -29,10 +29,6 @@ class KeypointDistanceFilter:
     We limit the range of acceptable values for each method from 1-100 and then for SIFT and SURF, we just
     multiply the value by a constant factor to get it in the correct range.
     """
-    _FACTOR_SURF = 0.01
-    _FACTOR_SIFT = 10
-    _FACTOR_BRISK = 10
-
     _RANGE_MIN = 1
     _RANGE_MAX = 100
     
@@ -73,21 +69,21 @@ class KeypointDistanceFilter:
     def filter(self, detector, matches):
         good_matches = []
 
-        for match in matches:
-            extractor = detector.extractor()
-            if extractor == ExtractorType.SURF:
-                limit = self._surf_max * self._FACTOR_SURF
-            elif extractor == ExtractorType.SIFT:
-                limit = self._sift_max * self._FACTOR_SIFT
-            elif extractor == ExtractorType.ORB:
-                limit = self._orb_max
-            elif extractor == ExtractorType.BRIEF:
-                limit = self._brief_max
-            elif extractor == ExtractorType.BRISK:
-                limit = self._brisk_max * self._FACTOR_BRISK
-            else:
-                raise ValueError("Unrecognised extractor type")
+        extractor = detector.extractor()
+        if extractor == ExtractorType.SURF:
+            limit = self._surf_max
+        elif extractor == ExtractorType.SIFT:
+            limit = self._sift_max
+        elif extractor == ExtractorType.ORB:
+            limit = self._orb_max
+        elif extractor == ExtractorType.BRIEF:
+            limit = self._brief_max
+        elif extractor == ExtractorType.BRISK:
+            limit = self._brisk_max
+        else:
+            raise ValueError("Unrecognised extractor type")
 
+        for match in matches:
             if match.distance() <= limit:
                 good_matches.append(match)
 

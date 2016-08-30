@@ -28,7 +28,7 @@ class SingleFeatureMatch:
         return self._included_in_transformation
 
     def distance(self):
-        return self._match.distance
+        return self._match.distance * self._detector.extractor_distance_factor()
 
     def point1(self):
         return self.img_point1() + self._offset1

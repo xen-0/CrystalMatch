@@ -50,6 +50,9 @@ class Detector:
     def is_non_free(self):
         return self._is_non_free
 
+    def extractor_distance_factor(self):
+        return ExtractorType.distance_factor(self._extractor)
+
     # -------- CONFIGURATION ------------------
     def set_adaptation(self, adaptation):
         if adaptation not in AdaptationType.LIST_ALL:
