@@ -11,6 +11,7 @@ class BriskDetector(Detector):
     BRISK: Binary Robust Invariant Scalable Keypoints. ICCV 2011: 2548-2555.'
     """
     DEFAULT_EXTRACTOR = ExtractorType.BRISK
+    DEFAULT_KEYPOINT_LIMIT = 30
 
     DEFAULT_THRESH = 30
     DEFAULT_OCTAVES = 3

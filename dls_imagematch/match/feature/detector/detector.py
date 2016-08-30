@@ -23,6 +23,7 @@ class Detector:
     DEFAULT_DETECTOR = DetectorType.ORB
     DEFAULT_ADAPTATION = AdaptationType.NONE
     DEFAULT_EXTRACTOR = ExtractorType.BRIEF
+    DEFAULT_KEYPOINT_LIMIT = 50
 
     def __init__(self, detector=DEFAULT_DETECTOR):
         """ Supply a detector name to use that detector with all its default parameters. """
@@ -34,6 +35,7 @@ class Detector:
         self._extractor = self.DEFAULT_EXTRACTOR
         self._normalization = self._default_normalization(detector)
         self._is_non_free = False
+        self._keypoint_distance_limit = self.DEFAULT_KEYPOINT_LIMIT
 
     # -------- ACCESSORS -----------------------
     def detector(self):
@@ -63,6 +65,11 @@ class Detector:
     def set_extractor(self, extractor):
         """ Set the descriptor extractor type. Possible values are 'ORB', 'SURF', 'SIFT', 'BRIEF', and 'BRISK'."""
         self._extractor = extractor
+
+    def set_keypoint_distance_limit(self, limit):
+        """ Largest allowable keypoint distance between two features to be considered a valid match using this
+        detector. """
+        self._keypoint_distance_limit = limit
 
     def set_from_config(self, config):
         self.set_extractor(config.extractor.value())

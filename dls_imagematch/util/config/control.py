@@ -69,7 +69,7 @@ class RangeIntConfigControl(ConfigControl):
         range_min = self._config_item.min()
         range_max = self._config_item.max()
 
-        self._sld_value = Slider(tag, range_min, range_min, range_max)
+        self._sld_value = Slider(tag, range_min, range_min, range_max, sld_width=94)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)

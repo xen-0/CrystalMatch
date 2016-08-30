@@ -16,6 +16,7 @@ class SurfDetector(Detector):
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
     """
     DEFAULT_EXTRACTOR = ExtractorType.SURF
+    DEFAULT_KEYPOINT_LIMIT = 30
 
     DEFAULT_HESSIAN_THRESHOLD = 100
     DEFAULT_N_OCTAVES = 4

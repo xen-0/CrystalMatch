@@ -16,6 +16,7 @@ class SiftDetector(Detector):
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
     """
     DEFAULT_EXTRACTOR = ExtractorType.SIFT
+    DEFAULT_KEYPOINT_LIMIT = 30
 
     DEFAULT_N_FEATURES = 500
     DEFAULT_N_OCTAVE_LAYERS = 3
