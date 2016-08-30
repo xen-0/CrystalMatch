@@ -47,7 +47,6 @@ class ValueConfigControl(ConfigControl):
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(lbl_int)
         hbox.addWidget(self._txt_value)
-        hbox.addWidget(QLabel(self._config_item.units()))
         hbox.addStretch()
 
         self.setLayout(hbox)
@@ -131,9 +130,10 @@ class EnumConfigControl(ConfigControl):
 
         self._cmbo_enum = QComboBox()
         self._cmbo_enum.setFixedWidth(self.COMBO_WIDTH)
-        self._cmbo_enum.addItems(self._config_item.enum_names)
+        enum_items = [str(i) for i in self._config_item.enum_names]
+        self._cmbo_enum.addItems(enum_items)
 
-        selected = self._config_item.value()
+        selected = str(self._config_item.value())
         index = self._cmbo_enum.findText(selected, QtCore.Qt.MatchFixedString)
         self._cmbo_enum.setCurrentIndex(index)
 
@@ -146,7 +146,7 @@ class EnumConfigControl(ConfigControl):
         self.setLayout(hbox)
 
     def update_from_config(self):
-        selected = self._config_item.value()
+        selected = str(self._config_item.value())
         index = self._cmbo_enum.findText(selected, QtCore.Qt.MatchFixedString)
         index = max(0, index)
         self._cmbo_enum.setCurrentIndex(index)
