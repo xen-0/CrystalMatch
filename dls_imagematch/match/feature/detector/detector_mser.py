@@ -5,6 +5,7 @@ from ..exception import FeatureDetectorError
 from .detector import Detector
 
 
+# TODO: MSER doesn't returns regions, not keypoints
 class MserDetector(Detector):
     """ Implements the MSER (Maximally stable extremal region extractor) keypoint detector.
 
@@ -15,7 +16,7 @@ class MserDetector(Detector):
     DEFAULT_MIN_AREA = 60
     DEFAULT_MAX_AREA = 14400
     DEFAULT_MAX_VARIATION = 0.25
-    DEFAULT_MIN_DIVERSITY = 2
+    DEFAULT_MIN_DIVERSITY = 0.2
     DEFAULT_MAX_EVOLUTION = 200
     DEFAULT_AREA_THRESHOLD = 1.01
     DEFAULT_MIN_MARGIN = 0.003

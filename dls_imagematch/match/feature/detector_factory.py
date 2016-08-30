@@ -21,8 +21,8 @@ class DetectorFactory:
             detector = SiftDetector()
         elif type == DetectorType.SURF:
             detector = SurfDetector()
-        elif type == DetectorType.MSER:
-            detector = MserDetector()
+        # elif type == DetectorType.MSER:
+        #     detector = MserDetector()
         elif type == DetectorType.BRISK:
             detector = BriskDetector()
         else:
