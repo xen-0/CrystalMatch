@@ -32,12 +32,6 @@ class XtalConfig(Config):
         self.transform_method = add(EnumConfigItem, "Transform Method", default=def_trans, extra_arg=trans_methods)
         self.transform_filter = add(EnumConfigItem, "Transform Filter", default=def_filter, extra_arg=trans_filters)
 
-        self.filter_surf = add(RangeIntConfigItem, "SURF Filter", default=30, extra_arg=[1, 100])
-        self.filter_sift = add(RangeIntConfigItem, "SIFT Filter", default=25, extra_arg=[1, 100])
-        self.filter_orb = add(RangeIntConfigItem, "ORB Filter", default=50, extra_arg=[1, 100])
-        self.filter_brief = add(RangeIntConfigItem, "BRIEF Filter", default=50, extra_arg=[1, 100])
-        self.filter_brisk = add(RangeIntConfigItem, "BRISK Filter", default=20, extra_arg=[1, 100])
-
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")

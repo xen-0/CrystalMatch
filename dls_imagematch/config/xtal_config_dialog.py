@@ -35,9 +35,3 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.search_height)
         add(cfg.transform_method)
         add(cfg.transform_filter)
-
-        add(cfg.filter_orb)
-        add(cfg.filter_surf)
-        add(cfg.filter_sift)
-        add(cfg.filter_brief)
-        add(cfg.filter_brisk)
