@@ -17,7 +17,7 @@ class DetectorConfig:
         self.orb = OrbConfig(folder + "det_orb.ini")
         self.sift = SiftConfig(folder + "det_sift.ini")
         self.surf = SurfConfig(folder + "det_surf.ini")
-        self.mser = MserConfig(folder + "det_mser.ini")
+        # self.mser = MserConfig(folder + "det_mser.ini")
         self.brisk = BriskConfig(folder + "det_brisk.ini")
 
     def get_detector_options(self, detector):
@@ -27,8 +27,8 @@ class DetectorConfig:
             return self.sift
         elif detector == DetectorType.SURF:
             return self.surf
-        elif detector == DetectorType.MSER:
-            return self.mser
+        # elif detector == DetectorType.MSER:
+        #     return self.mser
         elif detector == DetectorType.BRISK:
             return self.brisk
         else:
