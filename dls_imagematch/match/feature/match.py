@@ -5,18 +5,18 @@ class SingleFeatureMatch:
     """ Wrapper for the match and keypoint objects produced by the OpenCV feature matching routines. Makes
     it easier to use and pass around this data.
     """
-    def __init__(self, match, feature1, feature2, method):
+    def __init__(self, match, feature1, feature2, detector):
         self._match = match
         self._feature1 = feature1
         self._feature2 = feature2
-        self._method = method
+        self._detector = detector
         self._offset1 = Point(0, 0)
         self._offset2 = Point(0, 0)
         self._point2_projected = None
         self._included_in_transformation = True
 
     def method(self):
-        return self._method
+        return self._detector.adaptation() + self._detector.detector()
 
     def reprojection_error(self):
         if self._point2_projected is not None:
@@ -64,7 +64,6 @@ class SingleFeatureMatch:
     def from_cv2_match(cv2_match, features1, features2, detector):
         f1 = features1[cv2_match.queryIdx]
         f2 = features2[cv2_match.trainIdx]
-        method = detector.adaptation() + detector.detector()
-        cv2_match = SingleFeatureMatch(cv2_match, f1, f2, method)
+        cv2_match = SingleFeatureMatch(cv2_match, f1, f2, detector)
         return cv2_match
 
