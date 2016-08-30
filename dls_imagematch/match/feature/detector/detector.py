@@ -35,7 +35,7 @@ class Detector:
         self._extractor = self.DEFAULT_EXTRACTOR
         self._normalization = self._default_normalization(detector)
         self._is_non_free = False
-        self._keypoint_distance_limit = self.DEFAULT_KEYPOINT_LIMIT
+        self._keypoint_limit = self.DEFAULT_KEYPOINT_LIMIT
 
     # -------- ACCESSORS -----------------------
     def detector(self):
@@ -53,6 +53,9 @@ class Detector:
     def is_non_free(self):
         return self._is_non_free
 
+    def keypoint_limit(self):
+        return self._keypoint_limit
+
     def extractor_distance_factor(self):
         return ExtractorType.distance_factor(self._extractor)
 
@@ -66,13 +69,14 @@ class Detector:
         """ Set the descriptor extractor type. Possible values are 'ORB', 'SURF', 'SIFT', 'BRIEF', and 'BRISK'."""
         self._extractor = extractor
 
-    def set_keypoint_distance_limit(self, limit):
+    def set_keypoint_limit(self, limit):
         """ Largest allowable keypoint distance between two features to be considered a valid match using this
         detector. """
-        self._keypoint_distance_limit = limit
+        self._keypoint_limit = limit
 
     def set_from_config(self, config):
         self.set_extractor(config.extractor.value())
+        self.set_keypoint_limit(config.keypoint_limit.value())
 
     # -------- FUNCTIONALITY -------------------
     def detect_features(self, img):

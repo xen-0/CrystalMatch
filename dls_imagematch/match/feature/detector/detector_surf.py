@@ -68,6 +68,7 @@ class SurfDetector(Detector):
 
     def set_from_config(self, config):
         self.set_extractor(config.extractor.value())
+        self.set_keypoint_limit(config.keypoint_limit.value())
         self.set_hessian_threshold(config.hessian_threshold.value())
         self.set_n_octaves(config.n_octaves.value())
         self.set_n_octave_layers(config.n_octave_layers.value())

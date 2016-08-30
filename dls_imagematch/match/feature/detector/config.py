@@ -50,7 +50,7 @@ class DefaultConfig(Config):
         self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
 
         self.initialize_from_file()
 
@@ -77,7 +77,7 @@ class OrbConfig(Config):
         self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.n_features.set_comment(det.set_n_features.__doc__)
         self.scale_factor.set_comment(det.set_scale_factor.__doc__)
         self.n_levels.set_comment(det.set_n_levels.__doc__)
@@ -109,7 +109,7 @@ class SiftConfig(Config):
         self.sigma = add(FloatConfigItem, "Sigma", det.DEFAULT_SIGMA)
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.n_features.set_comment(det.set_n_features.__doc__)
         self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
         self.contrast_threshold.set_comment(det.set_contrast_threshold.__doc__)
@@ -138,7 +138,7 @@ class SurfConfig(Config):
         self.upright = add(BoolConfigItem, "Upright", det.DEFAULT_UPRIGHT)
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.hessian_threshold.set_comment(det.set_hessian_threshold.__doc__)
         self.n_octaves.set_comment(det.set_n_octaves.__doc__)
         self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
@@ -171,7 +171,7 @@ class MserConfig(Config):
         self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.delta.set_comment(det.set_delta.__doc__)
         self.min_area.set_comment(det.set_min_area.__doc__)
         self.max_area.set_comment(det.set_max_area.__doc__)
@@ -202,7 +202,7 @@ class BriskConfig(Config):
         self.pattern_scale = add(FloatConfigItem, "Pattern Scale", det.DEFAULT_PATTERN_SCALE)
 
         self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_distance_limit.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.thresh.set_comment(det.set_thresh.__doc__)
         self.octaves.set_comment(det.set_octaves.__doc__)
         self.pattern_scale.set_comment(det.set_pattern_scale.__doc__)

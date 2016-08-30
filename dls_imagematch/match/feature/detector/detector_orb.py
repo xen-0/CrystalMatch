@@ -126,6 +126,7 @@ class OrbDetector(Detector):
 
     def set_from_config(self, config):
         self.set_extractor(config.extractor.value())
+        self.set_keypoint_limit(config.keypoint_limit.value())
         self.set_n_features(config.n_features.value())
         self.set_scale_factor(config.scale_factor.value())
         self.set_n_levels(config.n_levels.value())

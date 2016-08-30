@@ -58,7 +58,15 @@ class SingleFeatureMatch:
     @staticmethod
     def from_cv2_matches(cv2_matches, features1, features2, detector):
         func = SingleFeatureMatch.from_cv2_match
-        return [func(match, features1, features2, detector) for match in cv2_matches]
+        single_matches = [func(match, features1, features2, detector) for match in cv2_matches]
+
+        # Filter out matches whose keypoint distances are too large
+        filtered = []
+        for match in single_matches:
+            if match.distance() < detector.keypoint_limit():
+                filtered.append(match)
+
+        return filtered
 
     @staticmethod
     def from_cv2_match(cv2_match, features1, features2, detector):

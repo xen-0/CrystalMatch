@@ -84,6 +84,7 @@ class MserDetector(Detector):
 
     def set_from_config(self, config):
         self.set_extractor(config.extractor.value())
+        self.set_keypoint_limit(config.keypoint_limit.value())
         self.set_delta(config.delta.value())
         self.set_min_area(config.min_area.value())
         self.set_max_area(config.max_area.value())
