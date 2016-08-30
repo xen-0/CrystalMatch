@@ -5,9 +5,11 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QP
 
 from ._point_select_dialog import PointSelectDialog
 from dls_imagematch.util.widget import Slider
+from dls_imagematch.util.config import ConfigDialog
 from dls_imagematch.util import Point
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.match.feature import KeypointDistanceFilter
+from dls_imagematch.match.feature.detector import DetectorConfig, DetectorType
 
 
 class CrystalMatchPane(QWidget):
@@ -91,6 +93,22 @@ class CrystalMatchPane(QWidget):
         filter_brisk = self._config.filter_brisk.value()
         self._slider_filter_brisk = Slider("BRISK Limit", filter_brisk, 1, 100)
 
+        btn_config_orb = QPushButton("Configure ORB")
+        btn_config_orb.setFixedWidth(100)
+        btn_config_orb.clicked.connect(lambda: self._open_detector_config(DetectorType.ORB))
+
+        btn_config_surf = QPushButton("Configure SURF")
+        btn_config_surf.setFixedWidth(100)
+        btn_config_surf.clicked.connect(lambda: self._open_detector_config(DetectorType.SURF))
+
+        btn_config_sift = QPushButton("Configure SIFT")
+        btn_config_sift.setFixedWidth(100)
+        btn_config_sift.clicked.connect(lambda: self._open_detector_config(DetectorType.SIFT))
+
+        btn_config_brisk = QPushButton("Configure BRISK")
+        btn_config_brisk.setFixedWidth(100)
+        btn_config_brisk.clicked.connect(lambda: self._open_detector_config(DetectorType.BRISK))
+
         self._btn_perform_match = QPushButton("Refresh")
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
         self._btn_perform_match.setFixedWidth(80)
@@ -105,6 +123,10 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(self._slider_filter_sift)
         vbox.addWidget(self._slider_filter_brief)
         vbox.addWidget(self._slider_filter_brisk)
+        vbox.addWidget(btn_config_orb)
+        vbox.addWidget(btn_config_surf)
+        vbox.addWidget(btn_config_sift)
+        vbox.addWidget(btn_config_brisk)
         vbox.addWidget(self._btn_perform_match)
         vbox.addStretch()
 
@@ -199,3 +221,13 @@ class CrystalMatchPane(QWidget):
                 self._set_point_value(Point(self._point.x, y))
         except ValueError:
             pass
+
+    def _open_detector_config(self, detector):
+        config_dir = self._config.config_dir.value()
+        config = DetectorConfig(config_dir)
+        options = config.get_detector_options(detector)
+
+        dialog = ConfigDialog(options)
+        dialog.auto_layout()
+        print(dialog._config_controls)
+        dialog.exec_()

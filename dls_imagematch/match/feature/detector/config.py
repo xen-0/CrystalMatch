@@ -1,4 +1,4 @@
-from util import Config, IntConfigItem, FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
+from dls_imagematch.util import Config, IntConfigItem, FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
 
 from .types import DetectorType, ExtractorType
 from .detector import Detector
