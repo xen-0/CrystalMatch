@@ -74,7 +74,11 @@ class ConfigDialog(QtGui.QDialog):
         if isinstance(item, RangeIntConfigItem):
             add(RangeIntConfigControl(item))
         elif isinstance(item, IntConfigItem):
-            add(ValueConfigControl(item, txt_width=40))
+            add(ValueConfigControl(item, txt_width=60))
+        elif isinstance(item, FloatConfigItem):
+            add(ValueConfigControl(item, txt_width=60))
+        elif isinstance(item, RangeFloatConfigItem):
+            add(ValueConfigControl(item, txt_width=60))
         elif isinstance(item, BoolConfigItem):
             add(BoolConfigControl(item))
         elif isinstance(item, EnumConfigItem):
@@ -83,6 +87,8 @@ class ConfigDialog(QtGui.QDialog):
             add(ColorConfigControl(item))
         elif isinstance(item, DirectoryConfigItem):
             add(DirectoryConfigControl(item))
+        else:
+            raise ValueError("Unrecognised ConfigItem type: {}".format(item))
 
     def finalize_layout(self):
         """ Set the layout in the dialog. This must be called after all of the items have been added (if doing
@@ -122,7 +128,7 @@ class ConfigDialog(QtGui.QDialog):
     def _add_control(self, control):
         """ Add the specified control to the current group (create a new group if none exists). """
         if len(self._groups) == 0:
-            self.start_group("Config Group")
+            self.start_group("Config Items")
 
         group = self._groups[-1]
         group.add_control(control)
