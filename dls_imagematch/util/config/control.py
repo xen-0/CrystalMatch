@@ -130,7 +130,7 @@ class EnumConfigControl(ConfigControl):
 
         self._cmbo_enum = QComboBox()
         self._cmbo_enum.setFixedWidth(self.COMBO_WIDTH)
-        enum_items = [str(i) for i in self._config_item.enum_names]
+        enum_items = [str(i) for i in self._config_item.enum_values]
         self._cmbo_enum.addItems(enum_items)
 
         selected = str(self._config_item.value())
