@@ -109,6 +109,10 @@ class CrystalMatchPane(QWidget):
         btn_config_brisk.setFixedWidth(100)
         btn_config_brisk.clicked.connect(lambda: self._open_detector_config(DetectorType.BRISK))
 
+        btn_config_default = QPushButton("Configure Default")
+        btn_config_default.setFixedWidth(100)
+        btn_config_default.clicked.connect(lambda: self._open_detector_config("Default"))
+
         self._btn_perform_match = QPushButton("Refresh")
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
         self._btn_perform_match.setFixedWidth(80)
@@ -127,6 +131,7 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(btn_config_surf)
         vbox.addWidget(btn_config_sift)
         vbox.addWidget(btn_config_brisk)
+        vbox.addWidget(btn_config_default)
         vbox.addWidget(self._btn_perform_match)
         vbox.addStretch()
 
@@ -229,5 +234,4 @@ class CrystalMatchPane(QWidget):
 
         dialog = ConfigDialog(options)
         dialog.auto_layout()
-        print(dialog._config_controls)
         dialog.exec_()
