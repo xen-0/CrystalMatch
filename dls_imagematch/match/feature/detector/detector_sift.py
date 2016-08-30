@@ -64,6 +64,7 @@ class SiftDetector(Detector):
         self._sigma = float(value)
 
     def set_from_config(self, config):
+        self.set_extractor(config.extractor.value())
         self.set_n_features(config.n_features.value())
         self.set_n_octave_layers(config.n_octave_layers.value())
         self.set_contrast_threshold(config.contrast_threshold.value())

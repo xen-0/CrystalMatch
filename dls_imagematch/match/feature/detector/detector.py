@@ -65,7 +65,7 @@ class Detector:
         self._extractor = extractor
 
     def set_from_config(self, config):
-        pass
+        self.set_extractor(config.extractor.value())
 
     # -------- FUNCTIONALITY -------------------
     def detect_features(self, img):
