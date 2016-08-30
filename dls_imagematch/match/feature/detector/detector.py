@@ -60,6 +60,10 @@ class Detector:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
         self._adaptation = adaptation
 
+    def set_extractor(self, extractor):
+        """ Set the descriptor extractor type. Possible values are 'ORB', 'SURF', 'SIFT', 'BRIEF', and 'BRISK'."""
+        self._extractor = extractor
+
     def set_from_config(self, config):
         pass
 

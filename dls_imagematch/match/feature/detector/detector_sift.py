@@ -15,6 +15,8 @@ class SiftDetector(Detector):
      or
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
     """
+    DEFAULT_EXTRACTOR = ExtractorType.SIFT
+
     DEFAULT_N_FEATURES = 500
     DEFAULT_N_OCTAVE_LAYERS = 3
     DEFAULT_CONTRAST_THRESHOLD = 0.04
@@ -26,7 +28,6 @@ class SiftDetector(Detector):
 
         # SIFT is not free and a licence should be obtained if using for commercial purposes
         self._is_non_free = True
-        self._extractor = ExtractorType.SIFT
 
         self._n_features = self.DEFAULT_N_FEATURES
         self._n_octave_layers = self.DEFAULT_N_OCTAVE_LAYERS

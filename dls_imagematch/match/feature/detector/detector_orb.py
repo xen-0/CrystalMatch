@@ -22,6 +22,8 @@ class OrbDetector(Detector):
     SCORE_FAST = "FAST_SCORE"
     SCORE_TYPE_NAMES = [SCORE_HARRIS, SCORE_FAST]
 
+    DEFAULT_EXTRACTOR = ExtractorType.ORB
+
     DEFAULT_N_FEATURES = 500
     DEFAULT_SCALE_FACTOR = 1.2
     DEFAULT_N_LEVELS = 8
@@ -33,8 +35,6 @@ class OrbDetector(Detector):
 
     def __init__(self):
         Detector.__init__(self, DetectorType.ORB)
-
-        self._extractor = ExtractorType.ORB
 
         self._n_features = self.DEFAULT_N_FEATURES
         self._scale_factor = self.DEFAULT_SCALE_FACTOR

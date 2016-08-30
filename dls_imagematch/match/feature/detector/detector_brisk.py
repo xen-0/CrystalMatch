@@ -10,14 +10,14 @@ class BriskDetector(Detector):
     and descriptor extractor described in 'Stefan Leutenegger, Margarita Chli and Roland Siegwart:
     BRISK: Binary Robust Invariant Scalable Keypoints. ICCV 2011: 2548-2555.'
     """
+    DEFAULT_EXTRACTOR = ExtractorType.BRISK
+
     DEFAULT_THRESH = 30
     DEFAULT_OCTAVES = 3
     DEFAULT_PATTERN_SCALE = 1.0
 
     def __init__(self):
         Detector.__init__(self, DetectorType.BRISK)
-
-        self._extractor = ExtractorType.BRISK
 
         self._thresh = self.DEFAULT_THRESH
         self._octaves = self.DEFAULT_OCTAVES

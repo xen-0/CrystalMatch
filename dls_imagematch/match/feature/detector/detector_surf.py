@@ -15,6 +15,8 @@ class SurfDetector(Detector):
      or
     http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
     """
+    DEFAULT_EXTRACTOR = ExtractorType.SURF
+
     DEFAULT_HESSIAN_THRESHOLD = 100
     DEFAULT_N_OCTAVES = 4
     DEFAULT_N_OCTAVE_LAYERS = 2
@@ -26,7 +28,6 @@ class SurfDetector(Detector):
 
         # SURF is not free and a licence should be obtained if using for commercial purposes
         self._is_non_free = True
-        self._extractor = ExtractorType.SURF
 
         self._hessian_threshold = self.DEFAULT_HESSIAN_THRESHOLD
         self._n_octaves = self.DEFAULT_N_OCTAVES

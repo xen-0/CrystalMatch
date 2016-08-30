@@ -24,8 +24,6 @@ class MserDetector(Detector):
     def __init__(self):
         Detector.__init__(self, DetectorType.MSER)
 
-        self._extractor = ExtractorType.BRIEF
-
         self._delta = self.DEFAULT_DELTA
         self._min_area = self.DEFAULT_MIN_AREA
         self._max_area = self.DEFAULT_MAX_AREA
