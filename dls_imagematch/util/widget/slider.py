@@ -4,13 +4,13 @@ from PyQt4 import QtGui, QtCore
 class Slider(QtGui.QWidget):
     signal_value_changed = QtCore.pyqtSignal(int)
 
-    def __init__(self, name, initial, min_val, max_val):
+    def __init__(self, name, initial, min_val, max_val, sld_width=180):
         super(Slider, self).__init__()
         self._min = int(min_val)
         self._max = int(max_val)
-        self._init_ui(name, int(initial))
+        self._init_ui(name, int(initial), sld_width)
 
-    def _init_ui(self, name, initial):
+    def _init_ui(self, name, initial, sld_width):
         self._lbl_name = QtGui.QLabel(name)
         self._lbl_name.setFixedWidth(100)
 
@@ -19,7 +19,7 @@ class Slider(QtGui.QWidget):
         self._slider.setFocusPolicy(QtCore.Qt.NoFocus)
         self._slider.setValue(initial)
         self._slider.valueChanged[int].connect(self._value_changed)
-        self._slider.setFixedWidth(180)
+        self._slider.setFixedWidth(sld_width)
 
         self._txt_value = QtGui.QLineEdit(str(initial))
         self._txt_value.textChanged.connect(self._value_changed)
