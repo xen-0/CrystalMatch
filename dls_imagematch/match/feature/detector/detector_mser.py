@@ -1,6 +1,6 @@
 import cv2
 
-from .types import DetectorType
+from .types import DetectorType, ExtractorType
 from ..exception import FeatureDetectorError
 from .detector import Detector
 
@@ -23,6 +23,8 @@ class MserDetector(Detector):
 
     def __init__(self):
         Detector.__init__(self, DetectorType.MSER)
+
+        self._extractor = ExtractorType.BRIEF
 
         self._delta = self.DEFAULT_DELTA
         self._min_area = self.DEFAULT_MIN_AREA

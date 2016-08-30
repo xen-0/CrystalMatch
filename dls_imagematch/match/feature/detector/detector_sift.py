@@ -1,6 +1,6 @@
 import cv2
 
-from .types import DetectorType
+from .types import DetectorType, ExtractorType
 from ..exception import FeatureDetectorError
 from .detector import Detector
 
@@ -26,6 +26,7 @@ class SiftDetector(Detector):
 
         # SIFT is not free and a licence should be obtained if using for commercial purposes
         self._is_non_free = True
+        self._extractor = ExtractorType.SIFT
 
         self._n_features = self.DEFAULT_N_FEATURES
         self._n_octave_layers = self.DEFAULT_N_OCTAVE_LAYERS

@@ -1,6 +1,6 @@
 import cv2
 
-from .types import DetectorType
+from .types import DetectorType, ExtractorType
 from ..exception import FeatureDetectorError
 from .detector import Detector, OPENCV_MAJOR
 
@@ -33,6 +33,8 @@ class OrbDetector(Detector):
 
     def __init__(self):
         Detector.__init__(self, DetectorType.ORB)
+
+        self._extractor = ExtractorType.ORB
 
         self._n_features = self.DEFAULT_N_FEATURES
         self._scale_factor = self.DEFAULT_SCALE_FACTOR

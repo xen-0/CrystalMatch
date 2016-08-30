@@ -1,6 +1,6 @@
 import cv2
 
-from .types import DetectorType
+from .types import DetectorType, ExtractorType
 from ..exception import FeatureDetectorError
 from .detector import Detector
 
@@ -16,6 +16,8 @@ class BriskDetector(Detector):
 
     def __init__(self):
         Detector.__init__(self, DetectorType.BRISK)
+
+        self._extractor = ExtractorType.BRISK
 
         self._thresh = self.DEFAULT_THRESH
         self._octaves = self.DEFAULT_OCTAVES

@@ -1,6 +1,6 @@
 import cv2
 
-from .types import DetectorType
+from .types import DetectorType, ExtractorType
 from ..exception import FeatureDetectorError
 from .detector import Detector
 
@@ -26,6 +26,7 @@ class SurfDetector(Detector):
 
         # SURF is not free and a licence should be obtained if using for commercial purposes
         self._is_non_free = True
+        self._extractor = ExtractorType.SURF
 
         self._hessian_threshold = self.DEFAULT_HESSIAN_THRESHOLD
         self._n_octaves = self.DEFAULT_N_OCTAVES

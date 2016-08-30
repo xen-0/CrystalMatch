@@ -22,6 +22,7 @@ class Detector:
     # Defaults
     DEFAULT_DETECTOR = DetectorType.ORB
     DEFAULT_ADAPTATION = AdaptationType.NONE
+    DEFAULT_EXTRACTOR = ExtractorType.BRIEF
 
     def __init__(self, detector=DEFAULT_DETECTOR):
         """ Supply a detector name to use that detector with all its default parameters. """
@@ -30,7 +31,7 @@ class Detector:
 
         self._detector = detector
         self._adaptation = self.DEFAULT_ADAPTATION
-        self._extractor = self._default_extractor(detector)
+        self._extractor = self.DEFAULT_EXTRACTOR
         self._normalization = self._default_normalization(detector)
         self._is_non_free = False
 
@@ -92,15 +93,6 @@ class Detector:
         return self._create_default_extractor(self._extractor)
 
     @staticmethod
-    def _default_extractor(detector_name):
-        """ SIFT, SURF, BRISK, and ORB have their own descriptor extraction methods. All others use the BRIEF
-        extractor."""
-        name = ExtractorType.BRIEF
-        if detector_name in ExtractorType.LIST_ALL:
-            name = detector_name
-        return name
-
-    @staticmethod
     def _default_normalization(detector):
         """ Keypoint normalization type for the detector method; used for matching. """
         if detector in [DetectorType.SIFT, DetectorType.SURF]:
@@ -121,7 +113,8 @@ class Detector:
     @staticmethod
     def _create_default_extractor(extractor):
         """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
-        array of 64 floats (in range -1 to 1); BRISK uses 64 integers, all others are arrays of 32 ints (in range 0 to 255). """
+        array of 64 floats (in range -1 to 1); BRISK uses 64 integers, all others are arrays of 32 ints
+        (in range 0 to 255). """
         try:
             extractor = cv2.DescriptorExtractor_create(extractor)
         except AttributeError:
