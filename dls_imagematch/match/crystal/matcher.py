@@ -25,7 +25,6 @@ class CrystalMatcher:
         self._search_height_real = self.DEFAULT_HEIGHT
         self._transform_method = None
         self._transform_filter = None
-        self._keypoint_distance_filter = None
 
     # -------- CONFIGURATION -------------------
     def set_real_region_size(self, size):
@@ -40,9 +39,6 @@ class CrystalMatcher:
 
     def set_transform_filter(self, filter):
         self._transform_filter = filter
-
-    def set_keypoint_distance_filter(self, distance_filter):
-        self._keypoint_distance_filter = distance_filter
 
     # -------- FUNCTIONALITY -------------------
     def match(self, img1_points):
@@ -60,7 +56,6 @@ class CrystalMatcher:
         img2_rect = self.make_search_region(point)
 
         feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, self._config, img1_rect, img2_rect)
-        feature_matcher.set_keypoint_distance_filter(self._keypoint_distance_filter)
 
         result = SingleCrystalMatch(point, self._pixel_size)
         self._perform_match(feature_matcher, result)

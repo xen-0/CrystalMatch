@@ -8,7 +8,6 @@ from dls_imagematch.util.widget import Slider
 from dls_imagematch.util.config import ConfigDialog
 from dls_imagematch.util import Point
 from dls_imagematch.match import CrystalMatcher
-from dls_imagematch.match.feature import KeypointDistanceFilter
 from dls_imagematch.match.feature.detector import DetectorConfig, DetectorType
 
 
@@ -78,21 +77,6 @@ class CrystalMatchPane(QWidget):
         search_height = self._config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 100, 800)
 
-        filter_orb = self._config.filter_orb.value()
-        self._slider_filter_orb = Slider("ORB Limit", filter_orb, 1, 100)
-
-        filter_surf = self._config.filter_surf.value()
-        self._slider_filter_surf = Slider("SURF Limit", filter_surf, 1, 100)
-
-        filter_sift = self._config.filter_sift.value()
-        self._slider_filter_sift = Slider("SIFT Limit", filter_sift, 1, 100)
-
-        filter_brief = self._config.filter_brief.value()
-        self._slider_filter_brief = Slider("BRIEF Limit", filter_brief, 1, 100)
-
-        filter_brisk = self._config.filter_brisk.value()
-        self._slider_filter_brisk = Slider("BRISK Limit", filter_brisk, 1, 100)
-
         btn_config_orb = QPushButton("Configure ORB")
         btn_config_orb.setFixedWidth(100)
         btn_config_orb.clicked.connect(lambda: self._open_detector_config(DetectorType.ORB))
@@ -122,11 +106,6 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(self._slider_region_size)
         vbox.addWidget(self._slider_search_width)
         vbox.addWidget(self._slider_search_height)
-        vbox.addWidget(self._slider_filter_orb)
-        vbox.addWidget(self._slider_filter_surf)
-        vbox.addWidget(self._slider_filter_sift)
-        vbox.addWidget(self._slider_filter_brief)
-        vbox.addWidget(self._slider_filter_brisk)
         vbox.addWidget(btn_config_orb)
         vbox.addWidget(btn_config_surf)
         vbox.addWidget(btn_config_sift)
@@ -167,32 +146,13 @@ class CrystalMatchPane(QWidget):
         region_size = self._slider_region_size.value()
         search_width = self._slider_search_width.value()
         search_height = self._slider_search_height.value()
-        keypoint_filter = self._create_keypoint_distance_filter()
 
         config_dir = self._config.config_dir.value()
 
         matcher = CrystalMatcher(self._aligned_images, config_dir)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
-        matcher.set_keypoint_distance_filter(keypoint_filter)
         return matcher
-
-    def _create_keypoint_distance_filter(self):
-        limit_orb = self._slider_filter_orb.value()
-        limit_surf = self._slider_filter_surf.value()
-        limit_sift = self._slider_filter_sift.value()
-        limit_brief = self._slider_filter_brief.value()
-        limit_brisk = self._slider_filter_brisk.value()
-
-        kp_filter = KeypointDistanceFilter()
-
-        kp_filter.set_orb_max(limit_orb)
-        kp_filter.set_surf_max(limit_surf)
-        kp_filter.set_sift_max(limit_sift)
-        kp_filter.set_brief_max(limit_brief)
-        kp_filter.set_brisk_max(limit_brisk)
-
-        return kp_filter
 
     def _emit_new_match_signal(self, crystal_match, matcher):
         feature_match = crystal_match.feature_matches()
