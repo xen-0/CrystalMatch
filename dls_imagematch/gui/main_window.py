@@ -3,8 +3,10 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 
 from config import XtalConfig, XtalConfigDialog
 
+from dls_imagematch.util.config import ConfigDialog
+from match.feature.detector import DetectorConfig, DetectorType
+
 from .image_select import ImageSelector
-from .well_select import WellSelector
 from .well_select_formulatrix import WellSelectorFormulatrix
 from .image_frame import ImageFrame
 from .auto_aligner import AutoImageAligner
@@ -36,7 +38,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         selector2 = ImageSelector("Select Image 2", self._config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelectorFormulatrix(self._config) #WellSelector(self._config)
+        well_selector = WellSelectorFormulatrix(self._config)
 
         # Main image frame - shows progress of image matching
         image_frame = ImageFrame(self._config)
@@ -100,6 +102,14 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         options_action.setStatusTip('Open Options Dialog')
         options_action.triggered.connect(self._open_config_dialog)
 
+        detector_menu = QtGui.QMenu('Detectors', self)
+
+        detector_menu.addAction(self._init_detector_menu(DetectorType.ORB))
+        detector_menu.addAction(self._init_detector_menu(DetectorType.SURF))
+        detector_menu.addAction(self._init_detector_menu(DetectorType.SIFT))
+        detector_menu.addAction(self._init_detector_menu(DetectorType.BRISK))
+        detector_menu.addAction(self._init_detector_menu("Default"))
+
         # Create menu bar
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu('&File')
@@ -107,7 +117,22 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
 
         option_menu = menu_bar.addMenu('&Option')
         option_menu.addAction(options_action)
+        option_menu.addMenu(detector_menu)
+
+    def _init_detector_menu(self, detector):
+        action = QtGui.QAction(QtGui.QIcon('exit.png'), detector, self)
+        action.triggered.connect(lambda: self._open_detector_config(detector))
+        return action
 
     def _open_config_dialog(self):
         dialog = XtalConfigDialog(self._config)
+        dialog.exec_()
+
+    def _open_detector_config(self, detector):
+        config_dir = self._config.config_dir.value()
+        config = DetectorConfig(config_dir)
+        options = config.get_detector_options(detector)
+
+        dialog = ConfigDialog(options)
+        dialog.auto_layout()
         dialog.exec_()
