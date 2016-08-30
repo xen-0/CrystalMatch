@@ -19,6 +19,13 @@ class ConfigControl(QWidget):
         self._config_item = item
         self.setContentsMargins(0, 0, 0, 0)
 
+        self._label = QLabel(self._config_item.tag())
+        self._label.setFixedWidth(self.LABEL_WIDTH)
+
+        comment = self._config_item.comment()
+        if comment is not None:
+            self.setToolTip(comment)
+
     def update_from_config(self):
         """ Update the value displayed in the control by reading from the ConfigItem"""
         pass
@@ -37,15 +44,12 @@ class ValueConfigControl(ConfigControl):
         self._init_ui(txt_width)
 
     def _init_ui(self, txt_width):
-        lbl_int = QLabel(self._config_item.tag())
-        lbl_int.setFixedWidth(self.LABEL_WIDTH)
-
         self._txt_value = QLineEdit()
         self._txt_value.setFixedWidth(txt_width)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(lbl_int)
+        hbox.addWidget(self._label)
         hbox.addWidget(self._txt_value)
         hbox.addStretch()
 
@@ -93,15 +97,12 @@ class BoolConfigControl(ConfigControl):
         self.update_from_config()
 
     def _init_ui(self):
-        lbl_bool = QLabel(self._config_item.tag())
-        lbl_bool.setFixedWidth(self.LABEL_WIDTH)
-
         self._chk_box = QCheckBox()
         self._chk_box.setTristate(False)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(lbl_bool)
+        hbox.addWidget(self._label)
         hbox.addWidget(self._chk_box)
         hbox.addStretch()
 
@@ -125,9 +126,6 @@ class EnumConfigControl(ConfigControl):
         self._init_ui()
 
     def _init_ui(self):
-        lbl_enum = QLabel(self._config_item.tag())
-        lbl_enum.setFixedWidth(self.LABEL_WIDTH)
-
         self._cmbo_enum = QComboBox()
         self._cmbo_enum.setFixedWidth(self.COMBO_WIDTH)
         enum_items = [str(i) for i in self._config_item.enum_values]
@@ -139,7 +137,7 @@ class EnumConfigControl(ConfigControl):
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(lbl_enum)
+        hbox.addWidget(self._label)
         hbox.addWidget(self._cmbo_enum)
         hbox.addStretch()
 
@@ -169,16 +167,13 @@ class DirectoryConfigControl(ConfigControl):
         self._txt_dir = QLineEdit()
         self._txt_dir.setFixedWidth(self.TEXT_WIDTH)
 
-        lbl_dir = QLabel(self._config_item.tag())
-        lbl_dir.setFixedWidth(self.LABEL_WIDTH)
-
         btn_show = QPushButton('View Files')
         btn_show.setFixedWidth(self.BUTTON_WIDTH)
         btn_show.clicked.connect(self._open_directory)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(lbl_dir)
+        hbox.addWidget(self._label)
         hbox.addWidget(self._txt_dir)
         hbox.addWidget(btn_show)
         hbox.addStretch()
@@ -215,15 +210,13 @@ class ColorConfigControl(ConfigControl):
         self._init_ui()
 
     def _init_ui(self):
-        lbl_color = QLabel(self._config_item.tag())
-        lbl_color.setFixedWidth(self.LABEL_WIDTH)
         self._swatch = QPushButton("")
         self._swatch.setFixedWidth(25)
         self._swatch.clicked.connect(self._choose_color)
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(lbl_color)
+        hbox.addWidget(self._label)
         hbox.addWidget(self._swatch)
         hbox.addStretch()
 
