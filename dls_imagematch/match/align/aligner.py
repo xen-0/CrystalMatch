@@ -1,4 +1,4 @@
-from ..feature.detector import Detector
+from ..feature.detector import Detector, DetectorConfig
 from ..feature import FeatureMatcher
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
@@ -8,9 +8,11 @@ class ImageAligner:
     _DEFAULT_DETECTOR = Detector.DEFAULT_DETECTOR
     _DEFAULT_ADAPTATION = Detector.DEFAULT_ADAPTATION
 
-    def __init__(self, img1, img2):
+    def __init__(self, img1, img2, config_dir):
         self._img1 = img1
         self._img2 = img2
+
+        self._config = DetectorConfig(config_dir)
 
         self._detector = self._DEFAULT_DETECTOR
         self._adaptation = self._DEFAULT_ADAPTATION
@@ -32,7 +34,7 @@ class ImageAligner:
     def align(self):
         img1, img2 = self._get_scaled_mono_images()
 
-        matcher = FeatureMatcher(img1, img2)
+        matcher = FeatureMatcher(img1, img2, self._config)
         matcher.set_detector(self._detector, self._adaptation)
 
         match_result = matcher.match_translation_only()
