@@ -4,6 +4,8 @@ At time of writing (Jan 2016), the VMXi beamline is currently under construction
 
 The beamline is unusual in that the control facilities are in the same room as the beam pipe, rather than in a separate cabin. This is possible because the pipe and sample stage will all be enclosed in full shielding.
 
+![Robot Arm](img/robot_arm.jpg)
+
 When the beamline is operational it will be fully automated. Samples will be prepared on plates in advance and stored in a refrigerator in the room. A robot on a track will move the plates from the fridge to the experiment sample stage. The sample imaging section of the beam will have a rotating beam lock so that samples can be safely introduced into the beam and it will still be safe for people to be working in the room.
 
 The beamline will have a very high throughput. It will take on the order of a second to image a well and a minute or two to do a whole plate, and the facility will be running 24-7. Apparently one of the fridges can store about 1000 plates. Samples will be loaded manually by the beamline scientists into the fridge and the process will be automated from there on.
@@ -37,6 +39,6 @@ An individual well looks something like the following image. The circle in the i
 
 ![Single Well](img/well.jpg)
 
-A bubble with crystals in may look something like the image below. However it will rarely be the case that the bubble and crystals are so clean. 
+A bubble with crystals in may look something like the image below. However it may not always be the case that the bubble and crystals are so clean. 
 
 ![Single Bubble with Crystals](img/bubble.jpg)

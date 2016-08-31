@@ -8,34 +8,45 @@ On VMXi, the width of the X-ray beam is only a few microns. Since each well is a
 
 ![Single Bubble with Marked Crystals](img/bubble2.jpg)
 
-Sample plates will be stored in a refrigerator in the beamline hutch and a robot will transfer them from the refrigerator to the beam sample chamber when required. When the plate is loaded into the fridge (and periodically after that), an image will be taken of each well in the plate. When the user access the web application, the most recent image will be shown to them for target selection.
+Sample plates will be stored in a special purpose refrigerator/imager system in the beamline hutch and a robot will transfer them from the refrigerator to the beam sample chamber when required. When the plate is loaded into the fridge (and periodically after that), an image will be taken of each well in the plate. When the user accesses the web application, the most recent image will be shown to them for target selection.
+
+The refrigerator system is the [Formulatrix Rock Imager](http://www.formulatrix.com/protein-crystallization/products/rock-imager-1000). It can store up to 1000 plates at a time and automatically handles the regular imaging.
+
+![Formulatrix Rock Imager 1000](img/formulatrix.jpg)
 
 
 The Problem
 -----------
-
-An issue that arises is that between the time that the user selects their targets and the time when the sample is actually scanned, it is possible for the sample in the well to move around to some degree. In the example image above, the most likely thing is that the individual crystals could move around within the bubble. This can occur due to natural motion, as well as when the sample is moved from the refrigerator to the beam. In particular there is an issue because the plates will be stored horizontally in the fridge but will be held vertically when being scanned in the beam.
+An issue that arises is that between the time that the user selects their targets and the time when the sample is actually scanned, it is possible for the sample in the well to move around to some degree. In the example image above, the most likely thing is that the individual crystals could move around within the bubble. This can occur due to natural motion, as well as when the sample is moved from the refrigerator to the beam. In particular there is an issue because the plates will be stored horizontally in the fridge but will be held vertically when being scanned in the beam, and so they could move under gravity.
 
 It is necessary then to be able to identify the current position of any selected features/areas at the time when the sample is actually being scanned. There will be a digital camera on the beamline which will be able to take high resolution images of the sample wells just before they are scanned. Also the position of the plate can be controlled using very high precision motors (to scan the beam across the sample, the sample itself moves rather than the beam, as the beam position is fixed).
 
-Therefore what is need is a piece of software that can compare an image taken in the fridge and one taken on the beamline, and track any movement of features that have been selected as targets by the user. This information is then translated into precise motion signals to control the position of the sample plate and make sure that the feature/s that the user selected are properly scanned by the beam.
+Therefore what is needed is a software tool that can compare an image taken in the fridge and one taken on the beamline, and track any movement of features that have been selected as targets by the user. This information is then translated into precise motion signals to control the position of the sample plate and make sure that the feature/s that the user selected are properly scanned by the beam.
 
 It should be noted that during the sample growing process, the shape and appearance of any crystals (and the bubble as a whole) will change dramatically. This should hopefully occur mostly prior to the sample being placed in the fridge and the first image taken and so we needn't worry about it much.
 
+Inputs and Outputs
+------------------
+For each sample, the inputs to the program will with Formulatrix and Beamline images of the sample well and the set of points (in pixel coordinates) that the user marked in the Formulatrix image.
+ 
+The expected output will be the set of x,y motor coordinates that the plate needs to be moved to in order to accurately image the selected region/s.
+
+The program is currently being developed with a GUI for development and testing, but the deployed application will be running continuously and automatically so will need to be able to communicate with other VMXi software components.
 
 
-Z-Slicing
----------
-Images taken in the fridge are likely to use a Z-focusing mode where the well is imaged multiple times at different focal depths. This will probably be displayed as a single composite image to the user, though it is not particularly clear how this will be formed (James Sandy asked me if I know how to go about doing this, so it may be up to me).
+Focus Stacking
+--------------
+Images taken in the fridge use a Z-focusing mode where the well is imaged multiple times at different focal depths. An operation is then performed which merges the set of images into a single composite image in which every part of the image is in sharp focus. The Imager control software performs this operation automatically. This composite image is displayed to the user for them to select targets.
 
 When the user selects a feature, the system will need to figure out which Z-slice has the feature in best focus. This feature will be important if the scan will include rotation of the sample, as we will need to know the Z-coordinate of the crystal within the sample bubble. For planar scanning, the Z-depth wont matter much as the plate will always be normal to the beam.
 
-I have suggested that instead (or perhaps in addition) to trying to do this automatically, we could have it set up so that once a user has selected a point or region of interest, they are then able to rapidly cycle through the Z-slices and select the one in which the feature/region is in best focus. I have suggested the possibility to James (by email). 
+It will be necessary to perform this same operation when images are being taken of the sample on the beamline. The program will need to implement this or we will need to call on an external utility to do it. 
+
+Idea: It may be possible that we can use the same Formulatrix software to do this, depending on how open the architecture is - we will need to get in touch with the company to figure this out.
 
 
 Real Time Constraint
 --------------------
-
 The beamline is intended to be very high throughput. The whole scanning operation for a single well should take on the order of 1 second. For this reason, the image matching algorithm needs to run very quickly. The image matching program will run on a dedicated machine, and there is budget available to use a high performance server specifically to run it if needed.
 
 
