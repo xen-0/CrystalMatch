@@ -26,7 +26,7 @@ class WellSelectorFormulatrix(QGroupBox):
 
         self._samples_dir = None
 
-        self._set_samples_directory("../test-images/Formulatrix/")
+        self._set_samples_directory(config.samples_dir.value())
         self._refresh_batch_lists()
         self._refresh_well_list()
 

@@ -33,7 +33,7 @@ class XtalConfig(Config):
         self.transform_filter = add(EnumConfigItem, "Transform Filter", default=def_filter, extra_arg=trans_filters)
 
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
-        self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Sample Sets/")
+        self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Formulatrix/")
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")
 
         self.config_dir = add(DirectoryConfigItem, "Config Directory", default=config_directory)
