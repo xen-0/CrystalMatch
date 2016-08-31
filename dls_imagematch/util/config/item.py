@@ -21,6 +21,7 @@ class ConfigItem:
         self._tag = tag
         self._default = default
         self._comment = None
+        self._acceptable_values = ""
 
     def value(self):
         """ Get the value of this option. """
@@ -33,6 +34,10 @@ class ConfigItem:
     def comment(self):
         """ Get the comment string for this item. """
         return self._comment
+
+    def acceptable_values(self):
+        """ Get a string representation of the allowable values. """
+        return self._acceptable_values
 
     def set(self, value):
         """ Set the value of this option. """
@@ -48,12 +53,14 @@ class ConfigItem:
 
     def to_file_string(self):
         """ Creates a string representation that can be saved to and read from file. """
+        ok_values = "# Possible Values: " + self._acceptable_values + "\n"
+
         if self._comment is not None:
             comment_lines = Config.create_comment_lines(self._comment)
             comment = "".join(comment_lines)
-            file_string = comment + self.OUTPUT_LINE.format(self._tag, self._value)
+            file_string = comment + ok_values + self.OUTPUT_LINE.format(self._tag, self._value)
         else:
-            file_string = self.OUTPUT_LINE.format(self._tag, self._value)
+            file_string = ok_values + self.OUTPUT_LINE.format(self._tag, self._value)
 
         return file_string
 
@@ -73,6 +80,7 @@ class IntConfigItem(ConfigItem):
     def __init__(self, tag, default, units=""):
         ConfigItem.__init__(self, tag, default)
         self._units = units
+        self._acceptable_values = "Integer"
 
     def units(self):
         """ The unit type of the value. """
@@ -100,6 +108,8 @@ class RangeIntConfigItem(IntConfigItem):
         if not self._in_range(default):
             raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
 
+        self._acceptable_values = "Integer in range [{},{}]".format(self._min, self._max)
+
     def min(self): return self._min
 
     def max(self): return self._max
@@ -124,6 +134,7 @@ class FloatConfigItem(ConfigItem):
     """
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "Float"
 
     def from_file_string(self, string):
         self._value = self._clean(string)
@@ -149,6 +160,13 @@ class RangeFloatConfigItem(FloatConfigItem):
 
         if not self._in_range(default):
             raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
+
+        if self._min is None:
+            self._acceptable_values = "Float <= {}".format(self._max)
+        elif self._max is None:
+            self._acceptable_values = "Float >= {}".format(self._min)
+        else:
+            self._acceptable_values = "Float in range [{},{}]".format(self._min, self._max)
 
     def min(self): return self._min
 
@@ -180,6 +198,7 @@ class DirectoryConfigItem(ConfigItem):
     """ Config item that stores a directory path (can be relative or absolute). """
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "Absolute or relative file path"
 
     def from_file_string(self, string):
         self._value = self._clean(string)
@@ -195,6 +214,7 @@ class ColorConfigItem(ConfigItem):
     """ Config item that stores a color. """
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "Comma-separated RGBA values, e.g. '255,128,50,255'"
 
     def from_file_string(self, string):
         self._value = Color.from_string(string)
@@ -204,6 +224,7 @@ class BoolConfigItem(ConfigItem):
     """ Config item that stores a boolean value. """
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "'True' or 'False'"
 
     def from_file_string(self, string):
         self._value = True if string.lower() == 'true' else False
@@ -214,6 +235,7 @@ class EnumConfigItem(ConfigItem):
     def __init__(self, tag, default, enum_values):
         ConfigItem.__init__(self, tag, default)
         self.enum_values = enum_values
+        self._acceptable_values = ", ".join(["'{}'".format(s) for s in self.enum_values])
 
         if default not in enum_values:
             self._default = self.enum_values[0]
