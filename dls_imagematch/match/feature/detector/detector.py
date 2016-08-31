@@ -20,6 +20,7 @@ class Detector:
     """
 
     # Defaults
+    DEFAULT_ENABLED = True
     DEFAULT_DETECTOR = DetectorType.ORB
     DEFAULT_ADAPTATION = AdaptationType.NONE
     DEFAULT_EXTRACTOR = ExtractorType.BRIEF
@@ -30,7 +31,7 @@ class Detector:
         if detector not in DetectorType.LIST_ALL:
             raise FeatureMatchException("No such feature matching detector available: " + detector)
 
-        self._enabled = True
+        self._enabled = self.DEFAULT_ENABLED
         self._detector = detector
         self._adaptation = self.DEFAULT_ADAPTATION
         self._extractor = self.DEFAULT_EXTRACTOR
@@ -84,6 +85,7 @@ class Detector:
         self._keypoint_limit = limit
 
     def set_from_config(self, config):
+        self.set_enabled(config.enabled.value())
         self.set_extractor(config.extractor.value())
         self.set_keypoint_limit(config.keypoint_limit.value())
 

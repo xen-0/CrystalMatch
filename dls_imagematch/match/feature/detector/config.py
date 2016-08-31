@@ -39,9 +39,25 @@ class DetectorConfig:
             return self.default
 
 
-class DefaultConfig(Config):
-    def __init__(self, file_path):
+class _BaseDetectorConfig(Config):
+    def __init__(self, file_path, detector_type):
         Config.__init__(self, file_path)
+
+        add = self.add
+        det = detector_type
+
+        self.enabled = add(BoolConfigItem, "Enabled", default=det.DEFAULT_ENABLED)
+        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
+        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
+
+        self.enabled.set_comment(det.set_enabled.__doc__)
+        self.extractor.set_comment(det.set_extractor.__doc__)
+        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
+
+
+class DefaultConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
 
         add = self.add
         det = Detector
@@ -50,19 +66,14 @@ class DefaultConfig(Config):
         self.set_comment(det.__doc__)
 
         self.use_non_free = add(BoolConfigItem, "Non-Free Algorithms", default=True)
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
-
         self.use_non_free.set_comment("Use proprietary algorithms (SIFT and SURF) in matching.")
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
 
         self.initialize_from_file()
 
 
-class OrbConfig(Config):
+class OrbConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
-        Config.__init__(self, file_path)
+        _BaseDetectorConfig.__init__(self, file_path, OrbDetector)
 
         add = self.add
         det = OrbDetector
@@ -70,8 +81,6 @@ class OrbConfig(Config):
         self.set_title("ORB Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
         self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
         self.scale_factor = add(RangeFloatConfigItem, "Scale Factor", det.DEFAULT_SCALE_FACTOR, extra_arg=[1.0, None])
         self.n_levels = add(IntConfigItem, "Num Levels", det.DEFAULT_N_LEVELS)
@@ -81,8 +90,6 @@ class OrbConfig(Config):
         self.score_type = add(EnumConfigItem, "Score Type", det.DEFAULT_SCORE_TYPE, det.SCORE_TYPE_NAMES)
         self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
 
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.n_features.set_comment(det.set_n_features.__doc__)
         self.scale_factor.set_comment(det.set_scale_factor.__doc__)
         self.n_levels.set_comment(det.set_n_levels.__doc__)
@@ -95,9 +102,9 @@ class OrbConfig(Config):
         self.initialize_from_file()
 
 
-class SiftConfig(Config):
+class SiftConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
-        Config.__init__(self, file_path)
+        _BaseDetectorConfig.__init__(self, file_path, SiftDetector)
 
         add = self.add
         det = SiftDetector
@@ -105,16 +112,12 @@ class SiftConfig(Config):
         self.set_title("SIFT Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
         self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
         self.contrast_threshold = add(FloatConfigItem, "Contrast Threshold", det.DEFAULT_CONTRAST_THRESHOLD)
         self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD)
         self.sigma = add(FloatConfigItem, "Sigma", det.DEFAULT_SIGMA)
 
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.n_features.set_comment(det.set_n_features.__doc__)
         self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
         self.contrast_threshold.set_comment(det.set_contrast_threshold.__doc__)
@@ -124,9 +127,9 @@ class SiftConfig(Config):
         self.initialize_from_file()
 
 
-class SurfConfig(Config):
+class SurfConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
-        Config.__init__(self, file_path)
+        _BaseDetectorConfig.__init__(self, file_path, SurfDetector)
 
         add = self.add
         det = SurfDetector
@@ -134,16 +137,12 @@ class SurfConfig(Config):
         self.set_title("SURF Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
         self.hessian_threshold = add(FloatConfigItem, "Hessian Threshold", det.DEFAULT_HESSIAN_THRESHOLD)
         self.n_octaves = add(IntConfigItem, "Num Octaves", det.DEFAULT_N_OCTAVES)
         self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
         self.extended = add(BoolConfigItem, "Extended", det.DEFAULT_EXTENDED)
         self.upright = add(BoolConfigItem, "Upright", det.DEFAULT_UPRIGHT)
 
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.hessian_threshold.set_comment(det.set_hessian_threshold.__doc__)
         self.n_octaves.set_comment(det.set_n_octaves.__doc__)
         self.n_octave_layers.set_comment(det.set_n_octave_layers.__doc__)
@@ -153,9 +152,9 @@ class SurfConfig(Config):
         self.initialize_from_file()
 
 
-class MserConfig(Config):
+class MserConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
-        Config.__init__(self, file_path)
+        _BaseDetectorConfig.__init__(self, file_path, MserDetector)
 
         add = self.add
         det = MserDetector
@@ -163,8 +162,6 @@ class MserConfig(Config):
         self.set_title("MSER Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
         self.delta = add(IntConfigItem, "Delta", det.DEFAULT_DELTA)
         self.min_area = add(IntConfigItem, "Min Area", det.DEFAULT_MIN_AREA)
         self.max_area = add(IntConfigItem, "Max Area", det.DEFAULT_MAX_AREA)
@@ -175,8 +172,6 @@ class MserConfig(Config):
         self.min_margin = add(FloatConfigItem, "Min Margin", det.DEFAULT_MIN_MARGIN)
         self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
 
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.delta.set_comment(det.set_delta.__doc__)
         self.min_area.set_comment(det.set_min_area.__doc__)
         self.max_area.set_comment(det.set_max_area.__doc__)
@@ -190,9 +185,9 @@ class MserConfig(Config):
         self.initialize_from_file()
 
 
-class BriskConfig(Config):
+class BriskConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
-        Config.__init__(self, file_path)
+        _BaseDetectorConfig.__init__(self, file_path, BriskDetector)
 
         add = self.add
         det = BriskDetector
@@ -200,14 +195,10 @@ class BriskConfig(Config):
         self.set_title("BRISK Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
-        self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
         self.thresh = add(IntConfigItem, "Threshold", det.DEFAULT_THRESH)
         self.octaves = add(IntConfigItem, "Octaves", det.DEFAULT_OCTAVES)
         self.pattern_scale = add(FloatConfigItem, "Pattern Scale", det.DEFAULT_PATTERN_SCALE)
 
-        self.extractor.set_comment(det.set_extractor.__doc__)
-        self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
         self.thresh.set_comment(det.set_thresh.__doc__)
         self.octaves.set_comment(det.set_octaves.__doc__)
         self.pattern_scale.set_comment(det.set_pattern_scale.__doc__)

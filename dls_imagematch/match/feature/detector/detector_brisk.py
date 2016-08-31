@@ -42,8 +42,7 @@ class BriskDetector(Detector):
         self._pattern_scale = float(value)
 
     def set_from_config(self, config):
-        self.set_extractor(config.extractor.value())
-        self.set_keypoint_limit(config.keypoint_limit.value())
+        Detector.set_from_config(self, config)
         self.set_thresh(config.thresh.value())
         self.set_octaves(config.octaves.value())
         self.set_pattern_scale(config.pattern_scale.value())

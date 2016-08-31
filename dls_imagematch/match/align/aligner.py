@@ -40,7 +40,8 @@ class ImageAligner:
         match_result = matcher.match_translation_only()
 
         if not match_result.has_transform():
-            raise ImageAlignmentError("Image Alignment failed - no matches found")
+            raise ImageAlignmentError("Image Alignment failed - no matches found. Is "
+                                      "{} detector enabled?".format(self._detector))
 
         translation = match_result.transform.translation()
         description = self._get_method_description()
