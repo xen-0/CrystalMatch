@@ -30,6 +30,7 @@ class Detector:
         if detector not in DetectorType.LIST_ALL:
             raise FeatureMatchException("No such feature matching detector available: " + detector)
 
+        self._enabled = True
         self._detector = detector
         self._adaptation = self.DEFAULT_ADAPTATION
         self._extractor = self.DEFAULT_EXTRACTOR
@@ -38,6 +39,9 @@ class Detector:
         self._keypoint_limit = self.DEFAULT_KEYPOINT_LIMIT
 
     # -------- ACCESSORS -----------------------
+    def enabled(self):
+        return self._enabled
+
     def detector(self):
         return self._detector
 
@@ -60,6 +64,11 @@ class Detector:
         return ExtractorType.distance_factor(self._extractor)
 
     # -------- CONFIGURATION ------------------
+    def set_enabled(self, enabled):
+        """ Determines whether or not the detector will be used. If set to false, attempting to
+        use the detector will yield no results."""
+        self._enabled = enabled
+
     def set_adaptation(self, adaptation):
         if adaptation not in AdaptationType.LIST_ALL:
             raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
@@ -85,6 +94,10 @@ class Detector:
         various attributes of the feature. By generating descriptors, we can compare the set of features
         on two images and find matches between them.
         """
+        if not self._enabled:
+            print("Detector {} is disabled".format(self._detector))
+            return []
+
         detector = self._create_detector()
         extractor = self._create_extractor()
 

@@ -21,6 +21,9 @@ class DetectorConfig:
         # self.mser = MserConfig(folder + "det_mser.ini")
         self.brisk = BriskConfig(folder + "det_brisk.ini")
 
+    def get_default_options(self):
+        return self.default
+
     def get_detector_options(self, detector):
         if detector == DetectorType.ORB:
             return self.orb
@@ -46,9 +49,11 @@ class DefaultConfig(Config):
         self.set_title("Default Detector Configuration")
         self.set_comment(det.__doc__)
 
+        self.use_non_free = add(BoolConfigItem, "Non-Free Algorithms", default=True)
         self.extractor = add(EnumConfigItem, "Extractor", det.DEFAULT_EXTRACTOR, ExtractorType.LIST_ALL)
         self.keypoint_limit = add(RangeIntConfigItem, "Keypoint Limit", det.DEFAULT_KEYPOINT_LIMIT, [1, 100])
 
+        self.use_non_free.set_comment("Use proprietary algorithms (SIFT and SURF) in matching.")
         self.extractor.set_comment(det.set_extractor.__doc__)
         self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
 
