@@ -2,6 +2,7 @@ from util.config import ConfigDialog
 
 
 class XtalConfigDialog(ConfigDialog):
+    """ Generates a configuration dialog for the program options. """
     def __init__(self, config):
         ConfigDialog.__init__(self, config)
 
@@ -20,7 +21,7 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.color_xtal_img2)
         add(cfg.color_search)
 
-        self.start_group("Directories")
+        self.start_group("Test Directories")
         add(cfg.input_dir)
         add(cfg.output_dir)
         add(cfg.samples_dir)
@@ -33,5 +34,5 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.region_size)
         add(cfg.search_width)
         add(cfg.search_height)
-        add(cfg.transform_method)
         add(cfg.transform_filter)
+        add(cfg.transform_method)
