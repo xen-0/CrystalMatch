@@ -60,7 +60,7 @@ class MetricPane(QWidget):
         self._lbl_matches.setText(str(num_matches))
 
         num_good_matches = result.num_good_matches()
-        percent = num_good_matches / num_matches * 100
+        percent = 0 if num_matches == 0 else num_good_matches / num_matches * 100
         msg = "{}   ({:.1f}%)".format(num_good_matches, percent)
         self._lbl_good_matches.setText(msg)
 
