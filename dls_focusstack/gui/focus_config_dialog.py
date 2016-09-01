@@ -16,7 +16,6 @@ class FocusConfigDialog(ConfigDialog):
 
         self.start_group("Image Alignment")
         add(cfg.align_method)
-        add(cfg.align_adapt)
 
         self.start_group("Focus Stacking")
         add(cfg.kernel_size)

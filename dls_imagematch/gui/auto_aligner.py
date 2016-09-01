@@ -29,12 +29,10 @@ class AutoImageAligner(QWidget):
             return
 
         method = self._config.align_detector.value()
-        adapt = self._config.align_adapt.value()
         config_dir = self._config.config_dir.value()
 
         aligner = ImageAligner(self._img1, self._img2, config_dir)
         aligner.set_detector_type(method)
-        aligner.set_adaptation_type(adapt)
 
         try:
             aligned_images = aligner.align()

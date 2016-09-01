@@ -12,7 +12,6 @@ class FeatureMatchResult:
         self.transform = transform
 
         self.method = None
-        self.method_adapt = None
 
     def any_matches(self):
         return len(self.matches) > 0

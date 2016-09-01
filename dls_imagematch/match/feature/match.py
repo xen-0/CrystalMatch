@@ -16,7 +16,7 @@ class SingleFeatureMatch:
         self._included_in_transformation = True
 
     def method(self):
-        return self._detector.adaptation() + self._detector.detector()
+        return self._detector.detector()
 
     def reprojection_error(self):
         if self._point2_projected is not None:

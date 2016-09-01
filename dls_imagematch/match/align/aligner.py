@@ -6,7 +6,6 @@ from .exception import ImageAlignmentError
 
 class ImageAligner:
     _DEFAULT_DETECTOR = Detector.DEFAULT_DETECTOR
-    _DEFAULT_ADAPTATION = Detector.DEFAULT_ADAPTATION
 
     def __init__(self, img1, img2, config_dir):
         self._img1 = img1
@@ -15,7 +14,6 @@ class ImageAligner:
         self._config = DetectorConfig(config_dir)
 
         self._detector = self._DEFAULT_DETECTOR
-        self._adaptation = self._DEFAULT_ADAPTATION
 
     # -------- CONFIGURATION -------------------
     def set_detector_type(self, detector):
@@ -24,18 +22,12 @@ class ImageAligner:
         else:
             self._detector = detector
 
-    def set_adaptation_type(self, adaptation):
-        if adaptation is None:
-            self._adaptation = self._DEFAULT_ADAPTATION
-        else:
-            self._adaptation = adaptation
-
     # -------- FUNCTIONALITY -------------------
     def align(self):
         img1, img2 = self._get_scaled_mono_images()
 
         matcher = FeatureMatcher(img1, img2, self._config)
-        matcher.set_detector(self._detector, self._adaptation)
+        matcher.set_detector(self._detector)
 
         match_result = matcher.match_translation_only()
 
@@ -62,7 +54,4 @@ class ImageAligner:
 
     def _get_method_description(self):
         description = "Feature matching - " + self._detector
-        if self._adaptation != '':
-            description += " with " + self._adaptation
-
         return description

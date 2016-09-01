@@ -2,7 +2,7 @@ from util import Color
 from util import Config, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
-from dls_imagematch.match.feature.detector import DetectorType, AdaptationType
+from dls_imagematch.match.feature.detector import DetectorType
 
 
 class XtalConfig(Config):
@@ -39,10 +39,6 @@ class XtalConfig(Config):
         self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
         self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
                                         "process.")
-
-        self.align_adapt = add(EnumConfigItem, "Adaptation", default=AdaptationType.NONE, extra_arg=AdaptationType.LIST_ALL)
-        self.align_adapt.set_comment("Feature detection adaptation method to be used for the initial image alignment "
-                                     "process.")
 
         self.region_size = add(RangeIntConfigItem, "Region Size (px)", default=100, extra_arg=[10, 200])
         self.region_size.set_comment("Size of the region around the user selected point in the first image to be "

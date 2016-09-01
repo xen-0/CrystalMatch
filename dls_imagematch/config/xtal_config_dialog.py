@@ -28,7 +28,6 @@ class XtalConfigDialog(ConfigDialog):
 
         self.start_group("Image Alignment")
         add(cfg.align_detector)
-        add(cfg.align_adapt)
 
         self.start_group("Xtal Search")
         add(cfg.region_size)

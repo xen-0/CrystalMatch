@@ -1,3 +1,3 @@
-from .types import DetectorType, ExtractorType, AdaptationType
+from .types import DetectorType, ExtractorType
 from .detector import Detector
 from .config import DetectorConfig

@@ -40,7 +40,7 @@ class FeatureMatcher:
         self._use_all_detectors = True
         self._detector = None
 
-    def set_detector(self, method, adaptation=""):
+    def set_detector(self, method):
         self._use_all_detectors = False
         self._detector = DetectorFactory.create(method, self._config)
 
@@ -80,10 +80,8 @@ class FeatureMatcher:
 
         if self._use_all_detectors:
             result.method = "All"
-            result.method_adapt = ""
         else:
             result.method = self._detector.detector
-            result.method_adapt = self._detector.adaptation
 
         return result
 

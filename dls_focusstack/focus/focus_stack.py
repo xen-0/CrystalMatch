@@ -16,9 +16,8 @@ class FocusStack:
 
         if with_align:
             method = cfg.align_method.value()
-            adapt = cfg.align_adapt.value()
             out_dir = cfg.output_dir.value()
-            images = self._align_images(self._images, method, adapt, out_dir)
+            images = self._align_images(self._images, method, out_dir)
         else:
             images = self._images
 
@@ -31,7 +30,7 @@ class FocusStack:
         return focused_image
 
     @staticmethod
-    def _align_images(images, method, adapt, out_dir):
+    def _align_images(images, method, out_dir):
         aligned_images = []
 
         # TODO - Frame-by-frame alignment where each frame is aligned with the previous one. This will mean
@@ -43,7 +42,7 @@ class FocusStack:
             #img1 = images[i-1]
             img2 = images[i]
             matcher = FeatureMatcher(img1, img2)
-            matcher.set_detector(method, adapt)
+            matcher.set_detector(method)
 
             transform = matcher.match()
             transformed_img = transform.inverse_transform_image(img2, img2.size)
