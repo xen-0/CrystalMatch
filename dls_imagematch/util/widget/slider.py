@@ -52,3 +52,19 @@ class Slider(QtGui.QWidget):
         except ValueError as e:
             print("Value is not an integer: " + str(value))
 
+        self._update_color()
+
+    def _update_color(self):
+        text = self._txt_value.text()
+        valid = True
+
+        try:
+            val = int(text)
+            if not (self._min <= val <= self._max):
+                valid = False
+        except ValueError:
+            valid = False
+
+        color = "white" if valid else "red"
+        self._txt_value.setStyleSheet("background-color: {};".format(color))
+
