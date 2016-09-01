@@ -150,9 +150,7 @@ class CrystalMatchControl(QGroupBox):
 
     def _fn_perform_match(self):
         selected_img1_points = self._selected_points
-
         self._perform_matching_task(selected_img1_points)
-        self._btn_locate.setEnabled(False)
 
     def _perform_matching_task(self, selected_points):
         matcher = self._create_crystal_matcher()
