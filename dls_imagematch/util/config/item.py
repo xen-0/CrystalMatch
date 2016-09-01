@@ -4,7 +4,10 @@ from .config import Config
 
 class ConfigItem:
     """ Represents a single option/configuration item which is essentially a name/value pair.
-    This class should be sub-classed in order to handle different types of value.
+    This class should be sub-classed in order to handle different types of value. Objects of this
+    class and sub-classes are intended for use with a Config object.
+
+    When subcl
     """
     DATA_TYPE = str
     OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}"
@@ -118,10 +121,14 @@ class FloatConfigItem(ConfigItem):
 
 
 class RangeIntConfigItem(IntConfigItem):
+    """ Config item that stores an integer with a restricted range of allowable values.
+    """
     DATA_TYPE = int
     TYPE_NAME = "Integer"
 
     def __init__(self, tag, default, limits=[0, 100]):
+        """ The range given by the limits is inclusive. For a half-open range, use None for the
+        first or second value. """
         IntConfigItem.__init__(self, tag, default)
         if len(limits) != 2:
             raise ValueError("range must be a list of 2 elements")
@@ -177,13 +184,14 @@ class RangeIntConfigItem(IntConfigItem):
 
 
 class RangeFloatConfigItem(RangeIntConfigItem):
+    """ Config item that stores a float with a restricted range of allowable values.
+    """
     DATA_TYPE = float
     TYPE_NAME = "Float"
 
     def __init__(self, tag, default, limits=[0.0, 1.0]):
-        """ Config item that stores a float with a limited range of values. Limits must contain two ordered
-        numbers that represent the inclusive range. Either limit can be set to None, if you only want to
-        bound the float on one side. """
+        """ Limits must contain two ordered numbers that represent the inclusive range. Either limit
+        can be set to None, if you only want to bound the float on one side. """
         RangeIntConfigItem.__init__(self, tag, default, limits)
 
 
@@ -206,6 +214,7 @@ class DirectoryConfigItem(ConfigItem):
 
 
 class ColorConfigItem(ConfigItem):
+    """ Config item that stores a color. """
     DATA_TYPE = Color
 
     """ Config item that stores a color. """
@@ -234,6 +243,7 @@ class EnumConfigItem(ConfigItem):
     DATA_TYPE = str
 
     def __init__(self, tag, default, enum_values):
+        """ The enum_values should be a list of strings. """
         ConfigItem.__init__(self, tag, default)
         self.enum_values = enum_values
         self._acceptable_values = ", ".join(["'{}'".format(s) for s in self.enum_values])

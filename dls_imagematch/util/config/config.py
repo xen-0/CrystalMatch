@@ -42,9 +42,13 @@ class Config:
     def comment(self): return self._comment
 
     def set_title(self, title):
+        """ Title that will be displayed in config file and dialog. """
         self._title = title
 
     def set_comment(self, comment):
+        """ General comment or instructions about this set of options. Individual config items can also
+        each have their own comment. The comment is displayed in the config file and as a tooltip in the
+        dialog. """
         self._comment = comment
 
     def initialize_from_file(self):
@@ -86,9 +90,11 @@ class Config:
                 f.write("\n\n" + item.to_file_string())
 
     def _make_file_header(self):
+        """ Create string header to be displayed in the config file. Includes the title and comment. """
         header = ""
         if self._title is not None:
-            banner = "-" * 30
+            num_pad = max(2, self.LINE_LENGTH - len(self._title)) - 2
+            banner = "-" * int(num_pad / 2)
             header += "# {} {} {}\n".format(banner, self._title, banner)
 
         if self._comment is not None:
@@ -125,6 +131,8 @@ class Config:
 
     @staticmethod
     def create_comment_lines(string):
+        """ Convert string into lines of comments to be displayed in a file. Wraps the string to an
+        appropriate line length and adds the comment character '#' at the start of each line. """
         lines = Config._string_to_wrapped_lines(string, Config.LINE_LENGTH-2)
         for i in range(len(lines)):
             lines[i] = Config.COMMENT + " " + lines[i] + "\n"
@@ -133,6 +141,8 @@ class Config:
 
     @staticmethod
     def _string_to_wrapped_lines(string, line_length):
+        """ Takes a string and wraps it to fit the specified line length by breaking the string
+        into words and inserting new lines as appropriate. """
         words = string.split()
         lines = [words[0]]
 

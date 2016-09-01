@@ -4,6 +4,9 @@ from PyQt4.QtGui import QColor
 
 
 class Color:
+    """ Represents a color stored as an RGB or RGBA value.
+
+    """
     SEP = ","
     CONSTRUCTOR_ERROR = "Values must be integers in range 0-255"
     STRING_PARSE_ERROR = "Input string must be 3 or 4 integers (0-255) separated by '{}'".format(SEP)
@@ -27,18 +30,23 @@ class Color:
         return "{1}{0}{2}{0}{3}{0}{4}".format(self.SEP, self.r, self.g, self.b, self.a)
 
     def bgra(self):
+        """ Return color as a BGRA tuple. (Useful for working with OpenCV). """
         return self.b, self.g, self.r, self.a
 
     def bgr(self):
+        """ Return color as a BGR tuple. (Useful for working with OpenCV). """
         return self.b, self.g, self.r
 
     def mono(self):
-        return int(round(0.3*self.r + 0.6*self.g + 0.1*self.b))
+        """ Perform conversion to 8-bit grayscale. """
+        return int(round(0.299*self.r + 0.587*self.g + 0.114*self.b))
 
     def to_qt(self):
+        """ Return the equivalent PyQt Color. """
         return QColor(self.r, self.g, self.b, self.a)
 
     def to_hex(self):
+        """ Return a hexadecimal representation of the color. """
         hex_str = '#'
         for val in [self.r, self.g, self.b]:
             hex_str += '{:02x}'.format(val)
@@ -47,10 +55,14 @@ class Color:
 
     @staticmethod
     def from_qt(qt_color):
+        """ Create a new Color object from an equivalent PyQt Color. """
         return Color(qt_color.red(), qt_color.green(), qt_color.blue(), qt_color.alpha())
 
     @staticmethod
     def from_string(string, sep=SEP):
+        """ Create a new Color object by interpreting a string. The string must contain 3 or 4 8-bit
+        values (0-255), separated by the sep character (comma by default). The values should be
+        ordered as RGB(A). """
         tokens = string.split(sep)
 
         if len(tokens) == 3:

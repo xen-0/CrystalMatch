@@ -244,6 +244,7 @@ class Image:
         cv2.putText(self.img, text, position, cv2.FONT_HERSHEY_SIMPLEX, scale, color.bgra(), thickness)
 
     def draw_cross(self, point, color=Color.Black(), size=5, thickness=1):
+        """ Draw an X on the image (in place). """
         self.draw_line(point - Point(size, size), point + Point(size, size), color, thickness)
         self.draw_line(point + Point(size, -size), point + Point(-size, size), color, thickness)
 
@@ -270,6 +271,7 @@ class Image:
         return Image(grain_extract, self.pixel_size)
 
     def to_qt_pixmap(self, scale=None):
+        """ Convert the image into a PyQt pixmap which can be displayed in QT GUI components. """
         width, height = self.size
         bytes_per_line = 3 * width
         rgb = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
