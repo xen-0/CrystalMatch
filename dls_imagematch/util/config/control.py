@@ -68,7 +68,6 @@ class RangeConfigControl(ConfigControl):
     def __init__(self, config_item):
         ConfigControl.__init__(self, config_item)
         self._data_type = config_item.DATA_TYPE
-        print(self._data_type)
         self._use_slider = config_item.is_closed_range() and self._data_type == int
 
         self._init_ui()
