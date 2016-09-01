@@ -1,29 +1,29 @@
-from ..feature.detector import Detector, DetectorConfig
+from ..feature.detector import DetectorConfig
 from ..feature import FeatureMatcher
+from ..transform import Translation
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
+from util.shape import Point
 
 
 class ImageAligner:
-    _DEFAULT_DETECTOR = Detector.DEFAULT_DETECTOR
-
     def __init__(self, img1, img2, config_dir):
         self._img1 = img1
         self._img2 = img2
 
         self._config = DetectorConfig(config_dir)
 
-        self._detector = self._DEFAULT_DETECTOR
+        self._detector = None
 
     # -------- CONFIGURATION -------------------
     def set_detector_type(self, detector):
-        if detector is None:
-            self._detector = self._DEFAULT_DETECTOR
-        else:
-            self._detector = detector
+        self._detector = detector
 
     # -------- FUNCTIONALITY -------------------
     def align(self):
+        if self._detector is None:
+            return self._default_alignment()
+
         img1, img2 = self._get_scaled_mono_images()
 
         matcher = FeatureMatcher(img1, img2, self._config)
@@ -36,10 +36,16 @@ class ImageAligner:
                                       "{} detector enabled?".format(self._detector))
 
         translation = match_result.transform.translation()
-        description = self._get_method_description()
+        description = "Feature matching - " + self._detector
         aligned_images = AlignedImages(self._img1, self._img2, translation, description)
 
         return aligned_images
+
+    def _default_alignment(self):
+        """ Default alignment result with 0 offset. """
+        translation = Point()
+        description = "DISABLED!"
+        return AlignedImages(self._img1, self._img2, translation, description)
 
     def _get_scaled_mono_images(self):
         """ Load the selected images to be matched, scale them appropriately and
@@ -51,7 +57,3 @@ class ImageAligner:
             self._img2 = self._img2.rescale(factor)
 
         return self._img1.to_mono(), self._img2.to_mono()
-
-    def _get_method_description(self):
-        description = "Feature matching - " + self._detector
-        return description

@@ -7,6 +7,8 @@ from dls_imagematch.match.align import ImageAligner, ImageAlignmentError
 
 
 class AutoImageAligner(QWidget):
+    """ Used by the GUI main window to perform image alignment.
+    """
     signal_aligned = pyqtSignal(object)
 
     def __init__(self, config):
@@ -28,11 +30,13 @@ class AutoImageAligner(QWidget):
         if self._img1 is None or self._img2 is None:
             return
 
+        do_align = self._config.use_alignment.value()
         method = self._config.align_detector.value()
         config_dir = self._config.config_dir.value()
 
         aligner = ImageAligner(self._img1, self._img2, config_dir)
-        aligner.set_detector_type(method)
+        if do_align:
+            aligner.set_detector_type(method)
 
         try:
             aligned_images = aligner.align()

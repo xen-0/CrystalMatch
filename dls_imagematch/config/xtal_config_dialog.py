@@ -27,6 +27,7 @@ class XtalConfigDialog(ConfigDialog):
         add(cfg.samples_dir)
 
         self.start_group("Image Alignment")
+        add(cfg.use_alignment)
         add(cfg.align_detector)
 
         self.start_group("Xtal Search")

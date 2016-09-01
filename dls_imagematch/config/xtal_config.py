@@ -1,5 +1,5 @@
 from util import Color
-from util import Config, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
+from util import Config, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem, BoolConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
 from dls_imagematch.match.feature.detector import DetectorType
@@ -35,6 +35,9 @@ class XtalConfig(Config):
         self.color_xtal_img2 = add(ColorConfigItem, "Img2 Xtal Color", Color.Red())
         self.color_xtal_img2.set_comment("Color displayed in GUI to indicate the position of the points in the second "
                                          "image calculated by feature matching.")
+
+        self.use_alignment = add(BoolConfigItem, "Perform Alignment", True)
+        self.use_alignment.set_comment("Automatically perform bulk image alignment when a new image is selected.")
 
         self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
         self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
