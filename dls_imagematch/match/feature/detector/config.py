@@ -81,14 +81,14 @@ class OrbConfig(_BaseDetectorConfig):
         self.set_title("ORB Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
-        self.scale_factor = add(RangeFloatConfigItem, "Scale Factor", det.DEFAULT_SCALE_FACTOR, extra_arg=[1.0, None])
-        self.n_levels = add(IntConfigItem, "Num Levels", det.DEFAULT_N_LEVELS)
-        self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD)
-        self.first_level = add(IntConfigItem, "First Level", det.DEFAULT_FIRST_LEVEL)
+        self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES, [1, None])
+        self.scale_factor = add(RangeFloatConfigItem, "Scale Factor", det.DEFAULT_SCALE_FACTOR, [1.001, None])
+        self.n_levels = add(RangeIntConfigItem, "Num Levels", det.DEFAULT_N_LEVELS, [1, None])
+        self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD, [1, None])
+        self.first_level = add(RangeIntConfigItem, "First Level", det.DEFAULT_FIRST_LEVEL, [0, 0])
         self.wta_k = add(EnumConfigItem, "WTA_K", det.DEFAULT_WTA_K, det.WTA_K_VALUES)
         self.score_type = add(EnumConfigItem, "Score Type", det.DEFAULT_SCORE_TYPE, det.SCORE_TYPE_NAMES)
-        self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE)
+        self.patch_size = add(IntConfigItem, "Patch Size", det.DEFAULT_PATCH_SIZE, [2, None])
 
         self.n_features.set_comment(det.set_n_features.__doc__)
         self.scale_factor.set_comment(det.set_scale_factor.__doc__)
@@ -112,8 +112,8 @@ class SiftConfig(_BaseDetectorConfig):
         self.set_title("SIFT Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.n_features = add(IntConfigItem, "Num Features", det.DEFAULT_N_FEATURES)
-        self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
+        self.n_features = add(RangeIntConfigItem, "Num Features", det.DEFAULT_N_FEATURES, [1, None])
+        self.n_octave_layers = add(RangeIntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS, [1, None])
         self.contrast_threshold = add(FloatConfigItem, "Contrast Threshold", det.DEFAULT_CONTRAST_THRESHOLD)
         self.edge_threshold = add(IntConfigItem, "Edge Threshold", det.DEFAULT_EDGE_THRESHOLD)
         self.sigma = add(FloatConfigItem, "Sigma", det.DEFAULT_SIGMA)
@@ -137,9 +137,9 @@ class SurfConfig(_BaseDetectorConfig):
         self.set_title("SURF Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.hessian_threshold = add(FloatConfigItem, "Hessian Threshold", det.DEFAULT_HESSIAN_THRESHOLD)
-        self.n_octaves = add(IntConfigItem, "Num Octaves", det.DEFAULT_N_OCTAVES)
-        self.n_octave_layers = add(IntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS)
+        self.hessian_threshold = add(RangeFloatConfigItem, "Hessian Threshold", det.DEFAULT_HESSIAN_THRESHOLD, [0.0, None])
+        self.n_octaves = add(RangeIntConfigItem, "Num Octaves", det.DEFAULT_N_OCTAVES, [0, None])
+        self.n_octave_layers = add(RangeIntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS, [1, None])
         self.extended = add(BoolConfigItem, "Extended", det.DEFAULT_EXTENDED)
         self.upright = add(BoolConfigItem, "Upright", det.DEFAULT_UPRIGHT)
 
@@ -195,9 +195,9 @@ class BriskConfig(_BaseDetectorConfig):
         self.set_title("BRISK Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.thresh = add(IntConfigItem, "Threshold", det.DEFAULT_THRESH)
-        self.octaves = add(IntConfigItem, "Octaves", det.DEFAULT_OCTAVES)
-        self.pattern_scale = add(FloatConfigItem, "Pattern Scale", det.DEFAULT_PATTERN_SCALE)
+        self.thresh = add(RangeIntConfigItem, "Threshold", det.DEFAULT_THRESH, [0, None])
+        self.octaves = add(RangeIntConfigItem, "Octaves", det.DEFAULT_OCTAVES, [0, None])
+        self.pattern_scale = add(RangeFloatConfigItem, "Pattern Scale", det.DEFAULT_PATTERN_SCALE, [0.0, None])
 
         self.thresh.set_comment(det.set_thresh.__doc__)
         self.octaves.set_comment(det.set_octaves.__doc__)

@@ -46,14 +46,14 @@ class SurfDetector(Detector):
     def set_n_octaves(self, value):
         """ The number of a gaussian pyramid octaves that the detector uses. It is set to 4 by default. If you
         want to get very large features, use the larger value. If you want just small features, decrease it. """
-        if int(value) < 1:
-            raise FeatureDetectorError("SURF number of octaves must be positive integer")
+        if int(value) < 0:
+            raise FeatureDetectorError("SURF number of octaves must be integer >= 0")
         self._n_octaves = int(value)
 
     def set_n_octave_layers(self, value):
         """ The number of images within each octave of a gaussian pyramid. """
-        if int(value) < 1:
-            raise FeatureDetectorError("SURF number of octave layers must be positive integer")
+        if int(value) < 0:
+            raise FeatureDetectorError("SURF number of octave layers must be integer >= 1")
         self._n_octaves = int(value)
 
     def set_extended(self, value):

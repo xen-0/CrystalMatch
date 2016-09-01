@@ -120,8 +120,8 @@ class OrbDetector(Detector):
     def set_patch_size(self, value):
         """ Size of the patch used by the oriented BRIEF descriptor. Of course, on smaller pyramid layers the
         perceived image area covered by a feature will be larger. """
-        if int(value) < 1:
-            raise FeatureDetectorError("ORB patch size must be positive integer")
+        if int(value) < 2:
+            raise FeatureDetectorError("ORB patch size must be integer >= 2")
         self._patch_size = int(value)
 
     def set_from_config(self, config):

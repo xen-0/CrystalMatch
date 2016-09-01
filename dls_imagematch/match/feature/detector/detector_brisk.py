@@ -27,14 +27,14 @@ class BriskDetector(Detector):
     # -------- CONFIGURATION ------------------
     def set_thresh(self, value):
         """ FAST/AGAST detection threshold score. """
-        if int(value) < 1:
-            raise FeatureDetectorError("BRISK threshold must be positive integer")
+        if int(value) < 0:
+            raise FeatureDetectorError("BRISK threshold must be integer >= 0")
         self._thresh = int(value)
 
     def set_octaves(self, value):
         """ Detection octaves. Use 0 to do single scale. """
-        if int(value) < 1:
-            raise FeatureDetectorError("BRISK octaves must be positive integer")
+        if int(value) < 0:
+            raise FeatureDetectorError("BRISK octaves must be integer >= 0")
         self._octaves = int(value)
 
     def set_pattern_scale(self, value):
