@@ -6,11 +6,8 @@ class ConfigItem:
     """ Represents a single option/configuration item which is essentially a name/value pair.
     This class should be sub-classed in order to handle different types of value. Objects of this
     class and sub-classes are intended for use with a Config object.
-
-    When subcl
     """
     DATA_TYPE = str
-    OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}"
 
     def __init__(self, tag, default):
         """ Initialize a new config item.
@@ -56,14 +53,16 @@ class ConfigItem:
 
     def to_file_string(self):
         """ Creates a string representation that can be saved to and read from file. """
-        ok_values = "# Possible Values: " + self._acceptable_values + "\n"
+        comment = ""
+        ok_values = "# Possible Values: {}\n".format(self._acceptable_values)
+        default = "# Default: {}\n".format(self._default)
+        name_value = "{}{}{}".format(self._tag, Config.DELIMITER, self._value)
 
         if self._comment is not None:
             comment_lines = Config.create_comment_lines(self._comment)
             comment = "".join(comment_lines)
-            file_string = comment + ok_values + self.OUTPUT_LINE.format(self._tag, self._value)
-        else:
-            file_string = ok_values + self.OUTPUT_LINE.format(self._tag, self._value)
+
+        file_string = comment + ok_values + default + name_value
 
         return file_string
 
