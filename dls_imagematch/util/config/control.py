@@ -62,9 +62,14 @@ class ValueConfigControl(ConfigControl):
         self._config_item.set(self._txt_value.text())
 
 
-class RangeIntConfigControl(ConfigControl):
+class RangeConfigControl(ConfigControl):
+    TEXT_WIDTH = 60
+
     def __init__(self, config_item):
         ConfigControl.__init__(self, config_item)
+        self._data_type = config_item.DATA_TYPE
+        print(self._data_type)
+        self._use_slider = config_item.is_closed_range() and self._data_type == int
 
         self._init_ui()
 
@@ -73,20 +78,50 @@ class RangeIntConfigControl(ConfigControl):
         range_min = self._config_item.min()
         range_max = self._config_item.max()
 
-        self._sld_value = Slider(tag, range_min, range_min, range_max, sld_width=94)
-
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(self._sld_value)
-        hbox.addStretch()
 
+        if self._use_slider:
+            self._sld_value = Slider(tag, range_min, range_min, range_max, sld_width=94)
+            hbox.addWidget(self._sld_value)
+        else:
+            self._txt_value = QLineEdit()
+            self._txt_value.setFixedWidth(self.TEXT_WIDTH)
+            self._txt_value.textChanged.connect(self._update_color)
+            hbox.addWidget(self._label)
+            hbox.addWidget(self._txt_value)
+
+        hbox.addStretch()
         self.setLayout(hbox)
 
     def update_from_config(self):
-        self._sld_value.set_value(self._config_item.value())
+        value = self._config_item.value()
+        if self._use_slider:
+            self._sld_value.set_value(value)
+        else:
+            self._txt_value.setText(str(value))
 
     def save_to_config(self):
-        self._config_item.set(self._sld_value.value())
+        if self._use_slider:
+            value = self._sld_value.value()
+        else:
+            value = self._txt_value.text()
+
+        self._config_item.set(value)
+
+    def _update_color(self):
+        text = self._txt_value.text()
+        valid = True
+
+        try:
+            val = self._data_type(text)
+            if not self._config_item.in_range(val):
+                valid = False
+        except ValueError:
+            valid = False
+
+        color = "white" if valid else "red"
+        self._txt_value.setStyleSheet("background-color: {};".format(color))
 
 
 class BoolConfigControl(ConfigControl):

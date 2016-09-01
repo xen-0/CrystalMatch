@@ -6,7 +6,7 @@ class ConfigItem:
     """ Represents a single option/configuration item which is essentially a name/value pair.
     This class should be sub-classed in order to handle different types of value.
     """
-
+    DATA_TYPE = str
     OUTPUT_LINE = line = "{}" + Config.DELIMITER + "{}"
 
     def __init__(self, tag, default):
@@ -77,6 +77,8 @@ class IntConfigItem(ConfigItem):
     """ Config item that stores an integer. Constructor may also take a 'units' parameter which is a
     string that represents the units of the value. This can be used in the UI.
     """
+    DATA_TYPE = int
+
     def __init__(self, tag, default, units=""):
         ConfigItem.__init__(self, tag, default)
         self._units = units
@@ -96,42 +98,11 @@ class IntConfigItem(ConfigItem):
             return self._default
 
 
-class RangeIntConfigItem(IntConfigItem):
-    def __init__(self, tag, default, range=[0,100]):
-        IntConfigItem.__init__(self, tag, default)
-        if len(range) != 2:
-            raise ValueError("range must be a list of 2 elements")
-
-        self._min = range[0]
-        self._max = range[1]
-
-        if not self._in_range(default):
-            raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
-
-        self._acceptable_values = "Integer in range [{},{}]".format(self._min, self._max)
-
-    def min(self): return self._min
-
-    def max(self): return self._max
-
-    def _clean(self, value):
-        try:
-            val = int(value)
-        except ValueError:
-            return self._default
-
-        if self._in_range(val):
-            return val
-        else:
-            return self._default
-
-    def _in_range(self, value):
-        return self._min <= value <= self._max
-
-
 class FloatConfigItem(ConfigItem):
     """ Config item that stores a float.
     """
+    DATA_TYPE = float
+
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
         self._acceptable_values = "Float"
@@ -146,44 +117,55 @@ class FloatConfigItem(ConfigItem):
             return self._default
 
 
-class RangeFloatConfigItem(FloatConfigItem):
-    def __init__(self, tag, default, limits=[0.0, 1.0]):
-        """ Config item that stores a float with a limited range of values. Limits must contain two ordered
-        numbers that represent the inclusive range. Either limit can be set to None, if you only want to
-        bound the float on one side. """
-        FloatConfigItem.__init__(self, tag, default)
+class RangeIntConfigItem(IntConfigItem):
+    DATA_TYPE = int
+    TYPE_NAME = "Integer"
+
+    def __init__(self, tag, default, limits=[0, 100]):
+        IntConfigItem.__init__(self, tag, default)
         if len(limits) != 2:
             raise ValueError("range must be a list of 2 elements")
 
         self._min = limits[0]
         self._max = limits[1]
+        self._acceptable_values = ""
 
-        if not self._in_range(default):
+        if not self.in_range(default):
             raise ValueError("default must be between {} and {} inclusive".format(self._min, self._max))
 
+        self._set_acceptable_values()
+
+    def _set_acceptable_values(self):
         if self._min is None:
-            self._acceptable_values = "Float <= {}".format(self._max)
+            self._acceptable_values = "{} <= {}".format(self.TYPE_NAME, self._max)
         elif self._max is None:
-            self._acceptable_values = "Float >= {}".format(self._min)
+            self._acceptable_values = "{} >= {}".format(self.TYPE_NAME, self._min)
         else:
-            self._acceptable_values = "Float in range [{},{}]".format(self._min, self._max)
+            self._acceptable_values = "{} in range [{}, {}]".format(self.TYPE_NAME, self._min, self._max)
 
     def min(self): return self._min
 
     def max(self): return self._max
 
+    def is_closed_range(self):
+        return self._max is not None and self._min is not None
+
     def _clean(self, value):
         try:
-            val = float(value)
+            val = self.DATA_TYPE(value)
         except ValueError:
             return self._default
 
-        if self._in_range(val):
+        if self.in_range(val):
             return val
+        elif self._min is not None and val < self._min:
+            return self._min
+        elif self._max is not None and val > self._max:
+            return self._max
         else:
             return self._default
 
-    def _in_range(self, value):
+    def in_range(self, value):
         ok = True
         if self._min is not None:
             ok &= self._min <= value
@@ -194,8 +176,21 @@ class RangeFloatConfigItem(FloatConfigItem):
         return ok
 
 
+class RangeFloatConfigItem(RangeIntConfigItem):
+    DATA_TYPE = float
+    TYPE_NAME = "Float"
+
+    def __init__(self, tag, default, limits=[0.0, 1.0]):
+        """ Config item that stores a float with a limited range of values. Limits must contain two ordered
+        numbers that represent the inclusive range. Either limit can be set to None, if you only want to
+        bound the float on one side. """
+        RangeIntConfigItem.__init__(self, tag, default, limits)
+
+
 class DirectoryConfigItem(ConfigItem):
     """ Config item that stores a directory path (can be relative or absolute). """
+    DATA_TYPE = str
+
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
         self._acceptable_values = "Absolute or relative file path"
@@ -211,6 +206,8 @@ class DirectoryConfigItem(ConfigItem):
 
 
 class ColorConfigItem(ConfigItem):
+    DATA_TYPE = Color
+
     """ Config item that stores a color. """
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
@@ -222,6 +219,8 @@ class ColorConfigItem(ConfigItem):
 
 class BoolConfigItem(ConfigItem):
     """ Config item that stores a boolean value. """
+    DATA_TYPE = bool
+
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
         self._acceptable_values = "'True' or 'False'"
@@ -232,6 +231,8 @@ class BoolConfigItem(ConfigItem):
 
 class EnumConfigItem(ConfigItem):
     """ Config item that stores an enum value. """
+    DATA_TYPE = str
+
     def __init__(self, tag, default, enum_values):
         ConfigItem.__init__(self, tag, default)
         self.enum_values = enum_values

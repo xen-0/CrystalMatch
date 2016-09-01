@@ -72,7 +72,7 @@ class ConfigDialog(QtGui.QDialog):
         add = self._add_control
 
         if isinstance(item, RangeIntConfigItem):
-            add(RangeIntConfigControl(item))
+            add(RangeConfigControl(item))
         elif isinstance(item, IntConfigItem):
             add(ValueConfigControl(item, txt_width=60))
         elif isinstance(item, FloatConfigItem):
@@ -112,7 +112,7 @@ class ConfigDialog(QtGui.QDialog):
         btn_ok.pressed.connect(self._dialog_close_ok)
         btn_apply = QtGui.QPushButton("Apply")
         btn_apply.pressed.connect(self._dialog_apply_changes)
-        btn_reset = QtGui.QPushButton("Reset All")
+        btn_reset = QtGui.QPushButton("Defaults")
         btn_reset.pressed.connect(self._dialog_reset)
 
         hbox = QtGui.QHBoxLayout()
