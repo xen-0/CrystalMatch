@@ -1,11 +1,14 @@
 from util import Color
-from util import Config, IntConfigItem, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
+from util import Config, DirectoryConfigItem, ColorConfigItem, EnumConfigItem, RangeIntConfigItem
 
 from dls_imagematch.match.feature import TransformCalculator
 from dls_imagematch.match.feature.detector import DetectorType, AdaptationType
 
 
 class XtalConfig(Config):
+    """ Configuration class that contains a number of options for the program. Stores options in a config
+    file that can be edited externally to set the values of the options.
+    """
     def __init__(self, config_directory):
         Config.__init__(self, config_directory + "xtal_match.ini")
 
@@ -19,23 +22,66 @@ class XtalConfig(Config):
         def_filter = TransformCalculator.DEFAULT_FILTER
 
         self.color_align = add(ColorConfigItem, "Align Color", Color.Purple())
+        self.color_align.set_comment("Outline color displayed in GUI to indicate alignment overlap of two images.")
+
         self.color_search = add(ColorConfigItem, "Search Box Color", Color.Orange())
+        self.color_search.set_comment("Outline color displayed in GUI to indicate region to be searched for feature "
+                                      "matching in second image.")
+
         self.color_xtal_img1 = add(ColorConfigItem, "Img1 Xtal Color", Color.Green())
+        self.color_xtal_img1.set_comment("Color displayed in GUI to indicate the position of the user selected points "
+                                         "in the first image")
+
         self.color_xtal_img2 = add(ColorConfigItem, "Img2 Xtal Color", Color.Red())
+        self.color_xtal_img2.set_comment("Color displayed in GUI to indicate the position of the points in the second "
+                                         "image calculated by feature matching.")
 
         self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
-        self.align_adapt = add(EnumConfigItem, "Adaptation", default=AdaptationType.NONE, extra_arg=AdaptationType.LIST_ALL)
+        self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
+                                        "process.")
 
-        self.region_size = add(IntConfigItem, "Region Size", default=100, extra_arg='px')
-        self.search_width = add(IntConfigItem, "Search Width", default=200, extra_arg='px')
-        self.search_height = add(IntConfigItem, "Search Height", default=400, extra_arg='px')
-        self.transform_method = add(EnumConfigItem, "Transform Method", default=def_trans, extra_arg=trans_methods)
+        self.align_adapt = add(EnumConfigItem, "Adaptation", default=AdaptationType.NONE, extra_arg=AdaptationType.LIST_ALL)
+        self.align_adapt.set_comment("Feature detection adaptation method to be used for the initial image alignment "
+                                     "process.")
+
+        self.region_size = add(RangeIntConfigItem, "Region Size (px)", default=100, extra_arg=[10, 200])
+        self.region_size.set_comment("Size of the region around the user selected point in the first image to be "
+                                     "considered in the feature matching process.")
+
+        self.search_width = add(RangeIntConfigItem, "Search Width (px)", default=200, extra_arg=[50, 1000])
+        self.search_width.set_comment("Width of the region in the second image in which to search in the feature "
+                                      "matching process.")
+
+        self.search_height = add(RangeIntConfigItem, "Search Height (px)", default=400, extra_arg=[50, 1000])
+        self.search_height.set_comment("Height of the region in the second image in which to search in the feature "
+                                       "matching process.")
+
         self.transform_filter = add(EnumConfigItem, "Transform Filter", default=def_filter, extra_arg=trans_filters)
+        self.transform_filter.set_comment("Method used to filter out bad matches prior to generating the transform.")
+
+        self.transform_method = add(EnumConfigItem, "Transform Method", default=def_trans, extra_arg=trans_methods)
+        self.transform_method.set_comment("Method to be used to generate the transform mapping the crystal in first "
+                                          "image to its location in the second image.")
 
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
+        self.input_dir.set_comment("Directory for storing any files required by testing.")
+
         self.samples_dir = add(DirectoryConfigItem, "Samples Directory", default="../test-images/Formulatrix/")
+        self.samples_dir.set_comment("Directory storing images taken for Formulatrix for testing.")
+
         self.output_dir = add(DirectoryConfigItem, "Output Directory", default="../test-output/")
+        self.output_dir.set_comment("Directory for storing any files generated by testing.")
 
         self.config_dir = add(DirectoryConfigItem, "Config Directory", default=config_directory)
+        self.config_dir.set_comment("Directory in which Detector configuration files are stored.")
+
+
+
+
+
+
+
+
+
 
         self.initialize_from_file()
