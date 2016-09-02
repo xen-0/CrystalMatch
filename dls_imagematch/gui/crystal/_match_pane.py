@@ -148,9 +148,10 @@ class CrystalMatchPane(QWidget):
         search_width = self._slider_search_width.value()
         search_height = self._slider_search_height.value()
 
-        config_dir = self._gui_config.config_dir.value()
+        detector_config_dir = self._gui_config.config_dir.value()
+        detector_config = DetectorConfig(detector_config_dir)
 
-        matcher = CrystalMatcher(self._aligned_images, config_dir)
+        matcher = CrystalMatcher(self._aligned_images, detector_config)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
         return matcher

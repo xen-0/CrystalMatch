@@ -7,6 +7,7 @@ from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.util import Rectangle
 from gui.components.progress_dialog import ProgressDialog
+from feature.detector import DetectorConfig
 from ..crystal import PointSelectDialog
 from ..crystal import SingleCrystalDialog
 
@@ -164,20 +165,11 @@ class CrystalMatchControl(QGroupBox):
         progress.exec_()
 
     def _create_crystal_matcher(self):
-        cfg = self._xtal_config
-        region_size = cfg.region_size.value()
-        search_width = cfg.search_width.value()
-        search_height = cfg.search_height.value()
-        transform_method = cfg.transform_method.value()
-        transform_filter = cfg.transform_filter.value()
+        detector_config_dir = self._gui_config.config_dir.value()
+        detector_config = DetectorConfig(detector_config_dir)
 
-        config_dir = self._gui_config.config_dir.value()
-
-        matcher = CrystalMatcher(self._aligned_images, config_dir)
-        matcher.set_real_region_size(region_size)
-        matcher.set_real_search_size(search_width, search_height)
-        matcher.set_transform_method(transform_method)
-        matcher.set_transform_filter(transform_filter)
+        matcher = CrystalMatcher(self._aligned_images, detector_config)
+        matcher.set_from_xtal_config(self._xtal_config)
         return matcher
 
     ''' ----------------------

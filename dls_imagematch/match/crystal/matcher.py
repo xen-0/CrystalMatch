@@ -2,7 +2,6 @@ from __future__ import division
 
 from util import Rectangle, Point
 from feature import BoundedFeatureMatcher
-from feature.detector import DetectorConfig
 from .match_results import CrystalMatchResults
 from .single_match_result import SingleCrystalMatch
 
@@ -12,13 +11,11 @@ class CrystalMatcher:
     DEFAULT_WIDTH = 200
     DEFAULT_HEIGHT = 400
 
-    def __init__(self, aligned_images, config_dir):
+    def __init__(self, aligned_images, detector_config, xtal_config=None):
         self._aligned_images = aligned_images
         self._img1 = aligned_images.img1.to_mono()
         self._img2 = aligned_images.img2.to_mono()
         self._pixel_size = self._img1.pixel_size
-
-        self._config = DetectorConfig(config_dir)
 
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
@@ -26,7 +23,21 @@ class CrystalMatcher:
         self._transform_method = None
         self._transform_filter = None
 
+        self._detector_config = detector_config
+        if xtal_config is not None:
+            self.set_from_xtal_config(xtal_config)
+
     # -------- CONFIGURATION -------------------
+    def set_from_xtal_config(self, config):
+        self._region_size_real = config.region_size.value()
+        self._search_width_real = config.search_width.value()
+        self._search_height_real = config.search_height.value()
+        self._transform_method = config.transform_method.value()
+        self._transform_filter = config.transform_filter.value()
+
+    def set_detector_config(self, config):
+        self._detector_config = config
+
     def set_real_region_size(self, size):
         self._region_size_real = size
 
@@ -55,7 +66,7 @@ class CrystalMatcher:
         img1_rect = self.make_target_region(point)
         img2_rect = self.make_search_region(point)
 
-        feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, self._config, img1_rect, img2_rect)
+        feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, self._detector_config, img1_rect, img2_rect)
 
         result = SingleCrystalMatch(point, self._pixel_size)
         self._perform_match(feature_matcher, result)

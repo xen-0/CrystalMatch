@@ -20,15 +20,15 @@ class XtalMatchConfig(Config):
         def_trans = TransformCalculator.DEFAULT_METHOD
         def_filter = TransformCalculator.DEFAULT_FILTER
 
-        self.region_size = add(RangeIntConfigItem, "Region Size (px)", default=100, extra_arg=[10, 200])
+        self.region_size = add(RangeIntConfigItem, "Region Size (um)", default=100, extra_arg=[10, 200])
         self.region_size.set_comment("Size of the region around the user selected point in the first image to be "
                                      "considered in the feature matching process.")
 
-        self.search_width = add(RangeIntConfigItem, "Search Width (px)", default=200, extra_arg=[50, 1000])
+        self.search_width = add(RangeIntConfigItem, "Search Width (um)", default=200, extra_arg=[50, 1000])
         self.search_width.set_comment("Width of the region in the second image in which to search in the feature "
                                       "matching process.")
 
-        self.search_height = add(RangeIntConfigItem, "Search Height (px)", default=400, extra_arg=[50, 1000])
+        self.search_height = add(RangeIntConfigItem, "Search Height (um)", default=400, extra_arg=[50, 1000])
         self.search_height.set_comment("Height of the region in the second image in which to search in the feature "
                                        "matching process.")
 
