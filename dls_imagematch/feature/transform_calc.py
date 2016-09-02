@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point
+from .transform import HomographyTransformation, Translation, AffineTransformation
 from .exception import TransformCalculationError
-from ..transform import HomographyTransformation, Translation, AffineTransformation
 
 
 class TransformCalculator:

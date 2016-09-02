@@ -2,15 +2,13 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
 from config import XtalConfig, XtalConfigDialog
-
 from dls_imagematch.util.config import ConfigDialog
-from match.feature.detector import DetectorConfig, DetectorType
-
-from .image_select import ImageSelector
-from .well_select_formulatrix import WellSelectorFormulatrix
-from .image_frame import ImageFrame
+from feature.detector import DetectorConfig, DetectorType
 from .auto_aligner import AutoImageAligner
 from .crystal import CrystalMatchControl
+from .image_frame import ImageFrame
+from .image_select import ImageSelector
+from .well_select_formulatrix import WellSelectorFormulatrix
 
 
 class VMXiCrystalMatchMainWindow(QMainWindow):

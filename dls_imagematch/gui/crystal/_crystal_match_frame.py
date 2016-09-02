@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox
 
-from dls_imagematch.match.feature import FeaturePainter
+from feature import FeaturePainter
 
 
 class CrystalMatchFrame(QWidget):

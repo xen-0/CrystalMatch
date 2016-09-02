@@ -1,10 +1,10 @@
 from __future__ import division
 
+from util import Rectangle, Point
+from feature import BoundedFeatureMatcher
+from feature.detector import DetectorConfig
 from .match_results import CrystalMatchResults
 from .single_match_result import SingleCrystalMatch
-from ..feature import BoundedFeatureMatcher
-from ..feature.detector import DetectorConfig
-from dls_imagematch.util import Rectangle, Point
 
 
 class CrystalMatcher:

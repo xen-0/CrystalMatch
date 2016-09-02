@@ -1,9 +1,8 @@
-from ..feature.detector import DetectorConfig
-from ..feature import FeatureMatcher
-from ..transform import Translation
+from feature.detector import DetectorConfig
+from feature import FeatureMatcher
+from util.shape import Point
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
-from util.shape import Point
 
 
 class ImageAligner:
