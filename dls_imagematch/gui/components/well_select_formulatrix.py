@@ -17,6 +17,7 @@ class WellSelectorFormulatrix(QGroupBox):
     """
     signal_image1_selected = QtCore.pyqtSignal(object)
     signal_image2_selected = QtCore.pyqtSignal(object)
+    signal_images_selected = QtCore.pyqtSignal(object, object)
 
     def __init__(self, gui_config):
         super(WellSelectorFormulatrix, self).__init__()
@@ -150,6 +151,7 @@ class WellSelectorFormulatrix(QGroupBox):
 
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)
+        self.signal_images_selected.emit(image1, image2)
 
     @staticmethod
     def get_sub_dirs(dir, startswith="", endswith=""):

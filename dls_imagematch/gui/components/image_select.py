@@ -81,8 +81,6 @@ class ImageSelector(QtGui.QGroupBox):
         self._display_filename_label(image.file)
         self._display_pixel_size(image.pixel_size)
 
-        self.signal_selected.emit(self._image)
-
     def _set_image_pixel_size(self, pixel_size):
         raw_img = self._image.img
         filename = self._image.file
@@ -111,6 +109,7 @@ class ImageSelector(QtGui.QGroupBox):
         if filepath:
             image = Image.from_file(filepath, self._pixel_size)
             self.set_image(image)
+            self.signal_selected.emit(self._image)
 
     def _display_image(self, image):
         """ Display the selected image in the frame. """

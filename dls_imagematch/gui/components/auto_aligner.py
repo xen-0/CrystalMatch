@@ -20,6 +20,11 @@ class AutoImageAligner(QWidget):
         self._img1 = None
         self._img2 = None
 
+    def set_images(self, image1, image2):
+        self._img1 = image1
+        self._img2 = image2
+        self._perform_alignment()
+
     def set_image_1(self, image):
         self._img1 = image
         self._perform_alignment()

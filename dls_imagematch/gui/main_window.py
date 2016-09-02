@@ -59,6 +59,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
 
         well_selector.signal_image1_selected.connect(selector1.set_image)
         well_selector.signal_image2_selected.connect(selector2.set_image)
+        well_selector.signal_images_selected.connect(self._aligner.set_images)
 
         well_selector.signal_image1_selected.connect(xtal_match.reset)
         well_selector.signal_image1_selected.connect(image_frame.clear)
