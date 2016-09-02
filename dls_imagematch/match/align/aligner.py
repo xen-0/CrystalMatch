@@ -1,4 +1,3 @@
-from feature.detector import DetectorConfig
 from feature import FeatureMatcher
 from util.shape import Point
 from .aligned_images import AlignedImages
@@ -6,39 +5,51 @@ from .exception import ImageAlignmentError
 
 
 class ImageAligner:
-    def __init__(self, img1, img2, config_dir):
+    def __init__(self, img1, img2, align_config=None, detector_config=None):
         self._img1 = img1
         self._img2 = img2
 
-        self._config = DetectorConfig(config_dir)
-
-        self._detector = None
+        self._align_config = align_config
+        self._detector_config = detector_config
 
     # -------- CONFIGURATION -------------------
-    def set_detector_type(self, detector):
-        self._detector = detector
+    def set_align_config(self, config):
+        self._align_config = config
+
+    def set_detector_config(self, config):
+        self._detector_config = config
 
     # -------- FUNCTIONALITY -------------------
     def align(self):
-        if self._detector is None:
+        self._check_config()
+
+        if not self._align_config.use_alignment.value():
             return self._default_alignment()
 
         img1, img2 = self._get_scaled_mono_images()
+        detector = self._align_config.align_detector.value()
 
-        matcher = FeatureMatcher(img1, img2, self._config)
-        matcher.set_detector(self._detector)
+        matcher = FeatureMatcher(img1, img2, self._detector_config)
+        matcher.set_detector(detector)
 
         match_result = matcher.match_translation_only()
 
         if not match_result.has_transform():
             raise ImageAlignmentError("Image Alignment failed - no matches found. Is "
-                                      "{} detector enabled?".format(self._detector))
+                                      "{} detector enabled?".format(detector))
 
         translation = match_result.transform.translation()
-        description = "Feature matching - " + self._detector
+        description = "Feature matching - " + detector
         aligned_images = AlignedImages(self._img1, self._img2, translation, description)
 
         return aligned_images
+
+    def _check_config(self):
+        """ Raises an exception if configuration has not been properly set. """
+        if self._align_config is None:
+            raise ImageAlignmentError("Must set Alignment config before performing alignment")
+        elif self._detector_config is None:
+            raise ImageAlignmentError("Must set Detector config before performing alignment")
 
     def _default_alignment(self):
         """ Default alignment result with 0 offset. """

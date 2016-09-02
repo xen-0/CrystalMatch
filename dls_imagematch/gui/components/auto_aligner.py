@@ -4,6 +4,7 @@ from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QWidget, QMessageBox
 
 from dls_imagematch.match.align import ImageAligner, ImageAlignmentError
+from feature.detector import DetectorConfig
 
 
 class AutoImageAligner(QWidget):
@@ -31,13 +32,10 @@ class AutoImageAligner(QWidget):
         if self._img1 is None or self._img2 is None:
             return
 
-        do_align = self._align_config.use_alignment.value()
-        method = self._align_config.align_detector.value()
-        config_dir = self._gui_config.config_dir.value()
+        detector_config_dir = self._gui_config.config_dir.value()
+        detector_config = DetectorConfig(detector_config_dir)
 
-        aligner = ImageAligner(self._img1, self._img2, config_dir)
-        if do_align:
-            aligner.set_detector_type(method)
+        aligner = ImageAligner(self._img1, self._img2, self._align_config, detector_config)
 
         try:
             aligned_images = aligner.align()
