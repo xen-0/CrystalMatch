@@ -37,7 +37,7 @@ class ImageAligner:
         """ Default alignment result with 0 offset. """
         translation = Point()
         description = "DISABLED!"
-        return AlignedImages(self._img1, self._img2, translation, description)
+        return AlignedImages(self._img1, self._img2, translation, self._align_config, description)
 
     def _check_config(self):
         """ Raises an exception if configuration has not been properly set. """

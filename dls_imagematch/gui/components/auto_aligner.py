@@ -45,5 +45,13 @@ class AutoImageAligner(QWidget):
         try:
             aligned_images = aligner.align()
             self.signal_aligned.emit(aligned_images)
+
+            if aligned_images.is_alignment_poor():
+                QMessageBox.warning(self, "Image Alignment Warning", "The quality of the image alignment "
+                                                                     "was poor", QMessageBox.Ok)
+            elif aligned_images.is_alignment_bad():
+                QMessageBox.critical(self, "Image Alignment Error", "Alignment failed due to very bad "
+                                                                    "fit.", QMessageBox.Ok)
+
         except ImageAlignmentError as ex:
             QMessageBox.critical(self, "Image Alignment Error", str(ex), QMessageBox.Ok)

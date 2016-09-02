@@ -18,7 +18,9 @@ class AlignConfig(Config):
         self.use_alignment = add(BoolConfigItem, "Perform Alignment", True)
         self.use_alignment.set_comment("Automatically perform bulk image alignment using feature matching when a new "
                                        "image is selected. If disabled, the images will just be lined up by the top "
-                                       "left corner, which is fine if you know that the images are already lined up.")
+                                       "left corner, which is fine if you know that the images are already lined up. "
+                                       "The alignment metric will still be calculated, indicating whether the fit is "
+                                       "any good.")
 
         self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
         self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
