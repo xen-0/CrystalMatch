@@ -74,7 +74,6 @@ class SiftDetector(Detector):
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
-        print("Creating SIFT detector")
         detector = cv2.SIFT(nfeatures=self._n_features,
                             nOctaveLayers=self._n_octave_layers,
                             contrastThreshold=self._contrast_threshold,

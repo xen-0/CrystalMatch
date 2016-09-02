@@ -49,8 +49,6 @@ class BriskDetector(Detector):
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
-        print("Creating BRISK detector")
-
         detector = cv2.BRISK(thresh=self._thresh,
                              octaves=self._octaves,
                              patternScale=self._pattern_scale)

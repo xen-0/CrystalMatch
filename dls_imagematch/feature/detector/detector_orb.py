@@ -137,7 +137,6 @@ class OrbDetector(Detector):
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
-        print("Creating ORB detector")
         if OPENCV_MAJOR == '2':
             constructor = cv2.ORB
         else:

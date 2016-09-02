@@ -76,7 +76,6 @@ class SurfDetector(Detector):
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
-        print("Creating SURF detector")
         detector = cv2.SURF(hessianThreshold=self._hessian_threshold,
                             nOctaves=self._n_octaves,
                             nOctaveLayers=self._n_octave_layers,

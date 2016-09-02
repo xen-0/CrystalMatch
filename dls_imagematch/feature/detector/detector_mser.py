@@ -96,7 +96,6 @@ class MserDetector(Detector):
 
     # -------- FUNCTIONALITY -------------------
     def _create_detector(self):
-        print("Creating MSER detector")
         detector = cv2.MSER(_delta=self._delta,
                             _min_area=self._min_area,
                             _max_area=self._max_area,
