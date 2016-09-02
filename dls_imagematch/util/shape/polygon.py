@@ -10,6 +10,9 @@ class Polygon:
 
         self._vertices = vertices
 
+    def vertices(self):
+        return self._vertices[:]
+
     def num_vertices(self):
         """ The number of vertices"""
         return len(self._vertices)

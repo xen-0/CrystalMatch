@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point, Image
+from .transformation import Transformation
 
 
-class HomographyTransformation:
+class HomographyTransformation(Transformation):
     def __init__(self, homography_matrix):
+        Transformation.__init__(self)
+
         self._homography = homography_matrix
         self._homography_inverse = None
 

@@ -1,8 +1,10 @@
 from dls_imagematch.util import Image
+from .transformation import Transformation
 
 
-class Translation:
+class Translation(Transformation):
     def __init__(self, translation):
+        Transformation.__init__(self)
         self._translation = translation
 
     def translation(self):

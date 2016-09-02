@@ -2,10 +2,12 @@ import cv2
 import numpy as np
 
 from dls_imagematch.util import Point
+from .transformation import Transformation
 
 
-class AffineTransformation:
+class AffineTransformation(Transformation):
     def __init__(self, affine_matrix):
+        Transformation.__init__(self)
         self._affine_matrix = affine_matrix
 
     def transform_points(self, points):
@@ -13,6 +15,9 @@ class AffineTransformation:
         transformed = cv2.perspectiveTransform(np_array, self._affine_matrix)
         transformed = self._np_array_to_points(transformed)
         return transformed
+
+    def transform_image(self, image, output_size):
+        raise NotImplementedError()
 
     @staticmethod
     def _points_to_np_array(points):
