@@ -69,13 +69,13 @@ class CrystalMatchPane(QWidget):
         hbox_select.addStretch(1)
 
         region_size = self._config.region_size.value()
-        self._slider_region_size = Slider("Region Size", region_size, 20, 150)
+        self._slider_region_size = Slider("Region Size", region_size, 10, 500)
 
         search_width = self._config.search_width.value()
-        self._slider_search_width = Slider("Search Width", search_width, 100, 500)
+        self._slider_search_width = Slider("Search Width", search_width, 50, 3000)
 
         search_height = self._config.search_height.value()
-        self._slider_search_height = Slider("Search Height", search_height, 100, 800)
+        self._slider_search_height = Slider("Search Height", search_height, 50, 3000)
 
         btn_config_orb = QPushButton("Configure ORB")
         btn_config_orb.setFixedWidth(100)
