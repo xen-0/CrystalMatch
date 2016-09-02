@@ -70,7 +70,7 @@ class ImageAligner:
 
         translation = match_result.transform.translation()
         description = "Feature matching - " + detector
-        aligned_images = AlignedImages(self._img1, self._img2, translation, description)
+        aligned_images = AlignedImages(self._img1, self._img2, translation, self._align_config, description)
         return aligned_images
 
     def _get_scaled_mono_images(self):

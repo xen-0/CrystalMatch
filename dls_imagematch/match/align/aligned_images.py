@@ -8,11 +8,14 @@ class AlignedImages:
     have the same real size per pixel. The translate is the distance (in pixels) that the top-left corner
     of image B should be offset from the top-left corner of image A, in order to properly align the images.
     """
-    def __init__(self, img1, img2, translate, method="Unknown"):
+    def __init__(self, img1, img2, translate, align_config, method="Unknown"):
         self.img1 = img1
         self.img2 = img2
         self.translate = translate
         self.method = method
+
+        self._limit_low = align_config.metric_limit_low.value()
+        self._limit_high = align_config.metric_limit_high.value()
 
         self._real_offset = None
         self._pixel_offset = None
@@ -21,6 +24,23 @@ class AlignedImages:
         self._overlay = None
         self._metric = None
         self._overlap_images = None
+
+    def is_alignment_good(self):
+        """ If True the alignment metric is less than the low limit and the alignment is considered to
+        be a good fit. """
+        metric = self.overlap_metric()
+        return metric <= self._limit_low
+
+    def is_alignment_poor(self):
+        """ If True the alignment metric is between the 2 limits and the alignment is considered to be poor. """
+        metric = self.overlap_metric()
+        return self._limit_low < metric <= self._limit_high
+
+    def is_alignment_bad(self):
+        """ If True, the alignment quality metric exceeds the top limit and the alignment is considered
+        to have failed. """
+        metric = self.overlap_metric()
+        return metric > self._limit_high
 
     def pixel_offset(self):
         """ The transform (offset) in pixels - nearest whole number. """
