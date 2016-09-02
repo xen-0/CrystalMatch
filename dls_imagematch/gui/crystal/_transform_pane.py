@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
-from dls_imagematch.util import Point
+from dls_imagematch.util.shape import Point, Polygon
 from dls_imagematch.util.widget import Slider
 from feature import TransformCalculator
 
@@ -112,7 +112,7 @@ class TransformPane(QWidget):
         point2 = None
 
         w = point1.x
-        quad1 = [Point(0, 0), Point(2*w, 0), Point(2*w, 2*w), Point(0, 2*w)]
+        quad1 = Polygon([Point(0, 0), Point(2*w, 0), Point(2*w, 2*w), Point(0, 2*w)])
         quad2 = None
 
         calc = self._create_transform_calc()
@@ -127,7 +127,7 @@ class TransformPane(QWidget):
             def trans(x, y):
                 return transform.transform_points([p1 + Point(x, y)])[0] - search_region_tl
 
-            quad2 = [trans(-w, -w), trans(w, -w), trans(w, w), trans(-w, w)]
+            quad2 = Polygon([trans(-w, -w), trans(w, -w), trans(w, w), trans(-w, w)])
 
         self._emit_new_transform_signal(transform)
         self._emit_new_points_signal(point1, point2)

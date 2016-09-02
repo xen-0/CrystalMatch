@@ -16,6 +16,9 @@ class MatchPainter:
     DEFAULT_PADDING = 5
     DEFAULT_BACK_COLOR = Color.Black()
 
+    IMAGE_1 = 1
+    IMAGE_2 = 2
+
     def __init__(self, img1, img2):
         self._img1 = img1
         self._img2 = img2
@@ -112,26 +115,21 @@ class MatchPainter:
 
         return img
 
-    def draw_transform_quads(self, quad1, quad2, img=None):
-        """ Draw a rectangle on image 1 and the corresponding transformed shape on image 2. """
+    def draw_transform_shapes(self, shape1, shape2, img=None):
+        """ Draw a shape on image 1 and the corresponding transformed shape on image 2. """
         if img is None:
             img = self._background_image.copy()
 
-        if quad1 is not None:
-            f1 = lambda x: self._point_to_img_coords(x, 1)
-            img.draw_line(f1(quad1[0]), f1(quad1[1]), Color.Orange(), 2)
-            img.draw_line(f1(quad1[1]), f1(quad1[2]), Color.Orange(), 2)
-            img.draw_line(f1(quad1[2]), f1(quad1[3]), Color.Orange(), 2)
-            img.draw_line(f1(quad1[3]), f1(quad1[0]), Color.Orange(), 2)
-
-        if quad2 is not None:
-            f2 = lambda x: self._point_to_img_coords(x, 2)
-            img.draw_line(f2(quad2[0]), f2(quad2[1]), Color.Orange(), 2)
-            img.draw_line(f2(quad2[1]), f2(quad2[2]), Color.Orange(), 2)
-            img.draw_line(f2(quad2[2]), f2(quad2[3]), Color.Orange(), 2)
-            img.draw_line(f2(quad2[3]), f2(quad2[0]), Color.Orange(), 2)
-
+        self._draw_shape(shape1, self.IMAGE_1, img)
+        self._draw_shape(shape2, self.IMAGE_2, img)
         return img
+
+    def _draw_shape(self, shape, img_num, img):
+        """ Draw a polygon on the specified image. """
+        if shape is not None:
+            shape = self._polygon_to_img_coords(shape, img_num)
+            for edge in shape.edges():
+                img.draw_line(edge[0], edge[1], Color.Orange(), thickness=2)
 
     def draw_matches(self, matches, highlight_matches=[], img=None):
         """ Draw lines for each of the matches between the respective points in the two images.
@@ -166,10 +164,17 @@ class MatchPainter:
 
     def _point_to_img_coords(self, point, img_num):
         """ Convert a point on image 1 or 2 to a coordinate in the background image. """
-        img_position = self._img1_position
-        if img_num == 2:
-            img_position = self._img2_position
+        img_position = self._get_image_position(img_num)
         return (point + img_position) * self._scale_factor
+
+    def _polygon_to_img_coords(self, polygon, img_num):
+        """ Convert a polygon on image 1 or 2 to a polygon in the background image. """
+        img_position = self._get_image_position(img_num)
+        return polygon.offset(img_position).scale(self._scale_factor)
+
+    def _get_image_position(self, num):
+        """ Get the position of the specified image. """
+        return self._img2_position if num == self.IMAGE_2 else self._img1_position
 
     @staticmethod
     def draw_keypoints(img, keypoints):

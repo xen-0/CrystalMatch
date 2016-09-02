@@ -83,7 +83,7 @@ class CrystalMatchFrame(QWidget):
 
         image = self._painter.background_image()
 
-        image = self._painter.draw_transform_quads(self._quad1, self._quad2, image)
+        image = self._painter.draw_transform_shapes(self._quad1, self._quad2, image)
         image = self._painter.draw_matches(self._matches, self._highlighted_matches, image)
         image = self._painter.draw_transform_points(self._img1_point, self._img2_point, image)
 
