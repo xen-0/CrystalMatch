@@ -24,6 +24,20 @@ class DetectorConfig:
     def get_default_options(self):
         return self.default
 
+    def is_detector_enabled(self, detector):
+        """ Returns true if the detector is enabled. Takes into account whether the detector is non-free and if
+        non-free detectors are disabled. """
+        options = self.get_detector_options(detector)
+        is_enabled = options.enabled.value()
+
+        if is_enabled:
+            default = self.get_default_options()
+            is_non_free = DetectorType.is_non_free(detector)
+            if is_non_free and not default.use_non_free.value():
+                is_enabled = False
+
+        return is_enabled
+
     def get_detector_options(self, detector):
         if detector == DetectorType.ORB:
             return self.orb

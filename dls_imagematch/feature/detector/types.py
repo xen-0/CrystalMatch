@@ -15,6 +15,10 @@ class DetectorType:
     LIST_FREE = [ORB, BRISK, FAST, STAR, MSER, GFTT, HARRIS, DENSE, BLOB]
     LIST_NON_FREE = [SIFT, SURF]
 
+    @staticmethod
+    def is_non_free(detector):
+        return detector in DetectorType.LIST_NON_FREE
+
 
 class ExtractorType:
     """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
