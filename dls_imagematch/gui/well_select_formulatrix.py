@@ -18,7 +18,7 @@ class WellSelectorFormulatrix(QGroupBox):
     signal_image1_selected = QtCore.pyqtSignal(object)
     signal_image2_selected = QtCore.pyqtSignal(object)
 
-    def __init__(self, config):
+    def __init__(self, gui_config):
         super(WellSelectorFormulatrix, self).__init__()
 
         self._init_ui()
@@ -26,7 +26,7 @@ class WellSelectorFormulatrix(QGroupBox):
 
         self._samples_dir = None
 
-        self._set_samples_directory(config.samples_dir.value())
+        self._set_samples_directory(gui_config.samples_dir.value())
         self._refresh_batch_lists()
         self._refresh_well_list()
 

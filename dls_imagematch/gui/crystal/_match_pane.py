@@ -17,10 +17,11 @@ class CrystalMatchPane(QWidget):
 
     LABEL_WIDTH = 100
 
-    def __init__(self, aligned_images, config):
+    def __init__(self, aligned_images, gui_config, xtal_config):
         super(CrystalMatchPane, self).__init__()
 
-        self._config = config
+        self._gui_config = gui_config
+        self._xtal_config = xtal_config
 
         self._aligned_images = aligned_images
 
@@ -68,13 +69,13 @@ class CrystalMatchPane(QWidget):
         hbox_select.addWidget(btn_select_point)
         hbox_select.addStretch(1)
 
-        region_size = self._config.region_size.value()
+        region_size = self._xtal_config.region_size.value()
         self._slider_region_size = Slider("Region Size", region_size, 10, 500)
 
-        search_width = self._config.search_width.value()
+        search_width = self._xtal_config.search_width.value()
         self._slider_search_width = Slider("Search Width", search_width, 50, 3000)
 
-        search_height = self._config.search_height.value()
+        search_height = self._xtal_config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 50, 3000)
 
         btn_config_orb = QPushButton("Configure ORB")
@@ -126,7 +127,7 @@ class CrystalMatchPane(QWidget):
         max_points = 1
 
         region_size = self._slider_region_size.value()
-        color = self._config.color_xtal_img1.value()
+        color = self._gui_config.color_xtal_img1.value()
         dialog = PointSelectDialog(self, self._aligned_images, max_points, region_size, color)
         result_ok = dialog.exec_()
 
@@ -147,7 +148,7 @@ class CrystalMatchPane(QWidget):
         search_width = self._slider_search_width.value()
         search_height = self._slider_search_height.value()
 
-        config_dir = self._config.config_dir.value()
+        config_dir = self._gui_config.config_dir.value()
 
         matcher = CrystalMatcher(self._aligned_images, config_dir)
         matcher.set_real_region_size(region_size)
@@ -188,7 +189,7 @@ class CrystalMatchPane(QWidget):
             pass
 
     def _open_detector_config(self, detector):
-        config_dir = self._config.config_dir.value()
+        config_dir = self._gui_config.config_dir.value()
         config = DetectorConfig(config_dir)
         options = config.get_detector_options(detector)
 

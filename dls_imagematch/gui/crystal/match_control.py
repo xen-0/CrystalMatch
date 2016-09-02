@@ -20,7 +20,7 @@ class CrystalMatchControl(QGroupBox):
 
     FRAME_STYLE = "color: {0}; font-size: 16pt; text-align: center; border:1px solid {0};"
 
-    def __init__(self, results_frame, config):
+    def __init__(self, results_frame, gui_config, xtal_config):
         super(CrystalMatchControl, self).__init__()
 
         self._results_frame = results_frame
@@ -30,7 +30,8 @@ class CrystalMatchControl(QGroupBox):
         self._aligned_images = None
         self._selected_points = []
 
-        self._config = config
+        self._gui_config = gui_config
+        self._xtal_config = xtal_config
 
         self._init_ui()
         self._clear_all_frames()
@@ -131,8 +132,8 @@ class CrystalMatchControl(QGroupBox):
     def _get_points_from_user_selection(self):
         """ Display a dialog and return the result to the caller. """
         max_points = self.NUM_FRAMES
-        size = self._config.region_size.value()
-        color = self._config.color_xtal_img1.value()
+        size = self._xtal_config.region_size.value()
+        color = self._gui_config.color_xtal_img1.value()
         dialog = PointSelectDialog(self, self._aligned_images, max_points, size, color)
         result_ok = dialog.exec_()
 
@@ -163,14 +164,14 @@ class CrystalMatchControl(QGroupBox):
         progress.exec_()
 
     def _create_crystal_matcher(self):
-        cfg = self._config
+        cfg = self._xtal_config
         region_size = cfg.region_size.value()
         search_width = cfg.search_width.value()
         search_height = cfg.search_height.value()
         transform_method = cfg.transform_method.value()
         transform_filter = cfg.transform_filter.value()
 
-        config_dir = self._config.config_dir.value()
+        config_dir = self._gui_config.config_dir.value()
 
         matcher = CrystalMatcher(self._aligned_images, config_dir)
         matcher.set_real_region_size(region_size)
@@ -183,8 +184,8 @@ class CrystalMatchControl(QGroupBox):
     SMALL IMAGE FUNCTIONS
     ------------------------'''
     def _clear_all_frames(self):
-        color1 = self._config.color_xtal_img1.value().to_hex()
-        color2 = self._config.color_xtal_img2.value().to_hex()
+        color1 = self._gui_config.color_xtal_img1.value().to_hex()
+        color2 = self._gui_config.color_xtal_img2.value().to_hex()
         for i in range(self.NUM_FRAMES):
             self._clear_frame(self._frames1[i], i, color1)
             self._clear_frame(self._frames2[i], i, color2)
@@ -196,8 +197,8 @@ class CrystalMatchControl(QGroupBox):
 
     def _display_image1_regions(self):
         img1 = self._aligned_images.img1
-        region_size = self._config.region_size.value()
-        color = self._config.color_xtal_img1.value()
+        region_size = self._xtal_config.region_size.value()
+        color = self._gui_config.color_xtal_img1.value()
 
         for i, point in enumerate(self._selected_points):
             if i >= self.NUM_FRAMES:
@@ -228,7 +229,7 @@ class CrystalMatchControl(QGroupBox):
         else:
             point = self._match_results.get_match(index).img1_point()
 
-        dialog = SingleCrystalDialog(self._aligned_images, point, self._config)
+        dialog = SingleCrystalDialog(self._aligned_images, point, self._gui_config, self._xtal_config)
         dialog.exec_()
 
     ''' ----------------------
@@ -236,7 +237,7 @@ class CrystalMatchControl(QGroupBox):
     ------------------------'''
     def _display_marked_img2(self):
         img2 = self._aligned_images.img2.copy()
-        color = self._config.color_search.value()
+        color = self._gui_config.color_search.value()
 
         matcher = self._create_crystal_matcher()
 
@@ -259,10 +260,10 @@ class CrystalMatchControl(QGroupBox):
         img1 = crystal_match_set.img1().copy()
         img2 = crystal_match_set.img2().copy()
 
-        region_size = self._config.region_size.value()
+        region_size = self._xtal_config.region_size.value()
 
-        color1 = self._config.color_xtal_img1.value()
-        color2 = self._config.color_xtal_img2.value()
+        color1 = self._gui_config.color_xtal_img1.value()
+        color2 = self._gui_config.color_xtal_img2.value()
 
         print(status)
         for i, match in enumerate(crystal_match_set.matches):

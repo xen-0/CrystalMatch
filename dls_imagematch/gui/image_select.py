@@ -20,12 +20,12 @@ class ImageSelector(QtGui.QGroupBox):
     PIXEL_SIZE_OK_COLOR = Color.White()
     PIXEL_SIZE_BAD_COLOR = Color(255, 128, 128)
 
-    def __init__(self, title, config):
+    def __init__(self, title, gui_config):
         super(ImageSelector, self).__init__()
 
         self._image = None
         self._pixel_size = 1.0
-        self._config = config
+        self._gui_config = gui_config
 
         self._init_ui()
         self.setTitle(title)
@@ -105,7 +105,7 @@ class ImageSelector(QtGui.QGroupBox):
 
     def _select_image_from_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
-        input_dir = self._config.input_dir.value()
+        input_dir = self._gui_config.input_dir.value()
         filepath = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', input_dir))
 
         if filepath:

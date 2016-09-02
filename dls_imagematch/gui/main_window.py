@@ -3,7 +3,8 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 
 from dls_imagematch.util.config import ConfigDialog
 from feature.detector import DetectorConfig, DetectorType
-from match.config import XtalConfig, XtalConfigDialog
+from match.config import XtalConfig
+from .config import GuiConfig
 from .auto_aligner import AutoImageAligner
 from .crystal import CrystalMatchControl
 from .image_frame import ImageFrame
@@ -19,7 +20,8 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self.matcher = None
         self._aligner = None
 
-        self._config = XtalConfig(config_dir)
+        self._gui_config = GuiConfig(config_dir)
+        self._xtal_config = XtalConfig(config_dir)
 
         self.init_ui()
 
@@ -32,20 +34,20 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self.init_menu_bar()
 
         # Image selectors
-        selector1 = ImageSelector("Select Image 1", self._config)
-        selector2 = ImageSelector("Select Image 2", self._config)
+        selector1 = ImageSelector("Select Image 1", self._gui_config)
+        selector2 = ImageSelector("Select Image 2", self._gui_config)
 
         # Plate well selector (example data set)
-        well_selector = WellSelectorFormulatrix(self._config)
+        well_selector = WellSelectorFormulatrix(self._gui_config)
 
         # Main image frame - shows progress of image matching
-        image_frame = ImageFrame(self._config)
+        image_frame = ImageFrame(self._gui_config)
 
         # Automatic Image Aligner
-        self._aligner = AutoImageAligner(self._config)
+        self._aligner = AutoImageAligner(self._gui_config, self._xtal_config)
 
         # Secondary Matching Control
-        xtal_match = CrystalMatchControl(image_frame, self._config)
+        xtal_match = CrystalMatchControl(image_frame, self._gui_config, self._xtal_config)
 
         # Connect signals
         self._aligner.signal_aligned.connect(xtal_match.set_aligned_images)
@@ -95,10 +97,13 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         exit_action.triggered.connect(QtGui.qApp.quit)
 
         # Open options dialog
-        options_action = QtGui.QAction(QtGui.QIcon('exit.png'), '&Options', self)
-        options_action.setShortcut('Ctrl+O')
-        options_action.setStatusTip('Open Options Dialog')
-        options_action.triggered.connect(self._open_config_dialog)
+        xtal_opt = QtGui.QAction(QtGui.QIcon('exit.png'), '&Crystal Matching...', self)
+        xtal_opt.setStatusTip('Open Crystal Matching Options Dialog')
+        xtal_opt.triggered.connect(self._open_xtal_config_dialog)
+
+        gui_opt = QtGui.QAction(QtGui.QIcon('exit.png'), '&Gui...', self)
+        gui_opt.setStatusTip('Open GUI Options Dialog')
+        gui_opt.triggered.connect(self._open_gui_config_dialog)
 
         detector_menu = QtGui.QMenu('Detectors', self)
 
@@ -114,23 +119,29 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         file_menu.addAction(exit_action)
 
         option_menu = menu_bar.addMenu('&Option')
-        option_menu.addAction(options_action)
+        option_menu.addAction(gui_opt)
+        option_menu.addAction(xtal_opt)
         option_menu.addMenu(detector_menu)
 
     def _init_detector_menu(self, detector):
         action = QtGui.QAction(QtGui.QIcon('exit.png'), detector, self)
-        action.triggered.connect(lambda: self._open_detector_config(detector))
+        action.triggered.connect(lambda: self._open_detector_config_dialog(detector))
         return action
 
-    def _open_config_dialog(self):
-        dialog = XtalConfigDialog(self._config)
-        dialog.exec_()
+    def _open_xtal_config_dialog(self):
+        self._open_config_dialog(self._xtal_config)
 
-    def _open_detector_config(self, detector):
-        config_dir = self._config.config_dir.value()
+    def _open_gui_config_dialog(self):
+        self._open_config_dialog(self._gui_config)
+
+    def _open_detector_config_dialog(self, detector):
+        config_dir = self._gui_config.config_dir.value()
         config = DetectorConfig(config_dir)
         options = config.get_detector_options(detector)
+        self._open_config_dialog(options)
 
-        dialog = ConfigDialog(options)
+    @staticmethod
+    def _open_config_dialog(config):
+        dialog = ConfigDialog(config)
         dialog.auto_layout()
         dialog.exec_()

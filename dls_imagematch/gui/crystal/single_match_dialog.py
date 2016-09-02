@@ -13,10 +13,11 @@ from ._transform_pane import TransformPane
 class SingleCrystalDialog(QDialog):
     LABEL_WIDTH = 100
 
-    def __init__(self, aligned_images, selected_point, config):
+    def __init__(self, aligned_images, selected_point, gui_config, xtal_config):
         super(SingleCrystalDialog, self).__init__()
 
-        self._config = config
+        self._gui_config = gui_config
+        self._xtal_config = xtal_config
 
         self._aligned_images = aligned_images
 
@@ -36,7 +37,7 @@ class SingleCrystalDialog(QDialog):
     def _init_ui(self):
         self.setWindowTitle('Single Crystal Matching')
 
-        self._match_pane = CrystalMatchPane(self._aligned_images, self._config)
+        self._match_pane = CrystalMatchPane(self._aligned_images, self._gui_config, self._xtal_config)
 
         self._transform_pane = TransformPane()
 

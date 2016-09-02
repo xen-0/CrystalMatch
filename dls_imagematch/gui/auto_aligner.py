@@ -11,10 +11,11 @@ class AutoImageAligner(QWidget):
     """
     signal_aligned = pyqtSignal(object)
 
-    def __init__(self, config):
+    def __init__(self, gui_config, xtal_config):
         super(AutoImageAligner, self).__init__()
 
-        self._config = config
+        self._gui_config = gui_config
+        self._xtal_config = xtal_config
         self._img1 = None
         self._img2 = None
 
@@ -30,9 +31,9 @@ class AutoImageAligner(QWidget):
         if self._img1 is None or self._img2 is None:
             return
 
-        do_align = self._config.use_alignment.value()
-        method = self._config.align_detector.value()
-        config_dir = self._config.config_dir.value()
+        do_align = self._xtal_config.use_alignment.value()
+        method = self._xtal_config.align_detector.value()
+        config_dir = self._gui_config.config_dir.value()
 
         aligner = ImageAligner(self._img1, self._img2, config_dir)
         if do_align:
