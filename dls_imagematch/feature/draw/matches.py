@@ -5,7 +5,13 @@ import cv2
 from dls_imagematch.util import Point, Image, Color
 
 
-class FeaturePainter:
+class MatchPainter:
+    """ Creates images illustrating the results of the feature match process. The resulting image shows the two
+    images side-by-side with lines drawn between them indicating the matches.
+
+    In addition, the image can contain the location of a point in image1 with its corresponding transform in
+    image 2 as well as a rectangle from image 1 with its corresponding transformed shape in image 2.
+    """
     DEFAULT_IMAGE_SIZE = 900
     DEFAULT_PADDING = 5
     DEFAULT_BACK_COLOR = Color.Black()
@@ -27,22 +33,28 @@ class FeaturePainter:
 
     # -------- CONFIGURATION -------------------
     def set_image_size(self, size):
+        """ Set the maximum size of the background image (should be a Point instance). """
         self._image_size = size
         self._create_background_image()
 
     def set_padding(self, padding):
+        """ Set the number of pixels of padding between images 1 and 2 in the background image. """
         self._padding = padding
         self._create_background_image()
 
     def set_back_color(self, color):
+        """ Set the background color. """
         self._back_color = color
         self._create_background_image()
 
     # -------- FUNCTIONALITY -------------------
     def background_image(self):
+        """ Get the background image (images 1 and 2 side-by-side) without any other markings (e.g. matches, etc.)"""
         return self._background_image.copy()
 
     def _create_background_image(self):
+        """ Create the background image, which consists of the two images side-by-side with a colored backdrop.
+        This must be recreated if the image size, padding, or background color changes. """
         self._calculate_image_positions()
 
         w, h = self._calculate_background_image_size()
@@ -55,6 +67,7 @@ class FeaturePainter:
         self._scale_factor = factor
 
     def _calculate_image_positions(self):
+        """ Determine the positions of images 1 and 2 in the background image. """
         pad = self._padding
         w1, h1 = self._img1.size
         w2, h2 = self._img2.size
@@ -68,6 +81,7 @@ class FeaturePainter:
             self._img2_position += Point(0, pad + 0.5*(h1-h2))
 
     def _calculate_background_image_size(self):
+        """ Determine the sizes of images 1 and 2 as displayed in the background image. """
         pad = self._padding
         w1, h1 = self._img1.size
         w2, h2 = self._img2.size
@@ -77,12 +91,14 @@ class FeaturePainter:
         return w_img, h_img
 
     def _rescale_to_max_size(self, image):
+        """ Resize the background image so that it fills up the maximum available space. """
         width, height = image.width, image.height
         factor = self._image_size / max(width, height)
         rescaled = image.rescale(factor)
         return rescaled, factor
 
     def draw_transform_points(self, img1_point, img2_point, img=None):
+        """ Draw a cross at a point on image 1 and the corresponding transformed point on image 2. """
         if img is None:
             img = self._background_image.copy()
 
@@ -97,6 +113,7 @@ class FeaturePainter:
         return img
 
     def draw_transform_quads(self, quad1, quad2, img=None):
+        """ Draw a rectangle on image 1 and the corresponding transformed shape on image 2. """
         if img is None:
             img = self._background_image.copy()
 
@@ -117,9 +134,9 @@ class FeaturePainter:
         return img
 
     def draw_matches(self, matches, highlight_matches=[], img=None):
-        """ Implementation of a function that is available in OpenCV 3 but not in OpenCV 2.
-        Makes an image that is a side-by-side of the two images, with detected features highlighted and lines
-        drawn between matching features in the two images.
+        """ Draw lines for each of the matches between the respective points in the two images.
+        Matches that are marked as included in the transformation will be colored blue whereas
+        those not included will be alight grey. Highlighted matches will appear in yellow
         """
         if img is None:
             img = self._background_image.copy()
@@ -136,6 +153,7 @@ class FeaturePainter:
         return img
 
     def _draw_match(self, img, match, color, thickness, radius):
+        """ Draw a single match on the image pair. """
         point1 = self._point_to_img_coords(match.img_point1(), 1)
         point2 = self._point_to_img_coords(match.img_point2(), 2)
 
@@ -147,6 +165,7 @@ class FeaturePainter:
         img.draw_line(point1, point2, color, thickness)
 
     def _point_to_img_coords(self, point, img_num):
+        """ Convert a point on image 1 or 2 to a coordinate in the background image. """
         img_position = self._img1_position
         if img_num == 2:
             img_position = self._img2_position

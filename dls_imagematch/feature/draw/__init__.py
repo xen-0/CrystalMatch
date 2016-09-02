@@ -1,1 +1,1 @@
-from .painter import FeaturePainter
+from .matches import MatchPainter
