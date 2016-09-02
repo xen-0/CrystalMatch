@@ -1,35 +1,35 @@
 from .exception import FeatureDetectorError
 
-from .detector import DetectorType
-from .detector.detector import Detector
-from .detector.detector_orb import OrbDetector
-from .detector.detector_sift import SiftDetector
-from .detector.detector_surf import SurfDetector
-from .detector.detector_mser import MserDetector
-from .detector.detector_brisk import BriskDetector
+from .types import DetectorType
+from .detector import Detector
+from .detector_orb import OrbDetector
+from .detector_sift import SiftDetector
+from .detector_surf import SurfDetector
+from .detector_mser import MserDetector
+from .detector_brisk import BriskDetector
 
 
 class DetectorFactory:
     @staticmethod
-    def create(type, options=None):
-        if type not in DetectorType.LIST_ALL:
-            raise FeatureDetectorError("Unknown detector type: {}".format(type))
+    def create(det_type, options=None):
+        if det_type not in DetectorType.LIST_ALL:
+            raise FeatureDetectorError("Unknown detector type: {}".format(det_type))
 
-        if type == DetectorType.ORB:
+        if det_type == DetectorType.ORB:
             detector = OrbDetector()
-        elif type == DetectorType.SIFT:
+        elif det_type == DetectorType.SIFT:
             detector = SiftDetector()
-        elif type == DetectorType.SURF:
+        elif det_type == DetectorType.SURF:
             detector = SurfDetector()
         # elif type == DetectorType.MSER:
         #     detector = MserDetector()
-        elif type == DetectorType.BRISK:
+        elif det_type == DetectorType.BRISK:
             detector = BriskDetector()
         else:
-            detector = Detector(detector=type)
+            detector = Detector(detector=det_type)
 
         if options is not None:
-            detector_options = options.get_detector_options(type)
+            detector_options = options.get_detector_options(det_type)
             detector.set_from_config(detector_options)
 
         if detector.is_non_free():

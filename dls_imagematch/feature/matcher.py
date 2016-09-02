@@ -3,11 +3,10 @@ from __future__ import division
 import cv2
 import numpy as np
 
-from .transform_calc import TransformCalculator, TransformCalculationError
-from .result import FeatureMatchResult
-
+from feature.detector.factory import DetectorFactory
 from .match import SingleFeatureMatch
-from .detector_factory import DetectorFactory
+from .result import FeatureMatchResult
+from .transform_calc import TransformCalculator, TransformCalculationError
 
 
 class FeatureMatcher:

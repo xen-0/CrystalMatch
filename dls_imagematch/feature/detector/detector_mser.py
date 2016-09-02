@@ -1,7 +1,7 @@
 import cv2
 
-from .types import DetectorType, ExtractorType
-from ..exception import FeatureDetectorError
+from .types import DetectorType
+from .exception import FeatureDetectorError
 from .detector import Detector
 
 

@@ -2,7 +2,7 @@ import cv2
 
 from .types import DetectorType, AdaptationType, ExtractorType
 from .feature import Feature
-from ..exception import OpenCvVersionError, FeatureMatchException
+from .exception import OpenCvVersionError, FeatureDetectorError
 
 OPENCV_MAJOR = cv2.__version__[0]
 
@@ -29,7 +29,7 @@ class Detector:
     def __init__(self, detector=DEFAULT_DETECTOR):
         """ Supply a detector name to use that detector with all its default parameters. """
         if detector not in DetectorType.LIST_ALL:
-            raise FeatureMatchException("No such feature matching detector available: " + detector)
+            raise FeatureDetectorError("No such feature detector available: " + detector)
 
         self._enabled = self.DEFAULT_ENABLED
         self._detector = detector
@@ -72,7 +72,7 @@ class Detector:
 
     def set_adaptation(self, adaptation):
         if adaptation not in AdaptationType.LIST_ALL:
-            raise FeatureMatchException("No such feature matching adaptation available: " + adaptation)
+            raise FeatureDetectorError("No such feature detector adaptation available: " + adaptation)
         self._adaptation = adaptation
 
     def set_extractor(self, extractor):

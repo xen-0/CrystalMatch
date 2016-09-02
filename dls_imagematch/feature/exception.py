@@ -1,12 +1,4 @@
-class FeatureDetectorError(Exception):
-    pass
-
-
 class FeatureMatchException(Exception):
-    pass
-
-
-class OpenCvVersionError(Exception):
     pass
 
 
