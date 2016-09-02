@@ -4,6 +4,7 @@ test-output
 test-focusstack
 scratchpad.py
 *.ini
+*.pdf
 
 *.pyc
 *.zip
