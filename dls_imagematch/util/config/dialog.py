@@ -128,7 +128,7 @@ class ConfigDialog(QtGui.QDialog):
     def _add_control(self, control):
         """ Add the specified control to the current group (create a new group if none exists). """
         if len(self._groups) == 0:
-            self.start_group("Config Items")
+            self.start_group("Options")
 
         group = self._groups[-1]
         group.add_control(control)

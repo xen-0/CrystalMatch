@@ -1,30 +1,24 @@
-from feature.detector import DetectorType
 from feature import TransformCalculator
-from dls_imagematch.util.config import Config, EnumConfigItem, RangeIntConfigItem, BoolConfigItem
+from dls_imagematch.util.config import Config, EnumConfigItem, RangeIntConfigItem
 
 
-class XtalConfig(Config):
+class XtalMatchConfig(Config):
     """ Configuration class that contains a number of options for the program. Stores options in a config
     file that can be edited externally to set the values of the options.
     """
     def __init__(self, config_directory):
-        Config.__init__(self, config_directory + "xtal_match.ini")
+        Config.__init__(self, config_directory + "crystal.ini")
 
         add = self.add
 
         self.set_title("Crystal Matching Configuration")
+        self.set_comment("Configuration for the crystal matching process including the size of the image region's "
+                         "to be matched and the filter to be used in generating a transformation.")
 
         trans_methods = TransformCalculator.METHODS
         trans_filters = TransformCalculator.FILTERS
         def_trans = TransformCalculator.DEFAULT_METHOD
         def_filter = TransformCalculator.DEFAULT_FILTER
-
-        self.use_alignment = add(BoolConfigItem, "Perform Alignment", True)
-        self.use_alignment.set_comment("Automatically perform bulk image alignment when a new image is selected.")
-
-        self.align_detector = add(EnumConfigItem, "Detector", default=DetectorType.ORB, extra_arg=DetectorType.LIST_ALL)
-        self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
-                                        "process.")
 
         self.region_size = add(RangeIntConfigItem, "Region Size (px)", default=100, extra_arg=[10, 200])
         self.region_size.set_comment("Size of the region around the user selected point in the first image to be "
