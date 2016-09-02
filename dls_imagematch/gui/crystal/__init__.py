@@ -1,3 +1,2 @@
-from .match_control import CrystalMatchControl
 from ._point_select_dialog import PointSelectDialog
 from .single_match_dialog import SingleCrystalDialog

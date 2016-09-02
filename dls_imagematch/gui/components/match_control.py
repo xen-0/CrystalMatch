@@ -4,11 +4,11 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt, QThread
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
-from ..progress_dialog import ProgressDialog
-from ._point_select_dialog import PointSelectDialog
-from .single_match_dialog import SingleCrystalDialog
 from dls_imagematch.match import CrystalMatcher
 from dls_imagematch.util import Rectangle
+from gui.components.progress_dialog import ProgressDialog
+from ..crystal import PointSelectDialog
+from ..crystal import SingleCrystalDialog
 
 
 class CrystalMatchControl(QGroupBox):
