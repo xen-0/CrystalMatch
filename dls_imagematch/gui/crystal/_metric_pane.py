@@ -54,7 +54,7 @@ class MetricPane(QWidget):
 
     def set_crystal_match_result(self, crystal_match_result):
         self._crystal_match_result = crystal_match_result
-        result = crystal_match_result.feature_matches()
+        result = crystal_match_result.feature_match_result()
 
         num_matches = result.num_matches()
         self._lbl_matches.setText(str(num_matches))

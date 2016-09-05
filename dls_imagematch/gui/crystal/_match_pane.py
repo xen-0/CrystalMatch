@@ -163,7 +163,7 @@ class CrystalMatchPane(QWidget):
         return matcher
 
     def _emit_new_match_signal(self, crystal_match, matcher):
-        feature_match = crystal_match.feature_matches()
+        feature_match = crystal_match.feature_match_result()
 
         self.signal_new_images.emit(feature_match.img1, feature_match.img2)
         self.signal_new_crystal_match.emit(crystal_match, matcher)

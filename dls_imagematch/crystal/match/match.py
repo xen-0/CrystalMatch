@@ -15,13 +15,16 @@ class CrystalMatch:
         self._img1_point = start_point
         self._img2_point = None
         self._pixel_size = pixel_size
-        self._feature_result = None
+        self._feature_match_result = None
 
     def is_success(self):
         return self._img2_point is not None
 
     def pixel_size(self):
         return self._pixel_size
+
+    def feature_match_result(self):
+        return self._feature_match_result
 
     def img1_point(self):
         """ The user-specified location of the crystal in Image 1 (in pixels). """
@@ -55,10 +58,7 @@ class CrystalMatch:
     def set_feature_match_result(self, feature_result):
         """ Set the transformation which maps the crystal location from Image 1 onto the
         same crystal location on Image 2. """
-        self._feature_result = feature_result
+        self._feature_match_result = feature_result
         trans = feature_result.transform
         if trans is not None:
             self._img2_point = trans.transform_points([self._img1_point])[0]
-
-    def feature_matches(self):
-        return self._feature_result

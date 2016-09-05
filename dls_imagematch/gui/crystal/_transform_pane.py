@@ -85,7 +85,7 @@ class TransformPane(QWidget):
     def set_crystal_match(self, crystal_match, matcher):
         self._matcher = matcher
         self._img1_point = crystal_match.img1_point()
-        self._matches = crystal_match.feature_matches().matches
+        self._matches = crystal_match.feature_match_result().matches
         self._refresh_transform()
 
     def _method_selection_changed(self):
