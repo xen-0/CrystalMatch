@@ -234,7 +234,12 @@ class BoolConfigItem(ConfigItem):
         self._acceptable_values = "'True' or 'False'"
 
     def from_file_string(self, string):
-        self._value = True if string.lower() == 'true' else False
+        if string.lower() in ["true", "t", "yes", "y", "ok"]:
+            self._value = True
+        elif string.lower() in ["false", "f", "no", "n"]:
+            self._value = False
+        else:
+            self._value = self._default
 
 
 class EnumConfigItem(ConfigItem):
