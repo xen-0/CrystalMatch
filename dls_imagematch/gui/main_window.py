@@ -21,7 +21,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self._aligner = None
 
         self._gui_config = GuiConfig(config_dir)
-        self._xtal_config = CrystalMatchConfig(config_dir)
+        self._crystal_config = CrystalMatchConfig(config_dir)
         self._align_config = AlignConfig(config_dir)
 
         self.init_ui()
@@ -48,10 +48,10 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self._aligner = AutoImageAligner(self._gui_config, self._align_config)
 
         # Secondary Matching Control
-        xtal_match = CrystalMatchControl(image_frame, self._gui_config, self._xtal_config)
+        crystal_match = CrystalMatchControl(image_frame, self._gui_config, self._crystal_config)
 
         # Connect signals
-        self._aligner.signal_aligned.connect(xtal_match.set_aligned_images)
+        self._aligner.signal_aligned.connect(crystal_match.set_aligned_images)
         self._aligner.signal_aligned.connect(image_frame.display_align_results)
 
         selector1.signal_selected.connect(self._aligner.set_image_1)
@@ -61,7 +61,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         well_selector.signal_image2_selected.connect(selector2.set_image)
         well_selector.signal_images_selected.connect(self._aligner.set_images)
 
-        well_selector.signal_image1_selected.connect(xtal_match.reset)
+        well_selector.signal_image1_selected.connect(crystal_match.reset)
         well_selector.signal_image1_selected.connect(image_frame.clear)
 
         # Create layout
@@ -72,7 +72,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         vbox_img_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
-        vbox_matching.addWidget(xtal_match)
+        vbox_matching.addWidget(crystal_match)
         vbox_matching.addWidget(image_frame)
         vbox_matching.addStretch(1)
 
@@ -99,9 +99,9 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         exit_action.triggered.connect(QtGui.qApp.quit)
 
         # Open options dialog
-        xtal_opt = QtGui.QAction('&Crystal Matching...', self)
-        xtal_opt.setStatusTip('Open Crystal Matching Options Dialog')
-        xtal_opt.triggered.connect(lambda: self._open_config_dialog(self._xtal_config))
+        crystal_opt = QtGui.QAction('&Crystal Matching...', self)
+        crystal_opt.setStatusTip('Open Crystal Matching Options Dialog')
+        crystal_opt.triggered.connect(lambda: self._open_config_dialog(self._crystal_config))
 
         align_opt = QtGui.QAction('&Image Alignment...', self)
         align_opt.setStatusTip('Open Image Alignment Options Dialog')
@@ -127,7 +127,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         option_menu = menu_bar.addMenu('&Option')
         option_menu.addAction(gui_opt)
         option_menu.addAction(align_opt)
-        option_menu.addAction(xtal_opt)
+        option_menu.addAction(crystal_opt)
         option_menu.addMenu(detector_menu)
 
     def _init_detector_menu(self, detector):
