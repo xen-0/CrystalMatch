@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 from dls_imagematch.util import Image
-from dls_imagematch.match import FeatureMatcher
+from dls_imagematch.crystal import FeatureMatcher
 
 
 class FocusStack:

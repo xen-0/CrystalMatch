@@ -4,7 +4,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt, QThread
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
-from dls_imagematch.match import CrystalMatcher
+from dls_imagematch.crystal import CrystalMatcher
 from dls_imagematch.util import Rectangle
 from .progress_dialog import ProgressDialog
 from feature.detector import DetectorConfig

@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
 
-from dls_imagematch.match import CrystalMatcher
+from dls_imagematch.crystal import CrystalMatcher
 from dls_imagematch.util import Point
 from dls_imagematch.util.config import ConfigDialog
 from dls_imagematch.util.widget import Slider

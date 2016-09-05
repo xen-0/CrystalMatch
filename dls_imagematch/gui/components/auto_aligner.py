@@ -4,7 +4,7 @@ from PyQt4.QtCore import pyqtSignal, QThread
 from PyQt4.QtGui import QWidget, QMessageBox
 
 from .progress_dialog import ProgressDialog
-from dls_imagematch.match.align import ImageAligner, ImageAlignmentError
+from dls_imagematch.crystal.align import ImageAligner, ImageAlignmentError
 from feature.detector import DetectorConfig
 
 

@@ -1,6 +1,6 @@
 from dls_imagematch.util.config import Config, IntConfigItem, DirectoryConfigItem, EnumConfigItem
 
-from dls_imagematch.match import FeatureMatcher, FeatureDetector
+from dls_imagematch.crystal import FeatureMatcher, FeatureDetector
 
 
 class FocusConfig(Config):

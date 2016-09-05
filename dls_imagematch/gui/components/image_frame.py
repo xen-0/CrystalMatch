@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4.QtGui import QLabel, QGroupBox, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QEvent
 
-from dls_imagematch.match import AlignedImages
+from dls_imagematch.crystal import AlignedImages
 
 
 class ImageFrame(QGroupBox):
