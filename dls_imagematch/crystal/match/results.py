@@ -1,7 +1,7 @@
 from ..align import AlignedImages
 
 
-class CrystalMatchResults:
+class CrystalMatcherResults:
     """ Represents a pair of images with a set of crystal location matches between them. The client
     specifies a list of points in Image 1 which are to be matched in Image 2, and later supplies a
     transformation which calculates the point in Image 2 from that in Image 1. """
@@ -23,7 +23,7 @@ class CrystalMatchResults:
         """ The number of crystal matches in the set. """
         return len(self.matches)
 
-    def get_match(self, index):
+    def get_crystal_match(self, index):
         """ Get a specific match object by index. """
         return self.matches[index]
 

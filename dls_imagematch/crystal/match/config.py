@@ -3,7 +3,7 @@ from dls_imagematch.util.config import Config, EnumConfigItem, RangeIntConfigIte
 from .matcher import CrystalMatcher
 
 
-class XtalMatchConfig(Config):
+class CrystalMatchConfig(Config):
     """ Configuration class that contains a number of options for the program. Stores options in a config
     file that can be edited externally to set the values of the options.
     """

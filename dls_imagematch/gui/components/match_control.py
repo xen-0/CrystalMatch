@@ -169,7 +169,7 @@ class CrystalMatchControl(QGroupBox):
         detector_config = DetectorConfig(detector_config_dir)
 
         matcher = CrystalMatcher(self._aligned_images, detector_config)
-        matcher.set_from_xtal_config(self._xtal_config)
+        matcher.set_from_crystal_config(self._xtal_config)
         return matcher
 
     ''' ----------------------
@@ -219,7 +219,7 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is None or self._match_results.num() <= index:
             point = None
         else:
-            point = self._match_results.get_match(index).img1_point()
+            point = self._match_results.get_crystal_match(index).img1_point()
 
         dialog = SingleCrystalDialog(self._aligned_images, point, self._gui_config, self._xtal_config)
         dialog.exec_()

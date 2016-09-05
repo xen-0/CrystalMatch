@@ -1,7 +1,7 @@
 from dls_imagematch.util import Rectangle
 
 
-class SingleCrystalMatch:
+class CrystalMatch:
     """  Represents a match between the position of a crystal in two separate images. """
     def __init__(self, start_point, pixel_size):
         """ Initialize a new CrystalMatch object. Note that You must call the set_transformation

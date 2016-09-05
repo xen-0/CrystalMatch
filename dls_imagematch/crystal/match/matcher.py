@@ -2,8 +2,8 @@ from __future__ import division
 
 from util import Rectangle, Point
 from feature import BoundedFeatureMatcher
-from .match_results import CrystalMatchResults
-from .single_match_result import SingleCrystalMatch
+from .results import CrystalMatcherResults
+from .match import CrystalMatch
 
 
 class CrystalMatcher:
@@ -12,7 +12,7 @@ class CrystalMatcher:
     DEFAULT_HEIGHT = 400
     DEFAULT_VERTICAL_SHIFT = 0.75
 
-    def __init__(self, aligned_images, detector_config, xtal_config=None):
+    def __init__(self, aligned_images, detector_config, crystal_config=None):
         self._aligned_images = aligned_images
         self._img1 = aligned_images.img1.to_mono()
         self._img2 = aligned_images.img2.to_mono()
@@ -26,11 +26,11 @@ class CrystalMatcher:
         self._transform_filter = None
 
         self._detector_config = detector_config
-        if xtal_config is not None:
-            self.set_from_xtal_config(xtal_config)
+        if crystal_config is not None:
+            self.set_from_crystal_config(crystal_config)
 
     # -------- CONFIGURATION -------------------
-    def set_from_xtal_config(self, config):
+    def set_from_crystal_config(self, config):
         self._region_size_real = config.region_size.value()
         self._search_width_real = config.search_width.value()
         self._search_height_real = config.search_height.value()
@@ -60,7 +60,7 @@ class CrystalMatcher:
     # -------- FUNCTIONALITY -------------------
     def match(self, img1_points):
         images = self._aligned_images
-        match_results = CrystalMatchResults(images)
+        match_results = CrystalMatcherResults(images)
 
         for point in img1_points:
             result = self._match_single_point(point)
@@ -74,7 +74,7 @@ class CrystalMatcher:
 
         feature_matcher = BoundedFeatureMatcher(self._img1, self._img2, self._detector_config, img1_rect, img2_rect)
 
-        result = SingleCrystalMatch(point, self._pixel_size)
+        result = CrystalMatch(point, self._pixel_size)
         self._perform_match(feature_matcher, result)
 
         return result

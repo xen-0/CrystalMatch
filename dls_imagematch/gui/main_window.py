@@ -3,7 +3,7 @@ from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, 
 
 from dls_imagematch.util.config import ConfigDialog
 from dls_imagematch.feature.detector import DetectorConfig, DetectorType
-from dls_imagematch.crystal import XtalMatchConfig, AlignConfig
+from dls_imagematch.crystal import CrystalMatchConfig, AlignConfig
 from .components import AutoImageAligner
 from .components import CrystalMatchControl
 from .components import ImageFrame
@@ -21,7 +21,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self._aligner = None
 
         self._gui_config = GuiConfig(config_dir)
-        self._xtal_config = XtalMatchConfig(config_dir)
+        self._xtal_config = CrystalMatchConfig(config_dir)
         self._align_config = AlignConfig(config_dir)
 
         self.init_ui()

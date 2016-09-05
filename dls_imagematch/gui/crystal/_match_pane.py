@@ -144,7 +144,7 @@ class CrystalMatchPane(QWidget):
     def _fn_perform_match(self):
         matcher = self._create_crystal_matcher()
         results = matcher.match([self._point])
-        crystal_match = results.get_match(0)
+        crystal_match = results.get_crystal_match(0)
         self._emit_new_match_signal(crystal_match, matcher)
 
     def _create_crystal_matcher(self):
