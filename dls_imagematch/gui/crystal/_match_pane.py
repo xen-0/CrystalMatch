@@ -78,6 +78,9 @@ class CrystalMatchPane(QWidget):
         search_height = self._xtal_config.search_height.value()
         self._slider_search_height = Slider("Search Height", search_height, 50, 3000)
 
+        search_shift = self._xtal_config.vertical_shift.value() * 100
+        self._slider_search_shift = Slider("Search Shift", int(search_shift), 0, 100)
+
         btn_config_orb = QPushButton("Configure ORB")
         btn_config_orb.setFixedWidth(100)
         btn_config_orb.clicked.connect(lambda: self._open_detector_config(DetectorType.ORB))
@@ -107,6 +110,7 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(self._slider_region_size)
         vbox.addWidget(self._slider_search_width)
         vbox.addWidget(self._slider_search_height)
+        vbox.addWidget(self._slider_search_shift)
         vbox.addWidget(btn_config_orb)
         vbox.addWidget(btn_config_surf)
         vbox.addWidget(btn_config_sift)
@@ -147,6 +151,7 @@ class CrystalMatchPane(QWidget):
         region_size = self._slider_region_size.value()
         search_width = self._slider_search_width.value()
         search_height = self._slider_search_height.value()
+        search_shift = self._slider_search_shift.value() / 100
 
         detector_config_dir = self._gui_config.config_dir.value()
         detector_config = DetectorConfig(detector_config_dir)
@@ -154,6 +159,7 @@ class CrystalMatchPane(QWidget):
         matcher = CrystalMatcher(self._aligned_images, detector_config)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
+        matcher.set_search_shift(search_shift)
         return matcher
 
     def _emit_new_match_signal(self, crystal_match, matcher):

@@ -7,9 +7,10 @@ from .single_match_result import SingleCrystalMatch
 
 
 class CrystalMatcher:
-    DEFAULT_REGION_SIZE = 50
+    DEFAULT_REGION_SIZE = 100
     DEFAULT_WIDTH = 200
     DEFAULT_HEIGHT = 400
+    DEFAULT_VERTICAL_SHIFT = 0.75
 
     def __init__(self, aligned_images, detector_config, xtal_config=None):
         self._aligned_images = aligned_images
@@ -20,6 +21,7 @@ class CrystalMatcher:
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
+        self._search_vertical_shift = self.DEFAULT_VERTICAL_SHIFT
         self._transform_method = None
         self._transform_filter = None
 
@@ -32,6 +34,7 @@ class CrystalMatcher:
         self._region_size_real = config.region_size.value()
         self._search_width_real = config.search_width.value()
         self._search_height_real = config.search_height.value()
+        self._search_vertical_shift = config.vertical_shift.value()
         self._transform_method = config.transform_method.value()
         self._transform_filter = config.transform_filter.value()
 
@@ -44,6 +47,9 @@ class CrystalMatcher:
     def set_real_search_size(self, width, height):
         self._search_width_real = width
         self._search_height_real = height
+
+    def set_search_shift(self, value):
+        self._search_vertical_shift = value
 
     def set_transform_method(self, method):
         self._transform_method = method
@@ -90,9 +96,10 @@ class CrystalMatcher:
         as the crystal is likely to move downwards under the effect of gravity. """
         images = self._aligned_images
         search_width, search_height = self._search_size_pixels()
+        vertical_shift = self._search_vertical_shift
 
         img2_point = img1_point - images.pixel_offset()
-        top_left = img2_point - Point(search_width/2, search_height/4)
+        top_left = img2_point - Point(search_width/2, search_height*(1-vertical_shift))
         rect = Rectangle.from_corner(top_left, search_width, search_height)
 
         rect = rect.intersection(images.img2.bounds())
