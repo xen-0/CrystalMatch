@@ -2,8 +2,8 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
 from dls_imagematch.util.config import ConfigDialog
-from feature.detector import DetectorConfig, DetectorType
-from crystal import XtalMatchConfig, AlignConfig
+from dls_imagematch.feature.detector import DetectorConfig, DetectorType
+from dls_imagematch.crystal import XtalMatchConfig, AlignConfig
 from .components import AutoImageAligner
 from .components import CrystalMatchControl
 from .components import ImageFrame
