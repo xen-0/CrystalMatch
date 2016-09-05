@@ -26,6 +26,14 @@ class AlignConfig(Config):
         self.align_detector.set_comment("Feature detection algorithm to be used for the initial image alignment "
                                         "process.")
 
+        self.pixel_size_1 = add(RangeFloatConfigItem, "Pixel Size 1 (um)", default=1.0, extra_arg=[0.01, None])
+        self.pixel_size_1.set_comment("The real size (in micrometers) represented by a single pixel in Image 1 (the "
+                                      "formulatrix image).")
+
+        self.pixel_size_2 = add(RangeFloatConfigItem, "Pixel Size 2 (um)", default=1.0, extra_arg=[0.01, None])
+        self.pixel_size_2.set_comment("The real size (in micrometers) represented by a single pixel in Image 2 (the "
+                                      "beamline image).")
+
         self.metric_limit_low = add(RangeFloatConfigItem, "Metric Limit Low", 15.0, [0.0, None])
         self.metric_limit_low.set_comment("A metric quantifying the quality of the alignment is calculated. If the "
                                           "metric is below this value, it is considered a good fit; if it is above, "
