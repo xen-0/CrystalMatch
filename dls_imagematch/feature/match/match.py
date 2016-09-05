@@ -1,7 +1,7 @@
 from dls_imagematch.util import Point
 
 
-class SingleFeatureMatch:
+class FeatureMatch:
     """ Wrapper for the match and keypoint objects produced by the OpenCV feature matching routines. Makes
     it easier to use and pass around this data.
     """
@@ -57,7 +57,7 @@ class SingleFeatureMatch:
 
     @staticmethod
     def from_cv2_matches(cv2_matches, features1, features2, detector):
-        func = SingleFeatureMatch.from_cv2_match
+        func = FeatureMatch.from_cv2_match
         single_matches = [func(match, features1, features2, detector) for match in cv2_matches]
 
         # Filter out matches whose keypoint distances are too large
@@ -72,6 +72,6 @@ class SingleFeatureMatch:
     def from_cv2_match(cv2_match, features1, features2, detector):
         f1 = features1[cv2_match.queryIdx]
         f2 = features2[cv2_match.trainIdx]
-        cv2_match = SingleFeatureMatch(cv2_match, f1, f2, detector)
+        cv2_match = FeatureMatch(cv2_match, f1, f2, detector)
         return cv2_match
 

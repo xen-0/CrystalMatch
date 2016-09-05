@@ -5,9 +5,8 @@ import numpy as np
 
 from ..transform.calculator import TransformCalculator, TransformCalculationError
 from ..detector.factory import DetectorFactory
-from .match import SingleFeatureMatch
-from .result import FeatureMatchResult
-
+from .match import FeatureMatch
+from .result import FeatureMatcherResult
 
 
 class FeatureMatcher:
@@ -76,13 +75,12 @@ class FeatureMatcher:
         return self.match()
 
     def _create_result_object(self, matches, transform):
-        result = FeatureMatchResult(self.img1, self.img2, matches, transform)
-
         if self._use_all_detectors:
-            result.method = "All"
+            method = "All"
         else:
-            result.method = self._detector.detector
+            method = self._detector.detector
 
+        result = FeatureMatcherResult(self.img1, self.img2, matches, transform, method)
         return result
 
     def _find_matches(self):
@@ -126,5 +124,5 @@ class FeatureMatcher:
         return top_matches
 
     def _matches_from_raw(self, raw_matches, features1, features2, method):
-        matches = SingleFeatureMatch.from_cv2_matches(raw_matches, features1, features2, method)
+        matches = FeatureMatch.from_cv2_matches(raw_matches, features1, features2, method)
         return matches

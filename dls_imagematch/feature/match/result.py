@@ -1,31 +1,45 @@
 from __future__ import division
 
 
-class FeatureMatchResult:
+class FeatureMatcherResult:
     """ Encapsulates the results of an invocation of the feature matching process. This object is
     returned to the client by FeatureMatcher.
     """
-    def __init__(self, img1, img2, matches, transform):
-        self.img1 = img1
-        self.img2 = img2
-        self.matches = matches
-        self.transform = transform
+    def __init__(self, img1, img2, matches, transform, method):
+        self._img1 = img1
+        self._img2 = img2
+        self._matches = matches
+        self._transform = transform
+        self._method = method
 
-        self.method = None
+    def img1(self): return self._img1
+
+    def img2(self): return self._img2
+
+    def matches(self): return self._matches
+
+    def transform(self): return self._transform
+
+    def method(self): return self._method
 
     def any_matches(self):
-        return len(self.matches) > 0
-
-    def has_transform(self):
-        return self.transform is not None
-
-    def good_matches(self):
-        return [m for m in self.matches if m.is_in_transformation()]
+        """ True if the result contains any feature matches. """
+        return len(self._matches) > 0
 
     def num_matches(self):
-        return len(self.matches)
+        """ The number of feature matches (whether good or bad). """
+        return len(self._matches)
+
+    def has_transform(self):
+        """ True if a transformation was successfully calculated from the feature matches. """
+        return self._transform is not None
+
+    def good_matches(self):
+        """ Returns the list of matches that were included in the transformation calculation. """
+        return [m for m in self._matches if m.is_in_transformation()]
 
     def num_good_matches(self):
+        """ The number of good feature matches. """
         return len(self.good_matches())
 
     def mean_transform_error(self):

@@ -1,7 +1,7 @@
 from __future__ import division
 
 from .matcher import FeatureMatcher
-from .match import SingleFeatureMatch
+from .match import FeatureMatch
 
 
 class BoundedFeatureMatcher(FeatureMatcher):
@@ -23,7 +23,7 @@ class BoundedFeatureMatcher(FeatureMatcher):
         self.img2_offset = img2_rect.top_left()
 
     def _matches_from_raw(self, raw_matches, keypoints1, keypoints2, method):
-        matches = SingleFeatureMatch.from_cv2_matches(raw_matches, keypoints1, keypoints2, method)
+        matches = FeatureMatch.from_cv2_matches(raw_matches, keypoints1, keypoints2, method)
         for match in matches:
             match.set_offsets(self.img1_offset, self.img2_offset)
 

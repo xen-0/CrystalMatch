@@ -68,7 +68,7 @@ class ImageAligner:
         if not match_result.has_transform():
             raise ImageAlignmentError("Image Alignment failed - no matches found.")
 
-        translation = match_result.transform.translation()
+        translation = match_result.transform().translation()
         description = "Feature matching - " + detector
         aligned_images = AlignedImages(self._img1, self._img2, translation, self._align_config, description)
         return aligned_images

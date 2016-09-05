@@ -59,6 +59,6 @@ class CrystalMatch:
         """ Set the transformation which maps the crystal location from Image 1 onto the
         same crystal location on Image 2. """
         self._feature_match_result = feature_result
-        trans = feature_result.transform
+        trans = feature_result.transform()
         if trans is not None:
             self._img2_point = trans.transform_points([self._img1_point])[0]
