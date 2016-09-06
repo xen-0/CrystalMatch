@@ -27,7 +27,7 @@ class SelectorFrame(QLabel):
         # Load image from file
         self._aligned_images = aligned_images
         self._selector_image = aligned_images.image1.to_color()
-        self._original_size = self._selector_image.size
+        self._original_size = self._selector_image.size()
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
         #  but must be no larger than the maximum size
@@ -41,7 +41,7 @@ class SelectorFrame(QLabel):
         self._display_image(self._selector_image)
 
     def _calculate_display_size(self, max_size):
-        w, h = self._selector_image.size
+        w, h = self._selector_image.size()
         if w > h:
             width = max_size
             height = int(h / w * max_size)

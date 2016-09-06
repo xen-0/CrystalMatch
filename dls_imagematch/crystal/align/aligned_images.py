@@ -61,7 +61,7 @@ class AlignedImages:
     def pixel_center(self):
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._pixel_center is None:
-            width, height = self.image2.size
+            width, height = self.image2.size()
             x, y = self.translate.x + width / 2, self.translate.y + height / 2
             x, y = int(round(x)), int(round(y))
             self._pixel_center = Point(x, y)
@@ -71,7 +71,7 @@ class AlignedImages:
     def real_center(self):
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._real_center is None:
-            width, height = self.image2.size
+            width, height = self.image2.size()
             x, y = self.translate.x + width / 2, self.translate.y + height / 2
             self._real_center = Point(x, y)
 

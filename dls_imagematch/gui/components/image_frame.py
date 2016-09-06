@@ -129,7 +129,7 @@ class ImageFrame(QGroupBox):
             x_perc = x / self._scaled_size[0]
             y_perc = y / self._scaled_size[1]
 
-            real_size = self._image.size
+            real_size = self._image.size()
 
             real_x_pixels = int(real_size[0] * x_perc)
             real_y_pixels = int(real_size[1] * y_perc)

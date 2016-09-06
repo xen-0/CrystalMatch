@@ -45,7 +45,7 @@ class FocusStack:
             matcher.set_detector(method)
 
             transform = matcher.match()
-            transformed_image = transform.inverse_transform_image(image2, image2.size)
+            transformed_image = transform.inverse_transform_image(image2, image2.size())
             transformed_image.save("{}aligned{}.png".format(out_dir, i))
             #transformed_image.popup()
 
@@ -75,7 +75,7 @@ class FocusStack:
     def _determine_focused_pixels(images, laplacians):
         output = np.zeros(shape=images[0].raw().shape, dtype=images[0].raw().dtype)
 
-        width, height = images[0].width, images[0].height
+        width, height = images[0].size()
         for y in range(0, height):
             for x in range(0, width):
                 yxlaps = abs(laplacians[:, y, x])

@@ -38,7 +38,7 @@ class SizedImage(Image):
 
         # Because the image must be an integer number of pixels, we must correct the
         # factor to calculate the pixel size properly.
-        corrected_factor = new_size[0] / self.width
+        corrected_factor = new_size[0] / self.width()
         pixel_size = self._pixel_size / corrected_factor
 
         return self.from_image(image, pixel_size)
@@ -60,5 +60,5 @@ class SizedImage(Image):
         return self.from_image(image, self._pixel_size)
 
     def freq_range(self, coarseness_range, scale_factor):
-        image = Image.freq_range(coarseness_range, scale_factor)
+        image = Image.freq_range(self, coarseness_range, scale_factor)
         return self.from_image(image, self._pixel_size)

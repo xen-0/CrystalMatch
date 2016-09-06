@@ -72,8 +72,8 @@ class MatchPainter:
     def _calculate_image_positions(self):
         """ Determine the positions of images 1 and 2 in the background image. """
         pad = self._padding
-        w1, h1 = self._image1.size
-        w2, h2 = self._image2.size
+        w1, h1 = self._image1.size()
+        w2, h2 = self._image2.size()
 
         self._image1_position = Point(pad, pad)
         self._image2_position = Point(2 * pad + w1, pad)
@@ -86,8 +86,8 @@ class MatchPainter:
     def _calculate_background_image_size(self):
         """ Determine the sizes of images 1 and 2 as displayed in the background image. """
         pad = self._padding
-        w1, h1 = self._image1.size
-        w2, h2 = self._image2.size
+        w1, h1 = self._image1.size()
+        w2, h2 = self._image2.size()
 
         w_bg = w1 + w2 + 3 * pad
         h_bg = 2 * pad + max(h1, h2)
@@ -95,7 +95,7 @@ class MatchPainter:
 
     def _rescale_to_max_size(self, image):
         """ Resize the background image so that it fills up the maximum available space. """
-        width, height = image.width, image.height
+        width, height = image.size()
         factor = self._image_size / max(width, height)
         rescaled = image.rescale(factor)
         return rescaled, factor

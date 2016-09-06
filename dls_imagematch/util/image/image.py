@@ -17,22 +17,31 @@ class Image:
     """
     def __init__(self, img):
         self._img = img
-
         self.file = None
-
-        # The size of the image in number of pixels
-        shape = img.shape
-        self.width = shape[1]
-        self.height = shape[0]
-        self.size = (self.width, self.height)
-
-        if len(shape) > 2:
-            self.channels = shape[2]
-        else:
-            self.channels = 1
 
     def raw(self):
         return self._img
+
+    def width(self):
+        return self._img.shape[1]
+
+    def height(self):
+        return self._img.shape[0]
+
+    def size(self):
+        return self.width(), self.height()
+
+    def bounds(self):
+        """ Return a rectangle that bounds the image (0,0,w,h). """
+        return Rectangle(Point(), Point(self.width(), self.height()))
+
+    def channels(self):
+        """ Number of image color channels (1=mono, 3=rgb, 4=rgba). """
+        shape = self._img.shape
+        if len(shape) > 2:
+            return shape[2]
+        else:
+            return 1
 
     def save(self, filename):
         """ Write the image to file. """
@@ -67,10 +76,6 @@ class Image:
         """ Return an Image object which is a deep copy of this one. """
         return Image(self._img.copy())
 
-    def bounds(self):
-        """ Return a rectangle that bounds the image (0,0,w,h). """
-        return Rectangle(Point(), Point(self.size[0], self.size[1]))
-
     def crop(self, rect):
         """ Return a new image which is a region of this image specified by the rectangle. """
         rect = rect.intersection(self.bounds()).intify()
@@ -84,7 +89,7 @@ class Image:
 
     def rescale(self, factor):
         """ Return a new Image that is a version of this image, resized to the specified scale. """
-        scaled_size = (int(self.width * factor), int(self.height * factor))
+        scaled_size = (int(self.width() * factor), int(self.height() * factor))
         return self.resize(scaled_size)
 
     def paste(self, src, point):
@@ -93,11 +98,11 @@ class Image:
         x_off, y_off = point.intify().tuple()
 
         # Overlap rectangle in target image coordinates
-        width, height = src.width, src.height
+        width, height = src.size()
         x1 = max(x_off, 0)
         y1 = max(y_off, 0)
-        x2 = min(x_off+width, self.width)
-        y2 = min(y_off+height, self.height)
+        x2 = min(x_off+width, self.width())
+        y2 = min(y_off+height, self.height())
 
         # Paste location is totally outside image
         if x1 > x2 or y1 > y2:
@@ -111,9 +116,9 @@ class Image:
 
         # Perform paste
         target = self._img
-        source = src.to_channels(self.channels).raw()
+        source = src.to_channels(self.channels()).raw()
 
-        if self.channels == 4:
+        if self.channels() == 4:
             # Use alpha blending
             alpha = 3
             for c in range(0, 3):
@@ -133,7 +138,7 @@ class Image:
         degrees = angle * 180 / math.pi
         matrix = cv2.getRotationMatrix2D(center, degrees, 1.0)
 
-        rotated = cv2.warpAffine(self._img, matrix, (self.width, self.height))
+        rotated = cv2.warpAffine(self._img, matrix, (self.width(), self.height()))
         return Image(rotated)
 
     def rotate_no_clip(self, angle):
@@ -141,7 +146,7 @@ class Image:
         so that the whole rotated shape will be visible without any being cropped.
         """
         # Calculate the size the expanded image needs to be to contain rotated image
-        x, y = self.width, self.height
+        x, y = self.size()
         w = abs(x*math.cos(angle)) + abs(y*math.sin(angle))
         h = abs(x*math.sin(angle)) + abs(y*math.cos(angle))
 
@@ -168,9 +173,9 @@ class Image:
 
     def to_mono(self):
         """ Return a grayscale version of the image. """
-        if self.channels == 3:
+        if self.channels() == 3:
             mono = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
-        elif self.channels == 4:
+        elif self.channels() == 4:
             mono = cv2.cvtColor(self._img, cv2.COLOR_BGRA2GRAY)
         else:
             mono = self._img
@@ -178,9 +183,9 @@ class Image:
 
     def to_color(self):
         """Convert the image into a 3 channel BGR image. """
-        if self.channels == 1:
+        if self.channels() == 1:
             color = cv2.cvtColor(self._img, cv2.COLOR_GRAY2BGR)
-        elif self.channels == 4:
+        elif self.channels() == 4:
             color = cv2.cvtColor(self._img, cv2.COLOR_BGR2BGRA)
         else:
             color = self._img
@@ -188,9 +193,9 @@ class Image:
 
     def to_alpha(self):
         """Convert the image into a 4 channel BGRA image. """
-        if self.channels == 1:
+        if self.channels() == 1:
             alpha = cv2.cvtColor(self._img, cv2.COLOR_GRAY2BGRA)
-        elif self.channels == 3:
+        elif self.channels() == 3:
             alpha = cv2.cvtColor(self._img, cv2.COLOR_BGR2BGRA)
         else:
             alpha = self._img
@@ -263,7 +268,7 @@ class Image:
 
     def to_qt_pixmap(self, scale=None):
         """ Convert the image into a PyQt pixmap which can be displayed in QT GUI components. """
-        width, height = self.size
+        width, height = self.size()
         bytes_per_line = 3 * width
         rgb = cv2.cvtColor(self._img, cv2.COLOR_BGR2RGB)
         q_img = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)

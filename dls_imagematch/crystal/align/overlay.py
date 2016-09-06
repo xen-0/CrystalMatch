@@ -26,7 +26,7 @@ class Overlayer:
         background = background.to_channels(3)
 
         # Define the rectangle that will be pasted to the background image
-        w, h = image2.size
+        w, h = image2.size()
         rect = Rectangle.from_corner(offset, w, h)
         background.draw_rectangle(rect, color=rect_color)
 
