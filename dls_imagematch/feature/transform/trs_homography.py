@@ -16,12 +16,12 @@ class HomographyTransformation(Transformation):
         self._homography_inverse = inv
 
     def transform_image(self, image, output_size):
-        warped = cv2.warpPerspective(image.img, self._homography, output_size)
+        warped = cv2.warpPerspective(image.img(), self._homography, output_size)
         warped = Image(warped)
         return warped
 
     def inverse_transform_image(self, image, output_size):
-        warped = cv2.warpPerspective(image.img, self._homography_inverse, output_size)
+        warped = cv2.warpPerspective(image.img(), self._homography_inverse, output_size)
         warped = Image(warped)
         return warped
 

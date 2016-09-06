@@ -17,7 +17,7 @@ class SizedImage(Image):
 
     @staticmethod
     def from_image(image, pixel_size):
-        sized_image = SizedImage(image.img, pixel_size)
+        sized_image = SizedImage(image.img(), pixel_size)
         sized_image.file = image.file
         return sized_image
 
@@ -27,7 +27,7 @@ class SizedImage(Image):
         return SizedImage(image, pixel_size)
 
     def copy(self):
-        return SizedImage(self.img.copy(), self._pixel_size)
+        return SizedImage(self._img.copy(), self._pixel_size)
 
     def crop(self, rect):
         image = Image.crop(self, rect)

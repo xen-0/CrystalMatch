@@ -90,7 +90,7 @@ class Detector:
         self.set_keypoint_limit(config.keypoint_limit.value())
 
     # -------- FUNCTIONALITY -------------------
-    def detect_features(self, img):
+    def detect_features(self, image):
         """ Detect interesting features in the image and generate descriptors. A keypoint identifies the
         location and orientation of a feature, and a descriptor is a vector of numbers that describe the
         various attributes of the feature. By generating descriptors, we can compare the set of features
@@ -103,8 +103,8 @@ class Detector:
         detector = self._create_detector()
         extractor = self._create_extractor()
 
-        keypoints = detector.detect(img.img, None)
-        keypoints, descriptors = extractor.compute(img.img, keypoints)
+        keypoints = detector.detect(image.img(), None)
+        keypoints, descriptors = extractor.compute(image.img(), keypoints)
 
         features = []
         if descriptors is None:

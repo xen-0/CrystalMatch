@@ -45,7 +45,7 @@ class OverlapMetric:
         """
         cr1, cr2 = Overlayer.get_overlap_regions(self.img1, self.img2, offset)
 
-        absdiff_img = cv2.absdiff(cr1.img, cr2.img)
+        absdiff_img = cv2.absdiff(cr1.img(), cr2.img())
         metric = np.sum(absdiff_img) / absdiff_img.size
 
         return metric

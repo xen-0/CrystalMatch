@@ -179,5 +179,5 @@ class MatchPainter:
     @staticmethod
     def draw_keypoints(img, keypoints):
         """ Draw the list of keypoints to the specified image and display it as a popup window. """
-        marked_img = cv2.drawKeypoints(img.img, keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        marked_img = cv2.drawKeypoints(img.img(), keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         return Image(marked_img)

@@ -16,7 +16,7 @@ class Image:
     in this program.
     """
     def __init__(self, img):
-        self.img = img
+        self._img = img
 
         self.file = None
 
@@ -31,9 +31,12 @@ class Image:
         else:
             self.channels = 1
 
+    def img(self):
+        return self._img
+
     def save(self, filename):
         """ Write the image to file. """
-        cv2.imwrite(filename, self.img)
+        cv2.imwrite(filename, self._img)
 
     @staticmethod
     def from_file(filename):
@@ -56,13 +59,13 @@ class Image:
 
     def popup(self, title='Popup Image'):
         """ Pop up a window to display an image until a key is pressed (blocking)."""
-        cv2.imshow(title, self.img)
+        cv2.imshow(title, self._img)
         cv2.waitKey(0)
         cv2.destroyWindow(title)
 
     def copy(self):
         """ Return an Image object which is a deep copy of this one. """
-        return Image(self.img.copy())
+        return Image(self._img.copy())
 
     def bounds(self):
         """ Return a rectangle that bounds the image (0,0,w,h). """
@@ -71,12 +74,12 @@ class Image:
     def crop(self, rect):
         """ Return a new image which is a region of this image specified by the rectangle. """
         rect = rect.intersection(self.bounds()).intify()
-        sub = self.img[rect.y1:rect.y2, rect.x1:rect.x2]
+        sub = self._img[rect.y1:rect.y2, rect.x1:rect.x2]
         return Image(sub)
 
     def resize(self, new_size):
         """ Return a new Image that is a resized version of this one. """
-        resized_img = cv2.resize(self.img, new_size)
+        resized_img = cv2.resize(self._img, new_size)
         return Image(resized_img)
 
     def rescale(self, factor):
@@ -107,8 +110,8 @@ class Image:
         sy2 = y2 - y_off
 
         # Perform paste
-        target = self.img
-        source = src.to_channels(self.channels).img
+        target = self._img
+        source = src.to_channels(self.channels).img()
 
         if self.channels == 4:
             # Use alpha blending
@@ -130,7 +133,7 @@ class Image:
         degrees = angle * 180 / math.pi
         matrix = cv2.getRotationMatrix2D(center, degrees, 1.0)
 
-        rotated = cv2.warpAffine(self.img, matrix, (self.width, self.height))
+        rotated = cv2.warpAffine(self._img, matrix, (self.width, self.height))
         return Image(rotated)
 
     def rotate_no_clip(self, angle):
@@ -166,31 +169,31 @@ class Image:
     def to_mono(self):
         """ Return a grayscale version of the image. """
         if self.channels == 3:
-            mono = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+            mono = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
         elif self.channels == 4:
-            mono = cv2.cvtColor(self.img, cv2.COLOR_BGRA2GRAY)
+            mono = cv2.cvtColor(self._img, cv2.COLOR_BGRA2GRAY)
         else:
-            mono = self.img
+            mono = self._img
         return Image(mono)
 
     def to_color(self):
         """Convert the image into a 3 channel BGR image. """
         if self.channels == 1:
-            color = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
+            color = cv2.cvtColor(self._img, cv2.COLOR_GRAY2BGR)
         elif self.channels == 4:
-            color = cv2.cvtColor(self.img, cv2.COLOR_BGR2BGRA)
+            color = cv2.cvtColor(self._img, cv2.COLOR_BGR2BGRA)
         else:
-            color = self.img
+            color = self._img
         return Image(color)
 
     def to_alpha(self):
         """Convert the image into a 4 channel BGRA image. """
         if self.channels == 1:
-            alpha = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGRA)
+            alpha = cv2.cvtColor(self._img, cv2.COLOR_GRAY2BGRA)
         elif self.channels == 3:
-            alpha = cv2.cvtColor(self.img, cv2.COLOR_BGR2BGRA)
+            alpha = cv2.cvtColor(self._img, cv2.COLOR_BGR2BGRA)
         else:
-            alpha = self.img
+            alpha = self._img
         return Image(alpha)
 
     ############################
@@ -198,20 +201,20 @@ class Image:
     ############################
     def draw_dot(self, point, color=Color.Black(), thickness=5):
         """ Draw the specified dot on the image (in place) """
-        cv2.circle(self.img, point.intify().tuple(), 0, color.bgra(), thickness)
+        cv2.circle(self._img, point.intify().tuple(), 0, color.bgra(), thickness)
 
     def draw_circle(self, point, radius, color=Color.Black(), thickness=2):
         """ Draw the specified circle on the image (in place) """
-        cv2.circle(self.img, point.intify().tuple(), int(radius), color.bgra(), thickness)
+        cv2.circle(self._img, point.intify().tuple(), int(radius), color.bgra(), thickness)
 
     def draw_rectangle(self, rect, color=Color.Black(), thickness=1):
         """ Draw the specified rectangle on the image (in place) """
         tl, br = rect.intify().top_left().tuple(), rect.intify().bottom_right().tuple()
-        cv2.rectangle(self.img, tl, br, color.bgra(), thickness=thickness)
+        cv2.rectangle(self._img, tl, br, color.bgra(), thickness=thickness)
 
     def draw_line(self, pt1, pt2, color=Color.Black(), thickness=2):
         """ Draw the specified line on the image (in place) """
-        cv2.line(self.img, pt1.intify().tuple(), pt2.intify().tuple(), color.bgra(), thickness=thickness)
+        cv2.line(self._img, pt1.intify().tuple(), pt2.intify().tuple(), color.bgra(), thickness=thickness)
 
     def draw_polygon(self, points, color=Color.Black(), thickness=2):
         """ Draw a polygon with vertices given by points. """
@@ -229,7 +232,7 @@ class Image:
             position = point + Point(-size[0]/2, +size[1]/2)
 
         position = position.intify().tuple()
-        cv2.putText(self.img, text, position, cv2.FONT_HERSHEY_SIMPLEX, scale, color.bgra(), thickness)
+        cv2.putText(self._img, text, position, cv2.FONT_HERSHEY_SIMPLEX, scale, color.bgra(), thickness)
 
     def draw_cross(self, point, color=Color.Black(), size=5, thickness=1):
         """ Draw an X on the image (in place). """
@@ -251,8 +254,8 @@ class Image:
         lower = int(c_lo/scale_factor)
         upper = int(c_hi/scale_factor)
 
-        a = cv2.blur(self.img, (lower, lower))
-        b = cv2.blur(self.img, (upper, upper))
+        a = cv2.blur(self._img, (lower, lower))
+        b = cv2.blur(self._img, (upper, upper))
 
         grain_extract = np.subtract(a, b) + 128
 
@@ -262,7 +265,7 @@ class Image:
         """ Convert the image into a PyQt pixmap which can be displayed in QT GUI components. """
         width, height = self.size
         bytes_per_line = 3 * width
-        rgb = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(self._img, cv2.COLOR_BGR2RGB)
         q_img = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_img)
 

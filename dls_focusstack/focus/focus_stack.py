@@ -61,7 +61,7 @@ class FocusStack:
         laps = []
         for i in range(len(images)):
             print "Lap {}".format(i)
-            img = images[i].to_mono().img
+            img = images[i].to_mono().img()
             blurred = cv2.GaussianBlur(img, (blur_size, blur_size), 0)
             result = cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
             laps.append(result)
@@ -73,14 +73,14 @@ class FocusStack:
 
     @staticmethod
     def _determine_focused_pixels(images, laplacians):
-        output = np.zeros(shape=images[0].img.shape, dtype=images[0].img.dtype)
+        output = np.zeros(shape=images[0].img().shape, dtype=images[0].img().dtype)
 
         width, height = images[0].width, images[0].height
         for y in range(0, height):
             for x in range(0, width):
                 yxlaps = abs(laplacians[:, y, x])
                 index = (np.where(yxlaps == max(yxlaps)))[0][0]
-                output[y, x] = images[index].img[y, x]
+                output[y, x] = images[index].img()[y, x]
 
         return Image(output)
 
