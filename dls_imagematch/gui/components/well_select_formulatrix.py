@@ -146,8 +146,8 @@ class WellSelectorFormulatrix(QGroupBox):
         file1 = str(batch_dir1 + filename)
         file2 = str(batch_dir2 + filename)
 
-        image1 = Image.from_file(file1, pixel_size=1.0)
-        image2 = Image.from_file(file2, pixel_size=1.0)
+        image1 = Image.from_file(file1)
+        image2 = Image.from_file(file2)
 
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)

@@ -2,12 +2,16 @@ from feature import FeatureMatcher
 from util.shape import Point
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
+from .sized_image import SizedImage
 
 
 class ImageAligner:
     def __init__(self, img1, img2, align_config=None, detector_config=None):
-        self._img1 = img1
-        self._img2 = img2
+        # Create images with associated real sizes
+        px_size_1 = align_config.pixel_size_1.value()
+        px_size_2 = align_config.pixel_size_2.value()
+        self._img1 = SizedImage.from_image(img1, px_size_1)
+        self._img2 = SizedImage.from_image(img2, px_size_2)
 
         self._align_config = align_config
         self._detector_config = detector_config

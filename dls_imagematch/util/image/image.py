@@ -15,7 +15,7 @@ class Image:
     """Class that wraps an OpenCV image and can perform various operations on it that are useful
     in this program.
     """
-    def __init__(self, img, pixel_size=0):
+    def __init__(self, img):
         self.img = img
 
         self.file = None
@@ -25,32 +25,25 @@ class Image:
         self.width = shape[1]
         self.height = shape[0]
         self.size = (self.width, self.height)
+
         if len(shape) > 2:
             self.channels = shape[2]
         else:
             self.channels = 1
-
-        # The real size represented by a single pixel in the image
-        self.pixel_size = pixel_size
-
-        # The real size represented by the image
-        self.real_size = (self.size[0] * self.pixel_size, self.size[1] * self.pixel_size)
-        self.real_width = self.real_size[0]
-        self.real_height = self.real_size[1]
 
     def save(self, filename):
         """ Write the image to file. """
         cv2.imwrite(filename, self.img)
 
     @staticmethod
-    def from_file(filename, pixel_size=0):
+    def from_file(filename):
         """ Create a new image by reading from file. """
         raw_img = cv2.imread(filename)
 
         if raw_img is None:
             raise ValueError("Could not read specified Image File: {}".format(filename))
 
-        image = Image(raw_img, pixel_size)
+        image = Image(raw_img)
         image.file = filename
         return image
 
@@ -69,7 +62,7 @@ class Image:
 
     def copy(self):
         """ Return an Image object which is a deep copy of this one. """
-        return Image(self.img.copy(), self.pixel_size)
+        return Image(self.img.copy())
 
     def bounds(self):
         """ Return a rectangle that bounds the image (0,0,w,h). """
@@ -79,17 +72,12 @@ class Image:
         """ Return a new image which is a region of this image specified by the rectangle. """
         rect = rect.intersection(self.bounds()).intify()
         sub = self.img[rect.y1:rect.y2, rect.x1:rect.x2]
-        return Image(sub, self.pixel_size)
+        return Image(sub)
 
     def resize(self, new_size):
         """ Return a new Image that is a resized version of this one. """
         resized_img = cv2.resize(self.img, new_size)
-
-        # Because the image must be an integer number of pixels, we must correct the
-        # factor to calculate the pixel size properly.
-        corrected_factor = new_size[0] / self.width
-        pixel_size = self.pixel_size / corrected_factor
-        return Image(resized_img, pixel_size)
+        return Image(resized_img)
 
     def rescale(self, factor):
         """ Return a new Image that is a version of this image, resized to the specified scale. """
@@ -124,12 +112,12 @@ class Image:
 
         if self.channels == 4:
             # Use alpha blending
-            ALPHA = 3
+            alpha = 3
             for c in range(0, 3):
-                target[y1:y2, x1:x2, c] = source[sy1:sy2, sx1:sx2, c] * (source[sy1:sy2, sx1:sx2, ALPHA] / 255.0) \
-                                          + target[y1:y2, x1:x2, c] * (1.0 - source[sy1:sy2, sx1:sx2, ALPHA] / 255.0)
+                target[y1:y2, x1:x2, c] = source[sy1:sy2, sx1:sx2, c] * (source[sy1:sy2, sx1:sx2, alpha] / 255.0) \
+                                          + target[y1:y2, x1:x2, c] * (1.0 - source[sy1:sy2, sx1:sx2, alpha] / 255.0)
 
-            target[y1:y2, x1:x2, ALPHA] = np.full((y2-y1, x2-x1), 255, np.uint8)
+            target[y1:y2, x1:x2, alpha] = np.full((y2-y1, x2-x1), 255, np.uint8)
 
         else:
             # No alpha blending
@@ -143,7 +131,7 @@ class Image:
         matrix = cv2.getRotationMatrix2D(center, degrees, 1.0)
 
         rotated = cv2.warpAffine(self.img, matrix, (self.width, self.height))
-        return Image(rotated, self.pixel_size)
+        return Image(rotated)
 
     def rotate_no_clip(self, angle):
         """Rotate the image about its center point, but expand the frame of the image
@@ -155,9 +143,9 @@ class Image:
         h = abs(x*math.sin(angle)) + abs(y*math.cos(angle))
 
         # Paste the image into a larger frame and rotate
-        img = Image.blank(w, h, 4, 0)
-        img.paste(self, w/2-x/2, h/2-y/2)
-        rotated = img.rotate(angle, (w/2,h/2))
+        image = Image.blank(w, h, 4, 0)
+        image.paste(self, w/2-x/2, h/2-y/2)
+        rotated = image.rotate(angle, (w/2, h/2))
 
         return rotated
 
@@ -183,7 +171,7 @@ class Image:
             mono = cv2.cvtColor(self.img, cv2.COLOR_BGRA2GRAY)
         else:
             mono = self.img
-        return Image(mono, self.pixel_size)
+        return Image(mono)
 
     def to_color(self):
         """Convert the image into a 3 channel BGR image. """
@@ -193,7 +181,7 @@ class Image:
             color = cv2.cvtColor(self.img, cv2.COLOR_BGR2BGRA)
         else:
             color = self.img
-        return Image(color, self.pixel_size)
+        return Image(color)
 
     def to_alpha(self):
         """Convert the image into a 4 channel BGRA image. """
@@ -203,7 +191,7 @@ class Image:
             alpha = cv2.cvtColor(self.img, cv2.COLOR_BGR2BGRA)
         else:
             alpha = self.img
-        return Image(alpha, self.pixel_size)
+        return Image(alpha)
 
     ############################
     # Drawing Functions
@@ -268,7 +256,7 @@ class Image:
 
         grain_extract = np.subtract(a, b) + 128
 
-        return Image(grain_extract, self.pixel_size)
+        return Image(grain_extract)
 
     def to_qt_pixmap(self, scale=None):
         """ Convert the image into a PyQt pixmap which can be displayed in QT GUI components. """
