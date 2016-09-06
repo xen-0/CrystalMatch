@@ -12,6 +12,9 @@ class FeatureMatcherResult:
         self._transform = transform
         self._method = method
 
+        self._time_match = 0
+        self._time_transform = 0
+
     def image1(self): return self._image1
 
     def image2(self): return self._image2
@@ -21,6 +24,16 @@ class FeatureMatcherResult:
     def transform(self): return self._transform
 
     def method(self): return self._method
+
+    def time_match(self): return self._time_match
+
+    def time_transform(self): return self._time_transform
+
+    def set_time_match(self, time):
+        self._time_match = time
+
+    def set_time_transform(self, time):
+        self._time_transform = time
 
     def any_matches(self):
         """ True if the result contains any feature matches. """

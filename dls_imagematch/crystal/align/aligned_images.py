@@ -14,6 +14,8 @@ class AlignedImages:
         self.translate = translate
         self.method = method
 
+        self.feature_match_result = None
+
         self._limit_low = align_config.metric_limit_low.value()
         self._limit_high = align_config.metric_limit_high.value()
 

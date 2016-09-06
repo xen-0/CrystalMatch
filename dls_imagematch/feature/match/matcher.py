@@ -1,5 +1,6 @@
 from __future__ import division
 
+import time
 import cv2
 import numpy as np
 
@@ -57,7 +58,9 @@ class FeatureMatcher:
 
     # -------- FUNCTIONALITY -------------------
     def match(self):
+        match_start_time = time.time()
         matches = self._find_matches()
+        match_end_time = time.time()
 
         calc = TransformCalculator()
         calc.set_method(self._transform_method)
@@ -68,7 +71,13 @@ class FeatureMatcher:
         except TransformCalculationError:
             transform = None
 
-        return self._create_result_object(matches, transform)
+        transform_end_time = time.time()
+
+        result = self._create_result_object(matches, transform)
+        result.set_time_match(match_end_time - match_start_time)
+        result.set_time_transform(transform_end_time - match_end_time)
+
+        return result
 
     def match_translation_only(self):
         self.set_transform_method(TransformCalculator.TRANSLATION)

@@ -242,15 +242,15 @@ class CrystalMatchControl(QGroupBox):
         self._results_frame.set_status_message(status)
         self._results_frame.display_image(image2)
 
-    def _display_results(self, crystal_match_set):
-        self._match_results = crystal_match_set
+    def _display_results(self, crystal_match_results):
+        self._match_results = crystal_match_results
         status = "Crystal matching complete"
 
         self._results_frame.clear()
         self._results_frame.set_status_message(status)
 
-        image1 = crystal_match_set.image1().copy()
-        image2 = crystal_match_set.image2().copy()
+        image1 = crystal_match_results.image1().copy()
+        image2 = crystal_match_results.image2().copy()
 
         region_size = self._crystal_config.region_size.value()
 
@@ -258,7 +258,7 @@ class CrystalMatchControl(QGroupBox):
         color2 = self._gui_config.color_crystal_image2.value()
 
         print(status)
-        for i, match in enumerate(crystal_match_set.matches):
+        for i, match in enumerate(crystal_match_results.matches):
             if not match.is_match_found():
                 continue
 
@@ -268,8 +268,8 @@ class CrystalMatchControl(QGroupBox):
             beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                             "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
 
-            delta_pixel = pixel2 - pixel1 + crystal_match_set.pixel_offset()
-            delta_real = real2 - real1 + crystal_match_set.real_offset()
+            delta_pixel = pixel2 - pixel1 + crystal_match_results.pixel_offset()
+            delta_real = real2 - real1 + crystal_match_results.real_offset()
             delta = "Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                     "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
@@ -277,7 +277,7 @@ class CrystalMatchControl(QGroupBox):
             print(beam_position)
             print(delta)
 
-            off = crystal_match_set.pixel_offset()
+            off = crystal_match_results.pixel_offset()
             image1.draw_cross(pixel1, color1, size=10, thickness=2)
             image1.draw_cross(pixel2+off, color2, size=10, thickness=2)
             image1.draw_circle(pixel2+off, 30, color2)
@@ -287,7 +287,7 @@ class CrystalMatchControl(QGroupBox):
 
             if i < self.NUM_FRAMES:
                 rect = Rectangle.from_center(pixel2, region_size, region_size)
-                image = crystal_match_set.image2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
+                image = crystal_match_results.image2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
                 image.draw_cross(image.bounds().center(), color=color2, thickness=1)
                 self._display_image_in_frame(image, 2, i)
 
