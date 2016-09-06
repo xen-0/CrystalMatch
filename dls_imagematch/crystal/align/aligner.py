@@ -81,7 +81,7 @@ class ImageAligner:
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Resize image B so it has the same size per pixel as image A
-        factor = self._img2.pixel_size / self._img1.pixel_size
+        factor = self._img2.pixel_size() / self._img1.pixel_size()
 
         if factor != 1:
             self._img2 = self._img2.rescale(factor)

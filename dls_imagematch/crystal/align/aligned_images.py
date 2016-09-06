@@ -53,7 +53,7 @@ class AlignedImages:
         """ The transform in real units (um) with no rounding. """
         if self._real_offset is None:
             x, y = self.translate.x, self.translate.y
-            pixel_size = self.img1.pixel_size
+            pixel_size = self.img1.pixel_size()
             self._real_offset = Point(x * pixel_size, y * pixel_size)
 
         return self._real_offset

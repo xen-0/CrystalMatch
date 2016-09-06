@@ -10,12 +10,10 @@ class SizedImage(Image):
         Image.__init__(self, img)
 
         # The real size represented by a single pixel in the image
-        self.pixel_size = pixel_size
+        self._pixel_size = pixel_size
 
-        # The real size represented by the image
-        self.real_size = (self.size[0] * self.pixel_size, self.size[1] * self.pixel_size)
-        self.real_width = self.real_size[0]
-        self.real_height = self.real_size[1]
+    def pixel_size(self):
+        return self._pixel_size
 
     @staticmethod
     def from_image(image, pixel_size):
@@ -29,11 +27,11 @@ class SizedImage(Image):
         return SizedImage(image, pixel_size)
 
     def copy(self):
-        return SizedImage(self.img.copy(), self.pixel_size)
+        return SizedImage(self.img.copy(), self._pixel_size)
 
     def crop(self, rect):
         image = Image.crop(self, rect)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)
 
     def resize(self, new_size):
         image = Image.resize(self, new_size)
@@ -41,26 +39,26 @@ class SizedImage(Image):
         # Because the image must be an integer number of pixels, we must correct the
         # factor to calculate the pixel size properly.
         corrected_factor = new_size[0] / self.width
-        pixel_size = self.pixel_size / corrected_factor
+        pixel_size = self._pixel_size / corrected_factor
 
         return self.from_image(image, pixel_size)
 
     def rotate(self, angle, center):
         image = Image.rotate(self, angle, center)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)
 
     def to_mono(self):
         image = Image.to_mono(self)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)
 
     def to_color(self):
         image = Image.to_color(self)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)
 
     def to_alpha(self):
         image = Image.to_alpha(self)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)
 
     def freq_range(self, coarseness_range, scale_factor):
         image = Image.freq_range(coarseness_range, scale_factor)
-        return self.from_image(image, self.pixel_size)
+        return self.from_image(image, self._pixel_size)

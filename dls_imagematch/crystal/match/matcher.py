@@ -16,7 +16,7 @@ class CrystalMatcher:
         self._aligned_images = aligned_images
         self._img1 = aligned_images.img1.to_mono()
         self._img2 = aligned_images.img2.to_mono()
-        self._pixel_size = self._img1.pixel_size
+        self._pixel_size = self._img1.pixel_size()
 
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
