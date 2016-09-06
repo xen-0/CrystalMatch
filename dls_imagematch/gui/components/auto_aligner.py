@@ -18,24 +18,24 @@ class AutoImageAligner(QWidget):
 
         self._gui_config = gui_config
         self._align_config = align_config
-        self._img1 = None
-        self._img2 = None
+        self._image1 = None
+        self._image2 = None
 
     def set_images(self, image1, image2):
-        self._img1 = image1
-        self._img2 = image2
+        self._image1 = image1
+        self._image2 = image2
         self._perform_alignment()
 
     def set_image_1(self, image):
-        self._img1 = image
+        self._image1 = image
         self._perform_alignment()
 
     def set_image_2(self, image):
-        self._img2 = image
+        self._image2 = image
         self._perform_alignment()
 
     def _perform_alignment(self):
-        if self._img1 is None or self._img2 is None:
+        if self._image1 is None or self._image2 is None:
             return
 
         aligner = self._create_aligner()
@@ -51,7 +51,7 @@ class AutoImageAligner(QWidget):
 
     def _create_aligner(self):
         detector_config = self._get_detector_config()
-        aligner = ImageAligner(self._img1, self._img2, self._align_config, detector_config)
+        aligner = ImageAligner(self._image1, self._image2, self._align_config, detector_config)
         return aligner
 
     def _get_detector_config(self):

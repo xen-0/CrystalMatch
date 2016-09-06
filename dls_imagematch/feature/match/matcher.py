@@ -24,14 +24,14 @@ class FeatureMatcher:
     _DEFAULT_TRANSFORM = TransformCalculator.DEFAULT_METHOD
     _DEFAULT_FILTER = TransformCalculator.DEFAULT_FILTER
 
-    def __init__(self, img1, img2, detector_config=None):
+    def __init__(self, image1, image2, detector_config=None):
         self._use_all_detectors = False
         self._detector = None
         self._transform_method = self._DEFAULT_TRANSFORM
         self._transform_filter = self._DEFAULT_FILTER
 
-        self.img1 = img1
-        self.img2 = img2
+        self.image1 = image1
+        self.image2 = image2
         self._config = detector_config
 
     # -------- CONFIGURATION -------------------
@@ -80,7 +80,7 @@ class FeatureMatcher:
         else:
             method = self._detector.detector
 
-        result = FeatureMatcherResult(self.img1, self.img2, matches, transform, method)
+        result = FeatureMatcherResult(self.image1, self.image2, matches, transform, method)
         return result
 
     def _find_matches(self):
@@ -100,8 +100,8 @@ class FeatureMatcher:
         return matches
 
     def _find_matches_for_detector(self, detector):
-        features1 = detector.detect_features(self.img1)
-        features2 = detector.detect_features(self.img2)
+        features1 = detector.detect_features(self.image1)
+        features2 = detector.detect_features(self.image2)
 
         raw_matches = self._brute_force_match(detector, features1, features2)
         matches = self._matches_from_raw(raw_matches, features1, features2, detector)

@@ -31,7 +31,7 @@ class Image:
         else:
             self.channels = 1
 
-    def img(self):
+    def raw(self):
         return self._img
 
     def save(self, filename):
@@ -111,7 +111,7 @@ class Image:
 
         # Perform paste
         target = self._img
-        source = src.to_channels(self.channels).img()
+        source = src.to_channels(self.channels).raw()
 
         if self.channels == 4:
             # Use alpha blending

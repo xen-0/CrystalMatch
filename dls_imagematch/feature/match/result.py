@@ -5,16 +5,16 @@ class FeatureMatcherResult:
     """ Encapsulates the results of an invocation of the feature matching process. This object is
     returned to the client by FeatureMatcher.
     """
-    def __init__(self, img1, img2, matches, transform, method):
-        self._img1 = img1
-        self._img2 = img2
+    def __init__(self, image1, image2, matches, transform, method):
+        self._image1 = image1
+        self._image2 = image2
         self._matches = matches
         self._transform = transform
         self._method = method
 
-    def img1(self): return self._img1
+    def image1(self): return self._image1
 
-    def img2(self): return self._img2
+    def image2(self): return self._image2
 
     def matches(self): return self._matches
 

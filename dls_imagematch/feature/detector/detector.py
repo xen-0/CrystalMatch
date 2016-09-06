@@ -103,8 +103,8 @@ class Detector:
         detector = self._create_detector()
         extractor = self._create_extractor()
 
-        keypoints = detector.detect(image.img(), None)
-        keypoints, descriptors = extractor.compute(image.img(), keypoints)
+        keypoints = detector.detect(image.raw(), None)
+        keypoints, descriptors = extractor.compute(image.raw(), keypoints)
 
         features = []
         if descriptors is None:

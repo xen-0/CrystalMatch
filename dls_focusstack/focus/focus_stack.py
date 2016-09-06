@@ -36,20 +36,20 @@ class FocusStack:
         # TODO - Frame-by-frame alignment where each frame is aligned with the previous one. This will mean
         # TODO - that the transform for a frame needs to be the product of all transforms that proceeded it
 
-        img1 = images[0]
+        image1 = images[0]
         for i in range(1, len(images)):
             print("Aligning image {}/{}".format(i+1, len(images)))
-            #img1 = images[i-1]
-            img2 = images[i]
-            matcher = FeatureMatcher(img1, img2)
+            #image1 = images[i-1]
+            image2 = images[i]
+            matcher = FeatureMatcher(image1, image2)
             matcher.set_detector(method)
 
             transform = matcher.match()
-            transformed_img = transform.inverse_transform_image(img2, img2.size)
-            transformed_img.save("{}aligned{}.png".format(out_dir, i))
-            #transformed_img.popup()
+            transformed_image = transform.inverse_transform_image(image2, image2.size)
+            transformed_image.save("{}aligned{}.png".format(out_dir, i))
+            #transformed_image.popup()
 
-            aligned_images.append(transformed_img)
+            aligned_images.append(transformed_image)
 
         return aligned_images
 
@@ -61,8 +61,8 @@ class FocusStack:
         laps = []
         for i in range(len(images)):
             print "Lap {}".format(i)
-            img = images[i].to_mono().img()
-            blurred = cv2.GaussianBlur(img, (blur_size, blur_size), 0)
+            image = images[i].to_mono().raw()
+            blurred = cv2.GaussianBlur(image, (blur_size, blur_size), 0)
             result = cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
             laps.append(result)
 
@@ -73,14 +73,14 @@ class FocusStack:
 
     @staticmethod
     def _determine_focused_pixels(images, laplacians):
-        output = np.zeros(shape=images[0].img().shape, dtype=images[0].img().dtype)
+        output = np.zeros(shape=images[0].raw().shape, dtype=images[0].raw().dtype)
 
         width, height = images[0].width, images[0].height
         for y in range(0, height):
             for x in range(0, width):
                 yxlaps = abs(laplacians[:, y, x])
                 index = (np.where(yxlaps == max(yxlaps)))[0][0]
-                output[y, x] = images[index].img()[y, x]
+                output[y, x] = images[index].raw()[y, x]
 
         return Image(output)
 

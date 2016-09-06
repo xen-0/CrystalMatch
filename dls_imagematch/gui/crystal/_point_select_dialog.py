@@ -26,7 +26,7 @@ class SelectorFrame(QLabel):
 
         # Load image from file
         self._aligned_images = aligned_images
-        self._selector_image = aligned_images.img1.to_color()
+        self._selector_image = aligned_images.image1.to_color()
         self._original_size = self._selector_image.size
 
         # Calculate size of image frame - it is sized to maintain the aspect ratio
@@ -58,10 +58,10 @@ class SelectorFrame(QLabel):
         self._selected_points = []
         self._display_image(self._selector_image)
 
-    def _display_image(self, cvimg):
+    def _display_image(self, image):
         """ Size the image appropriately and display it in the frame. """
         width, height = self._display_size
-        pixmap = cvimg.to_qt_pixmap()
+        pixmap = image.to_qt_pixmap()
         pixmap = pixmap.scaled(QSize(width, height), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         # Set label size
@@ -74,16 +74,16 @@ class SelectorFrame(QLabel):
         self._refresh_image()
 
     def _refresh_image(self):
-        img_copy = self._selector_image.copy()
+        image_copy = self._selector_image.copy()
         for point in self._selected_points:
-            self._draw_point_rectangle(img_copy, point)
+            self._draw_point_rectangle(image_copy, point)
 
-        self._display_image(img_copy)
+        self._display_image(image_copy)
 
-    def _draw_point_rectangle(self, img, point):
+    def _draw_point_rectangle(self, image, point):
         rect = Rectangle.from_center(point, self._rect_size, self._rect_size)
-        img.draw_rectangle(rect, self._rect_color, thickness=1)
-        img.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size / 2))
+        image.draw_rectangle(rect, self._rect_color, thickness=1)
+        image.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size / 2))
 
     def mousePressEvent(self, QMouseEvent):
         """ Called when the mouse is clicked. Records the coords of the start position of a

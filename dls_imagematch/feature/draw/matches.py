@@ -19,12 +19,12 @@ class MatchPainter:
     IMAGE_1 = 1
     IMAGE_2 = 2
 
-    def __init__(self, img1, img2):
-        self._img1 = img1
-        self._img2 = img2
+    def __init__(self, image1, image2):
+        self._image1 = image1
+        self._image2 = image2
 
-        self._img1_position = Point(0, 0)
-        self._img2_position = Point(0, 0)
+        self._image1_position = Point(0, 0)
+        self._image2_position = Point(0, 0)
         self._scale_factor = 1
         self._background_image = None
 
@@ -61,37 +61,37 @@ class MatchPainter:
         self._calculate_image_positions()
 
         w, h = self._calculate_background_image_size()
-        img = Image.blank(w, h)
-        img.paste(self._img1, self._img1_position)
-        img.paste(self._img2, self._img2_position)
+        image = Image.blank(w, h)
+        image.paste(self._image1, self._image1_position)
+        image.paste(self._image2, self._image2_position)
 
-        img, factor = self._rescale_to_max_size(img)
-        self._background_image = img
+        image, factor = self._rescale_to_max_size(image)
+        self._background_image = image
         self._scale_factor = factor
 
     def _calculate_image_positions(self):
         """ Determine the positions of images 1 and 2 in the background image. """
         pad = self._padding
-        w1, h1 = self._img1.size
-        w2, h2 = self._img2.size
+        w1, h1 = self._image1.size
+        w2, h2 = self._image2.size
 
-        self._img1_position = Point(pad, pad)
-        self._img2_position = Point(2 * pad + w1, pad)
+        self._image1_position = Point(pad, pad)
+        self._image2_position = Point(2 * pad + w1, pad)
 
         if h2 > h1:
-            self._img1_position += Point(0, pad + 0.5*(h2-h1))
+            self._image1_position += Point(0, pad + 0.5 * (h2 - h1))
         elif h2 > h1:
-            self._img2_position += Point(0, pad + 0.5*(h1-h2))
+            self._image2_position += Point(0, pad + 0.5 * (h1 - h2))
 
     def _calculate_background_image_size(self):
         """ Determine the sizes of images 1 and 2 as displayed in the background image. """
         pad = self._padding
-        w1, h1 = self._img1.size
-        w2, h2 = self._img2.size
+        w1, h1 = self._image1.size
+        w2, h2 = self._image2.size
 
-        w_img = w1 + w2 + 3 * pad
-        h_img = 2 * pad + max(h1, h2)
-        return w_img, h_img
+        w_bg = w1 + w2 + 3 * pad
+        h_bg = 2 * pad + max(h1, h2)
+        return w_bg, h_bg
 
     def _rescale_to_max_size(self, image):
         """ Resize the background image so that it fills up the maximum available space. """
@@ -100,84 +100,84 @@ class MatchPainter:
         rescaled = image.rescale(factor)
         return rescaled, factor
 
-    def draw_transform_points(self, img1_point, img2_point, img=None):
+    def draw_transform_points(self, image1_point, image2_point, image=None):
         """ Draw a cross at a point on image 1 and the corresponding transformed point on image 2. """
-        if img is None:
-            img = self._background_image.copy()
+        if image is None:
+            image = self._background_image.copy()
 
-        if img1_point is not None:
-            point1 = self._point_to_img_coords(img1_point, 1)
-            img.draw_cross(point1, Color.Green(), size=10, thickness=2)
+        if image1_point is not None:
+            point1 = self._point_to_image_coords(image1_point, 1)
+            image.draw_cross(point1, Color.Green(), size=10, thickness=2)
 
-        if img2_point is not None:
-            point2 = self._point_to_img_coords(img2_point, 2)
-            img.draw_cross(point2, Color.Green(), size=10, thickness=2)
+        if image2_point is not None:
+            point2 = self._point_to_image_coords(image2_point, 2)
+            image.draw_cross(point2, Color.Green(), size=10, thickness=2)
 
-        return img
+        return image
 
-    def draw_transform_shapes(self, shape1, shape2, img=None):
+    def draw_transform_shapes(self, shape1, shape2, image=None):
         """ Draw a shape on image 1 and the corresponding transformed shape on image 2. """
-        if img is None:
-            img = self._background_image.copy()
+        if image is None:
+            image = self._background_image.copy()
 
-        self._draw_shape(shape1, self.IMAGE_1, img)
-        self._draw_shape(shape2, self.IMAGE_2, img)
-        return img
+        self._draw_shape(shape1, self.IMAGE_1, image)
+        self._draw_shape(shape2, self.IMAGE_2, image)
+        return image
 
-    def _draw_shape(self, shape, img_num, img):
+    def _draw_shape(self, shape, image_num, image):
         """ Draw a polygon on the specified image. """
         if shape is not None:
-            shape = self._polygon_to_img_coords(shape, img_num)
+            shape = self._polygon_to_image_coords(shape, image_num)
             for edge in shape.edges():
-                img.draw_line(edge[0], edge[1], Color.Orange(), thickness=2)
+                image.draw_line(edge[0], edge[1], Color.Orange(), thickness=2)
 
-    def draw_matches(self, matches, highlight_matches=[], img=None):
+    def draw_matches(self, matches, highlight_matches=[], image=None):
         """ Draw lines for each of the matches between the respective points in the two images.
         Matches that are marked as included in the transformation will be colored blue whereas
         those not included will be alight grey. Highlighted matches will appear in yellow
         """
-        if img is None:
-            img = self._background_image.copy()
+        if image is None:
+            image = self._background_image.copy()
 
         for match in matches:
             color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
-            self._draw_match(img, match, color, thickness=1, radius=4)
+            self._draw_match(image, match, color, thickness=1, radius=4)
 
         for match in highlight_matches:
-            self._draw_match(img, match, Color.Yellow(), thickness=2, radius=4)
+            self._draw_match(image, match, Color.Yellow(), thickness=2, radius=4)
             color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
-            self._draw_match(img, match, color, thickness=1, radius=4)
+            self._draw_match(image, match, color, thickness=1, radius=4)
 
-        return img
+        return image
 
-    def _draw_match(self, img, match, color, thickness, radius):
+    def _draw_match(self, image, match, color, thickness, radius):
         """ Draw a single match on the image pair. """
-        point1 = self._point_to_img_coords(match.img_point1(), 1)
-        point2 = self._point_to_img_coords(match.img_point2(), 2)
+        point1 = self._point_to_image_coords(match.image_point1(), 1)
+        point2 = self._point_to_image_coords(match.image_point2(), 2)
 
         # Draw a small circle at both co-ordinates
-        img.draw_circle(point1, radius, color, thickness)
-        img.draw_circle(point2, radius, color, thickness)
+        image.draw_circle(point1, radius, color, thickness)
+        image.draw_circle(point2, radius, color, thickness)
 
         # Draw a line between the two points
-        img.draw_line(point1, point2, color, thickness)
+        image.draw_line(point1, point2, color, thickness)
 
-    def _point_to_img_coords(self, point, img_num):
+    def _point_to_image_coords(self, point, image_num):
         """ Convert a point on image 1 or 2 to a coordinate in the background image. """
-        img_position = self._get_image_position(img_num)
-        return (point + img_position) * self._scale_factor
+        image_position = self._get_image_position(image_num)
+        return (point + image_position) * self._scale_factor
 
-    def _polygon_to_img_coords(self, polygon, img_num):
+    def _polygon_to_image_coords(self, polygon, image_num):
         """ Convert a polygon on image 1 or 2 to a polygon in the background image. """
-        img_position = self._get_image_position(img_num)
-        return polygon.offset(img_position).scale(self._scale_factor)
+        image_position = self._get_image_position(image_num)
+        return polygon.offset(image_position).scale(self._scale_factor)
 
     def _get_image_position(self, num):
         """ Get the position of the specified image. """
-        return self._img2_position if num == self.IMAGE_2 else self._img1_position
+        return self._image2_position if num == self.IMAGE_2 else self._image1_position
 
     @staticmethod
-    def draw_keypoints(img, keypoints):
+    def draw_keypoints(image, keypoints):
         """ Draw the list of keypoints to the specified image and display it as a popup window. """
-        marked_img = cv2.drawKeypoints(img.img(), keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        return Image(marked_img)
+        marked_image = cv2.drawKeypoints(image.raw(), keypoints, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        return Image(marked_image)

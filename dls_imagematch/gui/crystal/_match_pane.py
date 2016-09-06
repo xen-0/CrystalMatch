@@ -32,7 +32,7 @@ class CrystalMatchPane(QWidget):
         self._slider_region_size = None
 
         self._init_ui()
-        self._set_point_value(aligned_images.img1.bounds().center())
+        self._set_point_value(aligned_images.image1.bounds().center())
 
     def _init_ui(self):
         pane = self._ui_create_pane()
@@ -131,7 +131,7 @@ class CrystalMatchPane(QWidget):
         max_points = 1
 
         region_size = self._slider_region_size.value()
-        color = self._gui_config.color_crystal_img1.value()
+        color = self._gui_config.color_crystal_image1.value()
         dialog = PointSelectDialog(self, self._aligned_images, max_points, region_size, color)
         result_ok = dialog.exec_()
 
@@ -165,7 +165,7 @@ class CrystalMatchPane(QWidget):
     def _emit_new_match_signal(self, crystal_match, matcher):
         feature_match = crystal_match.feature_match_result()
 
-        self.signal_new_images.emit(feature_match.img1(), feature_match.img2())
+        self.signal_new_images.emit(feature_match.image1(), feature_match.image2())
         self.signal_new_crystal_match.emit(crystal_match, matcher)
 
     def _set_point_value(self, point):

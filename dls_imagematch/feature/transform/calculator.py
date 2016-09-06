@@ -111,9 +111,9 @@ class TransformCalculator:
         matches, mask = self._pre_filter(matches)
 
         if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_points(matches)
+            image1_pts, image2_pts = self._get_np_points(matches)
 
-            homography, new_mask = cv2.findHomography(img1_pts, img2_pts, 0, 0)
+            homography, new_mask = cv2.findHomography(image1_pts, image2_pts, 0, 0)
             mask = self._combine_masks(mask, new_mask)
             transform = HomographyTransformation(homography)
 
@@ -126,10 +126,10 @@ class TransformCalculator:
         matches, mask = self._pre_filter(matches)
 
         if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_points(matches)
+            image1_pts, image2_pts = self._get_np_points(matches)
             use_full = self._method == self.AFFINE_FULL
 
-            affine = cv2.estimateRigidTransform(img1_pts, img2_pts, fullAffine=use_full)
+            affine = cv2.estimateRigidTransform(image1_pts, image2_pts, fullAffine=use_full)
 
             if affine is not None:
                 affine = np.array([affine[0], affine[1], [0, 0, 1]], np.float32)
@@ -153,9 +153,9 @@ class TransformCalculator:
         mask = [True] * len(matches)
 
         if self._has_enough_matches_for_transform(matches):
-            img1_pts, img2_pts = self._get_np_points(matches)
+            image1_pts, image2_pts = self._get_np_points(matches)
             filter = self._get_filter_code()
-            _, mask = cv2.findHomography(img1_pts, img2_pts, filter, self._ransac_threshold)
+            _, mask = cv2.findHomography(image1_pts, image2_pts, filter, self._ransac_threshold)
             mask = self._sanitize_mask(mask)
 
         return mask
@@ -186,11 +186,11 @@ class TransformCalculator:
 
     @staticmethod
     def _get_np_points(matches):
-        img1_pts = [m.point1().tuple() for m in matches]
-        img1_pts = np.float32(img1_pts).reshape(-1, 1, 2)
-        img2_pts = [m.point2().tuple() for m in matches]
-        img2_pts = np.float32(img2_pts).reshape(-1, 1, 2)
-        return img1_pts, img2_pts
+        image1_pts = [m.point1().tuple() for m in matches]
+        image1_pts = np.float32(image1_pts).reshape(-1, 1, 2)
+        image2_pts = [m.point2().tuple() for m in matches]
+        image2_pts = np.float32(image2_pts).reshape(-1, 1, 2)
+        return image1_pts, image2_pts
 
     @staticmethod
     def _sanitize_mask(mask):

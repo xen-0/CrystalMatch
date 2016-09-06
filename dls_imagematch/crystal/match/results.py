@@ -11,7 +11,6 @@ class CrystalMatcherResults:
         Parameters
         ----------
         aligned_images - AlignedImages object, containing the two images to draw crystal matches between
-        img1_points - list of Points of crystals in Image 1 coordinates (pixels)
         """
         if not isinstance(aligned_images, AlignedImages):
             raise TypeError("Argument must be instance of {}".format(AlignedImages.__name__))
@@ -27,13 +26,13 @@ class CrystalMatcherResults:
         """ Get a specific match object by index. """
         return self.matches[index]
 
-    def img1(self):
+    def image1(self):
         """ The first image; contains the user-selected crystal locations. """
-        return self._aligned_images.img1
+        return self._aligned_images.image1
 
-    def img2(self):
+    def image2(self):
         """ The second image. """
-        return self._aligned_images.img2
+        return self._aligned_images.image2
 
     def pixel_offset(self):
         """ The alignment offset between Image 1 and Image 2 (in pixels). """

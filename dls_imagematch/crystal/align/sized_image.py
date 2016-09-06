@@ -17,7 +17,7 @@ class SizedImage(Image):
 
     @staticmethod
     def from_image(image, pixel_size):
-        sized_image = SizedImage(image.img(), pixel_size)
+        sized_image = SizedImage(image.raw(), pixel_size)
         sized_image.file = image.file
         return sized_image
 

@@ -134,7 +134,7 @@ class CrystalMatchControl(QGroupBox):
         """ Display a dialog and return the result to the caller. """
         max_points = self.NUM_FRAMES
         size = self._crystal_config.region_size.value()
-        color = self._gui_config.color_crystal_img1.value()
+        color = self._gui_config.color_crystal_image1.value()
         dialog = PointSelectDialog(self, self._aligned_images, max_points, size, color)
         result_ok = dialog.exec_()
 
@@ -147,12 +147,12 @@ class CrystalMatchControl(QGroupBox):
         self._selected_points = points
         self._clear_all_frames()
         self._display_image1_regions()
-        self._display_marked_img2()
+        self._display_marked_image2()
         self._btn_locate.setEnabled(True)
 
     def _fn_perform_match(self):
-        selected_img1_points = self._selected_points
-        self._perform_matching_task(selected_img1_points)
+        selected_image1_points = self._selected_points
+        self._perform_matching_task(selected_image1_points)
 
     def _perform_matching_task(self, selected_points):
         matcher = self._create_crystal_matcher()
@@ -176,8 +176,8 @@ class CrystalMatchControl(QGroupBox):
     SMALL IMAGE FUNCTIONS
     ------------------------'''
     def _clear_all_frames(self):
-        color1 = self._gui_config.color_crystal_img1.value().to_hex()
-        color2 = self._gui_config.color_crystal_img2.value().to_hex()
+        color1 = self._gui_config.color_crystal_image1.value().to_hex()
+        color2 = self._gui_config.color_crystal_image2.value().to_hex()
         for i in range(self.NUM_FRAMES):
             self._clear_frame(self._frames1[i], i, color1)
             self._clear_frame(self._frames2[i], i, color2)
@@ -188,18 +188,18 @@ class CrystalMatchControl(QGroupBox):
         frame.setStyleSheet(self.FRAME_STYLE.format(color_hex))
 
     def _display_image1_regions(self):
-        img1 = self._aligned_images.img1
+        image1 = self._aligned_images.image1
         region_size = self._crystal_config.region_size.value()
-        color = self._gui_config.color_crystal_img1.value()
+        color = self._gui_config.color_crystal_image1.value()
 
         for i, point in enumerate(self._selected_points):
             if i >= self.NUM_FRAMES:
                 break
 
             rect = Rectangle.from_center(point, region_size, region_size)
-            img = img1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
-            img.draw_cross(img.bounds().center(), color, thickness=1)
-            self._display_image_in_frame(img, 1, i)
+            image = image1.crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
+            image.draw_cross(image.bounds().center(), color, thickness=1)
+            self._display_image_in_frame(image, 1, i)
 
     def _display_image_in_frame(self, image, row, frame_number):
         """ Display the specified Image object in the frame, scaled to fit the frame and maintain aspect ratio. """
@@ -219,7 +219,7 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is None or self._match_results.num() <= index:
             point = None
         else:
-            point = self._match_results.get_crystal_match(index).img1_point()
+            point = self._match_results.get_crystal_match(index).image1_point()
 
         dialog = SingleCrystalDialog(self._aligned_images, point, self._gui_config, self._crystal_config)
         dialog.exec_()
@@ -227,20 +227,20 @@ class CrystalMatchControl(QGroupBox):
     ''' ----------------------
     DISPLAY RESULTS FUNCTIONS
     ------------------------'''
-    def _display_marked_img2(self):
-        img2 = self._aligned_images.img2.copy()
+    def _display_marked_image2(self):
+        image2 = self._aligned_images.image2.copy()
         color = self._gui_config.color_search.value()
 
         matcher = self._create_crystal_matcher()
 
         for point in self._selected_points:
-            img2_rect = matcher.make_search_region(point)
-            img2.draw_rectangle(img2_rect, color)
+            image2_rect = matcher.make_search_region(point)
+            image2.draw_rectangle(image2_rect, color)
 
         status = "Ready for Crystal Matching"
         self._results_frame.clear()
         self._results_frame.set_status_message(status)
-        self._results_frame.display_image(img2)
+        self._results_frame.display_image(image2)
 
     def _display_results(self, crystal_match_set):
         self._match_results = crystal_match_set
@@ -249,21 +249,21 @@ class CrystalMatchControl(QGroupBox):
         self._results_frame.clear()
         self._results_frame.set_status_message(status)
 
-        img1 = crystal_match_set.img1().copy()
-        img2 = crystal_match_set.img2().copy()
+        image1 = crystal_match_set.image1().copy()
+        image2 = crystal_match_set.image2().copy()
 
         region_size = self._crystal_config.region_size.value()
 
-        color1 = self._gui_config.color_crystal_img1.value()
-        color2 = self._gui_config.color_crystal_img2.value()
+        color1 = self._gui_config.color_crystal_image1.value()
+        color2 = self._gui_config.color_crystal_image2.value()
 
         print(status)
         for i, match in enumerate(crystal_match_set.matches):
             if not match.is_match_found():
                 continue
 
-            pixel1, real1 = match.img1_point(), match.img1_point_real()
-            pixel2, real2 = match.img2_point(), match.img2_point_real()
+            pixel1, real1 = match.image1_point(), match.image1_point_real()
+            pixel2, real2 = match.image2_point(), match.image2_point_real()
 
             beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                             "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
@@ -278,20 +278,20 @@ class CrystalMatchControl(QGroupBox):
             print(delta)
 
             off = crystal_match_set.pixel_offset()
-            img1.draw_cross(pixel1, color1, size=10, thickness=2)
-            img1.draw_cross(pixel2+off, color2, size=10, thickness=2)
-            img1.draw_circle(pixel2+off, 30, color2)
+            image1.draw_cross(pixel1, color1, size=10, thickness=2)
+            image1.draw_cross(pixel2+off, color2, size=10, thickness=2)
+            image1.draw_circle(pixel2+off, 30, color2)
 
-            img2.draw_cross(pixel1-off, color1, size=10, thickness=2)
-            img2.draw_cross(pixel2, color2, size=10, thickness=2)
+            image2.draw_cross(pixel1-off, color1, size=10, thickness=2)
+            image2.draw_cross(pixel2, color2, size=10, thickness=2)
 
             if i < self.NUM_FRAMES:
                 rect = Rectangle.from_center(pixel2, region_size, region_size)
-                img = crystal_match_set.img2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
-                img.draw_cross(img.bounds().center(), color=color2, thickness=1)
-                self._display_image_in_frame(img, 2, i)
+                image = crystal_match_set.image2().crop(rect).resize((self.FRAME_SIZE, self.FRAME_SIZE))
+                image.draw_cross(image.bounds().center(), color=color2, thickness=1)
+                self._display_image_in_frame(image, 2, i)
 
-        self._results_frame.display_image(img2)
+        self._results_frame.display_image(image2)
 
 
 class _MatchTaskThread(QThread):

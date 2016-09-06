@@ -21,13 +21,13 @@ class GuiConfig(Config):
         self.color_search.set_comment("Outline color displayed in GUI to indicate region to be searched for feature "
                                       "matching in second image.")
 
-        self.color_crystal_img1 = add(ColorConfigItem, "Img1 Crystal Color", Color.Green())
-        self.color_crystal_img1.set_comment("Color displayed in GUI to indicate the position of the user selected "
-                                            "points in the first image")
+        self.color_crystal_image1 = add(ColorConfigItem, "Image1 Crystal Color", Color.Green())
+        self.color_crystal_image1.set_comment("Color displayed in GUI to indicate the position of the user selected "
+                                              "points in the first image")
 
-        self.color_crystal_img2 = add(ColorConfigItem, "Img2 Crystal Color", Color.Red())
-        self.color_crystal_img2.set_comment("Color displayed in GUI to indicate the position of the points in the "
-                                            "second image calculated by feature matching.")
+        self.color_crystal_image2 = add(ColorConfigItem, "Image2 Crystal Color", Color.Red())
+        self.color_crystal_image2.set_comment("Color displayed in GUI to indicate the position of the points in the "
+                                              "second image calculated by feature matching.")
 
         self.input_dir = add(DirectoryConfigItem, "Input Directory", default="../test-images/")
         self.input_dir.set_comment("Directory for storing any files required by testing.")

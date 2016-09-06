@@ -19,7 +19,7 @@ class TransformPane(QWidget):
 
         self._matcher = None
         self._matches = []
-        self._img1_point = None
+        self._image1_point = None
 
         # UI elements
         self._cmbo_methods = None
@@ -84,7 +84,7 @@ class TransformPane(QWidget):
 
     def set_crystal_match(self, crystal_match, matcher):
         self._matcher = matcher
-        self._img1_point = crystal_match.img1_point()
+        self._image1_point = crystal_match.image1_point()
         self._matches = crystal_match.feature_match_result().matches()
         self._refresh_transform()
 
@@ -105,10 +105,10 @@ class TransformPane(QWidget):
         if self._matcher is None:
             return
 
-        target_region_tl = self._matcher.make_target_region(self._img1_point).top_left()
-        search_region_tl = self._matcher.make_search_region(self._img1_point).top_left()
+        target_region_tl = self._matcher.make_target_region(self._image1_point).top_left()
+        search_region_tl = self._matcher.make_search_region(self._image1_point).top_left()
 
-        point1 = self._img1_point - target_region_tl
+        point1 = self._image1_point - target_region_tl
         point2 = None
 
         w = point1.x
@@ -119,10 +119,10 @@ class TransformPane(QWidget):
         transform = calc.calculate_transform(self._matches)
 
         if transform is not None:
-            transformed_point = transform.transform_points([self._img1_point])[0]
+            transformed_point = transform.transform_points([self._image1_point])[0]
             point2 = transformed_point - search_region_tl
 
-            p1 = self._img1_point
+            p1 = self._image1_point
 
             def trans(x, y):
                 return transform.transform_points([p1 + Point(x, y)])[0] - search_region_tl

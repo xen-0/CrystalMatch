@@ -6,12 +6,12 @@ from .sized_image import SizedImage
 
 
 class ImageAligner:
-    def __init__(self, img1, img2, align_config=None, detector_config=None):
+    def __init__(self, image1, image2, align_config=None, detector_config=None):
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
-        self._img1 = SizedImage.from_image(img1, px_size_1)
-        self._img2 = SizedImage.from_image(img2, px_size_2)
+        self._image1 = SizedImage.from_image(image1, px_size_1)
+        self._image2 = SizedImage.from_image(image2, px_size_2)
 
         self._align_config = align_config
         self._detector_config = detector_config
@@ -41,7 +41,7 @@ class ImageAligner:
         """ Default alignment result with 0 offset. """
         translation = Point()
         description = "DISABLED!"
-        return AlignedImages(self._img1, self._img2, translation, self._align_config, description)
+        return AlignedImages(self._image1, self._image2, translation, self._align_config, description)
 
     def _check_config(self):
         """ Raises an exception if configuration has not been properly set. """
@@ -61,8 +61,8 @@ class ImageAligner:
 
     def _perform_match(self, detector):
         """ Perform feature matching between the two images. """
-        img1, img2 = self._get_scaled_mono_images()
-        matcher = FeatureMatcher(img1, img2, self._detector_config)
+        image1, image2 = self._get_scaled_mono_images()
+        matcher = FeatureMatcher(image1, image2, self._detector_config)
         matcher.set_detector(detector)
         match_result = matcher.match_translation_only()
         return match_result
@@ -74,16 +74,16 @@ class ImageAligner:
 
         translation = match_result.transform().translation()
         description = "Feature matching - " + detector
-        aligned_images = AlignedImages(self._img1, self._img2, translation, self._align_config, description)
+        aligned_images = AlignedImages(self._image1, self._image2, translation, self._align_config, description)
         return aligned_images
 
     def _get_scaled_mono_images(self):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Resize image B so it has the same size per pixel as image A
-        factor = self._img2.pixel_size() / self._img1.pixel_size()
+        factor = self._image2.pixel_size() / self._image1.pixel_size()
 
         if factor != 1:
-            self._img2 = self._img2.rescale(factor)
+            self._image2 = self._image2.rescale(factor)
 
-        return self._img1.to_mono(), self._img2.to_mono()
+        return self._image1.to_mono(), self._image2.to_mono()

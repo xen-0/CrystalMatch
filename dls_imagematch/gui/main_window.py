@@ -65,11 +65,11 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         well_selector.signal_image1_selected.connect(image_frame.clear)
 
         # Create layout
-        vbox_img_selection = QVBoxLayout()
-        vbox_img_selection.addWidget(well_selector)
-        vbox_img_selection.addWidget(selector1)
-        vbox_img_selection.addWidget(selector2)
-        vbox_img_selection.addStretch(1)
+        vbox_image_selection = QVBoxLayout()
+        vbox_image_selection.addWidget(well_selector)
+        vbox_image_selection.addWidget(selector1)
+        vbox_image_selection.addWidget(selector2)
+        vbox_image_selection.addStretch(1)
 
         vbox_matching = QVBoxLayout()
         vbox_matching.addWidget(crystal_match)
@@ -78,7 +78,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
 
         hbox_main = QHBoxLayout()
         hbox_main.setSpacing(10)
-        hbox_main.addLayout(vbox_img_selection)
+        hbox_main.addLayout(vbox_image_selection)
         hbox_main.addLayout(vbox_matching)
         hbox_main.addStretch(1)
 

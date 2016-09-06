@@ -8,9 +8,9 @@ from .overlay import Overlayer
 
 class OverlapMetric:
 
-    def __init__(self, img1, img2, trial_transforms):
-        self.img1 = img1
-        self.img2 = img2
+    def __init__(self, image1, image2, trial_transforms):
+        self.image1 = image1
+        self.image2 = image2
         self.trial_transforms = trial_transforms
 
     def best_transform(self, starting_transform):
@@ -43,9 +43,9 @@ class OverlapMetric:
         differences. In the returned image, darker areas indicate greater differences in the
         overlap whereas lighter areas indicate more similarity.
         """
-        cr1, cr2 = Overlayer.get_overlap_regions(self.img1, self.img2, offset)
+        cr1, cr2 = Overlayer.get_overlap_regions(self.image1, self.image2, offset)
 
-        absdiff_img = cv2.absdiff(cr1.img(), cr2.img())
-        metric = np.sum(absdiff_img) / absdiff_img.size
+        absdiff_image = cv2.absdiff(cr1.raw(), cr2.raw())
+        metric = np.sum(absdiff_image) / absdiff_image.size
 
         return metric

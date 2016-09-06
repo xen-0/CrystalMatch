@@ -31,18 +31,18 @@ class FeatureMatch:
         return self._match.distance * self._detector.extractor_distance_factor()
 
     def point1(self):
-        return self.img_point1() + self._offset1
+        return self.image_point1() + self._offset1
 
     def point2(self):
-        return self.img_point2() + self._offset2
+        return self.image_point2() + self._offset2
 
     def point2_projected(self):
         return self._point2_projected
 
-    def img_point1(self):
+    def image_point1(self):
         return self._feature1.point()
 
-    def img_point2(self):
+    def image_point2(self):
         return self._feature2.point()
 
     def set_offsets(self, offset1, offset2):
