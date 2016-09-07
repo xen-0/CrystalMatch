@@ -3,7 +3,7 @@ from __future__ import division
 from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QDialogButtonBox, QPushButton
 
-from dls_imagematch.util import Rectangle, Point
+from dls_util.shape import Rectangle, Point
 
 
 class SelectorFrame(QLabel):

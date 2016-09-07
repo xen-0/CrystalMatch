@@ -1,13 +1,11 @@
-from dls_imagematch.util import Config, IntConfigItem, RangeIntConfigItem,\
+from dls_util.config import Config, IntConfigItem, RangeIntConfigItem,\
     FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
-
-from .types import DetectorType, ExtractorType
 from .detector import Detector
+from .detector_brisk import BriskDetector
 from .detector_orb import OrbDetector
 from .detector_sift import SiftDetector
 from .detector_surf import SurfDetector
-from .detector_mser import MserDetector
-from .detector_brisk import BriskDetector
+from .types import DetectorType, ExtractorType
 
 
 class DetectorConfig:

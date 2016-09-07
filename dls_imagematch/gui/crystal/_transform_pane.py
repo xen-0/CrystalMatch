@@ -2,10 +2,10 @@ from __future__ import division
 
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
+from dls_util.shape import Point, Polygon
 
-from dls_imagematch.util.shape import Point, Polygon
-from dls_imagematch.util.widget import Slider
 from feature import TransformCalculator
+from dls_util.widget import Slider
 
 
 class TransformPane(QWidget):

@@ -1,4 +1,4 @@
-from dls_imagematch.util import Rectangle
+from dls_util.shape import Rectangle
 
 
 class CrystalMatch:

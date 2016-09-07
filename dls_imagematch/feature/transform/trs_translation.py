@@ -1,4 +1,4 @@
-from dls_imagematch.util import Image
+from dls_util.image import Image
 from .transformation import Transformation
 
 

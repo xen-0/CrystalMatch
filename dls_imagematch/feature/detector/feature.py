@@ -1,4 +1,4 @@
-from dls_imagematch.util import Point
+from dls_util.shape import Point
 
 
 class Feature:

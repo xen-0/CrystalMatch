@@ -1,5 +1,5 @@
 from feature.detector import DetectorType
-from dls_imagematch.util.config import Config, EnumConfigItem, BoolConfigItem, RangeFloatConfigItem
+from dls_util.config import Config, EnumConfigItem, BoolConfigItem, RangeFloatConfigItem
 
 
 class AlignConfig(Config):

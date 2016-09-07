@@ -2,12 +2,12 @@ from __future__ import division
 
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
+from dls_util.shape import Point
+from dls_util.config import ConfigDialog
 
 from dls_imagematch.crystal import CrystalMatcher
-from dls_imagematch.util import Point
-from dls_imagematch.util.config import ConfigDialog
-from dls_imagematch.util.widget import Slider
 from feature.detector import DetectorConfig, DetectorType
+from dls_util.widget import Slider
 from ._point_select_dialog import PointSelectDialog
 
 

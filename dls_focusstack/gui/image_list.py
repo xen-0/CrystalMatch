@@ -1,10 +1,9 @@
 from __future__ import division
 
-from PyQt4.QtCore import Qt, QEvent
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QGroupBox, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QIcon, QPushButton
 
-from dls_imagematch.util import Image
+from dls_util.image import Image
 
 
 class ImageList(QGroupBox):

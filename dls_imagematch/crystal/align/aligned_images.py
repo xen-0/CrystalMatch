@@ -1,4 +1,5 @@
-from dls_imagematch.util import Color, Point
+from dls_util.image import Color
+from dls_util.shape import Point
 from .metric_overlap import OverlapMetric
 from .overlay import Overlayer
 

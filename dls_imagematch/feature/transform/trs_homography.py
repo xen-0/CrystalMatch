@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 
-from dls_imagematch.util import Point, Image
+from dls_util.image import Image
+from dls_util.shape import Point
 from .transformation import Transformation
 
 

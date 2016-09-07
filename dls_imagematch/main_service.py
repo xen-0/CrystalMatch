@@ -20,7 +20,7 @@ def main():
     image1_path = dir + "449/A02.jpg"
     image2_path = dir + "584/A02.jpg"
 
-    from dls_imagematch.util.shape import Point
+    from dls_util.shape import Point
     selected = [Point(1068, 442), Point(1191, 1415)]
 
     service = CrystalMatchService(CONFIG_DIR)

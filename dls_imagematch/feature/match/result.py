@@ -29,12 +29,6 @@ class FeatureMatcherResult:
 
     def time_transform(self): return self._time_transform
 
-    def set_time_match(self, time):
-        self._time_match = time
-
-    def set_time_transform(self, time):
-        self._time_transform = time
-
     def any_matches(self):
         """ True if the result contains any feature matches. """
         return len(self._matches) > 0
@@ -65,3 +59,9 @@ class FeatureMatcherResult:
         errors = [m.reprojection_error() for m in good_matches]
         total = sum(errors) / len(good_matches)
         return total
+
+    def set_time_match(self, time):
+        self._time_match = time
+
+    def set_time_transform(self, time):
+        self._time_transform = time

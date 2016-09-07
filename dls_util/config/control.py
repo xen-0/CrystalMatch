@@ -4,8 +4,8 @@ import sys
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QLabel, QHBoxLayout, QMessageBox, QLineEdit, QPushButton, QWidget, QCheckBox, QComboBox
 
-from util.image import Color
-from util.widget import Slider
+from dls_util.image import Color
+from dls_util.widget import Slider
 
 
 class ConfigControl(QWidget):

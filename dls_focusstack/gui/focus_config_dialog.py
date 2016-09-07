@@ -1,4 +1,4 @@
-from util.config.dialog import ConfigDialog
+from dls_util.config import ConfigDialog
 
 
 class FocusConfigDialog(ConfigDialog):

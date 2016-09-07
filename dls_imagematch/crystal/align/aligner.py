@@ -1,5 +1,5 @@
 from feature import FeatureMatcher
-from util.shape import Point
+from dls_util.shape import Point
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
 from .sized_image import SizedImage

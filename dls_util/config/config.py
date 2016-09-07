@@ -1,6 +1,6 @@
 import os
 
-from util.image import Color
+from dls_util.image import Color
 
 
 class Config:

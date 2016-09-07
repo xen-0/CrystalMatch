@@ -3,11 +3,11 @@ from __future__ import division
 import cv2
 import numpy as np
 
-from dls_imagematch.util import Point
+from dls_util.shape import Point
+from .exception import TransformCalculationError
+from .trs_affine import AffineTransformation
 from .trs_homography import HomographyTransformation
 from .trs_translation import Translation
-from .trs_affine import AffineTransformation
-from .exception import TransformCalculationError
 
 
 class TransformCalculator:

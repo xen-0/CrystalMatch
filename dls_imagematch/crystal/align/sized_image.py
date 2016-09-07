@@ -1,6 +1,6 @@
 from __future__ import division
 
-from util.image import Image
+from dls_util.image import Image
 
 
 class SizedImage(Image):

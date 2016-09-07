@@ -1,5 +1,5 @@
-from util.image import Color
-from dls_imagematch.util.config import Config, DirectoryConfigItem, ColorConfigItem
+from dls_util.config import Config, DirectoryConfigItem, ColorConfigItem
+from dls_util.image import Color
 
 
 class GuiConfig(Config):

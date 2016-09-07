@@ -1,5 +1,5 @@
 from feature import TransformCalculator
-from dls_imagematch.util.config import Config, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
+from dls_util.config import Config, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
 from .matcher import CrystalMatcher
 
 

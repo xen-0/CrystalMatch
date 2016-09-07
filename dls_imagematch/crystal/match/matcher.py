@@ -1,9 +1,9 @@
 from __future__ import division
 
-from util import Rectangle, Point
+from dls_util.shape import Rectangle, Point
 from feature import BoundedFeatureMatcher
-from .results import CrystalMatcherResults
 from .match import CrystalMatch
+from .results import CrystalMatcherResults
 
 
 class CrystalMatcher:

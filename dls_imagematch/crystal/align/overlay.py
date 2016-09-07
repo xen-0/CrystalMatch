@@ -1,6 +1,7 @@
 import cv2
 
-from dls_imagematch.util import Image, Rectangle, Point, Color
+from dls_util.shape import Rectangle, Point
+from dls_util.image import Image, Color
 
 
 class Overlayer:

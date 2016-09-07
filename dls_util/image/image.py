@@ -7,7 +7,7 @@ import numpy as np
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QImage, QPixmap
 
-from util.shape import Rectangle, Point
+from dls_util.shape import Rectangle, Point
 from .color import Color
 
 

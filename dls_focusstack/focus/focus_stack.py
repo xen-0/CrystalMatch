@@ -1,8 +1,8 @@
-import numpy as np
 import cv2
+import numpy as np
 
-from dls_imagematch.util import Image
-from dls_imagematch.crystal import FeatureMatcher
+from dls_imagematch.feature import FeatureMatcher
+from dls_util.image import Image
 
 
 class FocusStack:

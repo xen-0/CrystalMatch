@@ -2,7 +2,7 @@ from __future__ import division
 
 import unittest
 
-from dls_imagematch.util import Rectangle, Point
+from dls_util.shape import Rectangle, Point
 
 
 class TestRectangle(unittest.TestCase):
