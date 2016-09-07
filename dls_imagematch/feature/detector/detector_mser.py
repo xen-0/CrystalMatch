@@ -5,7 +5,7 @@ from .exception import FeatureDetectorError
 from .detector import Detector
 
 
-# TODO: MSER doesn't returns regions, not keypoints
+# TODO: The OpenCV MSER function returns regions, not keypoints => convert regions to keypoints
 class MserDetector(Detector):
     """ Implements the MSER (Maximally stable extremal region extractor) keypoint detector.
 

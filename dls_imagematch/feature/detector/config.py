@@ -18,8 +18,14 @@ class DetectorConfig:
         self.orb = OrbConfig(folder + "det_orb.ini")
         self.sift = SiftConfig(folder + "det_sift.ini")
         self.surf = SurfConfig(folder + "det_surf.ini")
-        # self.mser = MserConfig(folder + "det_mser.ini")
+        self.mser = MserConfig(folder + "det_mser.ini")
         self.brisk = BriskConfig(folder + "det_brisk.ini")
+        self.fast = FastConfig(folder + "det_fast.ini")
+        self.star = StarConfig(folder + "det_star.ini")
+        self.gftt = GfttConfig(folder + "det_gftt.ini")
+        self.harris = GfttConfig(folder + "det_harris.ini")
+        self.dense = GfttConfig(folder + "det_dense.ini")
+        self.blob = GfttConfig(folder + "det_blob.ini")
 
     def get_default_options(self):
         return self.default
@@ -45,10 +51,22 @@ class DetectorConfig:
             return self.sift
         elif detector == DetectorType.SURF:
             return self.surf
-        # elif detector == DetectorType.MSER:
-        #     return self.mser
         elif detector == DetectorType.BRISK:
             return self.brisk
+        elif detector == DetectorType.MSER:
+            return self.mser
+        elif detector == DetectorType.FAST:
+            return self.fast
+        elif detector == DetectorType.STAR:
+            return self.star
+        elif detector == DetectorType.GFTT:
+            return self.gftt
+        elif detector == DetectorType.HARRIS:
+            return self.harris
+        elif detector == DetectorType.DENSE:
+            return self.dense
+        elif detector == DetectorType.BLOB:
+            return self.blob
         else:
             return self.default
 
@@ -166,39 +184,6 @@ class SurfConfig(_BaseDetectorConfig):
         self.initialize_from_file()
 
 
-class MserConfig(_BaseDetectorConfig):
-    def __init__(self, file_path):
-        _BaseDetectorConfig.__init__(self, file_path, MserDetector)
-
-        add = self.add
-        det = MserDetector
-
-        self.set_title("MSER Detector Configuration")
-        self.set_comment(det.__doc__)
-
-        self.delta = add(IntConfigItem, "Delta", det.DEFAULT_DELTA)
-        self.min_area = add(IntConfigItem, "Min Area", det.DEFAULT_MIN_AREA)
-        self.max_area = add(IntConfigItem, "Max Area", det.DEFAULT_MAX_AREA)
-        self.max_variation = add(FloatConfigItem, "Max Variation", det.DEFAULT_MAX_VARIATION)
-        self.min_diversity = add(FloatConfigItem, "Min Diversity", det.DEFAULT_MIN_DIVERSITY)
-        self.max_evolution = add(IntConfigItem, "Max Evolution", det.DEFAULT_MAX_EVOLUTION)
-        self.area_threshold = add(FloatConfigItem, "Area Threshold", det.DEFAULT_AREA_THRESHOLD)
-        self.min_margin = add(FloatConfigItem, "Min Margin", det.DEFAULT_MIN_MARGIN)
-        self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
-
-        self.delta.set_comment(det.set_delta.__doc__)
-        self.min_area.set_comment(det.set_min_area.__doc__)
-        self.max_area.set_comment(det.set_max_area.__doc__)
-        self.max_variation.set_comment(det.set_max_variation.__doc__)
-        self.min_diversity.set_comment(det.set_min_diversity.__doc__)
-        self.max_evolution.set_comment(det.set_max_evolution.__doc__)
-        self.area_threshold.set_comment(det.set_area_threshold.__doc__)
-        self.min_margin.set_comment(det.set_min_margin.__doc__)
-        self.edge_blur_size.set_comment(det.set_edge_blur_size.__doc__)
-
-        self.initialize_from_file()
-
-
 class BriskConfig(_BaseDetectorConfig):
     def __init__(self, file_path):
         _BaseDetectorConfig.__init__(self, file_path, BriskDetector)
@@ -217,4 +202,100 @@ class BriskConfig(_BaseDetectorConfig):
         self.octaves.set_comment(det.set_octaves.__doc__)
         self.pattern_scale.set_comment(det.set_pattern_scale.__doc__)
 
+        self.initialize_from_file()
+
+
+# class MserConfig(_BaseDetectorConfig):
+#     def __init__(self, file_path):
+#         _BaseDetectorConfig.__init__(self, file_path, MserDetector)
+#
+#         add = self.add
+#         det = MserDetector
+#
+#         self.set_title("MSER Detector Configuration")
+#         self.set_comment(det.__doc__)
+#
+#         self.delta = add(IntConfigItem, "Delta", det.DEFAULT_DELTA)
+#         self.min_area = add(IntConfigItem, "Min Area", det.DEFAULT_MIN_AREA)
+#         self.max_area = add(IntConfigItem, "Max Area", det.DEFAULT_MAX_AREA)
+#         self.max_variation = add(FloatConfigItem, "Max Variation", det.DEFAULT_MAX_VARIATION)
+#         self.min_diversity = add(FloatConfigItem, "Min Diversity", det.DEFAULT_MIN_DIVERSITY)
+#         self.max_evolution = add(IntConfigItem, "Max Evolution", det.DEFAULT_MAX_EVOLUTION)
+#         self.area_threshold = add(FloatConfigItem, "Area Threshold", det.DEFAULT_AREA_THRESHOLD)
+#         self.min_margin = add(FloatConfigItem, "Min Margin", det.DEFAULT_MIN_MARGIN)
+#         self.edge_blur_size = add(IntConfigItem, "Edge Blur Size", det.DEFAULT_EDGE_BLUR_SIZE)
+#
+#         self.delta.set_comment(det.set_delta.__doc__)
+#         self.min_area.set_comment(det.set_min_area.__doc__)
+#         self.max_area.set_comment(det.set_max_area.__doc__)
+#         self.max_variation.set_comment(det.set_max_variation.__doc__)
+#         self.min_diversity.set_comment(det.set_min_diversity.__doc__)
+#         self.max_evolution.set_comment(det.set_max_evolution.__doc__)
+#         self.area_threshold.set_comment(det.set_area_threshold.__doc__)
+#         self.min_margin.set_comment(det.set_min_margin.__doc__)
+#         self.edge_blur_size.set_comment(det.set_edge_blur_size.__doc__)
+#
+#         self.initialize_from_file()
+
+
+class MserConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("MSER Detector Configuration")
+        self.set_comment("Implements the MSER detector")
+        self.initialize_from_file()
+
+
+class FastConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("FAST Detector Configuration")
+        self.set_comment("Implements the FAST detector")
+        self.initialize_from_file()
+
+
+class StarConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("STAR Detector Configuration")
+        self.set_comment("Implements the STAR detector")
+        self.initialize_from_file()
+
+
+class GfttConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("GFTT Detector Configuration")
+        self.set_comment("Implements the GFTT detector")
+        self.initialize_from_file()
+
+
+class HarrisConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("Harris Detector Configuration")
+        self.set_comment("Implements the Harris corner detector")
+        self.initialize_from_file()
+
+
+class DenseConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("Dense Detector Configuration")
+        self.set_comment("Implements the Dense detector")
+        self.initialize_from_file()
+
+
+class BlobConfig(_BaseDetectorConfig):
+    def __init__(self, file_path):
+        _BaseDetectorConfig.__init__(self, file_path, Detector)
+
+        self.set_title("SimpleBlob Detector Configuration")
+        self.set_comment("Implements the SimpleBlob detector")
         self.initialize_from_file()
