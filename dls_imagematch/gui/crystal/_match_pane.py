@@ -81,25 +81,15 @@ class CrystalMatchPane(QWidget):
         search_shift = self._crystal_config.vertical_shift.value() * 100
         self._slider_search_shift = Slider("Search Shift", int(search_shift), 0, 100)
 
-        btn_config_orb = QPushButton("Configure ORB")
-        btn_config_orb.setFixedWidth(100)
-        btn_config_orb.clicked.connect(lambda: self._open_detector_config(DetectorType.ORB))
+        hbox_cfg1 = QHBoxLayout()
+        for det_type in DetectorType.LIST_ALL[:6]:
+            hbox_cfg1.addWidget(self._make_config_button(det_type))
+        hbox_cfg1.addStretch(1)
 
-        btn_config_surf = QPushButton("Configure SURF")
-        btn_config_surf.setFixedWidth(100)
-        btn_config_surf.clicked.connect(lambda: self._open_detector_config(DetectorType.SURF))
-
-        btn_config_sift = QPushButton("Configure SIFT")
-        btn_config_sift.setFixedWidth(100)
-        btn_config_sift.clicked.connect(lambda: self._open_detector_config(DetectorType.SIFT))
-
-        btn_config_brisk = QPushButton("Configure BRISK")
-        btn_config_brisk.setFixedWidth(100)
-        btn_config_brisk.clicked.connect(lambda: self._open_detector_config(DetectorType.BRISK))
-
-        btn_config_default = QPushButton("Configure Default")
-        btn_config_default.setFixedWidth(100)
-        btn_config_default.clicked.connect(lambda: self._open_detector_config("Default"))
+        hbox_cfg2 = QHBoxLayout()
+        for det_type in DetectorType.LIST_ALL[6:]:
+            hbox_cfg2.addWidget(self._make_config_button(det_type))
+        hbox_cfg2.addStretch(1)
 
         self._btn_perform_match = QPushButton("Refresh")
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
@@ -111,16 +101,20 @@ class CrystalMatchPane(QWidget):
         vbox.addWidget(self._slider_search_width)
         vbox.addWidget(self._slider_search_height)
         vbox.addWidget(self._slider_search_shift)
-        vbox.addWidget(btn_config_orb)
-        vbox.addWidget(btn_config_surf)
-        vbox.addWidget(btn_config_sift)
-        vbox.addWidget(btn_config_brisk)
-        vbox.addWidget(btn_config_default)
+        vbox.addLayout(hbox_cfg1)
+        vbox.addLayout(hbox_cfg2)
+        vbox.addSpacing(10)
         vbox.addWidget(self._btn_perform_match)
         vbox.addStretch()
 
         grp_box.setLayout(vbox)
         return grp_box
+
+    def _make_config_button(self, detector_type):
+        button = QPushButton(detector_type)
+        button.setFixedWidth(50)
+        button.clicked.connect(lambda: self._open_detector_config(detector_type))
+        return button
 
     def set_starting_point(self, point):
         if point is not None:

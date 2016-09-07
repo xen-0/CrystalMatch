@@ -112,12 +112,10 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         gui_opt.triggered.connect(lambda: self._open_config_dialog(self._gui_config))
 
         detector_menu = QtGui.QMenu('Detectors', self)
-
-        detector_menu.addAction(self._init_detector_menu(DetectorType.ORB))
-        detector_menu.addAction(self._init_detector_menu(DetectorType.SURF))
-        detector_menu.addAction(self._init_detector_menu(DetectorType.SIFT))
-        detector_menu.addAction(self._init_detector_menu(DetectorType.BRISK))
         detector_menu.addAction(self._init_detector_menu("Default"))
+
+        for det_type in DetectorType.LIST_ALL:
+            detector_menu.addAction(self._init_detector_menu(det_type))
 
         # Create menu bar
         menu_bar = self.menuBar()
