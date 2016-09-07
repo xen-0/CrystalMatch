@@ -23,9 +23,9 @@ class DetectorConfig:
         self.fast = FastConfig(folder + "det_fast.ini")
         self.star = StarConfig(folder + "det_star.ini")
         self.gftt = GfttConfig(folder + "det_gftt.ini")
-        self.harris = GfttConfig(folder + "det_harris.ini")
-        self.dense = GfttConfig(folder + "det_dense.ini")
-        self.blob = GfttConfig(folder + "det_blob.ini")
+        self.harris = HarrisConfig(folder + "det_harris.ini")
+        self.dense = DenseConfig(folder + "det_dense.ini")
+        self.blob = BlobConfig(folder + "det_blob.ini")
 
     def get_default_options(self):
         return self.default
@@ -68,6 +68,7 @@ class DetectorConfig:
         elif detector == DetectorType.BLOB:
             return self.blob
         else:
+            print("Unrecognised detector type")
             return self.default
 
 
