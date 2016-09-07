@@ -14,7 +14,8 @@ class DetectorConfig:
     def __init__(self, folder):
         self._folder = folder
 
-        self.default = DefaultConfig(folder + "det_default.ini")
+        self.licensing = LicensingConfig(folder + "licensing.ini")
+
         self.orb = OrbConfig(folder + "det_orb.ini")
         self.sift = SiftConfig(folder + "det_sift.ini")
         self.surf = SurfConfig(folder + "det_surf.ini")
@@ -27,8 +28,8 @@ class DetectorConfig:
         self.dense = DenseConfig(folder + "det_dense.ini")
         self.blob = BlobConfig(folder + "det_blob.ini")
 
-    def get_default_options(self):
-        return self.default
+    def get_licensing_options(self):
+        return self.licensing
 
     def is_detector_enabled(self, detector):
         """ Returns true if the detector is enabled. Takes into account whether the detector is non-free and if
@@ -37,9 +38,9 @@ class DetectorConfig:
         is_enabled = options.enabled.value()
 
         if is_enabled:
-            default = self.get_default_options()
+            licensing = self.get_licensing_options()
             is_non_free = DetectorType.is_non_free(detector)
-            if is_non_free and not default.use_non_free.value():
+            if is_non_free and not licensing.use_non_free.value():
                 is_enabled = False
 
         return is_enabled
@@ -68,8 +69,20 @@ class DetectorConfig:
         elif detector == DetectorType.BLOB:
             return self.blob
         else:
-            print("Unrecognised detector type")
-            return self.default
+            raise ValueError("Unrecognised detector type")
+
+
+class LicensingConfig(Config):
+    def __init__(self, file_path):
+        Config.__init__(self, file_path)
+
+        self.set_title("Detector Licensing Configuration")
+        self.set_comment("Some detector algorithms are proprietary and are not free for commercial use.")
+
+        self.use_non_free = self.add(BoolConfigItem, "Non-Free Algorithms", default=True)
+        self.use_non_free.set_comment("Use proprietary algorithms (SIFT and SURF) in matching.")
+
+        self.initialize_from_file()
 
 
 class _BaseDetectorConfig(Config):
@@ -86,22 +99,6 @@ class _BaseDetectorConfig(Config):
         self.enabled.set_comment(det.set_enabled.__doc__)
         self.extractor.set_comment(det.set_extractor.__doc__)
         self.keypoint_limit.set_comment(det.set_keypoint_limit.__doc__)
-
-
-class DefaultConfig(_BaseDetectorConfig):
-    def __init__(self, file_path):
-        _BaseDetectorConfig.__init__(self, file_path, Detector)
-
-        add = self.add
-        det = Detector
-
-        self.set_title("Default Detector Configuration")
-        self.set_comment(det.__doc__)
-
-        self.use_non_free = add(BoolConfigItem, "Non-Free Algorithms", default=True)
-        self.use_non_free.set_comment("Use proprietary algorithms (SIFT and SURF) in matching.")
-
-        self.initialize_from_file()
 
 
 class OrbConfig(_BaseDetectorConfig):

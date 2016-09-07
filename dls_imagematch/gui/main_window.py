@@ -112,10 +112,13 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         gui_opt.triggered.connect(lambda: self._open_config_dialog(self._gui_config))
 
         detector_menu = QtGui.QMenu('Detectors', self)
-        detector_menu.addAction(self._init_detector_menu("Default"))
-
         for det_type in DetectorType.LIST_ALL:
             detector_menu.addAction(self._init_detector_menu(det_type))
+
+        license_opt = QtGui.QAction('&Licensing...', self)
+        license_opt.setStatusTip('Open Detector Licensing Options Dialog')
+        config = DetectorConfig(self._gui_config.config_dir.value()).get_licensing_options()
+        license_opt.triggered.connect(lambda: self._open_config_dialog(config))
 
         # Create menu bar
         menu_bar = self.menuBar()
@@ -126,6 +129,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         option_menu.addAction(gui_opt)
         option_menu.addAction(align_opt)
         option_menu.addAction(crystal_opt)
+        option_menu.addAction(license_opt)
         option_menu.addMenu(detector_menu)
 
     def _init_detector_menu(self, detector):
