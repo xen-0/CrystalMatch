@@ -2,6 +2,9 @@ from PyQt4 import QtGui, QtCore
 
 
 class Slider(QtGui.QWidget):
+    """ A PyQt widget that includes a slider and linked textbox allowing display and editing
+    of the selected integer value.
+    """
     signal_value_changed = QtCore.pyqtSignal(int)
 
     def __init__(self, name, initial, min_val, max_val, sld_width=180):
