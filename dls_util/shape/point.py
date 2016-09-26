@@ -70,9 +70,21 @@ class Point:
         """ Return the coordinates as an (x, y) tuple. """
         return self.x, self.y
 
+    def serialize(self, sep=";"):
+        return "{}{}{}".format(self.x, sep, self.y)
+
     @staticmethod
     def from_array(arr):
         """ Create a new point from a length-2 array of x,y coordinates. """
         return Point(arr[0], arr[1])
+
+    @staticmethod
+    def deserialize(string, sep=";"):
+        """ Create a point from a string representation. """
+        x, y = string.split(sep)
+        try:
+            return Point(float(x), float(y))
+        except:
+            raise ValueError("Failed to parse Point from string: '{}'".format(string))
 
 
