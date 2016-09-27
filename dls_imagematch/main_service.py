@@ -14,10 +14,10 @@ else:
 
 
 def main():
-    parser = get_argument_parser()
+    parser = _get_argument_parser()
     args = parser.parse_args()
 
-    selected_points = parse_selected_points_from_args(args)
+    selected_points = _parse_selected_points_from_args(args)
     config_directory = args.config
     if config_directory is None:
         config_directory = CONFIG_DIR
@@ -26,7 +26,7 @@ def main():
     service.perform_match(args.image_marked.name, args.image_target.name, selected_points)
 
 
-def parse_selected_points_from_args(args):
+def _parse_selected_points_from_args(args):
     """
     Parse the selected points list provided by the command line for validity and returns a list of Point objects.
     :param args: Command line arguments provided by argument parser - must contain 'selected_points'
@@ -47,7 +47,7 @@ def parse_selected_points_from_args(args):
     return selected_points
 
 
-def get_argument_parser():
+def _get_argument_parser():
     """
     Return an argument parser for the Crystal Matching service.
     :return: Argument parser.
