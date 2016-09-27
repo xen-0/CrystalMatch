@@ -25,8 +25,20 @@ The following steps will help you prepare an appropriate Python environment to r
     * PyQt4-4.11.4-cp27-none-win32.whl
 
 
+Running from the Command Line
+=============================
 
+To run the service from the command line the root directory of project (ie: the root of the git repository) must be added to the `PYTHONPATH` environment variable.
 
+The service can be run without this step but the `PYTHONPATH` variable must be defined in the command as follows:
+
+```
+PYTHONPATH=".." python main_service.py [marked-image] [target-image] [x,y ...]
+```
+OR
+```
+PYTHONPATH="[path-to-project-directory]" python main_service.py [marked-image] [target-image] [x,y ...]
+```
 
 
 

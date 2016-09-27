@@ -1,11 +1,10 @@
 import sys
 import argparse
 import re
-from dls_util.shape import Point
-from os.path import dirname
+from os import access, R_OK
 from sys import path
 from service import CrystalMatchService
-path.append(dirname(path[0]))
+from dls_util.shape import Point
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
