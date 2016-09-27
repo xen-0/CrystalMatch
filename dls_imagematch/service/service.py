@@ -28,6 +28,7 @@ class CrystalMatchService:
 
         # Perform Crystal Matching
         match_result = self._perform_matching(aligned_images, selected_points)
+        return match_result
 
     def _perform_alignment(self, formulatrix_image, beamline_image):
         """ Perform alignment on the two images, returning an AlignedImages object. """
