@@ -1,5 +1,7 @@
 from __future__ import division
 
+import os
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout
@@ -28,8 +30,8 @@ class ImageSelector(QtGui.QGroupBox):
     def _init_ui(self):
         """ Create all the display elements of the widget. """
         # Load image button
-        btn_load = QPushButton(self.BUTTON_TEXT)
-        btn_load.clicked.connect(self._select_image_from_file_dialog)
+        self._btn_load = QPushButton(self.BUTTON_TEXT)
+        self._btn_load.clicked.connect(self._select_image_from_file_dialog)
 
         # Selection filename - displays filename of selected images (A and B)
         self._lbl_filename = QLabel(self.NO_IMAGE_LABEL)
@@ -44,14 +46,19 @@ class ImageSelector(QtGui.QGroupBox):
 
         # Widget Layout
         hbox_load_btn = QHBoxLayout()
-        hbox_load_btn.addWidget(btn_load)
+        hbox_load_btn.addWidget(self._btn_load)
         hbox_load_btn.addWidget(self._lbl_filename)
+        hbox_load_btn.addStretch(1)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox_load_btn)
         vbox.addWidget(self._frame)
 
         self.setLayout(vbox)
+
+    def set_button_visible(self, visible):
+        self._btn_load.setVisible(visible)
+        self._lbl_filename.setVisible(visible)
 
     def image(self):
         return self._image
@@ -63,7 +70,11 @@ class ImageSelector(QtGui.QGroupBox):
 
     def _select_image_from_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
-        input_dir = self._gui_config.input_dir.value()
+        if self._gui_config is not None:
+            input_dir = self._gui_config.input_dir.value()
+        else:
+            input_dir = os.getcwd()
+
         file_path = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', input_dir))
 
         if file_path:
