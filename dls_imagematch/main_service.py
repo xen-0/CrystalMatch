@@ -32,9 +32,12 @@ def parse_selected_points_from_args(args):
     """
     selected_points = []
     point_expected_format = re.compile("[0-9]+,[0-9]+")
-    for point_string in args.coordinates:
+    for point_string in args.selected_points:
         point_string = point_string.strip('()')
-        if point_expected_format.fullmatch(point_string) is not None:
+        match = point_expected_format.match(point_string)
+        # Check the regex matches the entire string
+        # DEV NOTE: can use re.full_match in Python v3
+        if match is not None and match.span()[1] == len(point_string):
             x, y = map(int, point_string.strip('()').split(','))
             selected_points.append(Point(x, y))
         else:
