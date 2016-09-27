@@ -26,6 +26,11 @@ def main():
 
 
 def parse_selected_points_from_args(args):
+    """
+    Parse the selected points list provided by the command line for validity and returns a list of Point objects.
+    :param args: Command line arguments provided by argument parser - must contain 'selected_points'
+    :return: List of Selected Points.
+    """
     selected_points = []
     point_expected_format = re.compile("[0-9]+,[0-9]+")
     for point_string in args.coordinates:
@@ -39,6 +44,10 @@ def parse_selected_points_from_args(args):
 
 
 def get_argument_parser():
+    """
+    Return an argument parser for the Crystal Matching service.
+    :return: Argument parser.
+    """
     parser = argparse.ArgumentParser(description="Run Crystal Matching algorithm attempting to translate co-ordinates "
                                                  "from a marked image to the target image.")
     parser.add_argument('image_marked',
