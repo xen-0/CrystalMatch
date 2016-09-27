@@ -1,8 +1,7 @@
 import sys
 import argparse
 import re
-from os import access, R_OK
-from sys import path
+from os import access, R_OK, path
 from service import CrystalMatchService
 from dls_util.shape import Point
 
@@ -19,8 +18,11 @@ def main():
     args = parser.parse_args()
 
     selected_points = parse_selected_points_from_args(args)
+    config_directory = args.config
+    if config_directory is None:
+        config_directory = CONFIG_DIR
 
-    service = CrystalMatchService(CONFIG_DIR)
+    service = CrystalMatchService(config_directory)
     service.perform_match(args.image_marked.name, args.image_target.name, selected_points)
 
 
@@ -65,8 +67,28 @@ def get_argument_parser():
                         nargs='+',
                         help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                              "to the target image.")
+    parser.add_argument('--config',
+                        metavar="config_dir",
+                        action=ReadableConfigDir,
+                        help="Sets the configuration directory."
+                        )
     return parser
 
+
+class ReadableConfigDir(argparse.Action):
+    """
+    Argument parser action which verifies that the config directory specified is a valid, readable directory.
+    """
+    def __call__(self, parser, namespace, values, option_string=None):
+        prospective_dir = values
+        if not path.isdir(prospective_dir):
+            print ("ERROR: configuration directory does not exist: '" + prospective_dir + "'")
+            exit(1)
+        if access(prospective_dir, R_OK):
+            setattr(namespace, self.dest, prospective_dir)
+        else:
+            print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")
+            exit(1)
 
 if __name__ == '__main__':
     main()
