@@ -135,7 +135,8 @@ class CrystalMatchControl(QGroupBox):
         max_points = self.NUM_FRAMES
         size = self._crystal_config.region_size.value()
         color = self._gui_config.color_crystal_image1.value()
-        dialog = PointSelectDialog(self, self._aligned_images, max_points, size, color)
+        image = self._aligned_images.image1.to_color()
+        dialog = PointSelectDialog(self, image, max_points, size, color)
         result_ok = dialog.exec_()
 
         points = []

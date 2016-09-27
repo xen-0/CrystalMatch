@@ -126,7 +126,8 @@ class CrystalMatchPane(QWidget):
 
         region_size = self._slider_region_size.value()
         color = self._gui_config.color_crystal_image1.value()
-        dialog = PointSelectDialog(self, self._aligned_images, max_points, region_size, color)
+        image = self._aligned_images.image1.to_color()
+        dialog = PointSelectDialog(self, image, max_points, region_size, color)
         result_ok = dialog.exec_()
 
         if result_ok:
