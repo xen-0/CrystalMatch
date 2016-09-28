@@ -17,6 +17,6 @@ with open(case_file, 'w') as f:
             file1 = template.format(plate, batch1, name)
             file2 = template.format(plate, batch2, name)
 
-            line = file1 + "," + file2
+            line = file1 + ",," + file2 + ","
             print(line)
             f.write(line + "\n")

@@ -34,19 +34,51 @@ class _ImageWithPoints:
             image.draw_cross(point, Color.Green(), size=30, thickness=5)
         return image
 
+    def serialize(self):
+        """ Generate a string representation of this object that can be written to file. """
+        str_points = [p.serialize() for p in self.points()]
+        return self.path() + "," + ":".join(str_points)
+
+    @staticmethod
+    def deserialize(string, image_dir=""):
+        """ From format:
+            <image path>,<x1>;<y1>:<x2>;<y2>:...
+        """
+        tokens = string.split(",")
+        if len(tokens) != 2:
+            raise ValueError("Cannot deserialize crystal test case string.")
+
+        path = tokens[0].strip()
+        str_points = [p for p in tokens[1].strip().split(":") if any(p)]
+
+        _ImageWithPoints.check_file_exists(image_dir, path)
+
+        # Extract selected point coordinates
+        points = []
+        for str_point in str_points:
+            point = Point.deserialize(str_point)
+            points.append(point)
+
+        return _ImageWithPoints(path, points)
+
+    @staticmethod
+    def check_file_exists(prefix, file_path):
+        if not os.path.isfile(prefix + file_path):
+            raise ValueError("File: '{}', does not exist!".format(file_path))
+
 
 class CrystalTestCase:
     """ Represents a crystal matching system test case. The case contains the paths of the two image files,
     the user selected points in the first image, and the expected result points in the second image.
     """
-    def __init__(self, path_prefix, image_1_path, image_2_path, image_1_points, image_2_points):
+    def __init__(self, path_prefix, image_1, image_2):
         self._path_prefix = path_prefix
 
-        self._image1 = _ImageWithPoints(image_1_path, image_1_points)
-        self._image2 = _ImageWithPoints(image_2_path, image_2_points)
+        self._image1 = image_1
+        self._image2 = image_2
         self._images = [self._image1, self._image2]
 
-        self.name = image_1_path
+        self.name = image_1.path()
 
     # -------- ACCESSORS -----------------------
     def _get_image(self, img_num):
@@ -81,57 +113,27 @@ class CrystalTestCase:
     # -------- FUNCTIONALITY -----------------------
     def serialize(self):
         """ Generate a string representation of this object that can be written to file. """
-        tokens = list()
-        tokens.append(self._image1.path())
-        tokens.append(self._image2.path())
-
-        for p1, p2 in zip(self._image1.points(), self._image2.points()):
-            tokens.append(p1.serialize() + ":" + p2.serialize())
-
-        return ",".join(tokens)
+        return self._image1.serialize() + "," + self._image2.serialize()
 
     @staticmethod
     def deserialize(string, image_dir=""):
         """ From format:
-            <image 1 path>, <image 2 path>, <x1_1>;<y1_1>:<x1_2>;<y1_2>, <x2_1>;<y2_1>:<x2_2>;<y2_2>, ...
+            <image 1 path>,<x1>;<y1>:<x2>;<y2>,<image 2 path>,<x1>;<y1>:<x2>;<y2>
         """
         tokens = string.split(",")
-        if len(tokens) < 2:
+        if len(tokens) != 4:
             raise ValueError("Cannot deserialize crystal test case string.")
 
-        # Get image paths
-        image_1_path = tokens[0].strip()
-        image_2_path = tokens[1].strip()
+        string1 = tokens[0] + "," + tokens[1]
+        image1 = _ImageWithPoints.deserialize(string1, image_dir)
 
-        CrystalTestCase.check_file_exists(image_dir, image_1_path)
-        CrystalTestCase.check_file_exists(image_dir, image_2_path)
-
-        # Extract selected point coordinates
-        points_1 = []
-        points_2 = []
-
-        if len(tokens) > 2:
-            for point in tokens[2:]:
-                point_1, point_2 = CrystalTestCase._extract_points(point)
-                points_1.append(point_1)
-                points_2.append(point_2)
+        string2 = tokens[2] + "," + tokens[3]
+        image2 = _ImageWithPoints.deserialize(string2, image_dir)
 
         # Create test case
-        case = CrystalTestCase(image_dir, image_1_path, image_2_path, points_1, points_2)
-        case.name = tokens[0].strip() + " -> " + tokens[1].strip()
+        case = CrystalTestCase(image_dir, image1, image2)
+        case.name = tokens[0].strip() + " -> " + tokens[2].strip()
         return case
-
-    @staticmethod
-    def _extract_points(string):
-        """ String is the x,y coords of the point in the two images: x1;y1:x2;y2. Return two point objects. """
-        point_strings = string.strip().split(":")
-        points = [Point.deserialize(ps).intify() for ps in point_strings]
-        return points
-
-    @staticmethod
-    def check_file_exists(prefix, file_path):
-        if not os.path.isfile(prefix + file_path):
-            raise ValueError("File: '{}', does not exist!".format(file_path))
 
     @staticmethod
     def check_valid_image_number(number):
