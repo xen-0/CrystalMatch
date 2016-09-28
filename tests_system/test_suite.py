@@ -12,6 +12,9 @@ class CrystalTestSuite:
 
         self.cases = self._load_cases_from_file(case_file, image_directory)
 
+    def testable_cases(self):
+        return [c for c in self.cases if c.is_testable_case()]
+
     def image_directory(self): return self._image_directory
 
     def save_to_file(self):

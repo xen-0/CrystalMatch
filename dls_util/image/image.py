@@ -66,11 +66,14 @@ class Image:
         blank.draw_rectangle(blank.bounds(), color, thickness=-1)
         return blank
 
-    def popup(self, title='Popup Image'):
+    def popup(self, title='Popup Image', block=True):
         """ Pop up a window to display an image until a key is pressed (blocking)."""
         cv2.imshow(title, self._img)
-        cv2.waitKey(0)
-        cv2.destroyWindow(title)
+        if block:
+            cv2.waitKey(0)
+            cv2.destroyWindow(title)
+        else:
+            cv2.waitKey(1)
 
     def copy(self):
         """ Return an Image object which is a deep copy of this one. """

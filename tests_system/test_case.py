@@ -34,6 +34,12 @@ class _ImageWithPoints:
             image.draw_cross(point, Color.Green(), size=30, thickness=5)
         return image
 
+    def has_points(self):
+        return any(self._points)
+
+    def num_points(self):
+        return len(self._points)
+
     def serialize(self):
         """ Generate a string representation of this object that can be written to file. """
         str_points = [p.serialize() for p in self.points()]
@@ -109,6 +115,13 @@ class CrystalTestCase:
 
     def set_image_path(self, path, img_num):
         self._get_image(img_num).set_path(path)
+
+    def is_testable_case(self):
+        testable = self._image1 is not None and self._image2 is not None \
+                   and self._image1.has_points() \
+                   and self._image1.num_points() == self._image2.num_points()
+
+        return testable
 
     # -------- FUNCTIONALITY -----------------------
     def serialize(self):

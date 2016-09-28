@@ -23,9 +23,6 @@ class CrystalMatchService:
         # Perform alignment
         aligned_images = self._perform_alignment(image1, image2)
 
-        # overlay_image = aligned_images.overlay()
-        # overlay_image.popup()
-
         # Perform Crystal Matching
         match_result = self._perform_matching(aligned_images, selected_points)
         return match_result
@@ -44,7 +41,7 @@ class CrystalMatchService:
 
         crystal_match_results = matcher.match(selected_points)
         self._print_match_results(crystal_match_results)
-        self._popup_match_results(crystal_match_results)
+        #self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
 
