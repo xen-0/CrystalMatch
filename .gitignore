@@ -1,7 +1,6 @@
 .idea
 test-images
 test-output
-test-focusstack
 scratchpad.py
 *.ini
 *.pdf
