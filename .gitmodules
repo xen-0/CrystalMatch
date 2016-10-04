@@ -1,0 +1,3 @@
+[submodule "diamond-opencv-vision-utils"]
+	path = diamond-opencv-vision-utils
+	url = git@bitbucket.org:chris_martin_tessella/diamond-opencv-vision-utils.git
