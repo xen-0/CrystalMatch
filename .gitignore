@@ -1,10 +1,7 @@
-.idea
+*.iml
+.idea/misc.xml
 test-images
 test-output
-scratchpad.py
 *.ini
-*.pdf
 
 *.pyc
-*.zip
-*.csv
