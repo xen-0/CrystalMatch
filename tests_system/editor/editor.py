@@ -140,7 +140,7 @@ class TestEditor(QMainWindow):
         """ Display a dialog and return the result to the caller. """
         max_points = 10
         size = 100
-        color = Color.Green()
+        color = Color.green()
         dialog = PointSelectDialog(self, image, max_points, size, color)
         result_ok = dialog.exec_()
 

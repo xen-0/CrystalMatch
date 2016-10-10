@@ -6,7 +6,7 @@ from dls_util.image import Image, Color
 
 class Overlayer:
     @staticmethod
-    def create_overlay_image(image1, image2, offset, rect_color=Color.Black()):
+    def create_overlay_image(image1, image2, offset, rect_color=Color.black()):
         """ For the two images, A and B, where the position of B is offset from that of A, overlay
         image B onto image A at the appropriate position. The overlaid area will ve a blending of the
         two images. A rectangle will be drawn around the area.

@@ -14,18 +14,18 @@ class GuiConfig(Config):
         self.set_title("Crystal Matching GUI Configuration")
         self.set_comment("Configuration for the program GUI including displayed colors and input/output directories.")
 
-        self.color_align = add(ColorConfigItem, "Align Color", Color.Purple())
+        self.color_align = add(ColorConfigItem, "Align Color", Color.purple())
         self.color_align.set_comment("Outline color displayed in GUI to indicate alignment overlap of two images.")
 
-        self.color_search = add(ColorConfigItem, "Search Box Color", Color.Orange())
+        self.color_search = add(ColorConfigItem, "Search Box Color", Color.orange())
         self.color_search.set_comment("Outline color displayed in GUI to indicate region to be searched for feature "
                                       "matching in second image.")
 
-        self.color_crystal_image1 = add(ColorConfigItem, "Image1 Crystal Color", Color.Green())
+        self.color_crystal_image1 = add(ColorConfigItem, "Image1 Crystal Color", Color.green())
         self.color_crystal_image1.set_comment("Color displayed in GUI to indicate the position of the user selected "
                                               "points in the first image")
 
-        self.color_crystal_image2 = add(ColorConfigItem, "Image2 Crystal Color", Color.Red())
+        self.color_crystal_image2 = add(ColorConfigItem, "Image2 Crystal Color", Color.red())
         self.color_crystal_image2.set_comment("Color displayed in GUI to indicate the position of the points in the "
                                               "second image calculated by feature matching.")
 
