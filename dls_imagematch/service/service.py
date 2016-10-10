@@ -4,7 +4,7 @@ from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
 from dls_imagematch.feature.draw import MatchPainter
-from dls_util.image import Image
+from dls_util.imaging import Image
 
 
 class CrystalMatchService:

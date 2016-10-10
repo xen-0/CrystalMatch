@@ -1,7 +1,7 @@
 import os
 
 from dls_util.shape import Point
-from dls_util.image import Image, Color
+from dls_util.imaging import Image, Color
 
 
 class _ImageWithPoints:

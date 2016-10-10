@@ -1,7 +1,7 @@
 import cv2
 
 from dls_util.shape import Rectangle, Point
-from dls_util.image import Image, Color
+from dls_util.imaging import Image, Color
 
 
 class Overlayer:

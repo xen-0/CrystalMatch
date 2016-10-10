@@ -5,7 +5,7 @@ path.append(dirname(path[0]))
 from PyQt4 import QtGui
 from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QPushButton
 
-from dls_util.image import Color
+from dls_util.imaging import Color
 from dls_imagematch.gui.components import ImageSelector
 from dls_imagematch.gui.crystal import PointSelectDialog
 

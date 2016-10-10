@@ -3,7 +3,7 @@ from __future__ import division
 import cv2
 
 from dls_util.shape import Point
-from dls_util.image import Image, Color
+from dls_util.imaging import Image, Color
 
 
 class MatchPainter:
