@@ -1,10 +1,9 @@
-.idea
+*.iml
+.idea/misc.xml
+.idea/workspace.xml
 test-images
 test-output
-scratchpad.py
 *.ini
-*.pdf
 
 *.pyc
-*.zip
-*.csv
+gi

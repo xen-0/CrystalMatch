@@ -13,6 +13,7 @@ The following steps will help you prepare an appropriate Python environment to r
     * numpy
     * OpenCV
     * PyQt4
+    * mock (standard in Python v3.3+ but required for unit tests to run under v2.7)
     
 * Some of these packages can be installed using `pip`. To do this:
     * Open cmd.exe (being sure to ‘Run as Administrator’)

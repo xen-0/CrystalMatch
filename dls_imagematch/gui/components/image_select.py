@@ -6,7 +6,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout
 
-from dls_util.image import Image
+from dls_util.imaging import Image
 
 
 class ImageSelector(QtGui.QGroupBox):

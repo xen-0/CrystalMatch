@@ -17,4 +17,3 @@ for i, case in enumerate(cases):
     case.image_marked(1).rescale(0.3).popup(block=False)
 
     result = match_service.perform_match(case.image_path(1), case.image_path(2), case.image_points(1))
-

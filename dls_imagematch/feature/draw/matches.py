@@ -3,7 +3,7 @@ from __future__ import division
 import cv2
 
 from dls_util.shape import Point
-from dls_util.image import Image, Color
+from dls_util.imaging import Image, Color
 
 
 class MatchPainter:
@@ -15,7 +15,7 @@ class MatchPainter:
     """
     DEFAULT_IMAGE_SIZE = 900
     DEFAULT_PADDING = 5
-    DEFAULT_BACK_COLOR = Color.Black()
+    DEFAULT_BACK_COLOR = Color.black()
 
     IMAGE_1 = 1
     IMAGE_2 = 2
@@ -108,11 +108,11 @@ class MatchPainter:
 
         if image1_point is not None:
             point1 = self._point_to_image_coords(image1_point, 1)
-            image.draw_cross(point1, Color.Green(), size=10, thickness=2)
+            image.draw_cross(point1, Color.green(), size=10, thickness=2)
 
         if image2_point is not None:
             point2 = self._point_to_image_coords(image2_point, 2)
-            image.draw_cross(point2, Color.Green(), size=10, thickness=2)
+            image.draw_cross(point2, Color.green(), size=10, thickness=2)
 
         return image
 
@@ -130,7 +130,7 @@ class MatchPainter:
         if shape is not None:
             shape = self._polygon_to_image_coords(shape, image_num)
             for edge in shape.edges():
-                image.draw_line(edge[0], edge[1], Color.Orange(), thickness=2)
+                image.draw_line(edge[0], edge[1], Color.orange(), thickness=2)
 
     def draw_matches(self, matches, highlight_matches=[], image=None):
         """ Draw lines for each of the matches between the respective points in the two images.
@@ -141,12 +141,12 @@ class MatchPainter:
             image = self._background_image.copy()
 
         for match in matches:
-            color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
+            color = Color.blue() if match.is_in_transformation() else Color.slate_gray()
             self._draw_match(image, match, color, thickness=1, radius=4)
 
         for match in highlight_matches:
-            self._draw_match(image, match, Color.Yellow(), thickness=2, radius=4)
-            color = Color.Blue() if match.is_in_transformation() else Color.SlateGray()
+            self._draw_match(image, match, Color.yellow(), thickness=2, radius=4)
+            color = Color.blue() if match.is_in_transformation() else Color.slate_gray()
             self._draw_match(image, match, color, thickness=1, radius=4)
 
         return image

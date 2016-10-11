@@ -1,7 +1,7 @@
 import os
 
 from dls_util.shape import Point
-from dls_util.image import Image, Color
+from dls_util.imaging import Image, Color
 
 
 class _ImageWithPoints:
@@ -31,7 +31,7 @@ class _ImageWithPoints:
     def marked_image(self, prefix):
         image = self.image(prefix)
         for point in self._points:
-            image.draw_cross(point, Color.Green(), size=30, thickness=5)
+            image.draw_cross(point, Color.green(), size=30, thickness=5)
         return image
 
     def has_points(self):

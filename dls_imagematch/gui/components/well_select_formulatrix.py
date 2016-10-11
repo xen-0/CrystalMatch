@@ -5,7 +5,7 @@ import os
 from PyQt4 import QtCore
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 
-from dls_util.image import Image
+from dls_util.imaging import Image
 
 
 class WellSelectorFormulatrix(QGroupBox):
