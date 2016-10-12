@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="main_gui" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="Service - Run" type="PythonConfigurationType" factoryName="Python">
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
@@ -12,8 +12,8 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <module name="diamond-imagematch" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dls_imagematch/main_gui.py" />
-    <option name="PARAMETERS" value="" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dls_imagematch/main_service.py" />
+    <option name="PARAMETERS" value="../test-images/Formulatrix/46412/449/A02.jpg ../test-images/Formulatrix/46412/584/A02.jpg 1068,442 1068,442 1191,1415" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <method />
   </configuration>
