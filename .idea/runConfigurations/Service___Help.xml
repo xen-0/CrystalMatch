@@ -6,13 +6,13 @@
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dls_imagematch" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/source" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <module name="diamond-imagematch" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dls_imagematch/main_service.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/source/dls_imagematch/main_service.py" />
     <option name="PARAMETERS" value="-h" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <method />

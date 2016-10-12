@@ -42,13 +42,8 @@ To run the service from the command line the root directory of project (ie: the 
 The service can be run without this step but the `PYTHONPATH` variable must be defined in the command as follows:
 
 ```
-PYTHONPATH=".." python main_service.py [marked-image] [target-image] [x,y ...]
+PYTHONPATH="[path-to-source-directory]" python [./path/to/script]main_service.py [marked-image] [target-image] [x,y ...]
 ```
-OR
-```
-PYTHONPATH="[path-to-project-directory]" python main_service.py [marked-image] [target-image] [x,y ...]
-```
-
 
 
 
