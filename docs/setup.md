@@ -1,3 +1,11 @@
+Recommended IDE
+===============
+This application has been developed using the JetBrains PyCharm IDE. While the source code can be used separately using the information below, Pycharm is a highly recommended development tool.
+
+A free community edition of Pycharm is available from <https://www.jetbrains.com/pycharm/>; the professional edition has additional features which are useful but not essential to this project.
+
+The configuration files for Pycharm are located in `.idea` directories in the repository. The root level directory also contains example run configurations and should be detected automatically when opening the project with Pycharm for the first time.
+
 Using the Source Code - Windows
 ===============================
 This application is written in Python (v2.7) and was developed under Windows but should be portable to other platforms.
