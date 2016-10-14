@@ -2,15 +2,19 @@ import sys
 import argparse
 import re
 from os import access, R_OK, path
+
+from os.path import split, join
+
 from dls_imagematch.service import CrystalMatchService
 from dls_util.shape import Point
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
+CONFIG_DIR_NAME = "config"
 if IS_BUNDLED:
-    CONFIG_DIR = "./config/"
+    CONFIG_DIR = "./" + CONFIG_DIR_NAME + "/"
 else:
-    CONFIG_DIR = "../config/"
+    CONFIG_DIR = "../" + CONFIG_DIR_NAME + "/"
 
 
 def main():
@@ -80,14 +84,29 @@ class ReadableConfigDir(argparse.Action):
     Argument parser action which verifies that the config directory specified is a valid, readable directory.
     """
     def __call__(self, parser, namespace, values, option_string=None):
-        prospective_dir = values
+        prospective_dir = self.parse_config_path(values)
         if not path.isdir(prospective_dir):
             print ("WARNING: configuration directory not found, directory will be created: '" + prospective_dir + "'")
+            setattr(namespace, self.dest, prospective_dir)
         elif access(prospective_dir, R_OK):
             setattr(namespace, self.dest, prospective_dir)
         else:
             print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")
             exit(1)
+
+    @staticmethod
+    def parse_config_path(proposed_path):
+        """
+        Parse a string to return a path for the config directory.
+        :param proposed_path: String of the path to the configuration directory.
+        :return: Path of config directory.
+        """
+        prospective_dir = proposed_path
+        config_path, config_dir = split(prospective_dir)
+        if not config_dir == CONFIG_DIR_NAME:
+            prospective_dir = join(prospective_dir, CONFIG_DIR_NAME)
+        return prospective_dir
+
 
 if __name__ == '__main__':
     main()
