@@ -1,7 +1,7 @@
 from __future__ import division
 
 from dls_util.shape import Rectangle, Point
-from feature import BoundedFeatureMatcher
+from dls_imagematch.feature import BoundedFeatureMatcher
 from .match import CrystalMatch
 from .results import CrystalMatcherResults
 

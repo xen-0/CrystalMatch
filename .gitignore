@@ -4,6 +4,7 @@
 test-images
 test-output
 *.ini
+sys_test_output
 
 *.pyc
 gi

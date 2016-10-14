@@ -1,3 +1,5 @@
+from os.path import join
+
 from dls_util.config import Config, IntConfigItem, RangeIntConfigItem,\
     FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
 from .detector import Detector
@@ -12,19 +14,19 @@ class DetectorConfig:
     def __init__(self, folder):
         self._folder = folder
 
-        self.licensing = LicensingConfig(folder + "licensing.ini")
+        self.licensing = LicensingConfig(join(folder, "licensing.ini"))
 
-        self.orb = OrbConfig(folder + "det_orb.ini")
-        self.sift = SiftConfig(folder + "det_sift.ini")
-        self.surf = SurfConfig(folder + "det_surf.ini")
-        self.mser = MserConfig(folder + "det_mser.ini")
-        self.brisk = BriskConfig(folder + "det_brisk.ini")
-        self.fast = FastConfig(folder + "det_fast.ini")
-        self.star = StarConfig(folder + "det_star.ini")
-        self.gftt = GfttConfig(folder + "det_gftt.ini")
-        self.harris = HarrisConfig(folder + "det_harris.ini")
-        self.dense = DenseConfig(folder + "det_dense.ini")
-        self.blob = BlobConfig(folder + "det_blob.ini")
+        self.orb = OrbConfig(join(folder, "det_orb.ini"))
+        self.sift = SiftConfig(join(folder, "det_sift.ini"))
+        self.surf = SurfConfig(join(folder, "det_surf.ini"))
+        self.mser = MserConfig(join(folder, "det_mser.ini"))
+        self.brisk = BriskConfig(join(folder, "det_brisk.ini"))
+        self.fast = FastConfig(join(folder, "det_fast.ini"))
+        self.star = StarConfig(join(folder, "det_star.ini"))
+        self.gftt = GfttConfig(join(folder, "det_gftt.ini"))
+        self.harris = HarrisConfig(join(folder, "det_harris.ini"))
+        self.dense = DenseConfig(join(folder, "det_dense.ini"))
+        self.blob = BlobConfig(join(folder, "det_blob.ini"))
 
     def get_licensing_options(self):
         return self.licensing

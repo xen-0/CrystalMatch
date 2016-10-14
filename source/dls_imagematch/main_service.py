@@ -2,7 +2,7 @@ import sys
 import argparse
 import re
 from os import access, R_OK, path
-from service import CrystalMatchService
+from dls_imagematch.service import CrystalMatchService
 from dls_util.shape import Point
 
 # Detect if the program is running from source or has been bundled
@@ -82,9 +82,8 @@ class ReadableConfigDir(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         prospective_dir = values
         if not path.isdir(prospective_dir):
-            print ("ERROR: configuration directory does not exist: '" + prospective_dir + "'")
-            exit(1)
-        if access(prospective_dir, R_OK):
+            print ("WARNING: configuration directory not found, directory will be created: '" + prospective_dir + "'")
+        elif access(prospective_dir, R_OK):
             setattr(namespace, self.dest, prospective_dir)
         else:
             print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")

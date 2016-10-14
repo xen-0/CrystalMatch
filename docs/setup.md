@@ -45,6 +45,7 @@ The service can be run without this step but the `PYTHONPATH` variable must be d
 PYTHONPATH="[path-to-source-directory]" python [./path/to/script]main_service.py [marked-image] [target-image] [x,y ...]
 ```
 
+NOTE: A `config` directory will be added to the current working directory unless an alternate path is specified using the flag `--config ./path/to/dir`.
 
 
 
