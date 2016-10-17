@@ -29,6 +29,8 @@ class SystemTest(TestCase):
     OUTPUT_DIR_NAME = "sys_test_output"
     CONFIG_FLAG = "--config"
 
+    _active_output_dir = None  # Used to store the current active output out dir - should be set when sys test runs.
+
     def _get_output_dir(self):
         """
         Assert-safe method of retrieving the output directory.
@@ -50,7 +52,7 @@ class SystemTest(TestCase):
     def _get_test_output_dir(self, test_name):
         return join(self._get_output_dir(), test_name)
 
-    def _set_directory_paths(self, test_file_path):
+    def set_directory_paths(self, test_file_path):
         """
         Must be included in the setUp() method of the child TestCase.
         :param test_file_path: Must be the result of os.path.realpath(__file__) from the child file.
@@ -61,7 +63,7 @@ class SystemTest(TestCase):
         # Set output directory
         self._output_dir = join(self._get_test_suite_dir(), self.OUTPUT_DIR_NAME)
 
-    def _run_crystal_matching_test(self, test_name, cmd_line_args):
+    def run_crystal_matching_test(self, test_name, cmd_line_args):
         """
         Run the Crystal Matching algorithm in a sub-process relative to a directory named
         test_name in the test suite output directory. If the directory already exists it will be overwritten.
@@ -71,23 +73,45 @@ class SystemTest(TestCase):
         :return: The path of the output directory.
         """
 
-        test_output_dir = self._get_test_output_dir(test_name)
-        if exists(test_output_dir):
-            rmtree(test_output_dir)
-        makedirs(test_output_dir)
+        self._active_output_dir = self._get_test_output_dir(test_name)
+        if exists(self._active_output_dir):
+            rmtree(self._active_output_dir)
+        makedirs(self._active_output_dir)
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
-            cmd_line_args = self.CONFIG_FLAG + " " + test_output_dir + " " + cmd_line_args
+            cmd_line_args = cmd_line_args + " " + self.CONFIG_FLAG + " " + self._active_output_dir
 
         # Run Crystal Matching Algorithm with command line arguments
         command = "python -m dls_imagematch.main_service " + cmd_line_args
-        # TODO: Improve logging to associate this with the unit test
-        print ("COMMAND: " + command)
-        call(command, shell=True, cwd=test_output_dir)
-        return test_output_dir
+        stdout_file = self._get_std_out_file("w")
+        stdout_file.writelines("COMMAND LINE: " + command)
+        stderr_file = self._get_std_err_file("w")
+        call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
+        return self._active_output_dir
+
+    def _get_std_out_file(self, mode):
+        """
+        Gets the stdout file from the current active output directory
+        :param mode: File read/write mode
+        :return: File object for stdout file
+        """
+        return file(join(self._active_output_dir, "stdout"), mode=mode)
+
+    def _get_std_err_file(self, mode):
+        """
+        Gets the stderr file from the current active output directory
+        :param mode: File read/write mode
+        :return: File object for stderr file
+        """
+        return file(join(self._active_output_dir, "stderr"), mode=mode)
 
     # Testing Tools
+
+    def failUnlessStdoutContains(self, string):
+        with self._get_std_out_file("r") as std_out_file:
+            std_out = std_out_file.read()
+            self.failUnless(string in std_out)
 
     def failUnlessDirExists(self, directory_path):
         self.failUnless(exists(directory_path), "Directory does not exist: " + directory_path)

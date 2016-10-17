@@ -5,13 +5,13 @@ from system_test import SystemTest
 
 class TestCommandLineConfigFlag(SystemTest):
     def setUp(self):
-        self._set_directory_paths(realpath(__file__))
+        self.set_directory_paths(realpath(__file__))
 
     def test_config_flag_creates_config_directory(self):
         test_name = "test_config_flag_creates_config_directory"
         config = "--config " + join(self._get_test_output_dir(test_name), "test", "dir", "path")
-        self._run_crystal_matching_test(test_name,
-                                        config + " " + "../../input/A01_1.jpg ../../input/A01_2.jpg 1068,442")
+        self.run_crystal_matching_test(test_name,
+                                       config + " " + "../../input/A01_1.jpg ../../input/A01_2.jpg 1068,442")
 
         # Check configuration directory exists
         expected_config_dir = join(self._get_test_output_dir(test_name), "test", "dir", "path", "config")
@@ -31,3 +31,6 @@ class TestCommandLineConfigFlag(SystemTest):
                           "licensing.ini"]
         self.failUnlessDirExists(expected_config_dir)
         self.failUnlessDirContainsFiles(expected_config_dir, expected_files)
+
+        # Test that a warning message is shown when the config dir does not exist
+        self.failUnlessStdoutContains("WARNING: configuration directory not found, directory will be created")
