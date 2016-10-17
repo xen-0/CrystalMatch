@@ -27,7 +27,7 @@ def main():
         config_directory = CONFIG_DIR
 
     service = CrystalMatchService(config_directory)
-    service.perform_match(args.image_marked.name, args.image_target.name, selected_points)
+    service.perform_match(args.image_input.name, args.image_output.name, selected_points)
 
 
 def _parse_selected_points_from_args(args):
@@ -57,13 +57,14 @@ def _get_argument_parser():
     :return: Argument parser.
     """
     parser = argparse.ArgumentParser(description="Run Crystal Matching algorithm attempting to translate co-ordinates "
-                                                 "from a marked image to the target image.")
-    parser.add_argument('image_marked',
-                        metavar="marked_image",
+                                                 "on an input image to the coordinate-space of an output image while "
+                                                 "accounting for possible movement of crystals in the sample.")
+    parser.add_argument('image_input',
+                        metavar="input_image",
                         type=file,
-                        help='Image file corresponding to the co-ordinates provided.')
-    parser.add_argument('image_target',
-                        metavar="target_image",
+                        help='Input Image file corresponding to the co-ordinates provided.')
+    parser.add_argument('image_output',
+                        metavar="output_image",
                         type=file,
                         help='Image file on which to find translated co-ordinates.')
     parser.add_argument('selected_points',
@@ -72,10 +73,16 @@ def _get_argument_parser():
                         help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                              "to the target image.")
     parser.add_argument('--config',
-                        metavar="config_dir",
+                        metavar="path",
                         action=ReadableConfigDir,
-                        help="Sets the configuration directory."
-                        )
+                        help="Sets the configuration directory.")
+    # TODO: apply the scale values below to alignment image calculation.
+    parser.add_argument('--scale_input',
+                        metavar="scale",
+                        help="The scale of the input image in micrometers per pixel. The default value is 1.0um/pixel")
+    parser.add_argument('--scale_output',
+                        metavar="scale",
+                        help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
     return parser
 
 
