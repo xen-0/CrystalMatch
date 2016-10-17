@@ -14,4 +14,4 @@ class ExampleSystemTest(SystemTest):
         This will create a test output directory called test_something in the parent directory which can be tested.
         """
         self.run_crystal_matching_test("test_something",
-                                        "../../input/A01_1.jpg ../../input/A01_2.jpg 1068,442 1191,1415")
+                                       "../../input/A01_1.jpg ../../input/A01_2.jpg 1068,442 1191,1415")

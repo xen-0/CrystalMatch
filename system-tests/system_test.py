@@ -2,6 +2,7 @@ from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir
 from re import match
 from shutil import rmtree
+from string import replace
 from subprocess import call
 from unittest import TestCase
 
@@ -68,6 +69,12 @@ class SystemTest(TestCase):
         Run the Crystal Matching algorithm in a sub-process relative to a directory named
         test_name in the test suite output directory. If the directory already exists it will be overwritten.
         If the --config flag is not included in the command line args it will be set to the output directory.
+        The following tokens can be used in command line arguments:
+
+        {input} -> replaced with the path to a directory in the test_suite_dir called 'input'
+         usage: {input}/[file]
+
+
         :param test_name: Directory name used to store output in the test suite output dir.
         :param cmd_line_args: Command line arguments to be used for the sub-process call.
         :return: The path of the output directory.
@@ -77,6 +84,9 @@ class SystemTest(TestCase):
         if exists(self._active_output_dir):
             rmtree(self._active_output_dir)
         makedirs(self._active_output_dir)
+
+        # Replace tokens in the command line
+        cmd_line_args = replace(cmd_line_args, "{input}", join(self._get_test_suite_dir(), "input"))
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
