@@ -1,9 +1,11 @@
 import sys
 import argparse
 import re
-from os import access, R_OK, path
+from os import access, R_OK, path, listdir
 
-from os.path import split, join
+from os.path import split, join, isdir
+
+from re import match
 
 from dls_imagematch.service import CrystalMatchService
 from dls_util.shape import Point
@@ -40,10 +42,10 @@ def _parse_selected_points_from_args(args):
     point_expected_format = re.compile("[0-9]+,[0-9]+")
     for point_string in args.selected_points:
         point_string = point_string.strip('()')
-        match = point_expected_format.match(point_string)
+        match_results = point_expected_format.match(point_string)
         # Check the regex matches the entire string
         # DEV NOTE: can use re.full_match in Python v3
-        if match is not None and match.span()[1] == len(point_string):
+        if match_results is not None and match_results.span()[1] == len(point_string):
             x, y = map(int, point_string.strip('()').split(','))
             selected_points.append(Point(x, y))
         else:
@@ -101,19 +103,26 @@ class ReadableConfigDir(argparse.Action):
             print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")
             exit(1)
 
-    @staticmethod
-    def parse_config_path(proposed_path):
+    def parse_config_path(self, proposed_path):
         """
         Parse a string to return a path for the config directory.
         :param proposed_path: String of the path to the configuration directory.
         :return: Path of config directory.
         """
         prospective_dir = proposed_path
+        if isdir(proposed_path) and self._is_config_dir(proposed_path):
+            return proposed_path
         config_path, config_dir = split(prospective_dir)
         if not config_dir == CONFIG_DIR_NAME:
             prospective_dir = join(prospective_dir, CONFIG_DIR_NAME)
         return prospective_dir
 
+    @staticmethod
+    def _is_config_dir(dir_path):
+        for file_path in listdir(dir_path):
+            if match(".*[.]ini", file_path):
+                return True
+        return False
 
 if __name__ == '__main__':
     main()
