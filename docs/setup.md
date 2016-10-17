@@ -48,4 +48,25 @@ PYTHONPATH="[path-to-source-directory]" python [./path/to/script]main_service.py
 NOTE: A `config` directory will be added to the current working directory unless an alternate path is specified using the flag `--config ./path/to/dir`.
 
 
+Unit Testing
+============
+
+Unit tests have been in-lined with the module structure - unit tests for a class will be located in a file named `test_[file name]`.
+
+In order to run unit tests in Pycharm right-click on a python module and select "Run unittests" - this will run all unit tests in the module and any sub-modules. If you are not using Pycharm the `nose` library can be used to similar effect.
+
+The professional (paid licence) edition of Pycharm incorporates the `coverage` Python library which provides a rough indication of how much of the code is covered by unit tests.  The `coverage` tool can be run outside of Pycharm but has not been tested.
+
+**NOTE:** Avoid running unit tests for the entire repository as system tests also use the python `unittest` framework and take considerably longer to run.
+
+System Tests
+============
+
+At the time of writing system testing does not cover the application exhaustively - tests were added late in the development process and have been written to cover features as they are added or updated.
+
+System tests are located in the `system-tests` directory of the repository. A custom System Testing Framework has been constructed which runs the algorithm and outputs the results to output directories named `sys_test_output` which are ignored by the git repository.  The framework should be self-documenting and will not be described here in detail.
+
+The System Test Framework is based on the standard python `unittest` library (note that this will need to be installed during setup for Python 2.7). System Tests can be run in the same manner as unit tests but may require the `PYTHONPATH` variable to be added if you are not using Pycharm.
+
+System Tests are based roughly on unit tests - each `test_` method in a unit test class should cause the application to run once using the method `run_crystal_matching_test(test_name, cmd_line_args)`.  This will generate an output directory which contains the stdout and stderr in file form as well as the config directory and any file system output from the application itself.  The parent class `SystemTest` provides a series of helper methods which are primarily aimed at rapid testing of content in the output directory (including stdout).
 
