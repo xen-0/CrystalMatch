@@ -8,7 +8,6 @@ class TestRunFromCommandLine(SystemTest):
         self.set_directory_paths(realpath(__file__))
 
     def test_runs_with_image_alignment_only(self):
-        # TODO: add token for common resources
         cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_runs_with_image_alignment_only.__name__, cmd_line)
 
