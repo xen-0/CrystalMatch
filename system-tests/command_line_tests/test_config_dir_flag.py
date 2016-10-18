@@ -19,6 +19,8 @@ class TestCommandLineConfigFlag(SystemTest):
     def test_config_flag_recognises_config_dir(self):
         cmd_line = "--config ./test/dir/path/config {resources}/A01_1.jpg {resources}/A01_2.jpg"
         output_dir = self.run_crystal_matching_test(self.test_config_flag_creates_dir_named_config.__name__, cmd_line)
+
+        # Check that the application has not nested an extra 'config' as it is already included in the path
         self.validate_config_dir(output_dir)
 
     def validate_config_dir(self, output_dir):
