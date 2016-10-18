@@ -39,17 +39,18 @@ def _parse_selected_points_from_args(args):
     :return: List of Selected Points.
     """
     selected_points = []
-    point_expected_format = re.compile("[0-9]+,[0-9]+")
-    for point_string in args.selected_points:
-        point_string = point_string.strip('()')
-        match_results = point_expected_format.match(point_string)
-        # Check the regex matches the entire string
-        # DEV NOTE: can use re.full_match in Python v3
-        if match_results is not None and match_results.span()[1] == len(point_string):
-            x, y = map(int, point_string.strip('()').split(','))
-            selected_points.append(Point(x, y))
-        else:
-            print ("WARNING: Selected point with invalid format will be ignored - '" + point_string + "'")
+    if args.selected_points:
+        point_expected_format = re.compile("[0-9]+,[0-9]+")
+        for point_string in args.selected_points:
+            point_string = point_string.strip('()')
+            match_results = point_expected_format.match(point_string)
+            # Check the regex matches the entire string
+            # DEV NOTE: can use re.full_match in Python v3
+            if match_results is not None and match_results.span()[1] == len(point_string):
+                x, y = map(int, point_string.strip('()').split(','))
+                selected_points.append(Point(x, y))
+            else:
+                print ("WARNING: Selected point with invalid format will be ignored - '" + point_string + "'")
     return selected_points
 
 
@@ -71,7 +72,7 @@ def _get_argument_parser():
                         help='Image file on which to find translated co-ordinates.')
     parser.add_argument('selected_points',
                         metavar="x,y",
-                        nargs='+',
+                        nargs='?',
                         help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                              "to the target image.")
     parser.add_argument('--config',

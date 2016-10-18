@@ -1,7 +1,7 @@
 from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir
 from re import match
-from shutil import rmtree
+from shutil import rmtree, copytree
 from string import replace
 from subprocess import call
 from unittest import TestCase
@@ -53,6 +53,9 @@ class SystemTest(TestCase):
     def _get_test_output_dir(self, test_name):
         return join(self._get_output_dir(), test_name)
 
+    def _input_dir(self):
+        return join(self._get_test_suite_dir(), "input")
+
     def set_directory_paths(self, test_file_path):
         """
         Must be included in the setUp() method of the child TestCase.
@@ -67,26 +70,35 @@ class SystemTest(TestCase):
     def run_crystal_matching_test(self, test_name, cmd_line_args):
         """
         Run the Crystal Matching algorithm in a sub-process relative to a directory named
-        test_name in the test suite output directory. If the directory already exists it will be overwritten.
+        test_name in the Test Suite Output Directory. If the directory already exists it will be overwritten.
         If the --config flag is not included in the command line args it will be set to the output directory.
+
+        The Test Suite Output Directory may contain a directory called 'input' which can be used to store common files
+        used by tests.  In addition, if a directory exists with the same name as the test being run the contents of that
+        directory will be copied to the directory before the test begins.
+
         The following tokens can be used in command line arguments:
 
         {input} -> replaced with the path to a directory in the test_suite_dir called 'input'
          usage: {input}/[file]
-
 
         :param test_name: Directory name used to store output in the test suite output dir.
         :param cmd_line_args: Command line arguments to be used for the sub-process call.
         :return: The path of the output directory.
         """
 
+        # Set up the output directory - copy input resources
         self._active_output_dir = self._get_test_output_dir(test_name)
         if exists(self._active_output_dir):
             rmtree(self._active_output_dir)
-        makedirs(self._active_output_dir)
+        test_input_dir = join(self._input_dir(), test_name)
+        if self._is_dir(test_input_dir):
+            copytree(test_input_dir, self._active_output_dir)
+        else:
+            makedirs(self._active_output_dir)
 
         # Replace tokens in the command line
-        cmd_line_args = replace(cmd_line_args, "{input}", join(self._get_test_suite_dir(), "input"))
+        cmd_line_args = replace(cmd_line_args, "{input}", self._input_dir())
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
@@ -108,6 +120,12 @@ class SystemTest(TestCase):
         """
         return file(join(self._active_output_dir, "stdout"), mode=mode)
 
+    @staticmethod
+    def _is_dir(directory_path):
+        return exists(directory_path) and isdir(directory_path)
+
+    # Test Utility Methods
+
     def _get_std_err_file(self, mode):
         """
         Gets the stderr file from the current active output directory
@@ -116,12 +134,20 @@ class SystemTest(TestCase):
         """
         return file(join(self._active_output_dir, "stderr"), mode=mode)
 
-    # Testing Tools
-
-    def failUnlessStdoutContains(self, string):
+    def failUnlessStdoutContains(self, *strings):
+        """
+        Fail the current test case unless stdout contains these strings.
+        :param strings: Test to match in stdout - can be an array of string or a single string
+        """
         with self._get_std_out_file("r") as std_out_file:
             std_out = std_out_file.read()
-            self.failUnless(string in std_out)
+            for match_line in strings:
+                self.failUnless(match_line in std_out)
+
+    def failIfStrErrHasContent(self):
+        with self._get_std_err_file("r") as std_err_file:
+            std_err = std_err_file.read()
+            self.failIf(len(std_err) > 0, "Standard err file shows errors: " + std_err_file.name)
 
     def failUnlessDirExists(self, directory_path):
         self.failUnless(exists(directory_path), "Directory does not exist: " + directory_path)
@@ -134,9 +160,14 @@ class SystemTest(TestCase):
             self.fail("Could not find regex \"" + regex_filename + "\" in directory: " + directory_path)
 
     def failUnlessDirContainsFile(self, directory_path, file_name):
+        self.failUnless(self._is_dir(directory_path), "Directory does not exist: " + directory_path)
         self.failUnless(file_name in listdir(directory_path), "Could not find file \"" + file_name +
                         "\" in directory: " + directory_path)
 
     def failUnlessDirContainsFiles(self, directory_path, files):
+        self.failUnless(self._is_dir(directory_path), "Directory does not exist: " + directory_path)
         for file_name in files:
             self.failUnlessDirContainsFile(directory_path, file_name)
+
+    def failIfDirExists(self, dir_path):
+        self.failIf(self._is_dir(dir_path))
