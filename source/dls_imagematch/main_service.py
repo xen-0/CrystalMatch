@@ -72,7 +72,7 @@ def _get_argument_parser():
                         help='Image file on which to find translated co-ordinates.')
     parser.add_argument('selected_points',
                         metavar="x,y",
-                        nargs='?',
+                        nargs='*',
                         help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                              "to the target image.")
     parser.add_argument('--config',
