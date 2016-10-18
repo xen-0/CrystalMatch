@@ -1,5 +1,5 @@
 from os import makedirs, listdir
-from os.path import exists, join, splitext, isdir
+from os.path import exists, join, splitext, isdir, realpath, split
 from re import match
 from shutil import rmtree, copytree
 from string import replace
@@ -28,6 +28,7 @@ class SystemTest(TestCase):
     """
 
     OUTPUT_DIR_NAME = "sys_test_output"
+    RESOURCE_DIR_NAME = "resources"
     CONFIG_FLAG = "--config"
 
     _active_output_dir = None  # Used to store the current active output out dir - should be set when sys test runs.
@@ -79,8 +80,10 @@ class SystemTest(TestCase):
 
         The following tokens can be used in command line arguments:
 
-        {input} -> replaced with the path to a directory in the test_suite_dir called 'input'
+        {input} -> replaced with an absolute path to a directory in the test_suite_dir named 'input'.
          usage: {input}/[file]
+        {resources} -> replace with an absolute path to a resources directory in the system tests root dir.
+         usage: {resources}/[file]
 
         :param test_name: Directory name used to store output in the test suite output dir.
         :param cmd_line_args: Command line arguments to be used for the sub-process call.
@@ -99,6 +102,7 @@ class SystemTest(TestCase):
 
         # Replace tokens in the command line
         cmd_line_args = replace(cmd_line_args, "{input}", self._input_dir())
+        cmd_line_args = replace(cmd_line_args, "{resources}", self._get_resources_dir())
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
@@ -111,6 +115,16 @@ class SystemTest(TestCase):
         stderr_file = self._get_std_err_file("w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
+
+    def _get_resources_dir(self):
+        """
+        Get the path of a resource directory which in the same directory as this file (hackity, hack, hack, hack).
+        Saves space in the repository as we can reuse files between tests.
+        :return: The path of the System Tests Resources directory.
+        """
+        sys_test_root, this_file = split(realpath(__file__))
+        sys_test_root = join(sys_test_root, self.RESOURCE_DIR_NAME)
+        return sys_test_root
 
     def _get_std_out_file(self, mode):
         """

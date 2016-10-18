@@ -12,12 +12,12 @@ class TestCommandLineConfigFlag(SystemTest):
         self.set_directory_paths(realpath(__file__))
 
     def test_config_flag_creates_dir_named_config(self):
-        cmd_line = "--config ./test/dir/path {input}/A01_1.jpg {input}/A01_2.jpg 1068,442"
+        cmd_line = "--config ./test/dir/path {resources}/A01_1.jpg {resources}/A01_2.jpg 1068,442"
         output_dir = self.run_crystal_matching_test(self.test_config_flag_creates_dir_named_config.__name__, cmd_line)
         self.validate_config_dir(output_dir)
 
     def test_config_flag_recognises_config_dir(self):
-        cmd_line = "--config ./test/dir/path/config {input}/A01_1.jpg {input}/A01_2.jpg 1068,442"
+        cmd_line = "--config ./test/dir/path/config {resources}/A01_1.jpg {resources}/A01_2.jpg 1068,442"
         output_dir = self.run_crystal_matching_test(self.test_config_flag_creates_dir_named_config.__name__, cmd_line)
         self.validate_config_dir(output_dir)
 
@@ -30,7 +30,7 @@ class TestCommandLineConfigFlag(SystemTest):
         self.failUnlessStdoutContains("WARNING: configuration directory not found, directory will be created")
 
     def test_config_flag_checks_for_ini_file(self):
-        cmd_line = "--config ./renamed_config_dir {input}/A01_1.jpg {input}/A01_2.jpg 1068,442"
+        cmd_line = "--config ./renamed_config_dir {resources}/A01_1.jpg {resources}/A01_2.jpg 1068,442"
         output_dir = self.run_crystal_matching_test(self.test_config_flag_checks_for_ini_file.__name__, cmd_line)
 
         # Check renamed_config_dir has been used as the config dir
