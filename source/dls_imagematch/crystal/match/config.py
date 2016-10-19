@@ -1,4 +1,6 @@
-from feature import TransformCalculator
+from os.path import join
+
+from dls_imagematch.feature import TransformCalculator
 from dls_util.config import Config, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
 from .matcher import CrystalMatcher
 
@@ -8,7 +10,7 @@ class CrystalMatchConfig(Config):
     file that can be edited externally to set the values of the options.
     """
     def __init__(self, config_directory):
-        Config.__init__(self, config_directory + "crystal.ini")
+        Config.__init__(self, join(config_directory, "crystal.ini"))
 
         add = self.add
 

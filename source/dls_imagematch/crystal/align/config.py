@@ -1,4 +1,6 @@
-from feature.detector import DetectorType
+from os.path import join
+
+from dls_imagematch.feature.detector import DetectorType
 from dls_util.config import Config, EnumConfigItem, BoolConfigItem, RangeFloatConfigItem
 
 
@@ -7,7 +9,7 @@ class AlignConfig(Config):
     file that can be edited externally to set the values of the options.
     """
     def __init__(self, config_directory):
-        Config.__init__(self, config_directory + "align.ini")
+        Config.__init__(self, join(config_directory, "align.ini"))
 
         add = self.add
 

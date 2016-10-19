@@ -1,3 +1,5 @@
+from os.path import join
+
 from dls_util.config import Config, DirectoryConfigItem, ColorConfigItem
 from dls_util.imaging import Color
 
@@ -7,7 +9,7 @@ class GuiConfig(Config):
     file that can be edited externally to set the values of the options.
     """
     def __init__(self, config_directory):
-        Config.__init__(self, config_directory + "gui.ini")
+        Config.__init__(self, join(config_directory, "gui.ini"))
 
         add = self.add
 

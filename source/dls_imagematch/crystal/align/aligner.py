@@ -1,4 +1,4 @@
-from feature import FeatureMatcher
+from dls_imagematch.feature import FeatureMatcher
 from dls_util.shape import Point
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
