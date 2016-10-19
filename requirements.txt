@@ -1,0 +1,8 @@
+enum==0.4.6
+funcsigs==1.0.2
+mock==2.0.0
+numpy==1.11.2+mkl
+opencv-python==2.4.13
+pbr==1.10.0
+PyQt4==4.11.4
+six==1.10.0
