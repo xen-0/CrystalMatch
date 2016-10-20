@@ -2,7 +2,7 @@ from __future__ import division
 
 import os
 
-from PyQt4 import QtCore
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 
 from dls_util.imaging import Image
@@ -15,9 +15,9 @@ class WellSelectorFormulatrix(QGroupBox):
 
     The path of an image is expected to be: plate_xxx/batch_yy/well_zz_profile_1.jpg
     """
-    signal_image1_selected = QtCore.pyqtSignal(object)
-    signal_image2_selected = QtCore.pyqtSignal(object)
-    signal_images_selected = QtCore.pyqtSignal(object, object)
+    signal_image1_selected = pyqtSignal(object)
+    signal_image2_selected = pyqtSignal(object)
+    signal_images_selected = pyqtSignal(object, object)
 
     def __init__(self, gui_config):
         super(WellSelectorFormulatrix, self).__init__()
@@ -154,10 +154,10 @@ class WellSelectorFormulatrix(QGroupBox):
         self.signal_images_selected.emit(image1, image2)
 
     @staticmethod
-    def get_sub_dirs(dir, startswith="", endswith=""):
+    def get_sub_dirs(directory, startswith="", endswith=""):
         """ Return the full path of all immediate subdirectories in the
         specified directory. """
-        dirs = os.listdir(dir)
+        dirs = os.listdir(directory)
 
         if startswith != "":
             dirs = [d for d in dirs if d.startswith(startswith)]
@@ -165,14 +165,14 @@ class WellSelectorFormulatrix(QGroupBox):
         if endswith != "":
             dirs = [d for d in dirs if d.endswith(endswith)]
 
-        paths = [os.path.join(dir, d) for d in dirs]
+        paths = [os.path.join(directory, d) for d in dirs]
         sub_dirs = [p for p in paths if os.path.isdir(p)]
         return sub_dirs
 
     @staticmethod
-    def get_files(dir):
+    def get_files(directory):
         """ Return a list of all files (full path) in the directory. """
-        paths = [os.path.join(dir,o) for o in os.listdir(dir)]
+        paths = [os.path.join(directory, o) for o in os.listdir(directory)]
         files = [p for p in paths if os.path.isfile(p)]
 
         return files

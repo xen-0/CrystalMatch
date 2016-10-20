@@ -50,11 +50,11 @@ class FeatureMatcher:
         else:
             self._transform_method = method
 
-    def set_transform_filter(self, filter):
-        if filter is None:
+    def set_transform_filter(self, filter_obj):
+        if filter_obj is None:
             self._transform_filter = self._DEFAULT_FILTER
         else:
-            self._transform_filter = filter
+            self._transform_filter = filter_obj
 
     # -------- FUNCTIONALITY -------------------
     def match(self):

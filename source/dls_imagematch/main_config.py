@@ -2,14 +2,16 @@ import sys
 
 from os.path import dirname
 from sys import path
-path.append(dirname(path[0]))
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QIcon, QAction
+from PyQt4.QtGui import QMainWindow, QIcon
+from PyQt4.QtGui.QAction import QAction
+from PyQt4.QtGui.QApplication import QApplication
 
 from dls_util.config import ConfigDialog
 from dls_imagematch.crystal import CrystalMatchConfig, AlignConfig
 from dls_imagematch.feature.detector import DetectorConfig, DetectorType
+
+path.append(dirname(path[0]))
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
@@ -42,7 +44,7 @@ class CrystalMatchConfigWindow(QMainWindow):
         exit_action = QAction(QIcon('exit.png'), '&Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
-        exit_action.triggered.connect(QtGui.qApp.quit)
+        exit_action.triggered.connect(QApplication.quit)
 
         # Open options dialog
         crystal_opt = self._init_options_menu_item("Crystal Matching", self._crystal_config)
@@ -64,13 +66,13 @@ class CrystalMatchConfigWindow(QMainWindow):
             detector_menu.addAction(self._init_detector_menu(det_type))
 
     def _init_options_menu_item(self, name, config):
-        action = QtGui.QAction('&{}...'.format(name), self)
+        action = QAction('&{}...'.format(name), self)
         action.setStatusTip('Open {} Options Dialog'.format(name))
         action.triggered.connect(lambda: self._open_config_dialog(config))
         return action
 
     def _init_detector_menu(self, detector):
-        action = QtGui.QAction(detector + "...", self)
+        action = QAction(detector + "...", self)
         options = self._detector_config.get_detector_options(detector)
         action.triggered.connect(lambda: self._open_config_dialog(options))
         return action
@@ -83,8 +85,8 @@ class CrystalMatchConfigWindow(QMainWindow):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    ex = CrystalMatchConfigWindow(CONFIG_DIR)
+    app = QApplication(sys.argv)
+    CrystalMatchConfigWindow(CONFIG_DIR)
     sys.exit(app.exec_())
 
 

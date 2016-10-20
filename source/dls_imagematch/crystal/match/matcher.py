@@ -54,8 +54,8 @@ class CrystalMatcher:
     def set_transform_method(self, method):
         self._transform_method = method
 
-    def set_transform_filter(self, filter):
-        self._transform_filter = filter
+    def set_transform_filter(self, filter_obj):
+        self._transform_filter = filter_obj
 
     # -------- FUNCTIONALITY -------------------
     def match(self, image1_points):

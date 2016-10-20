@@ -2,17 +2,16 @@ from __future__ import division
 
 import os
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout
+from PyQt4.QtCore import Qt, pyqtSignal
+from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog, QGroupBox
 
 from dls_util.imaging import Image
 
 
-class ImageSelector(QtGui.QGroupBox):
+class ImageSelector(QGroupBox):
     """ Widget that allows the user to select and view an image.
     """
-    signal_selected = QtCore.pyqtSignal(object)
+    signal_selected = pyqtSignal(object)
 
     IMAGE_SIZE = 350
     BUTTON_TEXT = "Load Image"
@@ -75,7 +74,7 @@ class ImageSelector(QtGui.QGroupBox):
         else:
             input_dir = os.getcwd()
 
-        file_path = str(QtGui.QFileDialog.getOpenFileName(self, 'Open file', input_dir))
+        file_path = str(QFileDialog().getOpenFileName(self, 'Open file', input_dir))
 
         if file_path:
             image = Image.from_file(file_path)

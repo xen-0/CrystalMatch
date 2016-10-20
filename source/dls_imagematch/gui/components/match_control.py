@@ -1,11 +1,10 @@
 from __future__ import division
 
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt, QThread
+from PyQt4.QtCore import Qt, QThread, pyqtSignal
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
 from dls_imagematch.crystal import CrystalMatcher
-from feature.detector import DetectorConfig
+from dls_imagematch.feature.detector import DetectorConfig
 from dls_util.shape import Rectangle
 from .progress_dialog import ProgressDialog
 from ..crystal import PointSelectDialog
@@ -128,7 +127,7 @@ class CrystalMatchControl(QGroupBox):
             self._set_selected_points(points)
 
     def _show_perform_alignment_message(self):
-        QMessageBox.warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
+        QMessageBox().warning(self, "Warning", "Perform image alignment first", QMessageBox.Ok)
 
     def _get_points_from_user_selection(self):
         """ Display a dialog and return the result to the caller. """
@@ -296,8 +295,8 @@ class CrystalMatchControl(QGroupBox):
 
 
 class _MatchTaskThread(QThread):
-    task_finished = QtCore.pyqtSignal()
-    task_results = QtCore.pyqtSignal(object)
+    task_finished = pyqtSignal()
+    task_results = pyqtSignal(object)
 
     def __init__(self, matcher, selected_points):
         super(_MatchTaskThread, self).__init__()

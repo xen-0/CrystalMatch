@@ -1,19 +1,21 @@
 from __future__ import division
 
-from PyQt4 import QtCore
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
+
+from dls_imagematch.feature.detector.config import DetectorConfig
+from dls_imagematch.feature.detector.types import DetectorType
 from dls_util.shape import Point
 from dls_util.config import ConfigDialog
 
 from dls_imagematch.crystal import CrystalMatcher
-from feature.detector import DetectorConfig, DetectorType
 from dls_util.widget import Slider
 from ._point_select_dialog import PointSelectDialog
 
 
 class CrystalMatchPane(QWidget):
-    signal_new_crystal_match = QtCore.pyqtSignal(object, object)
-    signal_new_images = QtCore.pyqtSignal(object, object)
+    signal_new_crystal_match = pyqtSignal(object, object)
+    signal_new_images = pyqtSignal(object, object)
 
     LABEL_WIDTH = 100
 

@@ -1,5 +1,4 @@
-from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction, QApplication, QMenu)
 
 from dls_imagematch.crystal import CrystalMatchConfig, AlignConfig
 from dls_imagematch.feature.detector import DetectorConfig, DetectorType
@@ -96,26 +95,26 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         exit_action = QAction(QIcon('exit.png'), '&Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
-        exit_action.triggered.connect(QtGui.qApp.quit)
+        exit_action.triggered.connect(QApplication.quit)
 
         # Open options dialog
-        crystal_opt = QtGui.QAction('&Crystal Matching...', self)
+        crystal_opt = QAction('&Crystal Matching...', self)
         crystal_opt.setStatusTip('Open Crystal Matching Options Dialog')
         crystal_opt.triggered.connect(lambda: self._open_config_dialog(self._crystal_config))
 
-        align_opt = QtGui.QAction('&Image Alignment...', self)
+        align_opt = QAction('&Image Alignment...', self)
         align_opt.setStatusTip('Open Image Alignment Options Dialog')
         align_opt.triggered.connect(lambda: self._open_config_dialog(self._align_config))
 
-        gui_opt = QtGui.QAction('&Gui...', self)
+        gui_opt = QAction('&Gui...', self)
         gui_opt.setStatusTip('Open GUI Options Dialog')
         gui_opt.triggered.connect(lambda: self._open_config_dialog(self._gui_config))
 
-        detector_menu = QtGui.QMenu('Detectors', self)
+        detector_menu = QMenu('Detectors', self)
         for det_type in DetectorType.LIST_ALL:
             detector_menu.addAction(self._init_detector_menu(det_type))
 
-        license_opt = QtGui.QAction('&Licensing...', self)
+        license_opt = QAction('&Licensing...', self)
         license_opt.setStatusTip('Open Detector Licensing Options Dialog')
         config = DetectorConfig(self._gui_config.config_dir.value()).get_licensing_options()
         license_opt.triggered.connect(lambda: self._open_config_dialog(config))
@@ -133,7 +132,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         option_menu.addMenu(detector_menu)
 
     def _init_detector_menu(self, detector):
-        action = QtGui.QAction(detector + "...", self)
+        action = QAction(detector + "...", self)
         action.triggered.connect(lambda: self._open_detector_config_dialog(detector))
         return action
 

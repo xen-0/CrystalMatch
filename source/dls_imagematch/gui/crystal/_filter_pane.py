@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4 import QtCore
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 
@@ -11,7 +11,7 @@ class FilterPane(QWidget):
     BAD_MATCHES = "Bad Matches"
     NO_MATCHES = "No Matches"
 
-    signal_matches_filtered = QtCore.pyqtSignal(object)
+    signal_matches_filtered = pyqtSignal(object)
 
     def __init__(self):
         super(FilterPane, self).__init__()
@@ -87,7 +87,7 @@ class FilterPane(QWidget):
         self._filtered_matches = []
 
         self._clear_selection()
-        self._update_method_dropdown([])
+        self._update_method_dropdown()
         self._changed_filters()
 
     def _changed_filters(self):
@@ -129,7 +129,8 @@ class FilterPane(QWidget):
             index = 0
         self._cmbo_methods.setCurrentIndex(index)
 
-    def _get_match_methods(self, matches):
+    @staticmethod
+    def _get_match_methods(matches):
         methods = []
         for match in matches:
             method = match.method()

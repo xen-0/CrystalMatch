@@ -34,21 +34,21 @@ class ExtractorType:
     LIST_ALL = [ORB, SURF, SIFT, BRIEF, BRISK]
 
     @staticmethod
-    def distance_factor(type):
+    def distance_factor(factor_type):
         """ Each extractor type has a different keypoint representation and so a different metric is used
         for calculating the match keypoint distance in each case. Consequently, the values of keypoint
         distance from two different extractor methods are not directly comparable (e.g. SURF produces
         distances in the range 0-1, whereas SIFT are in the range 100-1000). These distance factors
         bring the distances from each extractor method into roughly the same range (1-100). """
-        if type == ExtractorType.ORB:
+        if factor_type == ExtractorType.ORB:
             return 1
-        elif type == ExtractorType.SURF:
+        elif factor_type == ExtractorType.SURF:
             return 100
-        elif type == ExtractorType.SIFT:
+        elif factor_type == ExtractorType.SIFT:
             return 0.1
-        elif type == ExtractorType.BRISK:
+        elif factor_type == ExtractorType.BRISK:
             return 0.1
-        elif type == ExtractorType.BRIEF:
+        elif factor_type == ExtractorType.BRIEF:
             return 1
 
 

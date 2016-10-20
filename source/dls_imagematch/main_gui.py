@@ -2,11 +2,11 @@ import sys
 
 from os.path import dirname
 from sys import path
-path.append(dirname(path[0]))
 
+from PyQt4.QtGui import QApplication
 
-from PyQt4 import QtGui
 from gui import VMXiCrystalMatchMainWindow
+path.append(dirname(path[0]))
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
@@ -17,8 +17,8 @@ else:
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    ex = VMXiCrystalMatchMainWindow(CONFIG_DIR)
+    app = QApplication(sys.argv)
+    VMXiCrystalMatchMainWindow(CONFIG_DIR)
     sys.exit(app.exec_())
 
 
