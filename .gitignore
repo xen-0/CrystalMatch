@@ -6,6 +6,7 @@ test-output
 *.ini
 sys_test_output
 distribution
+venv
 
 *.pyc
 gi
