@@ -4,6 +4,7 @@ import os
 
 from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
+from os.path import join, splitext
 
 from dls_util.imaging import Image
 
@@ -66,8 +67,8 @@ class WellSelectorFormulatrix(QGroupBox):
         plate_folders = self.get_sub_dirs(directory)
 
         for folder in plate_folders:
-            folder = folder.split("/")[-1]
-            self._cmbo_plate.addItem(folder)
+            head, tail = os.path.split(folder)
+            self._cmbo_plate.addItem(tail)
 
     def is_sample_dir_valid(self):
         return self._samples_dir is not None and os.path.exists(self._samples_dir)
@@ -92,9 +93,9 @@ class WellSelectorFormulatrix(QGroupBox):
 
     def _populate_batch_lists(self, folders):
         for folder in folders:
-            folder = folder.split("\\")[-1]
-            self._cmbo_batch1.addItem(folder)
-            self._cmbo_batch2.addItem(folder)
+            head, tail = os.path.split(folder)
+            self._cmbo_batch1.addItem(tail)
+            self._cmbo_batch2.addItem(tail)
 
     def _refresh_well_list(self):
         """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
@@ -112,8 +113,7 @@ class WellSelectorFormulatrix(QGroupBox):
 
     def _populate_well_list(self, files):
         for f in files:
-            well = str(f[:7])
-            self._cmbo_well.addItem(well)
+            self._cmbo_well.addItem(f)
 
     def _set_selected_well(self, text):
         index = self._cmbo_well.findText(text)
@@ -121,14 +121,14 @@ class WellSelectorFormulatrix(QGroupBox):
             self._cmbo_well.setCurrentIndex(index)
 
     def _get_well_files_list(self):
-        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
-        batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
-        batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
+        plate_dir = join(self._samples_dir, str(self._cmbo_plate.currentText()))
+        batch_dir1 = join(plate_dir, str(self._cmbo_batch1.currentText()))
+        batch_dir2 = join(plate_dir, str(self._cmbo_batch2.currentText()))
 
         files1 = self.get_files(str(batch_dir1))
-        files1 = [f.split("/")[-1][:-4] for f in files1]
+        files1 = [splitext(os.path.split(f)[1])[0] for f in files1]
         files2 = self.get_files(str(batch_dir2))
-        files2 = [f.split("/")[-1][:-4] for f in files2]
+        files2 = [splitext(os.path.split(f)[1])[0] for f in files2]
 
         # Find the set of images that both batches have in common
         common = list(set(files1).intersection(files2))
@@ -138,13 +138,14 @@ class WellSelectorFormulatrix(QGroupBox):
     def _emit_well_selected_signal(self):
         """ Select a well from the dataset to use for matching. Display the
         corresponding images in slot A and B. """
-        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
-        batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
-        batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
+        plate_dir = join(self._samples_dir, str(self._cmbo_plate.currentText()))
+        batch_dir1 = join(plate_dir, str(self._cmbo_batch1.currentText()))
+        batch_dir2 = join(plate_dir, str(self._cmbo_batch2.currentText()))
 
-        filename = self._cmbo_well.currentText() + ".jpg"
-        file1 = str(batch_dir1 + filename)
-        file2 = str(batch_dir2 + filename)
+        # TODO: Refactor this - should not be using a hard-coded jpg assumption
+        filename = str(self._cmbo_well.currentText()) + ".jpg"
+        file1 = join(batch_dir1, filename)
+        file2 = join(batch_dir2, filename)
 
         image1 = Image.from_file(file1)
         image2 = Image.from_file(file2)

@@ -1,8 +1,10 @@
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction, QApplication, QMenu)
 
-from dls_imagematch.crystal import CrystalMatchConfig, AlignConfig
-from dls_imagematch.feature.detector import DetectorConfig, DetectorType
-from dls_util.config import ConfigDialog
+from source.dls_imagematch.crystal.align.config import AlignConfig
+from source.dls_imagematch.crystal.match.config import CrystalMatchConfig
+from source.dls_imagematch.feature.detector.config import DetectorConfig
+from source.dls_imagematch.feature.detector.types import DetectorType
+from source.dls_util.config.dialog import ConfigDialog
 from .components import AutoImageAligner
 from .components import CrystalMatchControl
 from .components import ImageFrame
