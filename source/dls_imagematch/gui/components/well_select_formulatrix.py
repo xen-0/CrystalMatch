@@ -6,6 +6,8 @@ from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
 from os.path import join, splitext
 
+from PyQt4.QtGui import QMessageBox
+
 from dls_util.imaging import Image
 
 
@@ -142,10 +144,10 @@ class WellSelectorFormulatrix(QGroupBox):
         batch_dir1 = join(plate_dir, str(self._cmbo_batch1.currentText()))
         batch_dir2 = join(plate_dir, str(self._cmbo_batch2.currentText()))
 
-        # TODO: Refactor this - should not be using a hard-coded jpg assumption
-        filename = str(self._cmbo_well.currentText()) + ".jpg"
-        file1 = join(batch_dir1, filename)
-        file2 = join(batch_dir2, filename)
+        filename = str(self._cmbo_well.currentText())
+
+        file1 = self._get_first_file_match_with_name(batch_dir1, filename)
+        file2 = self._get_first_file_match_with_name(batch_dir2, filename)
 
         image1 = Image.from_file(file1)
         image2 = Image.from_file(file2)
@@ -153,6 +155,25 @@ class WellSelectorFormulatrix(QGroupBox):
         self.signal_image1_selected.emit(image1)
         self.signal_image2_selected.emit(image2)
         self.signal_images_selected.emit(image1, image2)
+
+    def _get_first_file_match_with_name(self, directory, filename):
+        """
+        Look in the specified directory and return the first file which matches the given filename after the suffix
+        is removed.  If multiple files with the filename exist a warning will be displayed and the first file match will
+        be returned.
+        :param directory: Directory to search
+        :param filename: Filename to match (without suffix)
+        :return: File path of first match.
+        """
+        files = os.listdir(directory)
+        matched_files = [x for x in files if splitext(x)[0] == filename]
+        if len(matched_files) == 0:
+            QMessageBox().warning(self, "Could not find file matching '{}' in directory '{}'", filename, directory)
+            return None
+        elif len(matched_files) > 1:
+            QMessageBox().warning(self, "Multiple files with name '{}' in directory '{}'.  Using '{}'",
+                                  filename, directory, matched_files[0])
+        return join(directory, matched_files[0])
 
     @staticmethod
     def get_sub_dirs(directory, startswith="", endswith=""):
