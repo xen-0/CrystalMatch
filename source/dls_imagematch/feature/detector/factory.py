@@ -5,11 +5,14 @@ from .detector import Detector
 from .detector_orb import OrbDetector
 from .detector_sift import SiftDetector
 from .detector_surf import SurfDetector
-from .detector_mser import MserDetector
+# from .detector_mser import MserDetector
 from .detector_brisk import BriskDetector
 
 
 class DetectorFactory:
+    def __init__(self):
+        pass
+
     @staticmethod
     def create(det_type, options=None):
         if det_type not in DetectorType.LIST_ALL:
@@ -21,6 +24,7 @@ class DetectorFactory:
             detector = SiftDetector()
         elif det_type == DetectorType.SURF:
             detector = SurfDetector()
+        # MSER currently has no wrapper class due to the format of the output - need to update to reinstate this
         # elif type == DetectorType.MSER:
         #     detector = MserDetector()
         elif det_type == DetectorType.BRISK:

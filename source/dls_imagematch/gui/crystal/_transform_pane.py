@@ -1,18 +1,19 @@
 from __future__ import division
 
-from PyQt4 import QtCore
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
+
+from dls_imagematch.feature.transform.calculator import TransformCalculator
 from dls_util.shape import Point, Polygon
 
-from feature import TransformCalculator
 from dls_util.widget import Slider
 
 
 class TransformPane(QWidget):
-    signal_new_transform = QtCore.pyqtSignal(object)
-    signal_new_points = QtCore.pyqtSignal(object, object)
-    signal_new_quads = QtCore.pyqtSignal(object, object)
-    signal_updated_matches = QtCore.pyqtSignal(object)
+    signal_new_transform = pyqtSignal(object)
+    signal_new_points = pyqtSignal(object, object)
+    signal_new_quads = pyqtSignal(object, object)
+    signal_updated_matches = pyqtSignal(object)
 
     def __init__(self):
         super(TransformPane, self).__init__()
@@ -97,8 +98,8 @@ class TransformPane(QWidget):
         self._refresh_transform()
 
     def _set_slider_enabled_state(self):
-        filter = self._get_filter_value()
-        is_ransac = filter == TransformCalculator.RANSAC
+        filter_value = self._get_filter_value()
+        is_ransac = filter_value == TransformCalculator.RANSAC
         self._slider_threshold.setEnabled(is_ransac)
 
     def _refresh_transform(self):
@@ -135,12 +136,12 @@ class TransformPane(QWidget):
 
     def _create_transform_calc(self):
         method = self._get_method_value()
-        filter = self._get_filter_value()
+        filter_value = self._get_filter_value()
         threshold = self._slider_threshold.value()
 
         calc = TransformCalculator()
         calc.set_method(method)
-        calc.set_filter(filter)
+        calc.set_filter(filter_value)
         calc.set_ransac_threshold(threshold)
         return calc
 

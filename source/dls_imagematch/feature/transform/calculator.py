@@ -64,10 +64,10 @@ class TransformCalculator:
             raise TransformCalculationError("Not a valid transformation method: '{}'".format(method))
         self._method = method
 
-    def set_filter(self, filter):
-        if filter not in self.FILTERS:
-            raise TransformCalculationError("Not a valid filter: '{}'".format(filter))
-        self._filter = filter
+    def set_filter(self, filter_obj):
+        if filter_obj not in self.FILTERS:
+            raise TransformCalculationError("Not a valid filter: '{}'".format(filter_obj))
+        self._filter = filter_obj
 
     def set_ransac_threshold(self, threshold):
         self._ransac_threshold = threshold
@@ -154,19 +154,19 @@ class TransformCalculator:
 
         if self._has_enough_matches_for_transform(matches):
             image1_pts, image2_pts = self._get_np_points(matches)
-            filter = self._get_filter_code()
-            _, mask = cv2.findHomography(image1_pts, image2_pts, filter, self._ransac_threshold)
+            filter_code = self._get_filter_code()
+            _, mask = cv2.findHomography(image1_pts, image2_pts, filter_code, self._ransac_threshold)
             mask = self._sanitize_mask(mask)
 
         return mask
 
     def _get_filter_code(self):
-        filter = self._filter
-        if filter == self.NO_FILTER:
+        filter_code = self._filter
+        if filter_code == self.NO_FILTER:
             return 0
-        elif filter == self.LMEDS:
+        elif filter_code == self.LMEDS:
             return cv2.LMEDS
-        elif filter == self.RANSAC:
+        elif filter_code == self.RANSAC:
             return cv2.RANSAC
         else:
             return -1

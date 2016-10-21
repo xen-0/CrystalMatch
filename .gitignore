@@ -1,10 +1,13 @@
 *.iml
 .idea/misc.xml
 .idea/workspace.xml
+.idea/inspectionProfiles
 test-images
 test-output
 *.ini
 sys_test_output
+distribution
+venv
 
 *.pyc
 gi

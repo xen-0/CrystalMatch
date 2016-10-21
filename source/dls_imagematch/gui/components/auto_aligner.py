@@ -3,9 +3,9 @@ from __future__ import division
 from PyQt4.QtCore import pyqtSignal, QThread
 from PyQt4.QtGui import QWidget, QMessageBox
 
+from dls_imagematch.feature.detector.config import DetectorConfig
 from .progress_dialog import ProgressDialog
 from dls_imagematch.crystal.align import ImageAligner, ImageAlignmentError
-from feature.detector import DetectorConfig
 
 
 class AutoImageAligner(QWidget):
@@ -63,14 +63,14 @@ class AutoImageAligner(QWidget):
         self.signal_aligned.emit(aligned_images)
 
         if aligned_images.is_alignment_poor():
-            QMessageBox.warning(self, "Image Alignment Warning", "The quality of the image alignment "
-                                                                 "was poor", QMessageBox.Ok)
+            QMessageBox().warning(self, "Image Alignment Warning", "The quality of the image alignment "
+                                                                   "was poor", QMessageBox.Ok)
         elif aligned_images.is_alignment_bad():
-            QMessageBox.critical(self, "Image Alignment Error", "Alignment failed due to very bad "
-                                                                "fit.", QMessageBox.Ok)
+            QMessageBox().critical(self, "Image Alignment Error", "Alignment failed due to very bad "
+                                                                  "fit.", QMessageBox.Ok)
 
     def _display_failure_message(self, message):
-        QMessageBox.critical(self, "Image Alignment Error", message, QMessageBox.Ok)
+        QMessageBox().critical(self, "Image Alignment Error", message, QMessageBox.Ok)
 
 
 class _AlignTaskThread(QThread):
@@ -91,7 +91,3 @@ class _AlignTaskThread(QThread):
 
         except ImageAlignmentError as ex:
             self.task_failed.emit(str(ex))
-
-
-
-

@@ -2,7 +2,7 @@ from __future__ import division
 
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox
 
-from feature.draw import MatchPainter
+from dls_imagematch.feature.draw.matches import MatchPainter
 
 
 class CrystalMatchFrame(QWidget):
@@ -92,5 +92,3 @@ class CrystalMatchFrame(QWidget):
     def _display_image(self, image):
         pixmap = image.to_qt_pixmap(self._frame.size())
         self._frame.setPixmap(pixmap)
-
-

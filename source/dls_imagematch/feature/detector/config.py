@@ -167,7 +167,10 @@ class SurfConfig(_BaseDetectorConfig):
         self.set_title("SURF Detector Configuration")
         self.set_comment(det.__doc__)
 
-        self.hessian_threshold = add(RangeFloatConfigItem, "Hessian Threshold", det.DEFAULT_HESSIAN_THRESHOLD, [0.0, None])
+        self.hessian_threshold = add(RangeFloatConfigItem,
+                                     "Hessian Threshold",
+                                     det.DEFAULT_HESSIAN_THRESHOLD,
+                                     [0.0, None])
         self.n_octaves = add(RangeIntConfigItem, "Num Octaves", det.DEFAULT_N_OCTAVES, [0, None])
         self.n_octave_layers = add(RangeIntConfigItem, "Num Octave Layers", det.DEFAULT_N_OCTAVE_LAYERS, [1, None])
         self.extended = add(BoolConfigItem, "Extended", det.DEFAULT_EXTENDED)

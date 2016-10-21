@@ -1,12 +1,11 @@
 from __future__ import division
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QWidget, QVBoxLayout, QTableWidget, QGroupBox
+from PyQt4.QtCore import Qt, pyqtSignal
+from PyQt4.QtGui import QWidget, QVBoxLayout, QTableWidget, QGroupBox, QAbstractItemView, QTableWidgetItem
 
 
 class FeatureMatchTable(QWidget):
-    signal_matches_selected = QtCore.pyqtSignal(object)
+    signal_matches_selected = pyqtSignal(object)
 
     COLUMNS = ['Index', 'Method', 'KP Dist', 'Good?', 'Error']
 
@@ -42,7 +41,7 @@ class FeatureMatchTable(QWidget):
             table.setColumnWidth(i, 65)
 
         table.setColumnHidden(0, True)
-        table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.currentItemChanged.connect(self._changed_selection)
         table.cellPressed.connect(self._changed_selection)
         self._table = table
@@ -97,7 +96,7 @@ class FeatureMatchTable(QWidget):
         items = [index, match.method(), distance, included, error]
 
         for col, item in enumerate(items):
-            table_item = QtGui.QTableWidgetItem(str(item))
+            table_item = QTableWidgetItem(str(item))
             table_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self._table.setItem(row, col, table_item)
             if match in selected:

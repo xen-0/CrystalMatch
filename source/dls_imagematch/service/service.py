@@ -41,7 +41,7 @@ class CrystalMatchService:
 
         crystal_match_results = matcher.match(selected_points)
         self._print_match_results(crystal_match_results)
-        #self._popup_match_results(crystal_match_results)
+        # self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
 
@@ -101,7 +101,7 @@ class CrystalMatchService:
             painter = MatchPainter(feature_match_result.image1(), feature_match_result.image2())
 
             image = painter.background_image()
-            #image = painter.draw_transform_shapes(self._quad1, self._quad2, image)
+            # image = painter.draw_transform_shapes(self._quad1, self._quad2, image)
             image = painter.draw_matches(feature_match_result.good_matches(), [], image)
-            #image = painter.draw_transform_points(self._image1_point, self._image2_point, image)
+            # image = painter.draw_transform_points(self._image1_point, self._image2_point, image)
             image.popup()

@@ -84,10 +84,10 @@ class SelectorFrame(QLabel):
         image.draw_rectangle(rect, self._rect_color, thickness=1)
         image.draw_cross(point, self._rect_color, thickness=1, size=int(self._rect_size / 2))
 
-    def mousePressEvent(self, QMouseEvent):
+    def mousePressEvent(self, q_mouse_event):
         """ Called when the mouse is clicked. Records the coords of the start position of a
         rectangle drag. """
-        display_point = QMouseEvent.pos()
+        display_point = q_mouse_event.pos()
         display_point = Point(display_point.x(), display_point.y())
         image_point = display_point * self._display_scale
         self._add_point(image_point)
@@ -102,6 +102,7 @@ class PointSelectDialog(QDialog):
         self._init_ui(image, max_points, region_size, select_color)
 
     def _init_ui(self, image, max_points, region_size, select_color):
+        # noinspection SqlDialectInspection,SqlNoDataSourceInspection
         self.setWindowTitle('Select Region of Interest from Image A')
 
         self._frame = SelectorFrame(1100, image, max_points, region_size, select_color)

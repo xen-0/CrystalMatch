@@ -8,7 +8,7 @@ class MetricPane(QWidget):
         super(MetricPane, self).__init__()
 
         self._crystal_match_result = None
-        self._tranform = None
+        self._transform = None
 
         self._init_ui()
 
@@ -37,7 +37,8 @@ class MetricPane(QWidget):
         grp_box.setLayout(vbox)
         return grp_box
 
-    def _ui_create_label(self, tag, value):
+    @staticmethod
+    def _ui_create_label(tag, value):
         tag_width = 120
 
         tag_label = QLabel(tag)

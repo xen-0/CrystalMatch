@@ -2,8 +2,11 @@ from __future__ import division
 
 import os
 
-from PyQt4 import QtCore
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QHBoxLayout, QComboBox, QGroupBox
+from os.path import join, splitext
+
+from PyQt4.QtGui import QMessageBox
 
 from dls_util.imaging import Image
 
@@ -15,9 +18,9 @@ class WellSelectorFormulatrix(QGroupBox):
 
     The path of an image is expected to be: plate_xxx/batch_yy/well_zz_profile_1.jpg
     """
-    signal_image1_selected = QtCore.pyqtSignal(object)
-    signal_image2_selected = QtCore.pyqtSignal(object)
-    signal_images_selected = QtCore.pyqtSignal(object, object)
+    signal_image1_selected = pyqtSignal(object)
+    signal_image2_selected = pyqtSignal(object)
+    signal_images_selected = pyqtSignal(object, object)
 
     def __init__(self, gui_config):
         super(WellSelectorFormulatrix, self).__init__()
@@ -66,8 +69,8 @@ class WellSelectorFormulatrix(QGroupBox):
         plate_folders = self.get_sub_dirs(directory)
 
         for folder in plate_folders:
-            folder = folder.split("/")[-1]
-            self._cmbo_plate.addItem(folder)
+            head, tail = os.path.split(folder)
+            self._cmbo_plate.addItem(tail)
 
     def is_sample_dir_valid(self):
         return self._samples_dir is not None and os.path.exists(self._samples_dir)
@@ -92,9 +95,9 @@ class WellSelectorFormulatrix(QGroupBox):
 
     def _populate_batch_lists(self, folders):
         for folder in folders:
-            folder = folder.split("\\")[-1]
-            self._cmbo_batch1.addItem(folder)
-            self._cmbo_batch2.addItem(folder)
+            head, tail = os.path.split(folder)
+            self._cmbo_batch1.addItem(tail)
+            self._cmbo_batch2.addItem(tail)
 
     def _refresh_well_list(self):
         """ Called when a batch is selected in one of the batch dropdowns. Displays a list of the available
@@ -112,8 +115,7 @@ class WellSelectorFormulatrix(QGroupBox):
 
     def _populate_well_list(self, files):
         for f in files:
-            well = str(f[:7])
-            self._cmbo_well.addItem(well)
+            self._cmbo_well.addItem(f)
 
     def _set_selected_well(self, text):
         index = self._cmbo_well.findText(text)
@@ -121,14 +123,14 @@ class WellSelectorFormulatrix(QGroupBox):
             self._cmbo_well.setCurrentIndex(index)
 
     def _get_well_files_list(self):
-        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
-        batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
-        batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
+        plate_dir = join(self._samples_dir, str(self._cmbo_plate.currentText()))
+        batch_dir1 = join(plate_dir, str(self._cmbo_batch1.currentText()))
+        batch_dir2 = join(plate_dir, str(self._cmbo_batch2.currentText()))
 
         files1 = self.get_files(str(batch_dir1))
-        files1 = [f.split("/")[-1][:-4] for f in files1]
+        files1 = [splitext(os.path.split(f)[1])[0] for f in files1]
         files2 = self.get_files(str(batch_dir2))
-        files2 = [f.split("/")[-1][:-4] for f in files2]
+        files2 = [splitext(os.path.split(f)[1])[0] for f in files2]
 
         # Find the set of images that both batches have in common
         common = list(set(files1).intersection(files2))
@@ -138,13 +140,14 @@ class WellSelectorFormulatrix(QGroupBox):
     def _emit_well_selected_signal(self):
         """ Select a well from the dataset to use for matching. Display the
         corresponding images in slot A and B. """
-        plate_dir = self._samples_dir + self._cmbo_plate.currentText()
-        batch_dir1 = plate_dir + "/" + self._cmbo_batch1.currentText() + "/"
-        batch_dir2 = plate_dir + "/" + self._cmbo_batch2.currentText() + "/"
+        plate_dir = join(self._samples_dir, str(self._cmbo_plate.currentText()))
+        batch_dir1 = join(plate_dir, str(self._cmbo_batch1.currentText()))
+        batch_dir2 = join(plate_dir, str(self._cmbo_batch2.currentText()))
 
-        filename = self._cmbo_well.currentText() + ".jpg"
-        file1 = str(batch_dir1 + filename)
-        file2 = str(batch_dir2 + filename)
+        filename = str(self._cmbo_well.currentText())
+
+        file1 = self._get_first_file_match_with_name(batch_dir1, filename)
+        file2 = self._get_first_file_match_with_name(batch_dir2, filename)
 
         image1 = Image.from_file(file1)
         image2 = Image.from_file(file2)
@@ -153,11 +156,30 @@ class WellSelectorFormulatrix(QGroupBox):
         self.signal_image2_selected.emit(image2)
         self.signal_images_selected.emit(image1, image2)
 
+    def _get_first_file_match_with_name(self, directory, filename):
+        """
+        Look in the specified directory and return the first file which matches the given filename after the suffix
+        is removed.  If multiple files with the filename exist a warning will be displayed and the first file match will
+        be returned.
+        :param directory: Directory to search
+        :param filename: Filename to match (without suffix)
+        :return: File path of first match.
+        """
+        files = os.listdir(directory)
+        matched_files = [x for x in files if splitext(x)[0] == filename]
+        if len(matched_files) == 0:
+            QMessageBox().warning(self, "Could not find file matching '{}' in directory '{}'", filename, directory)
+            return None
+        elif len(matched_files) > 1:
+            QMessageBox().warning(self, "Multiple files with name '{}' in directory '{}'.  Using '{}'",
+                                  filename, directory, matched_files[0])
+        return join(directory, matched_files[0])
+
     @staticmethod
-    def get_sub_dirs(dir, startswith="", endswith=""):
+    def get_sub_dirs(directory, startswith="", endswith=""):
         """ Return the full path of all immediate subdirectories in the
         specified directory. """
-        dirs = os.listdir(dir)
+        dirs = os.listdir(directory)
 
         if startswith != "":
             dirs = [d for d in dirs if d.startswith(startswith)]
@@ -165,14 +187,14 @@ class WellSelectorFormulatrix(QGroupBox):
         if endswith != "":
             dirs = [d for d in dirs if d.endswith(endswith)]
 
-        paths = [os.path.join(dir, d) for d in dirs]
+        paths = [os.path.join(directory, d) for d in dirs]
         sub_dirs = [p for p in paths if os.path.isdir(p)]
         return sub_dirs
 
     @staticmethod
-    def get_files(dir):
+    def get_files(directory):
         """ Return a list of all files (full path) in the directory. """
-        paths = [os.path.join(dir,o) for o in os.listdir(dir)]
+        paths = [os.path.join(directory, o) for o in os.listdir(directory)]
         files = [p for p in paths if os.path.isfile(p)]
 
         return files

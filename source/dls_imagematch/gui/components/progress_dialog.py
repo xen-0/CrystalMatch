@@ -1,7 +1,7 @@
-from PyQt4 import QtGui
+from PyQt4.QtGui import QDialog, QIcon, QProgressBar, QVBoxLayout, QLabel
 
 
-class ProgressDialog(QtGui.QDialog):
+class ProgressDialog(QDialog):
 
     def __init__(self, caption):
         super(ProgressDialog, self).__init__()
@@ -13,13 +13,13 @@ class ProgressDialog(QtGui.QDialog):
         """
         self.setFixedWidth(300)
         self.setWindowTitle('Operation Progress')
-        self.setWindowIcon(QtGui.QIcon('web.png'))
+        self.setWindowIcon(QIcon('web.png'))
 
-        self.progressBar = QtGui.QProgressBar()
+        self.progressBar = QProgressBar()
         self.progressBar.setRange(0, 0)
 
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(QtGui.QLabel(caption))
+        vbox = QVBoxLayout()
+        vbox.addWidget(QLabel(caption))
         vbox.addWidget(self.progressBar)
 
         self.setLayout(vbox)
