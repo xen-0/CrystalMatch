@@ -4,8 +4,8 @@ from os.path import dirname
 from sys import path
 
 from PyQt4.QtGui import QMainWindow, QIcon
-from PyQt4.QtGui.QAction import QAction
-from PyQt4.QtGui.QApplication import QApplication
+from PyQt4.QtGui import QAction
+from PyQt4.QtGui import QApplication
 
 from dls_util.config import ConfigDialog
 from dls_imagematch.crystal import CrystalMatchConfig, AlignConfig
