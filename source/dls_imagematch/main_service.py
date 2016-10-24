@@ -8,6 +8,7 @@ from os.path import split, join, isdir
 from re import match
 
 from dls_imagematch.service import CrystalMatchService
+from dls_imagematch.version import VersionHandler
 from dls_util.shape import Point
 
 # Detect if the program is running from source or has been bundled
@@ -86,6 +87,7 @@ def _get_argument_parser():
     parser.add_argument('--scale_output',
                         metavar="scale",
                         help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
+    parser.add_argument('-v', '--version', action='version', version=VersionHandler.version_string())
     return parser
 
 
