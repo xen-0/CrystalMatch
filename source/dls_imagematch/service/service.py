@@ -1,4 +1,5 @@
 import logging
+from sys import stdout
 
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
@@ -10,12 +11,30 @@ from dls_util.imaging import Image
 
 
 class CrystalMatchService:
-    def __init__(self, config_directory):
+    def __init__(self, config_directory, verbose=False, debug=False):
         self._config_directory = config_directory
 
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory)
         self._config_crystal = CrystalMatchConfig(config_directory)
+
+        # Set up logging
+        if debug:
+            self.set_std_out_log_level(logging.DEBUG)
+            logging.debug("DEBUG mode set")
+        elif verbose:
+            self.set_std_out_log_level(logging.INFO)
+            logging.info("VERBOSE mode set")
+
+    @staticmethod
+    def set_std_out_log_level(level):
+        root = logging.getLogger()
+        root.setLevel(level)
+        ch = logging.StreamHandler(stdout)
+        ch.setLevel(level)
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # ch.setFormatter(formatter)
+        root.addHandler(ch)
 
     def perform_match(self, formulatrix_image_path, beamline_image_path, selected_points):
         # Create the images
@@ -70,7 +89,7 @@ class CrystalMatchService:
         logging.info("Crystal Matching Complete")
 
         for i, crystal_match in enumerate(crystal_results.matches):
-            logging.info("\n*** Crystal Match {} ***".format(i+1))
+            logging.info("*** Crystal Match {} ***".format(i+1))
             if not crystal_match.is_match_found():
                 logging.info("-- Match Failed")
                 continue

@@ -30,7 +30,8 @@ def main():
     if config_directory is None:
         config_directory = CONFIG_DIR
 
-    service = CrystalMatchService(config_directory)
+    debug = hasattr(args, "debug") and args.debug
+    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)
     service.perform_match(args.image_input.name, args.image_output.name, selected_points)
 
 
@@ -88,7 +89,15 @@ def _get_argument_parser():
     parser.add_argument('--scale_output',
                         metavar="scale",
                         help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
-    parser.add_argument('-v', '--version', action='version', version=VersionHandler.version_string())
+    parser.add_argument('--version',
+                        action='version',
+                        version=VersionHandler.version_string())
+    parser.add_argument('-v', '--verbose',
+                        action="store_true",
+                        help="increase output verbosity")
+    parser.add_argument('-d', '--debug',
+                        action="store_true",
+                        help="output debug information to the console")
     return parser
 
 
