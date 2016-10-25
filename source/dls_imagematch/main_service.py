@@ -1,3 +1,4 @@
+import logging
 import sys
 import argparse
 import re
@@ -51,7 +52,7 @@ def _parse_selected_points_from_args(args):
                 x, y = map(int, point_string.strip('()').split(','))
                 selected_points.append(Point(x, y))
             else:
-                print ("WARNING: Selected point with invalid format will be ignored - '" + point_string + "'")
+                logging.warning("Selected point with invalid format will be ignored - '" + point_string + "'")
     return selected_points
 
 
@@ -98,12 +99,12 @@ class ReadableConfigDir(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         prospective_dir = self.parse_config_path(values)
         if not path.isdir(prospective_dir):
-            print ("WARNING: configuration directory not found, directory will be created: '" + prospective_dir + "'")
+            logging.warning("Configuration directory not found, directory will be created: '" + prospective_dir + "'")
             setattr(namespace, self.dest, prospective_dir)
         elif access(prospective_dir, R_OK):
             setattr(namespace, self.dest, prospective_dir)
         else:
-            print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")
+            logging.error("Configuration directory is not readable: '" + prospective_dir + "'")
             exit(1)
 
     def parse_config_path(self, proposed_path):

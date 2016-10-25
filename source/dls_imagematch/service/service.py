@@ -1,3 +1,5 @@
+import logging
+
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.match import CrystalMatchConfig
@@ -56,27 +58,27 @@ class CrystalMatchService:
         elif aligned.is_alignment_bad():
             status = "Alignment failed!"
 
-        print("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
+        logging.info("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
 
         match_result = aligned.feature_match_result
         if match_result is not None:
-            print("- Matching Time: {:.4f}".format(match_result.time_match()))
-            print("- Transform Time: {:.4f}".format(match_result.time_transform()))
+            logging.info("- Matching Time: {:.4f}".format(match_result.time_match()))
+            logging.info("- Transform Time: {:.4f}".format(match_result.time_transform()))
 
     @staticmethod
     def _print_match_results(crystal_results):
-        print("Crystal Matching Complete")
+        logging.info("Crystal Matching Complete")
 
         for i, crystal_match in enumerate(crystal_results.matches):
-            print("\n*** Crystal Match {} ***".format(i+1))
+            logging.info("\n*** Crystal Match {} ***".format(i+1))
             if not crystal_match.is_match_found():
-                print("-- Match Failed")
+                logging.info("-- Match Failed")
                 continue
 
             # Matching time
             feature_result = crystal_match.feature_match_result()
-            print("- Matching Time: {:.4f}".format(feature_result.time_match()))
-            print("- Transform Time: {:.4f}".format(feature_result.time_transform()))
+            logging.info("- Matching Time: {:.4f}".format(feature_result.time_match()))
+            logging.info("- Transform Time: {:.4f}".format(feature_result.time_transform()))
 
             # Beam position and movement
             pixel1, real1 = crystal_match.image1_point(), crystal_match.image1_point_real()
@@ -90,8 +92,8 @@ class CrystalMatchService:
             delta = "- Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                     "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
-            print(beam_position)
-            print(delta)
+            logging.info(beam_position)
+            logging.info(delta)
 
     @staticmethod
     def _popup_match_results(results):

@@ -1,5 +1,7 @@
 from __future__ import division
 
+import logging
+
 from PyQt4.QtCore import Qt, QThread, pyqtSignal
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
@@ -257,7 +259,7 @@ class CrystalMatchControl(QGroupBox):
         color1 = self._gui_config.color_crystal_image1.value()
         color2 = self._gui_config.color_crystal_image2.value()
 
-        print(status)
+        logging.info(status)
         for i, match in enumerate(crystal_match_results.matches):
             if not match.is_match_found():
                 continue
@@ -273,9 +275,9 @@ class CrystalMatchControl(QGroupBox):
             delta = "Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                     "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
-            print("-- Match {} --".format(i))
-            print(beam_position)
-            print(delta)
+            logging.info("-- Match {} --".format(i))
+            logging.info(beam_position)
+            logging.info(delta)
 
             off = crystal_match_results.pixel_offset()
             image1.draw_cross(pixel1, color1, size=10, thickness=2)
