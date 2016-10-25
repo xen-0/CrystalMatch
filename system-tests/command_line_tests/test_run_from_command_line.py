@@ -8,21 +8,22 @@ class TestRunFromCommandLine(SystemTest):
         self.set_directory_paths(realpath(__file__))
 
     def test_runs_with_image_alignment_only(self):
-        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg"
+        cmd_line = "-v {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_runs_with_image_alignment_only.__name__, cmd_line)
 
-        # Check stderr for content and stdout for correct alignment
-        self.failIfStrErrHasContent()
-        self.failUnlessStdoutContains("Image Alignment Completed - Status: 'Good Alignment'",
+        # Check stdout for correct alignment
+        self.failUnlessStdOutContains("Image Alignment Completed - Status: 'Good Alignment' (Score=9.49)",
                                       "Crystal Matching Complete")
 
     def test_runs_with_images_and_points(self):
-        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 1068,442 1168,442 1191,1415"
+        cmd_line = "-v {resources}/A01_1.jpg {resources}/A01_2.jpg 1068,442 1168,442 1191,1415"
         self.run_crystal_matching_test(self.test_runs_with_images_and_points.__name__, cmd_line)
 
-        # Check that all three points were transformed and that there are no errors
-        self.failIfStrErrHasContent()
-        self.failUnlessStdoutContains("Image Alignment Completed - Status: 'Good Alignment'",
+        # Check that all three points were transformed
+        self.failUnlessStdOutContains("Image Alignment Completed - Status: 'Good Alignment'",
                                       "*** Crystal Match 1 ***",
+                                      "Crystal Movement: x=1.02 um, y=4.53 um (1 px, 4 px)",
                                       "*** Crystal Match 2 ***",
-                                      "*** Crystal Match 3 ***")
+                                      "Match Failed",
+                                      "*** Crystal Match 3 ***",
+                                      "Crystal Movement: x=3.46 um, y=-1.21 um (3 px, -1 px)")

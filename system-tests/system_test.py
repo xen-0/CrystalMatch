@@ -1,6 +1,6 @@
 from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir, realpath, split
-from re import match
+from re import match, compile
 from shutil import rmtree, copytree
 from string import replace
 from subprocess import call
@@ -134,6 +134,16 @@ class SystemTest(TestCase):
         """
         return file(join(self._active_output_dir, "stdout"), mode=mode)
 
+    def _get_std_out(self):
+        with self._get_std_out_file("r") as std_out_file:
+            std_out = std_out_file.read()
+        return std_out
+
+    def _get_std_err(self):
+        with self._get_std_err_file("r") as std_err_file:
+            std_err = std_err_file.read()
+        return std_err
+
     @staticmethod
     def _is_dir(directory_path):
         return exists(directory_path) and isdir(directory_path)
@@ -148,20 +158,29 @@ class SystemTest(TestCase):
         """
         return file(join(self._active_output_dir, "stderr"), mode=mode)
 
-    def failUnlessStdoutContains(self, *strings):
+    def failUnlessStdOutContains(self, *strings):
         """
         Fail the current test case unless stdout contains these strings.
         :param strings: Test to match in stdout - can be an array of string or a single string
         """
-        with self._get_std_out_file("r") as std_out_file:
-            std_out = std_out_file.read()
-            for match_line in strings:
-                self.failUnless(match_line in std_out)
+        std_out = self._get_std_out()
+        for match_line in strings:
+            self.failUnless(match_line in std_out, "Not found in std_out: " + match_line)
+
+    def failUnlessStdErrContains(self, *strings):
+        std_err = self._get_std_err()
+        for match_line in strings:
+            self.failUnless(match_line in std_err, "Not found in std_err: " + match_line)
+
+    def failUnlessStdErrContainsRegex(self, *regex):
+        std_err = self._get_std_err()
+        for match_line in regex:
+            compiled_regex = compile(match_line)
+            self.failUnless(compiled_regex.search(std_err) is not None)
 
     def failIfStrErrHasContent(self):
-        with self._get_std_err_file("r") as std_err_file:
-            std_err = std_err_file.read()
-            self.failIf(len(std_err) > 0, "Standard err file shows errors: " + std_err_file.name)
+        std_err = self._get_std_err()
+        self.failIf(len(std_err) > 0, "Standard err file shows errors: " + self._get_std_err_file("r").name)
 
     def failUnlessDirExists(self, directory_path):
         self.failUnless(exists(directory_path), "Directory does not exist: " + directory_path)
