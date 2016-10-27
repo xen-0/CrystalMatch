@@ -15,6 +15,14 @@ from dls_util.shape.point import Point
 
 class TestServiceResult(TestCase):
     @staticmethod
+    def get_output(mock_print):
+        output = ""
+        for method_call in mock_print.call_args_list:
+            output += method_call[0][0]
+        assert (len(output) > 0)
+        return output
+
+    @staticmethod
     def mock_crystal_matcher_results(deltas, mean_transform_errors, new_positions, status_codes):
         assert (len(new_positions) == len(deltas) == len(mean_transform_errors) == len(status_codes))
         match_array = []
@@ -54,6 +62,14 @@ class TestServiceResult(TestCase):
         mock_print.assert_any_call('job_id:"test-job-id"')
         mock_print.assert_any_call('input_image:"test/file/path/fomulatrix"')
         mock_print.assert_any_call('output_image:"test-file/path/beamline"')
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_job_id_does_not_print_if_blank(self, mock_print):
+        result = ServiceResult("", "test/file/path/fomulatrix", "test-file/path/beamline")
+        result.print_results()
+
+        output = self.get_output(mock_print)
+        self.failIf("job_id" in output)
 
     def test_add_image_alignment_results(self):
         mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset"])
@@ -102,10 +118,7 @@ class TestServiceResult(TestCase):
         result.print_results()
 
         # Test for presence of poi: objects in output
-        output = ""
-        for method_call in mock_print.call_args_list:
-            output += method_call[0][0]
-        assert(len(output) > 0)
+        output = self.get_output(mock_print)
         self.failIf("poi:" in output)
 
     @patch('dls_imagematch.service.service_result.print', create=True)

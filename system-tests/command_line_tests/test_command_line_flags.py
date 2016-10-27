@@ -44,3 +44,24 @@ class TestCommandLineFlags(SystemTest):
 
         # Check for version flag on stdout
         self.failUnlessStdErrContainsRegex("v[0-9]+[.][0-9]+[.][0-9]+")
+
+    def test_job_id_does_not_appear_in_output_when_not_set(self):
+        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_job_id_does_not_appear_in_output_when_not_set.__name__, cmd_line)
+
+        # Check for job_id in output
+        self.failIfStdOutContains("job_id:")
+
+    def test_job_id_flag_displays_job_id_in_output(self):
+        cmd_line = "--job test_case {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_job_id_flag_displays_job_id_in_output.__name__, cmd_line)
+
+        # Check for job_id in output
+        self.failUnlessStdOutContains('job_id:"test_case"')
+
+    def test_job_id_shortcut_flag_displays_job_id_in_output(self):
+        cmd_line = "-j test_case {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_job_id_shortcut_flag_displays_job_id_in_output.__name__, cmd_line)
+
+        # Check for job_id in output
+        self.failUnlessStdOutContains('job_id:"test_case"')

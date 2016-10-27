@@ -25,14 +25,21 @@ def main():
     parser = _get_argument_parser()
     args = parser.parse_args()
 
+    # Setup parameters
     selected_points = _parse_selected_points_from_args(args)
     config_directory = args.config
     if config_directory is None:
         config_directory = CONFIG_DIR
-
     debug = hasattr(args, "debug") and args.debug
+    if not hasattr(args, "job"):
+        args.job = ""
+
+    # Run service
     service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)
-    service_results = service.perform_match(args.image_input.name, args.image_output.name, selected_points)
+    service_results = service.perform_match(args.image_input.name,
+                                            args.image_output.name,
+                                            selected_points,
+                                            job_id=args.job)
     service_results.print_results()
 
 
@@ -99,6 +106,9 @@ def _get_argument_parser():
     parser.add_argument('-d', '--debug',
                         action="store_true",
                         help="output debug information to the console")
+    parser.add_argument('-j', '--job',
+                        metavar="job_id",
+                        help="Specify a job_id - this will be reported in the output to help identify this run")
     return parser
 
 

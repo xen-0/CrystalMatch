@@ -26,7 +26,6 @@ class ServiceResult:
         """
         Harvest the output data from an image alignment operation.
         :param aligned_images: An AlignedImages object.
-        :return:
         """
         self._alignment_transform = aligned_images.pixel_offset()
         self._alignment_status_code = aligned_images.alignment_status_code()
@@ -60,13 +59,15 @@ class ServiceResult:
         """
         Print the contents of this results object to the console.
         """
-        output = ['job_id:"' + self._job_id + '"',
-                  'input_image:"' + self._image_path_formulatrix + '"',
-                  'output_image:"' + self._image_path_beamline + '"',
-                  'align_transform:' + self._print_alignment_transform(),
-                  'align_status:' + str(self._alignment_status_code),
-                  'align_error:' + str(self._alignment_error)
-                  ]
+        output = []
+        if self._job_id != "":
+            output = ['job_id:"' + self._job_id + '"']
+        output += ['input_image:"' + self._image_path_formulatrix + '"',
+                   'output_image:"' + self._image_path_beamline + '"',
+                   'align_transform:' + self._print_alignment_transform(),
+                   'align_status:' + str(self._alignment_status_code),
+                   'align_error:' + str(self._alignment_error)
+                   ]
 
         self._print_crystal_match_results(output)
 

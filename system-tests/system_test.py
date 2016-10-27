@@ -161,11 +161,20 @@ class SystemTest(TestCase):
     def failUnlessStdOutContains(self, *strings):
         """
         Fail the current test case unless stdout contains these strings.
-        :param strings: Test to match in stdout - can be an array of string or a single string
+        :param strings: Strings to match in stdout - can be an array of string or a single string
         """
         std_out = self._get_std_out()
         for match_line in strings:
             self.failUnless(match_line in std_out, "Not found in std_out: " + match_line)
+
+    def failIfStdOutContains(self, *strings):
+        """
+        Fail the current test case if stdout contains any of these strings.
+        :param strings: Strings to match in stdout - can be an array of string or a single string
+        """
+        std_out = self._get_std_out()
+        for match_line in strings:
+            self.failIf(match_line in std_out, "Found in std_out when not expected: " + match_line)
 
     def failUnlessStdErrContains(self, *strings):
         std_err = self._get_std_err()
