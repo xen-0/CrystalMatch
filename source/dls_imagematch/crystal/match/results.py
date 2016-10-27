@@ -16,15 +16,21 @@ class CrystalMatcherResults:
             raise TypeError("Argument must be instance of {}".format(AlignedImages.__name__))
 
         self._aligned_images = aligned_images
-        self.matches = []
+        self._matches = []
+
+    def get_matches(self):
+        return self._matches
+
+    def append_match(self, crystal_match):
+        self._matches.append(crystal_match)
 
     def num(self):
         """ The number of crystal matches in the set. """
-        return len(self.matches)
+        return len(self._matches)
 
     def get_crystal_match(self, index):
         """ Get a specific match object by index. """
-        return self.matches[index]
+        return self._matches[index]
 
     def image1(self):
         """ The first image; contains the user-selected crystal locations. """

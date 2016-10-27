@@ -1,6 +1,20 @@
 from dls_util.shape import Rectangle
 
 
+class CrystalMatchStatus:
+    def __init__(self, code, status):
+        self.code = code
+        self.status = status
+
+    def __str__(self):
+        return str(self.code) + ", " + self.status
+
+# Status values
+CRYSTAL_MATCH_STATUS_STATUS_NOT_SET = CrystalMatchStatus(-1, "NOT SET")
+CRYSTAL_MATCH_STATUS_OK = CrystalMatchStatus(1, "OK")
+CRYSTAL_MATCH_STATUS_FAIL = CrystalMatchStatus(0, "FAIL")
+
+
 class CrystalMatch:
     """  Represents a match between the position of a crystal in two separate images. """
     def __init__(self, start_point, pixel_size):
@@ -16,6 +30,7 @@ class CrystalMatch:
         self._image2_point = None
         self._pixel_size = pixel_size
         self._feature_match_result = None
+        self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET
 
     def is_success(self):
         return self._image2_point is not None
@@ -41,7 +56,7 @@ class CrystalMatch:
 
     def image2_point(self):
         """ The location of the crystal in Image 2 as determined by the transformation (in
-        pixels). Note that the set_transformation method must be called to set this to a valid
+        pixels). Note that the set_feature_match_result method must be called to set this to a valid
         value. """
         return self._image2_point
 
@@ -50,6 +65,27 @@ class CrystalMatch:
         um). Note that the set_transformation method must be called to set this to a valid
         value. """
         return self._image2_point * self._pixel_size
+
+    def get_delta(self):
+        """
+        Returns the offset between the starting point in image B and the final translated point.
+        """
+        # TODO: apply global transform to self._image1_point
+        return self.get_transformed_point() - self._image1_point
+
+    def get_transformed_point(self):
+        """
+        If the match is a success this returns the transformed point in image B, if not then it should return the
+        original point in Image A translated by the Global Alignment transform (ie: the equivalent point in image B).
+        """
+        if self.is_match_found:
+            return self._image2_point
+        else:
+            # TODO: apply global transform to this value
+            return self._image1_point
+
+    def get_status(self):
+        return self._status
 
     def is_match_found(self):
         """ Returns True if the set_transformation function has been called correctly. """
@@ -61,4 +97,7 @@ class CrystalMatch:
         self._feature_match_result = feature_result
         trans = feature_result.transform()
         if trans is not None:
+            self._status = CRYSTAL_MATCH_STATUS_OK
             self._image2_point = trans.transform_points([self._image1_point])[0]
+        else:
+            self._status = CRYSTAL_MATCH_STATUS_FAIL

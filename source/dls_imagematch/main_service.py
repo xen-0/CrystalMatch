@@ -32,7 +32,8 @@ def main():
 
     debug = hasattr(args, "debug") and args.debug
     service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)
-    service.perform_match(args.image_input.name, args.image_output.name, selected_points)
+    service_results = service.perform_match(args.image_input.name, args.image_output.name, selected_points)
+    service_results.print_results()
 
 
 def _parse_selected_points_from_args(args):

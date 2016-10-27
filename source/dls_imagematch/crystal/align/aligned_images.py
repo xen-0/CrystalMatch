@@ -4,6 +4,20 @@ from .metric_overlap import OverlapMetric
 from .overlay import Overlayer
 
 
+class AlignedImagesStatus:
+    def __init__(self, code, status):
+        self.code = code
+        self.status = status
+
+    def __str__(self):
+        return str(self.code) + ", " + self.status
+
+# Status values
+ALIGNED_IMAGE_STATUS_NOT_SET = AlignedImagesStatus(-1, "NOT SET")
+ALIGNED_IMAGE_STATUS_OK = AlignedImagesStatus(1, "OK")
+ALIGNED_IMAGE_STATUS_FAIL = AlignedImagesStatus(0, "FAIL")
+
+
 class AlignedImages:
     """ Represents a pair of images on which an alignment operation has been performed. The images should
     have the same real size per pixel. The translate is the distance (in pixels) that the top-left corner
@@ -84,8 +98,12 @@ class AlignedImages:
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
             self._overlay = Overlayer.create_overlay_image(self.image1, self.image2, self.translate, rect_color)
-
         return self._overlay
+
+    def alignment_status_code(self):
+        if self.is_alignment_bad():
+            return ALIGNED_IMAGE_STATUS_FAIL
+        return ALIGNED_IMAGE_STATUS_OK
 
     def overlap_metric(self):
         """ Metric which gives an indication of the quality of the alignment (lower is better). """

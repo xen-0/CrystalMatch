@@ -260,7 +260,7 @@ class CrystalMatchControl(QGroupBox):
         color2 = self._gui_config.color_crystal_image2.value()
 
         logging.info(status)
-        for i, match in enumerate(crystal_match_results.matches):
+        for i, match in enumerate(crystal_match_results.get_matches()):
             if not match.is_match_found():
                 continue
 
