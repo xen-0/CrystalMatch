@@ -31,8 +31,6 @@ def main():
     if config_directory is None:
         config_directory = CONFIG_DIR
     debug = hasattr(args, "debug") and args.debug
-    if not hasattr(args, "job"):
-        args.job = ""
 
     # Run service
     service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)

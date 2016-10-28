@@ -71,6 +71,14 @@ class TestServiceResult(TestCase):
         output = self.get_output(mock_print)
         self.failIf("job_id" in output)
 
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_job_id_does_not_print_and_does_not_cause_exception_if_none(self, mock_print):
+        result = ServiceResult(None, "test/file/path/fomulatrix", "test-file/path/beamline")
+        result.print_results()
+
+        output = self.get_output(mock_print)
+        self.failIf("job_id" in output)
+
     def test_add_image_alignment_results(self):
         mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset"])
         result = ServiceResult("job-id", "fomulatrix", "beamline")

@@ -60,7 +60,7 @@ class ServiceResult:
         Print the contents of this results object to the console.
         """
         output = []
-        if self._job_id != "":
+        if self._job_id and self._job_id != "":
             output = ['job_id:"' + self._job_id + '"']
         output += ['input_image:"' + self._image_path_formulatrix + '"',
                    'output_image:"' + self._image_path_beamline + '"',
