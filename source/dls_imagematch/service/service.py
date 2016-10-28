@@ -3,6 +3,7 @@ from sys import stdout
 
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
+from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
@@ -57,9 +58,10 @@ class CrystalMatchService:
         aligned_images = self._perform_alignment(image1, image2)
         service_result.set_image_alignment_results(aligned_images)
 
-        # Perform Crystal Matching
-        match_results = self._perform_matching(aligned_images, selected_points)
-        service_result.append_crystal_matching_results(match_results)
+        # Perform Crystal Matching - only proceed if we have a valid alignment
+        if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
+            match_results = self._perform_matching(aligned_images, selected_points)
+            service_result.append_crystal_matching_results(match_results)
         return service_result
 
     def _perform_alignment(self, formulatrix_image, beamline_image):
