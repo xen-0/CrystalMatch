@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 
 from .types import DetectorType, AdaptationType, ExtractorType
@@ -97,7 +99,7 @@ class Detector:
         on two images and find matches between them.
         """
         if not self._enabled:
-            print("Detector {} is disabled".format(self._detector))
+            logging.info("Detector {} is disabled".format(self._detector))
             return []
 
         detector = self._create_detector()

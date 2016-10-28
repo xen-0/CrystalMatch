@@ -64,7 +64,7 @@ class CrystalMatcher:
 
         for point in image1_points:
             result = self._match_single_point(point)
-            match_results.matches.append(result)
+            match_results.append_match(result)
 
         return match_results
 

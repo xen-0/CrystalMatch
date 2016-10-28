@@ -1,37 +1,72 @@
+import logging
+from sys import stdout
+
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
 from dls_imagematch.feature.draw import MatchPainter
+from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
 
 
 class CrystalMatchService:
-    def __init__(self, config_directory):
+    def __init__(self, config_directory, verbose=False, debug=False):
         self._config_directory = config_directory
 
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, selected_points):
+        # Set up logging
+        if debug:
+            self.set_std_out_log_level(logging.DEBUG)
+            logging.debug("DEBUG mode set")
+        elif verbose:
+            self.set_std_out_log_level(logging.INFO)
+            logging.info("VERBOSE mode set")
+
+    @staticmethod
+    def set_std_out_log_level(level):
+        root = logging.getLogger()
+        root.setLevel(level)
+        ch = logging.StreamHandler(stdout)
+        ch.setLevel(level)
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # ch.setFormatter(formatter)
+        root.addHandler(ch)
+
+    def perform_match(self, formulatrix_image_path, beamline_image_path, selected_points, job_id=None):
+        """
+        Perform image alignment and crystal matching returning a results object.
+        :param job_id: Optional parameter for command line - returned in results to identify the run.
+        :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
+        :param beamline_image_path: File path to the 'after' image from the Beam line.
+        :param selected_points: An array of points to match between the images.
+        :return: ServiceResult object.
+        """
         # Create the images
         image1 = Image.from_file(formulatrix_image_path)
         image2 = Image.from_file(beamline_image_path)
 
+        # Create results object
+        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path)
+
         # Perform alignment
         aligned_images = self._perform_alignment(image1, image2)
+        service_result.set_image_alignment_results(aligned_images)
 
         # Perform Crystal Matching
-        match_result = self._perform_matching(aligned_images, selected_points)
-        return match_result
+        match_results = self._perform_matching(aligned_images, selected_points)
+        service_result.append_crystal_matching_results(match_results)
+        return service_result
 
     def _perform_alignment(self, formulatrix_image, beamline_image):
         """ Perform alignment on the two images, returning an AlignedImages object. """
         aligner = ImageAligner(formulatrix_image, beamline_image, self._config_align, self._config_detector)
         aligned_images = aligner.align()
-        self._print_alignment_status(aligned_images)
+        self._log_alignment_status(aligned_images)
 
         return aligned_images
 
@@ -40,13 +75,13 @@ class CrystalMatchService:
         matcher.set_from_crystal_config(self._config_crystal)
 
         crystal_match_results = matcher.match(selected_points)
-        self._print_match_results(crystal_match_results)
+        self._log_match_results(crystal_match_results)
         # self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
 
     @staticmethod
-    def _print_alignment_status(aligned):
+    def _log_alignment_status(aligned):
         status = "Unknown"
 
         if aligned.is_alignment_good():
@@ -56,27 +91,27 @@ class CrystalMatchService:
         elif aligned.is_alignment_bad():
             status = "Alignment failed!"
 
-        print("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
+        logging.info("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
 
         match_result = aligned.feature_match_result
         if match_result is not None:
-            print("- Matching Time: {:.4f}".format(match_result.time_match()))
-            print("- Transform Time: {:.4f}".format(match_result.time_transform()))
+            logging.info("- Matching Time: {:.4f}".format(match_result.time_match()))
+            logging.info("- Transform Time: {:.4f}".format(match_result.time_transform()))
 
     @staticmethod
-    def _print_match_results(crystal_results):
-        print("Crystal Matching Complete")
+    def _log_match_results(crystal_results):
+        logging.info("Crystal Matching Complete")
 
-        for i, crystal_match in enumerate(crystal_results.matches):
-            print("\n*** Crystal Match {} ***".format(i+1))
+        for i, crystal_match in enumerate(crystal_results.get_matches()):
+            logging.info("*** Crystal Match {} ***".format(i+1))
             if not crystal_match.is_match_found():
-                print("-- Match Failed")
+                logging.info("-- Match Failed")
                 continue
 
             # Matching time
             feature_result = crystal_match.feature_match_result()
-            print("- Matching Time: {:.4f}".format(feature_result.time_match()))
-            print("- Transform Time: {:.4f}".format(feature_result.time_transform()))
+            logging.info("- Matching Time: {:.4f}".format(feature_result.time_match()))
+            logging.info("- Transform Time: {:.4f}".format(feature_result.time_transform()))
 
             # Beam position and movement
             pixel1, real1 = crystal_match.image1_point(), crystal_match.image1_point_real()
@@ -90,8 +125,8 @@ class CrystalMatchService:
             delta = "- Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                     "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
-            print(beam_position)
-            print(delta)
+            logging.info(beam_position)
+            logging.info(delta)
 
     @staticmethod
     def _popup_match_results(results):

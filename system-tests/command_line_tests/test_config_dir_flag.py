@@ -18,7 +18,7 @@ class TestCommandLineConfigFlag(SystemTest):
 
     def test_config_flag_recognises_config_dir(self):
         cmd_line = "--config ./test/dir/path/config {resources}/A01_1.jpg {resources}/A01_2.jpg"
-        output_dir = self.run_crystal_matching_test(self.test_config_flag_creates_dir_named_config.__name__, cmd_line)
+        output_dir = self.run_crystal_matching_test(self.test_config_flag_recognises_config_dir.__name__, cmd_line)
 
         # Check that the application has not nested an extra 'config' as it is already included in the path
         self.validate_config_dir(output_dir)
@@ -29,7 +29,7 @@ class TestCommandLineConfigFlag(SystemTest):
         self.failUnlessDirExists(expected_config_dir)
         self.failUnlessDirContainsFiles(expected_config_dir, self.expected_config_files)
         # Test that a warning message is shown when the config dir does not exist
-        self.failUnlessStdoutContains("WARNING: configuration directory not found, directory will be created")
+        self.failUnlessStdErrContains("WARNING", "Configuration directory not found, directory will be created")
 
     def test_config_flag_checks_for_ini_file(self):
         cmd_line = "--config ./renamed_config_dir {resources}/A01_1.jpg {resources}/A01_2.jpg"

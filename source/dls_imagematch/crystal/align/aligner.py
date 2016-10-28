@@ -1,3 +1,5 @@
+import logging
+
 from dls_imagematch.feature import FeatureMatcher
 from dls_util.shape import Point
 from .aligned_images import AlignedImages
@@ -10,6 +12,10 @@ class ImageAligner:
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
+
+        logging.info("Image 1 original size: %d x %d", image1.width(), image1.height())
+        logging.info("Image 2 original size: %d x %d", image2.width(), image2.height())
+
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
 
@@ -82,6 +88,7 @@ class ImageAligner:
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
         # Resize image B so it has the same size per pixel as image A
+        # TODO: Rescale image A instead and transform the input co-ordinates accordingly.
         factor = self._image2.pixel_size() / self._image1.pixel_size()
 
         if factor != 1:

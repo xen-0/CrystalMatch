@@ -1,3 +1,4 @@
+import logging
 import sys
 import argparse
 import re
@@ -24,13 +25,20 @@ def main():
     parser = _get_argument_parser()
     args = parser.parse_args()
 
+    # Setup parameters
     selected_points = _parse_selected_points_from_args(args)
     config_directory = args.config
     if config_directory is None:
         config_directory = CONFIG_DIR
+    debug = hasattr(args, "debug") and args.debug
 
-    service = CrystalMatchService(config_directory)
-    service.perform_match(args.image_input.name, args.image_output.name, selected_points)
+    # Run service
+    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)
+    service_results = service.perform_match(args.image_input.name,
+                                            args.image_output.name,
+                                            selected_points,
+                                            job_id=args.job)
+    service_results.print_results()
 
 
 def _parse_selected_points_from_args(args):
@@ -51,7 +59,7 @@ def _parse_selected_points_from_args(args):
                 x, y = map(int, point_string.strip('()').split(','))
                 selected_points.append(Point(x, y))
             else:
-                print ("WARNING: Selected point with invalid format will be ignored - '" + point_string + "'")
+                logging.warning("Selected point with invalid format will be ignored - '" + point_string + "'")
     return selected_points
 
 
@@ -87,7 +95,18 @@ def _get_argument_parser():
     parser.add_argument('--scale_output',
                         metavar="scale",
                         help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
-    parser.add_argument('-v', '--version', action='version', version=VersionHandler.version_string())
+    parser.add_argument('--version',
+                        action='version',
+                        version=VersionHandler.version_string())
+    parser.add_argument('-v', '--verbose',
+                        action="store_true",
+                        help="increase output verbosity")
+    parser.add_argument('-d', '--debug',
+                        action="store_true",
+                        help="output debug information to the console")
+    parser.add_argument('-j', '--job',
+                        metavar="job_id",
+                        help="Specify a job_id - this will be reported in the output to help identify this run")
     return parser
 
 
@@ -98,12 +117,12 @@ class ReadableConfigDir(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         prospective_dir = self.parse_config_path(values)
         if not path.isdir(prospective_dir):
-            print ("WARNING: configuration directory not found, directory will be created: '" + prospective_dir + "'")
+            logging.warning("Configuration directory not found, directory will be created: '" + prospective_dir + "'")
             setattr(namespace, self.dest, prospective_dir)
         elif access(prospective_dir, R_OK):
             setattr(namespace, self.dest, prospective_dir)
         else:
-            print ("ERROR: configuration directory is not readable: '" + prospective_dir + "'")
+            logging.error("Configuration directory is not readable: '" + prospective_dir + "'")
             exit(1)
 
     def parse_config_path(self, proposed_path):
