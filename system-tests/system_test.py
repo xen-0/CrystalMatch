@@ -101,8 +101,7 @@ class SystemTest(TestCase):
             makedirs(self._active_output_dir)
 
         # Replace tokens in the command line
-        cmd_line_args = replace(cmd_line_args, "{input}", self._input_dir())
-        cmd_line_args = replace(cmd_line_args, "{resources}", self._get_resources_dir())
+        cmd_line_args = self.substitute_tokens(cmd_line_args)
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
@@ -115,6 +114,11 @@ class SystemTest(TestCase):
         stderr_file = self._get_std_err_file("w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
+
+    def substitute_tokens(self, sub_string):
+        sub_string = replace(sub_string, "{input}", self._input_dir())
+        sub_string = replace(sub_string, "{resources}", self._get_resources_dir())
+        return sub_string
 
     def _get_resources_dir(self):
         """
@@ -175,6 +179,27 @@ class SystemTest(TestCase):
         std_out = self._get_std_out()
         for match_line in strings:
             self.failIf(match_line in std_out, "Found in std_out when not expected: " + match_line)
+
+    def failUnlessStdOutContainsRegexString(self, regex, count=0):
+        """
+        Match a regex string to the contents of StdOut.  Optionally specify the number of matches the output must
+        contain.
+        :param count: Number of matches required, 0 disables feature and fails if the match does not appear.
+        :param regex: Regex to match.
+        :return:
+        """
+        std_out = self._get_std_out()
+        compiled_regex = compile(regex)
+        if count == 0:
+            self.failUnless(compiled_regex.search(std_out) is not None)
+        else:
+            matches = compiled_regex.findall(std_out)
+            self.failUnless(matches is not None and len(matches) == count,
+                            "Regex expected in output " + str(count) + " time(s): " + regex)
+
+    def failUnlessStdOutContainsRegex(self, *regex):
+        for r in regex:
+            self.failUnlessStdOutContainsRegexString(r, count=0)
 
     def failUnlessStdErrContains(self, *strings):
         std_err = self._get_std_err()

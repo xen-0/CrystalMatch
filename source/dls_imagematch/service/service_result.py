@@ -12,6 +12,9 @@ class ServiceResult:
     Results class which determines the format and structure of output reported to the console. This is also intended to
     standardise the handling of errors for the wrapper service.
     """
+
+    POI_RESULTS_HEADER = "\nco-ordinates ; transform ; status ; mean error"
+
     def __init__(self, job_id, formulatrix_image_path, beamline_image_path):
         self.SEPARATOR = " ; "
         self._job_id = job_id
@@ -47,7 +50,7 @@ class ServiceResult:
 
     def _print_crystal_match_results(self, output_list):
         if len(self._match_results) > 0:
-            output_list.append("\nco-ordinates ; transform ; status ; mean error")
+            output_list.append(self.POI_RESULTS_HEADER)
         for crystal_match in self._match_results:
             line = "poi:"
             line += str(crystal_match.get_transformed_point()) + self.SEPARATOR
