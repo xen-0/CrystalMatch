@@ -40,9 +40,10 @@ class ServiceResult:
         self._match_results = self._match_results + crystal_matcher_results.get_matches()
 
     def _print_alignment_transform(self):
+        # TODO: replace scale factor when supported by app
         if self._alignment_transform is None:
-            return str(Point(0, 0))
-        return str(self._alignment_transform)
+            return "1.00, " + str(Point(0, 0))
+        return "1.00, " + str(self._alignment_transform)
 
     def _print_crystal_match_results(self, output_list):
         if len(self._match_results) > 0:

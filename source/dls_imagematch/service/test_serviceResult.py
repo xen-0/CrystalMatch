@@ -89,8 +89,8 @@ class TestServiceResult(TestCase):
         # Set up mock for successful image match
         status = ALIGNED_IMAGE_STATUS_OK
         confidence = 9.8
-        transform = Point(3.0, 4.0)
-        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+        offset = Point(3.0, 4.0)
+        mock_aligned_image = self.mock_aligned_images(confidence, status, offset)
 
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
@@ -98,7 +98,7 @@ class TestServiceResult(TestCase):
 
         # Test output
         mock_print.assert_has_calls([
-            call("align_transform:" + str(transform)),
+            call("align_transform:1.00, " + str(offset)),
             call("align_status:1, OK"),
             call("align_error:9.8")])
 
@@ -116,7 +116,7 @@ class TestServiceResult(TestCase):
 
         # Test output
         mock_print.assert_has_calls([
-            call("align_transform:(0.00, 0.00)"),
+            call("align_transform:1.00, (0.00, 0.00)"),
             call("align_status:0, FAIL"),
             call("align_error:0.0")])
 
