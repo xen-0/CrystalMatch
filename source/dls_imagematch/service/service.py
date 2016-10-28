@@ -34,6 +34,7 @@ class CrystalMatchService:
         root.setLevel(level)
         ch = logging.StreamHandler(stdout)
         ch.setLevel(level)
+        # TODO: Add file logging using format below
         # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         # ch.setFormatter(formatter)
         root.addHandler(ch)
