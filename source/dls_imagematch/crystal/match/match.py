@@ -78,7 +78,7 @@ class CrystalMatch:
         If the match is a success this returns the transformed point in image B, if not then it should return the
         original point in Image A translated by the Global Alignment transform (ie: the equivalent point in image B).
         """
-        if self.is_match_found:
+        if self.is_match_found():
             return self._image2_point
         else:
             # TODO: apply global transform to this value
