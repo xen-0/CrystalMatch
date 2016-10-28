@@ -1,4 +1,5 @@
 from os.path import realpath
+from unittest.case import skip
 
 from dls_imagematch.service.service_result import ServiceResult
 from system_test import SystemTest
@@ -67,3 +68,7 @@ class TestServiceOutput(SystemTest):
         # Check for failed POI result
         self.failUnlessStdOutContains(ServiceResult.POI_RESULTS_HEADER)
         self.failUnlessStdOutContainsRegexString(self.POI_LINE_REGEX_FAIL, count=1)
+
+    @skip("Feature not implemented yet.")
+    def test_format_of_global_transform_with_scaled_image(self):
+        self.fail("Not implemented - feature under development.")
