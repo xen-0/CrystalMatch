@@ -13,11 +13,12 @@ class ImageAligner:
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
-
-        logging.info("Image 1 original size: %d x %d", image1.width(), image1.height())
-        logging.info("Image 2 original size: %d x %d", image2.width(), image2.height())
-
         self._scale_factor = px_size_1 / px_size_2
+
+        logging.info("Image 1 original size: %d x %d (%d um/pixel)", image1.width(), image1.height(), px_size_1)
+        logging.info("Image 2 original size: %d x %d (%d um/pixel)", image2.width(), image2.height(), px_size_2)
+        logging.info("Scale Factor calculated as " + str(self._scale_factor))
+
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
 
@@ -49,7 +50,8 @@ class ImageAligner:
         """ Default alignment result with 0 offset. """
         translation = Point()
         description = "DISABLED!"
-        return AlignedImages(self._image1, self._image2, self._scale_factor, translation, self._align_config, description)
+        return AlignedImages(self._image1, self._image2, self._scale_factor,
+                             translation, self._align_config, description)
 
     def _check_config(self):
         """ Raises an exception if configuration has not been properly set. """
@@ -82,15 +84,17 @@ class ImageAligner:
 
         translation = match_result.transform().translation()
         description = "Feature matching - " + detector
-        aligned_images = AlignedImages(self._image1, self._image2, self._scale_factor, translation, self._align_config, description)
+        aligned_images = AlignedImages(self._image1, self._image2, self._scale_factor,
+                                       translation, self._align_config, description)
         aligned_images.feature_match_result = match_result
         return aligned_images
 
     def _get_scaled_mono_images(self):
         """ Load the selected images to be matched, scale them appropriately and
-        convert to grayscale. """
+        convert to greyscale. """
         # Resize image A so it has the same size per pixel as image B
         if self._scale_factor != 1:
+            logging.info("Resizing Formulatrix image (image 1) using scale factor " + str(self._scale_factor))
             self._image1 = self._image1.rescale(self._scale_factor)
 
         return self._image1.to_mono(), self._image2.to_mono()
