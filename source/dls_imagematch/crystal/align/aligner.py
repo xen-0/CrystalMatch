@@ -8,7 +8,8 @@ from .sized_image import SizedImage
 
 
 class ImageAligner:
-    def __init__(self, image1, image2, align_config=None, detector_config=None):
+    def __init__(self, image1, image2, align_config, detector_config=None):
+        assert(align_config is not None)
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
@@ -16,6 +17,7 @@ class ImageAligner:
         logging.info("Image 1 original size: %d x %d", image1.width(), image1.height())
         logging.info("Image 2 original size: %d x %d", image2.width(), image2.height())
 
+        self._scale_factor = px_size_1 / px_size_2
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
 
@@ -87,11 +89,8 @@ class ImageAligner:
     def _get_scaled_mono_images(self):
         """ Load the selected images to be matched, scale them appropriately and
         convert to grayscale. """
-        # Resize image B so it has the same size per pixel as image A
-        # TODO: Rescale image A instead and transform the input co-ordinates accordingly.
-        factor = self._image2.pixel_size() / self._image1.pixel_size()
-
-        if factor != 1:
-            self._image2 = self._image2.rescale(factor)
+        # Resize image A so it has the same size per pixel as image B
+        if self._scale_factor != 1:
+            self._image1 = self._image1.rescale(self._scale_factor)
 
         return self._image1.to_mono(), self._image2.to_mono()
