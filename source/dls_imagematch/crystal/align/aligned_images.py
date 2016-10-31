@@ -20,17 +20,20 @@ ALIGNED_IMAGE_STATUS_FAIL = AlignedImagesStatus(0, "FAIL")
 
 class AlignedImages:
     """ Represents a pair of images on which an alignment operation has been performed. The images should
-    have the same real size per pixel. The translate is the distance (in pixels) that the top-left corner
+    have the same real size per pixel. The translation is the distance (in pixels) that the top-left corner
     of image B should be offset from the top-left corner of image A, in order to properly align the images.
+    The scale_factor is the scaling applied to image1 to match image2.  Together the translation and scale_factor
+    form the alignment transformation.
     """
-    def __init__(self, image1, image2, translate, align_config, method="Unknown"):
+    def __init__(self, image1, image2, scale_factor, translation, align_config, method="Unknown"):
         self.image1 = image1
         self.image2 = image2
-        self.translate = translate
         self.method = method
 
         self.feature_match_result = None
 
+        self._scale_factor = scale_factor
+        self._translation = translation
         self._limit_low = align_config.metric_limit_low.value()
         self._limit_high = align_config.metric_limit_high.value()
 
@@ -59,17 +62,24 @@ class AlignedImages:
         metric = self.overlap_metric()
         return metric > self._limit_high
 
+    def get_alignment_transform(self):
+        """
+        Return the scale and translation transform which must be applied to a point in image 1 to map it to image 2.
+        :return: A scale factor float and a Point() object offset.
+        """
+        return self._scale_factor, self.pixel_offset()
+
     def pixel_offset(self):
         """ The transform (offset) in pixels - nearest whole number. """
         if self._pixel_offset is None:
-            self._pixel_offset = Point(int(round(self.translate.x, 0)), int(round(self.translate.y, 0)))
+            self._pixel_offset = Point(int(round(self._translation.x, 0)), int(round(self._translation.y, 0)))
 
         return self._pixel_offset
 
     def real_offset(self):
         """ The transform in real units (um) with no rounding. """
         if self._real_offset is None:
-            x, y = self.translate.x, self.translate.y
+            x, y = self._translation.x, self._translation.y
             pixel_size = self.image1.pixel_size()
             self._real_offset = Point(x * pixel_size, y * pixel_size)
 
@@ -79,7 +89,7 @@ class AlignedImages:
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._pixel_center is None:
             width, height = self.image2.size()
-            x, y = self.translate.x + width / 2, self.translate.y + height / 2
+            x, y = self._translation.x + width / 2, self._translation.y + height / 2
             x, y = int(round(x)), int(round(y))
             self._pixel_center = Point(x, y)
 
@@ -89,7 +99,7 @@ class AlignedImages:
         """ The position of the center of image B (in image A coordinates) - in pixels. """
         if self._real_center is None:
             width, height = self.image2.size()
-            x, y = self.translate.x + width / 2, self.translate.y + height / 2
+            x, y = self._translation.x + width / 2, self._translation.y + height / 2
             self._real_center = Point(x, y)
 
         return self._real_center
@@ -97,7 +107,7 @@ class AlignedImages:
     def overlay(self, rect_color=Color.black()):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
-            self._overlay = Overlayer.create_overlay_image(self.image1, self.image2, self.translate, rect_color)
+            self._overlay = Overlayer.create_overlay_image(self.image1, self.image2, self._translation, rect_color)
         return self._overlay
 
     def alignment_status_code(self):
@@ -109,7 +119,7 @@ class AlignedImages:
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
             metric_calc = OverlapMetric(self.image1, self.image2, None)
-            self._metric = metric_calc.calculate_overlap_metric(self.translate)
+            self._metric = metric_calc.calculate_overlap_metric(self._translation)
 
         return self._metric
 

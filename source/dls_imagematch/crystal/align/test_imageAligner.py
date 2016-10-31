@@ -17,7 +17,8 @@ class TestImageAligner(TestCase):
         align_config.pixel_size_1.value = MagicMock(return_value=image_1_pixel_size)
         align_config.pixel_size_2.value = MagicMock(return_value=image_2_pixel_size)
         aligner = ImageAligner(image1, image2, align_config)
-        # Static method used to create new image objects in aligner - override the assignment below
+
+        # Static method used which return new image objects in aligner - override the assignment
         aligner._image1 = image1
         aligner._image2 = image2
         return aligner, image1, image2

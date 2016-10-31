@@ -49,7 +49,7 @@ class ImageAligner:
         """ Default alignment result with 0 offset. """
         translation = Point()
         description = "DISABLED!"
-        return AlignedImages(self._image1, self._image2, translation, self._align_config, description)
+        return AlignedImages(self._image1, self._image2, self._scale_factor, translation, self._align_config, description)
 
     def _check_config(self):
         """ Raises an exception if configuration has not been properly set. """
@@ -82,7 +82,7 @@ class ImageAligner:
 
         translation = match_result.transform().translation()
         description = "Feature matching - " + detector
-        aligned_images = AlignedImages(self._image1, self._image2, translation, self._align_config, description)
+        aligned_images = AlignedImages(self._image1, self._image2, self._scale_factor, translation, self._align_config, description)
         aligned_images.feature_match_result = match_result
         return aligned_images
 

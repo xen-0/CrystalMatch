@@ -13,10 +13,10 @@ class TestImageScaling(SystemTest):
 
         # Check the global transformation, status and error margin
         self.failUnlessStdOutContains(
-            'align_transform:0.5, (2.00, 8.00)',
-            'align_status:1, OK',
             # TODO: Could extract the values and test via thresholding?
-            'align_error:8.'
+            'align_transform:0.5, (0.00, 4.00)',
+            'align_status:1, OK',
+            'align_error:7.'
         )
 
     def test_alignment_with_larger_beam_line_image(self):
@@ -25,10 +25,10 @@ class TestImageScaling(SystemTest):
 
         # Check the global transformation, status and error margin
         self.failUnlessStdOutContains(
-            'align_transform:2, (0.00, -4.00)',
-            'align_status:1, OK',
             # TODO: Could extract the values and test via thresholding?
-            'align_error:7.'
+            'align_transform:2.0, (-2.00, -8.00)',
+            'align_status:1, OK',
+            'align_error:8.'
         )
 
     def test_alignment_with_smaller_beam_line_image_with_points(self):
