@@ -25,7 +25,7 @@ class AlignedImages:
     The scale_factor is the scaling applied to image1 to match image2.  Together the translation and scale_factor
     form the alignment transformation.
     """
-    def __init__(self, image1, image2, scale_factor, translation, align_config, method="Unknown"):
+    def __init__(self, image1, image2, resolution, scale_factor, translation, align_config, method="Unknown"):
         self.image1 = image1
         self.image2 = image2
         self.method = method
@@ -33,6 +33,7 @@ class AlignedImages:
         self.feature_match_result = None
 
         self._scale_factor = scale_factor
+        self._resolution = resolution
         self._translation = translation
         self._limit_low = align_config.metric_limit_low.value()
         self._limit_high = align_config.metric_limit_high.value()
@@ -44,6 +45,13 @@ class AlignedImages:
         self._overlay = None
         self._metric = None
         self._overlap_images = None
+
+    def get_working_resolution(self):
+        """
+        Gets the pixel size for the aligned images, usually in micro-meters per pixel.
+        :return: The resolution of the aligned images as a float value.
+        """
+        return self._resolution
 
     def is_alignment_good(self):
         """ If True the alignment metric is less than the low limit and the alignment is considered to

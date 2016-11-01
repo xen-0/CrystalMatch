@@ -14,10 +14,6 @@ class CrystalMatcher:
 
     def __init__(self, aligned_images, detector_config, crystal_config=None):
         self._aligned_images = aligned_images
-        self._image1 = aligned_images.image1.to_mono()
-        self._image2 = aligned_images.image2.to_mono()
-        self._pixel_size = self._image1.pixel_size()
-
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
@@ -72,10 +68,13 @@ class CrystalMatcher:
         image1_rect = self.make_target_region(point)
         image2_rect = self.make_search_region(point)
 
-        feature_matcher = BoundedFeatureMatcher(self._image1, self._image2, self._detector_config,
-                                                image1_rect, image2_rect)
+        feature_matcher = BoundedFeatureMatcher(self._aligned_images.image1.to_mono(),
+                                                self._aligned_images.image2.to_mono(),
+                                                self._detector_config,
+                                                image1_rect,
+                                                image2_rect)
 
-        result = CrystalMatch(point, self._pixel_size)
+        result = CrystalMatch(point, self._aligned_images.get_working_resolution())
         self._perform_match(feature_matcher, result)
 
         return result
@@ -107,9 +106,9 @@ class CrystalMatcher:
         return rect
 
     def _region_size_pixels(self):
-        return self._region_size_real / self._pixel_size
+        return self._region_size_real / self._aligned_images.get_working_resolution()
 
     def _search_size_pixels(self):
-        width = self._search_width_real / self._pixel_size
-        height = self._search_height_real / self._pixel_size
+        width = self._search_width_real / self._aligned_images.get_working_resolution()
+        height = self._search_height_real / self._aligned_images.get_working_resolution()
         return width, height

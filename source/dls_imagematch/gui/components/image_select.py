@@ -65,7 +65,7 @@ class ImageSelector(QGroupBox):
     def set_image(self, image):
         self._image = image
         self._display_image(image)
-        self._display_filename_label(image.file)
+        self._display_filename_label(image.get_file())
 
     def _select_image_from_file_dialog(self):
         """ Display open dialog for Image slot A, load the selected image. """
