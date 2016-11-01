@@ -65,8 +65,10 @@ class CrystalMatcher:
         return match_results
 
     def _match_single_point(self, point):
-        image1_rect = self.make_target_region(point)
-        image2_rect = self.make_search_region(point)
+        crystal_match = CrystalMatch(point, self._aligned_images)
+
+        image1_rect = self.make_target_region(crystal_match.get_poi_image_1())
+        image2_rect = self.make_search_region(crystal_match.get_poi_image_2_pre_match())
 
         feature_matcher = BoundedFeatureMatcher(self._aligned_images.image1.to_mono(),
                                                 self._aligned_images.image2.to_mono(),
@@ -74,10 +76,9 @@ class CrystalMatcher:
                                                 image1_rect,
                                                 image2_rect)
 
-        result = CrystalMatch(point, self._aligned_images.get_working_resolution())
-        self._perform_match(feature_matcher, result)
+        self._perform_match(feature_matcher, crystal_match)
 
-        return result
+        return crystal_match
 
     def _perform_match(self, feature_matcher, crystal_match):
         feature_matcher.set_use_all_detectors()
@@ -91,18 +92,16 @@ class CrystalMatcher:
         size = self._region_size_pixels()
         return Rectangle.from_center(center, size, size)
 
-    def make_search_region(self, image1_point):
+    def make_search_region(self, centre_point):
         """ Define a rectangle on image B in which to search for the matching crystal. Its narrow and tall
         as the crystal is likely to move downwards under the effect of gravity. """
-        images = self._aligned_images
         search_width, search_height = self._search_size_pixels()
         vertical_shift = self._search_vertical_shift
 
-        image2_point = image1_point - images.pixel_offset()
-        top_left = image2_point - Point(search_width/2, search_height*(1-vertical_shift))
+        top_left = centre_point - Point(search_width / 2, search_height * (1 - vertical_shift))
         rect = Rectangle.from_corner(top_left, search_width, search_height)
 
-        rect = rect.intersection(images.image2.bounds())
+        rect = rect.intersection(self._aligned_images.image2.bounds())
         return rect
 
     def _region_size_pixels(self):

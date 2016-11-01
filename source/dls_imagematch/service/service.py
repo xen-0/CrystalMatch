@@ -61,6 +61,13 @@ class CrystalMatchService:
 
         # Perform Crystal Matching - only proceed if we have a valid alignment
         if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
+            # Remap points onto image B
+            # TODO: refactor transform - use alignment transform object?
+            sf, tr = aligned_images.get_alignment_transform()
+            if sf != 1.0:
+                for i in range(len(selected_points)):
+                    selected_points[i] = selected_points[i] * sf
+                    # selected_points[i] = selected_points[i] + tr
             match_results = self._perform_matching(aligned_images, selected_points)
             service_result.append_crystal_matching_results(match_results)
         return service_result
@@ -107,7 +114,7 @@ class CrystalMatchService:
 
         for i, crystal_match in enumerate(crystal_results.get_matches()):
             logging.info("*** Crystal Match {} ***".format(i+1))
-            if not crystal_match.is_match_found():
+            if not crystal_match.is_success():
                 logging.info("-- Match Failed")
                 continue
 
@@ -117,15 +124,15 @@ class CrystalMatchService:
             logging.info("- Transform Time: {:.4f}".format(feature_result.time_transform()))
 
             # Beam position and movement
-            pixel1, real1 = crystal_match.image1_point(), crystal_match.image1_point_real()
-            pixel2, real2 = crystal_match.image2_point(), crystal_match.image2_point_real()
+            pixel1, real1 = crystal_match.get_poi_image_1(), crystal_match.get_poi_image_1_real()
+            pixel2, real2 = crystal_match.get_poi_image_2_matched(), crystal_match.get_poi_image_2_matched_real()
 
             beam_position = "- Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                             "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
 
-            delta_pixel = pixel2 - pixel1 + crystal_results.pixel_offset()
-            delta_real = real2 - real1 + crystal_results.real_offset()
-            delta = "- Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
+            delta_pixel = pixel2 - pixel1 - crystal_results.pixel_offset()
+            delta_real = real2 - real1 - crystal_results.pixel_offset()
+            delta = "- Crystal Movement(actual): x={0:.2f} um, y={1:.2f} um ({2} px, " \
                     "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
             logging.info(beam_position)

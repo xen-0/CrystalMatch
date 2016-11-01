@@ -221,7 +221,7 @@ class CrystalMatchControl(QGroupBox):
         if self._match_results is None or self._match_results.num() <= index:
             point = None
         else:
-            point = self._match_results.get_crystal_match(index).image1_point()
+            point = self._match_results.get_crystal_match(index).get_poi_image_1()
 
         dialog = SingleCrystalDialog(self._aligned_images, point, self._gui_config, self._crystal_config)
         dialog.exec_()
@@ -261,11 +261,11 @@ class CrystalMatchControl(QGroupBox):
 
         logging.info(status)
         for i, match in enumerate(crystal_match_results.get_matches()):
-            if not match.is_match_found():
+            if not match.is_success():
                 continue
 
-            pixel1, real1 = match.image1_point(), match.image1_point_real()
-            pixel2, real2 = match.image2_point(), match.image2_point_real()
+            pixel1, real1 = match.get_poi_image_1(), match.get_poi_image_1_real()
+            pixel2, real2 = match.get_poi_image_2_matched(), match.get_poi_image_2_matched_real()
 
             beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
                             "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))

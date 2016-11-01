@@ -33,7 +33,7 @@ class TestServiceResult(TestCase):
 
             # Mock Crystal Match
             mock_crystal_match = create_autospec(CrystalMatch, spec_set=True)
-            mock_crystal_match.get_transformed_point = MagicMock(return_value=new_positions[i])
+            mock_crystal_match.get_transformed_poi = MagicMock(return_value=new_positions[i])
             mock_crystal_match.get_delta = MagicMock(return_value=deltas[i])
             mock_crystal_match.feature_match_result = MagicMock(return_value=mock_feature_match)
             mock_crystal_match.get_status = MagicMock(return_value=status_codes[i])

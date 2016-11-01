@@ -51,7 +51,7 @@ class ServiceResult:
             output_list.append(self.POI_RESULTS_HEADER)
         for crystal_match in self._match_results:
             line = "poi:"
-            line += str(crystal_match.get_transformed_point()) + self.SEPARATOR
+            line += str(crystal_match.get_transformed_poi()) + self.SEPARATOR
             line += str(crystal_match.get_delta()) + self.SEPARATOR
             line += str(crystal_match.get_status()) + self.SEPARATOR
             line += str(crystal_match.feature_match_result().mean_transform_error())

@@ -17,79 +17,70 @@ CRYSTAL_MATCH_STATUS_FAIL = CrystalMatchStatus(0, "FAIL")
 
 class CrystalMatch:
     """  Represents a match between the position of a crystal in two separate images. """
-    def __init__(self, start_point, pixel_size):
-        """ Initialize a new CrystalMatch object. Note that You must call the set_transformation
-        method to set the transformation (and therefore calculate the matching position in Image 2).
-
-        Parameters
-        ----------
-        start_point - The user selected location of the crystal in image 1 (in pixels)
-        pixel_size - The real size of a pixel in the image (in um)
+    def __init__(self, start_point, aligned_images):
         """
-        self._image1_point = start_point
-        self._image2_point = None
-        self._pixel_size = pixel_size
+        Initialize a new CrystalMatch object. Note that You must call the set_transformation
+        method to set the transformation (and therefore calculate the matching position in Image 2).
+        :param start_point: The user selected location of the crystal in image 1 (in pixels)
+        :param aligned_images: AlignedImages object from ImageAligner
+        """
+        self._aligned_images = aligned_images
+        self._poi_image_1 = start_point
+        self._poi_image_2_pre_match = start_point + self._aligned_images.pixel_offset()
+        self._poi_image_2_matched = None
         self._feature_match_result = None
         self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET
 
     def is_success(self):
-        return self._image2_point is not None
-
-    def pixel_size(self):
-        return self._pixel_size
+        return self._poi_image_2_matched is not None
 
     def feature_match_result(self):
         return self._feature_match_result
 
-    def image1_point(self):
+    def get_poi_image_1(self):
         """ The user-specified location of the crystal in Image 1 (in pixels). """
-        return self._image1_point
+        return self._poi_image_1
 
-    def image1_point_real(self):
+    def get_poi_image_1_real(self):
         """ The user-specified location of the crystal in Image 1 (in um). """
-        return self._image1_point * self._pixel_size
+        return self._poi_image_1 * self._aligned_images.get_working_resolution()
 
-    def image1_region(self, size):
-        """ Return a Rectangle object of specified side length, centered around the Image 1
-        point (in pixels). """
-        return Rectangle.from_center(self._image1_point, size, size)
+    def get_poi_image_2_pre_match(self):
+        """
+        The location of the POI on image 2 before matching (ie: the POI on image 1 with the alignment transform applied.
+        """
+        return self._poi_image_2_pre_match
 
-    def image2_point(self):
+    def get_poi_image_2_matched(self):
         """ The location of the crystal in Image 2 as determined by the transformation (in
         pixels). Note that the set_feature_match_result method must be called to set this to a valid
         value. """
-        return self._image2_point
+        return self._poi_image_2_matched
 
-    def image2_point_real(self):
+    def get_poi_image_2_matched_real(self):
         """ The location of the crystal in Image 2 as determined by the transformation (in
         um). Note that the set_transformation method must be called to set this to a valid
         value. """
-        return self._image2_point * self._pixel_size
+        return self._poi_image_2_matched * self._aligned_images.get_working_resolution()
 
     def get_delta(self):
         """
-        Returns the offset between the starting point in image B and the final translated point.
+        Returns the offset which maps the pre-match POI in image 2 to the final point in image 2.
         """
-        # TODO: apply global transform to self._image1_point
-        return self.get_transformed_point() - self._image1_point
+        return self.get_transformed_poi() - self._poi_image_2_pre_match
 
-    def get_transformed_point(self):
+    def get_transformed_poi(self):
         """
-        If the match is a success this returns the transformed point in image B, if not then it should return the
-        original point in Image A translated by the Global Alignment transform (ie: the equivalent point in image B).
+        If the match is a success this returns the final point in image B, if not then it should return the
+        offset POI from Image a (ie: the original POI with the Alignment transform applied to map it to image 2).
         """
-        if self.is_match_found():
-            return self._image2_point
+        if self.is_success():
+            return self._poi_image_2_matched
         else:
-            # TODO: apply global transform to this value
-            return self._image1_point
+            return self._poi_image_2_pre_match
 
     def get_status(self):
         return self._status
-
-    def is_match_found(self):
-        """ Returns True if the set_transformation function has been called correctly. """
-        return self._image2_point is not None
 
     def set_feature_match_result(self, feature_result):
         """ Set the transformation which maps the crystal location from Image 1 onto the
@@ -98,6 +89,6 @@ class CrystalMatch:
         trans = feature_result.transform()
         if trans is not None:
             self._status = CRYSTAL_MATCH_STATUS_OK
-            self._image2_point = trans.transform_points([self._image1_point])[0]
+            self._poi_image_2_matched = trans.transform_points([self._poi_image_2_pre_match])[0]
         else:
             self._status = CRYSTAL_MATCH_STATUS_FAIL

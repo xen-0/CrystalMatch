@@ -19,13 +19,15 @@ ALIGNED_IMAGE_STATUS_FAIL = AlignedImagesStatus(0, "FAIL")
 
 
 class AlignedImages:
-    """ Represents a pair of images on which an alignment operation has been performed. The images should
-    have the same real size per pixel. The translation is the distance (in pixels) that the top-left corner
-    of image B should be offset from the top-left corner of image A, in order to properly align the images.
+    """
+    Represents a pair of images on which an alignment operation has been performed. The images should have the same
+    real size per pixel. The translation is the distance (in pixels) that the top-left
+    corner of image B should be offset from the top-left corner of image A, in order to properly align the images.
     The scale_factor is the scaling applied to image1 to match image2.  Together the translation and scale_factor
     form the alignment transformation.
     """
     def __init__(self, image1, image2, resolution, scale_factor, translation, align_config, method="Unknown"):
+        # TODO: Write documentation
         self.image1 = image1
         self.image2 = image2
         self.method = method
@@ -78,7 +80,7 @@ class AlignedImages:
         return self._scale_factor, self.pixel_offset()
 
     def pixel_offset(self):
-        """ The transform (offset) in pixels - nearest whole number. """
+        """ The translation (offset) in pixels - nearest whole number. """
         if self._pixel_offset is None:
             self._pixel_offset = Point(int(round(self._translation.x, 0)), int(round(self._translation.y, 0)))
 
@@ -88,7 +90,7 @@ class AlignedImages:
         """ The transform in real units (um) with no rounding. """
         if self._real_offset is None:
             x, y = self._translation.x, self._translation.y
-            pixel_size = self.image1.pixel_size()
+            pixel_size = self._resolution
             self._real_offset = Point(x * pixel_size, y * pixel_size)
 
         return self._real_offset

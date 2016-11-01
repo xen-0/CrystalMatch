@@ -153,6 +153,7 @@ class CrystalMatchPane(QWidget):
         detector_config_dir = self._gui_config.config_dir.value()
         detector_config = DetectorConfig(detector_config_dir)
 
+        # TODO: add logging to the GUI
         matcher = CrystalMatcher(self._aligned_images, detector_config)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
