@@ -19,7 +19,7 @@ class CrystalMatch:
     """  Represents a match between the position of a crystal in two separate images. """
     def __init__(self, start_point, aligned_images):
         """
-        Initialize a new CrystalMatch object. Note that You must call the set_transformation
+        Initialize a new CrystalMatch object. Note that You must call the set_feature_match_result
         method to set the transformation (and therefore calculate the matching position in Image 2).
         :param start_point: The user selected location of the crystal in image 1 (in pixels)
         :param aligned_images: AlignedImages object from ImageAligner
@@ -32,7 +32,11 @@ class CrystalMatch:
         self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET
 
     def is_success(self):
-        return self._poi_image_2_matched is not None
+        return self._status == CRYSTAL_MATCH_STATUS_OK
+
+    def has_matched(self):
+        """ Returns true if the feature match has been set, regardless of success. """
+        return self._status != CRYSTAL_MATCH_STATUS_STATUS_NOT_SET
 
     def feature_match_result(self):
         return self._feature_match_result
