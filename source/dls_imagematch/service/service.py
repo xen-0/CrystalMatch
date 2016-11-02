@@ -85,7 +85,7 @@ class CrystalMatchService:
         matcher.set_from_crystal_config(self._config_crystal)
 
         crystal_match_results = matcher.match(selected_points)
-        self._log_match_results(crystal_match_results)
+        logging.info("Crystal Matching Complete")
         # self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
@@ -105,38 +105,8 @@ class CrystalMatchService:
 
         match_result = aligned.feature_match_result
         if match_result is not None:
-            logging.info("- Matching Time: {:.4f}".format(match_result.time_match()))
-            logging.info("- Transform Time: {:.4f}".format(match_result.time_transform()))
-
-    @staticmethod
-    def _log_match_results(crystal_results):
-        logging.info("Crystal Matching Complete")
-
-        for i, crystal_match in enumerate(crystal_results.get_matches()):
-            logging.info("*** Crystal Match {} ***".format(i+1))
-            if not crystal_match.is_success():
-                logging.info("-- Match Failed")
-                continue
-
-            # Matching time
-            feature_result = crystal_match.feature_match_result()
-            logging.info("- Matching Time: {:.4f}".format(feature_result.time_match()))
-            logging.info("- Transform Time: {:.4f}".format(feature_result.time_transform()))
-
-            # Beam position and movement
-            pixel1, real1 = crystal_match.get_poi_image_1(), crystal_match.get_poi_image_1_real()
-            pixel2, real2 = crystal_match.get_poi_image_2_matched(), crystal_match.get_poi_image_2_matched_real()
-
-            beam_position = "- Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
-                            "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
-
-            delta_pixel = pixel2 - pixel1 - crystal_results.pixel_offset()
-            delta_real = real2 - real1 - crystal_results.pixel_offset()
-            delta = "- Crystal Movement(actual): x={0:.2f} um, y={1:.2f} um ({2} px, " \
-                    "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
-
-            logging.info(beam_position)
-            logging.info(delta)
+            logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
+            logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
 
     @staticmethod
     def _popup_match_results(results):

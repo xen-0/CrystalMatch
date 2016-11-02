@@ -1,7 +1,5 @@
 from __future__ import division
 
-import logging
-
 from PyQt4.QtCore import Qt, QThread, pyqtSignal
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
@@ -258,8 +256,6 @@ class CrystalMatchControl(QGroupBox):
 
         color1 = self._gui_config.color_crystal_image1.value()
         color2 = self._gui_config.color_crystal_image2.value()
-
-        logging.info(status)
         for i, match in enumerate(crystal_match_results.get_matches()):
             if not match.is_success():
                 continue
@@ -267,24 +263,11 @@ class CrystalMatchControl(QGroupBox):
             pixel1, real1 = match.get_poi_image_1(), match.get_poi_image_1_real()
             pixel2, real2 = match.get_poi_image_2_matched(), match.get_poi_image_2_matched_real()
 
-            beam_position = "Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, " \
-                            "{3} px)".format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y)))
-
-            delta_pixel = pixel2 - pixel1 + crystal_match_results.pixel_offset()
-            delta_real = real2 - real1 + crystal_match_results.real_offset()
-            delta = "Crystal Movement: x={0:.2f} um, y={1:.2f} um ({2} px, " \
-                    "{3} px)".format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
-
-            logging.info("-- Match {} --".format(i))
-            logging.info(beam_position)
-            logging.info(delta)
-
-            off = crystal_match_results.pixel_offset()
             image1.draw_cross(pixel1, color1, size=10, thickness=2)
-            image1.draw_cross(pixel2+off, color2, size=10, thickness=2)
-            image1.draw_circle(pixel2+off, 30, color2)
+            image1.draw_cross(pixel2, color2, size=10, thickness=2)
+            image1.draw_circle(pixel2, 30, color2)
 
-            image2.draw_cross(pixel1-off, color1, size=10, thickness=2)
+            image2.draw_cross(pixel1, color1, size=10, thickness=2)
             image2.draw_cross(pixel2, color2, size=10, thickness=2)
 
             if i < self.NUM_FRAMES:

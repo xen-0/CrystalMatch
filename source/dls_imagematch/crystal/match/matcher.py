@@ -58,9 +58,12 @@ class CrystalMatcher:
         images = self._aligned_images
         match_results = CrystalMatcherResults(images)
 
+        crystal_id = 1
         for point in image1_points:
             result = self._match_single_point(point)
+            result.print_to_log(crystal_id=crystal_id)
             match_results.append_match(result)
+            crystal_id += 1
 
         return match_results
 

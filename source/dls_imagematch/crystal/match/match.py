@@ -1,3 +1,5 @@
+import logging
+
 from dls_util.shape import Rectangle
 
 
@@ -73,6 +75,9 @@ class CrystalMatch:
         """
         return self.get_transformed_poi() - self._poi_image_2_pre_match
 
+    def get_delta_real(self):
+        return self.get_delta() * self._aligned_images.get_working_resolution()
+
     def get_transformed_poi(self):
         """
         If the match is a success this returns the final point in image B, if not then it should return the
@@ -96,3 +101,33 @@ class CrystalMatch:
             self._poi_image_2_matched = trans.transform_points([self._poi_image_2_pre_match])[0]
         else:
             self._status = CRYSTAL_MATCH_STATUS_FAIL
+
+    def print_to_log(self, crystal_id=None):
+        """
+        Print the current configuration of the CrystalMatch object to the log information. Base information given by
+        INFO with detailed info using DEBUG flag.
+        :param crystal_id: Optionally print the id for the crystal - can be string or number
+        """
+        if crystal_id is not None:
+            logging.info("*** Crystal Match " + str(crystal_id) + " ***",)
+        else:
+            logging.info("*** Crystal Match ***")
+
+        if not self.is_success():
+            logging.info("-- Match Failed")
+        else:
+            logging.debug("- Matching Time: {:.4f}".format(self._feature_match_result.time_match()))
+            logging.debug("- Transform Time: {:.4f}".format(self._feature_match_result.time_transform()))
+
+            beam_position = "- Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
+            delta = "- Crystal Movement(delta): x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
+
+            # .format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y))
+            # .format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
+
+            poi_real = self.get_poi_image_2_matched_real()
+            poi_pixel = self.get_poi_image_2_matched()
+            logging.info(beam_position.format(poi_real.x, poi_real.y, poi_pixel.x, poi_pixel.y))
+            offset_real = self.get_delta_real()
+            offset_pixel = self.get_delta()
+            logging.info(delta.format(offset_real.x, offset_real.y, offset_pixel.x, offset_pixel.y))
