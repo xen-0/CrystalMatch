@@ -1,7 +1,5 @@
 import logging
 
-from dls_util.shape import Rectangle
-
 
 class CrystalMatchStatus:
     def __init__(self, code, status):
@@ -113,6 +111,7 @@ class CrystalMatch:
         else:
             logging.info("*** Crystal Match ***")
 
+        logging.info("- Input POI: ({} px, {} px)".format(self.get_poi_image_1().x, self.get_poi_image_1().y))
         if not self.is_success():
             logging.info("-- Match Failed")
         else:
@@ -121,9 +120,6 @@ class CrystalMatch:
 
             beam_position = "- Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
             delta = "- Crystal Movement(delta): x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
-
-            # .format(real2.x, real2.y, int(round(pixel2.x)), int(round(pixel2.y))
-            # .format(delta_real.x, delta_real.y, int(round(delta_pixel.x)), int(round(delta_pixel.y)))
 
             poi_real = self.get_poi_image_2_matched_real()
             poi_pixel = self.get_poi_image_2_matched()
