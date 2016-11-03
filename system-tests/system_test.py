@@ -1,3 +1,4 @@
+import re
 from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir, realpath, split
 from re import match, compile
@@ -5,6 +6,8 @@ from shutil import rmtree, copytree
 from string import replace
 from subprocess import call
 from unittest import TestCase
+
+from dls_util.shape.point import Point
 
 
 class SystemTest(TestCase):
@@ -149,10 +152,19 @@ class SystemTest(TestCase):
         return std_err
 
     @staticmethod
-    def _is_dir(directory_path):
-        return exists(directory_path) and isdir(directory_path)
+    def floatify_regex_match(matches):
+        float_array = []
+        for i in range(len(matches)):
+            float_array.append([])
+            for j in range(len(matches[i])):
+                float_array[i].append(float(matches[i][j]))
+        return float_array
 
     # Test Utility Methods
+
+    @staticmethod
+    def _is_dir(directory_path):
+        return exists(directory_path) and isdir(directory_path)
 
     def _get_std_err_file(self, mode):
         """
@@ -238,3 +250,46 @@ class SystemTest(TestCase):
 
     def failIfDirExists(self, dir_path):
         self.failIf(self._is_dir(dir_path))
+
+    def failUnlessPoiAlmostEqual(self, expected):
+        poi_array = self.get_poi_from_std_out()
+        self.failUnlessEqual(len(expected), len(poi_array), "Unexpected number of POI.")
+        for i in range(len(poi_array)):
+            loc, off, success, err = poi_array[i]
+            self.failUnlessAlmostEqual(expected[i][0].x, loc.x, delta=0.5)
+            self.failUnlessAlmostEqual(expected[i][0].y, loc.y, delta=0.5)
+            self.failUnlessAlmostEqual(expected[i][1].x, off.x, delta=0.5)
+            self.failUnlessAlmostEqual(expected[i][1].y, off.y, delta=0.5)
+            self.failUnlessEqual(expected[i][2], success)
+            self.failUnlessAlmostEqual(expected[i][3], err, delta=1)
+
+    def get_global_transform_from_std_out(self):
+        """
+        Extract the global transform data from the std_out
+        :return: Scale, x translation and y translation
+        """
+        std_out = self._get_std_out()
+        re_compile = re.compile("align_transform:([0-9]+\.[0-9]+), \((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\)")
+        matches = re_compile.findall(std_out)
+        self.failUnlessEqual(1, len(matches), "Unexpected number of matches for alignment_transform")
+        float_array = self.floatify_regex_match(matches)
+        scale, x_trans, y_trans = float_array[0]
+        return scale, x_trans, y_trans
+
+    def get_poi_from_std_out(self):
+        """
+        Extract the output POI from the std_out file.
+        :return: Array of POI in the format [location, offset, success, error].
+        """
+        std_out = self._get_std_out()
+        # Match POI lines in the output
+        reg_ex = "poi:\((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\) ; \((-?[0-9]+\.[0-9]+)," \
+                 " (-?[0-9]+\.[0-9]+)\) ; ([01]).* ; ([0-9]+\.[0-9]+)"
+        re_compile = re.compile(reg_ex)
+        matches = re_compile.findall(std_out)
+        float_array = self.floatify_regex_match(matches)
+        poi_array = []
+        for f in float_array:
+            # Extract pixel location, offset, success value and mean error
+            poi_array.append([Point(f[0], f[1]), Point(f[2], f[3]), f[4], f[5]])
+        return poi_array
