@@ -39,10 +39,10 @@ class ImageAligner:
         self._rescale_image_1()
 
     # -------- CONFIGURATION -------------------
-    def set_align_config(self, config):
+    def set_align_config(self, config):  # pragma: no cover
         self._align_config = config
 
-    def set_detector_config(self, config):
+    def set_detector_config(self, config):  # pragma: no cover
         self._detector_config = config
 
     def _rescale_image_1(self):
@@ -65,6 +65,17 @@ class ImageAligner:
         aligned_images = self._generate_alignment(match_result, detector)
 
         return aligned_images
+
+    def scale_points(self, points_array):
+        """
+        Apply the scale transform from image 1 to an array of Point objects.
+        :param points_array: An array of Point objects
+        :return: A scaled array of Point object.
+        """
+        output_array = []
+        for point in points_array:
+            output_array.append(point * self._scale_factor)
+        return output_array
 
     def _default_alignment(self):
         """ Default alignment result with 0 offset. """

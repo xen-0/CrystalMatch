@@ -39,13 +39,13 @@ class CrystalMatchService:
         # ch.setFormatter(formatter)
         root.addHandler(ch)
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, selected_points, job_id=None):
+    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None):
         """
         Perform image alignment and crystal matching returning a results object.
         :param job_id: Optional parameter for command line - returned in results to identify the run.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
         :param beamline_image_path: File path to the 'after' image from the Beam line.
-        :param selected_points: An array of points to match between the images.
+        :param input_poi: An array of points of interest to match between the images.
         :return: ServiceResult object.
         """
         # Create the images
@@ -56,29 +56,31 @@ class CrystalMatchService:
         service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path)
 
         # Perform alignment
-        aligned_images = self._perform_alignment(image1, image2)
+        aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
         service_result.set_image_alignment_results(aligned_images)
 
         # Perform Crystal Matching - only proceed if we have a valid alignment
         if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
-            # Remap points onto image B
-            # TODO: refactor transform - use alignment transform object?
-            sf, tr = aligned_images.get_alignment_transform()
-            if sf != 1.0:
-                for i in range(len(selected_points)):
-                    selected_points[i] = selected_points[i] * sf
-                    # selected_points[i] = selected_points[i] + tr
-            match_results = self._perform_matching(aligned_images, selected_points)
+            match_results = self._perform_matching(aligned_images, scaled_poi)
             service_result.append_crystal_matching_results(match_results)
         return service_result
 
-    def _perform_alignment(self, formulatrix_image, beamline_image):
-        """ Perform alignment on the two images, returning an AlignedImages object. """
+    def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):
+        """
+        Perform alignment on the two images, returning an AlignedImages object. As the formulatrix image will be
+        scaled the formulatrix_points will alos be scaled to map to the new resolution.
+        :param formulatrix_image: image on which points are selected (this will be resized)
+        :param beamline_image: image onto which points are projected
+        :param formulatrix_points: points on the formulatrix image - these will be rescaled along
+        with the formulatrix_image
+        :return: An AlignedImages object and a scaled array of formulatrix points.
+        """
         aligner = ImageAligner(formulatrix_image, beamline_image, self._config_align, self._config_detector)
         aligned_images = aligner.align()
+        scaled_formulatrix_points = aligner.scale_points(formulatrix_points)
         self._log_alignment_status(aligned_images)
 
-        return aligned_images
+        return aligned_images, scaled_formulatrix_points
 
     def _perform_matching(self, aligned_images, selected_points):
         matcher = CrystalMatcher(aligned_images, self._config_detector)

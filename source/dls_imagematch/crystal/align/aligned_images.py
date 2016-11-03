@@ -21,20 +21,29 @@ ALIGNED_IMAGE_STATUS_FAIL = AlignedImagesStatus(0, "FAIL")
 class AlignedImages:
     """
     Represents a pair of images on which an alignment operation has been performed. The images should have the same
-    real size per pixel. The translation is the distance (in pixels) that the top-left
-    corner of image B should be offset from the top-left corner of image A, in order to properly align the images.
-    The scale_factor is the scaling applied to image1 to match image2.  Together the translation and scale_factor
-    form the alignment transformation.
+    real size per pixel.
     """
-    def __init__(self, image1, image2, resolution, scale_factor, translation, align_config, method="Unknown"):
-        # TODO: Write documentation
+    def __init__(self, image1, image2, resolution, original_scale_factor, translation, align_config, method="Unknown"):
+        """
+        The images must have the same resolution - scale_factor is the value used to map image1 onto image2.
+        The translation is the distance (in pixels) that the top-left corner of image B should be offset from the
+        top-left corner of image A, in order to properly align the images. Together the translation and scale_factor
+        describe the alignment transformation.
+        :param image1: The before image - if rescaling was necessary it should have been done to this image!
+        :param image2: The after image
+        :param resolution: The shared resolution of the images
+        :param original_scale_factor: Original scale factor used to rescale image1 to the resolution of image2.
+        :param translation: The translation which maps a point in image 1 onto image 2
+        :param align_config: Alignment configuration object.
+        :param method: Description text for detector used.
+        """
         self.image1 = image1
         self.image2 = image2
         self.method = method
 
         self.feature_match_result = None
 
-        self._scale_factor = scale_factor
+        self._scale_factor = original_scale_factor
         self._resolution = resolution
         self._translation = translation
         self._limit_low = align_config.metric_limit_low.value()
