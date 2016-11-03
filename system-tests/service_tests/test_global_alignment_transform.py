@@ -10,7 +10,7 @@ class TestGlobalAlignmentTransform(SystemTest):
 
     def test_alignment_on_identical_image(self):
         cmd_line = "{resources}/A10_1.jpg {resources}/A10_1.jpg 871,590"
-        self.run_crystal_matching_test(self.test_alignment_with_positive_offset_on_image_b.__name__, cmd_line)
+        self.run_crystal_matching_test(self.test_alignment_on_identical_image.__name__, cmd_line)
 
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
 
@@ -61,7 +61,7 @@ class TestGlobalAlignmentTransform(SystemTest):
 
     def test_alignment_with_mixed_offset_on_image_b(self):
         cmd_line = "{resources}/A10_1@-0-10.jpg {resources}/A10_1@-10-0.jpg 871,590"
-        self.run_crystal_matching_test(self.test_alignment_with_positive_offset_on_image_b.__name__, cmd_line)
+        self.run_crystal_matching_test(self.test_alignment_with_mixed_offset_on_image_b.__name__, cmd_line)
 
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
 
@@ -78,7 +78,7 @@ class TestGlobalAlignmentTransform(SystemTest):
 
     def test_alignment_with_mixed_offset_counterpoint_on_image_b(self):
         cmd_line = "{resources}/A10_1@-0-10.jpg {resources}/A10_1@-10-0.jpg 871,590"
-        self.run_crystal_matching_test(self.test_alignment_with_positive_offset_on_image_b.__name__, cmd_line)
+        self.run_crystal_matching_test(self.test_alignment_with_mixed_offset_counterpoint_on_image_b.__name__, cmd_line)
 
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
 

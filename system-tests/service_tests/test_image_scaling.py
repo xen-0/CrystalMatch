@@ -1,4 +1,5 @@
 from os.path import realpath
+from unittest.case import skip
 
 from system_test import SystemTest
 
@@ -12,32 +13,38 @@ class TestImageScaling(SystemTest):
         self.run_crystal_matching_test(self.test_alignment_with_smaller_beam_line_image.__name__, cmd_line)
 
         # Check the global transformation, status and error margin
-        self.failUnlessStdOutContains(
-            # TODO: Could extract the values and test via thresholding?
-            'align_transform:0.5, (0.00, 4.00)',
-            'align_status:1, OK',
-            'align_error:7.'
-        )
+        scale, x, y = self.get_global_transform_from_std_out()
+        self.failUnlessEqual(scale, 0.5)
+        self.failUnlessEqual(x, 0)
+        self.failUnlessEqual(y, 4)
+        matches = self.regex_from_std_out('align_error:(.*)')
+        self.failUnlessEqual(1, len(matches))
+        self.failUnlessAlmostEqual(7.5, float(matches[0][0]), delta=0.5)
+        self.failUnlessStdOutContains('align_status:1, OK')
 
     def test_alignment_with_larger_beam_line_image(self):
         cmd_line = "{resources}/A10_2@0.5.jpg {resources}/A10_1.jpg"
         self.run_crystal_matching_test(self.test_alignment_with_larger_beam_line_image.__name__, cmd_line)
 
         # Check the global transformation, status and error margin
-        self.failUnlessStdOutContains(
-            # TODO: Could extract the values and test via thresholding?
-            'align_transform:2.0, (-2.00, -8.00)',
-            'align_status:1, OK',
-            'align_error:8.'
-        )
+        scale, x, y = self.get_global_transform_from_std_out()
+        self.failUnlessEqual(scale, 2.0)
+        self.failUnlessEqual(x, -2)
+        self.failUnlessEqual(y, -8)
+        matches = self.regex_from_std_out('align_error:(.*)')
+        self.failUnlessEqual(1, len(matches))
+        self.failUnlessAlmostEqual(8.5, float(matches[0][0]), delta=0.5)
+        self.failUnlessStdOutContains('align_status:1, OK')
 
+    @skip("Not implemented")
     def test_alignment_with_smaller_beam_line_image_with_points(self):
-        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2@0.5.jpg"
+        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2@0.5.jpg 871,590"
         self.run_crystal_matching_test(self.test_alignment_with_smaller_beam_line_image_with_points.__name__, cmd_line)
 
         # Check Points of interest are found and reported at correct co-ordinates
         self.fail("Not implemented.")
 
+    @skip("Not implemented")
     def test_alignment_with_larger_beam_line_image_with_points(self):
         cmd_line = "{resources}/A10_2@0.5.jpg {resources}/A10_1.jpg"
         self.run_crystal_matching_test(self.test_alignment_with_larger_beam_line_image_with_points.__name__, cmd_line)

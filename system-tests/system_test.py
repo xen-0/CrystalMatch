@@ -276,9 +276,20 @@ class SystemTest(TestCase):
         scale, x_trans, y_trans = float_array[0]
         return scale, x_trans, y_trans
 
+    def regex_from_std_out(self, regex):
+        """
+        Search std_out and return an array of single values from std_out
+        :param regex: Regex expression containing brackets
+        :return: An array of matches
+        """
+        re_compile = re.compile(regex)
+        matches = re_compile.findall(self._get_std_out())
+        self.failIf(matches is None)
+        return matches
+
     def get_poi_from_std_out(self):
         """
-        Extract the output POI from the std_out file.
+        Extract the output POI from the std_out file. - Note this will provide double entries with Verbose mode on.
         :return: Array of POI in the format [location, offset, success, error].
         """
         std_out = self._get_std_out()
