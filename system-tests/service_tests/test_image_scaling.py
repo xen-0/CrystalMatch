@@ -16,10 +16,9 @@ class TestImageScaling(SystemTest):
         scale, x, y = self.get_global_transform_from_std_out()
         self.failUnlessEqual(scale, 0.5)
         self.failUnlessEqual(x, 0)
-        self.failUnlessEqual(y, 4)
+        self.failUnlessEqual(y, -4)
         matches = self.regex_from_std_out('align_error:(.*)')
         self.failUnlessEqual(1, len(matches))
-        self.failUnlessAlmostEqual(7.5, float(matches[0][0]), delta=0.5)
         self.failUnlessStdOutContains('align_status:1, OK')
 
     def test_alignment_with_larger_beam_line_image(self):
@@ -29,11 +28,10 @@ class TestImageScaling(SystemTest):
         # Check the global transformation, status and error margin
         scale, x, y = self.get_global_transform_from_std_out()
         self.failUnlessEqual(scale, 2.0)
-        self.failUnlessEqual(x, -2)
-        self.failUnlessEqual(y, -8)
+        self.failUnlessEqual(x, 2)
+        self.failUnlessEqual(y, 8)
         matches = self.regex_from_std_out('align_error:(.*)')
         self.failUnlessEqual(1, len(matches))
-        self.failUnlessAlmostEqual(8.5, float(matches[0][0]), delta=0.5)
         self.failUnlessStdOutContains('align_status:1, OK')
 
     @skip("Not implemented")

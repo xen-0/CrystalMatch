@@ -12,7 +12,7 @@ class TestRunFromCommandLine(SystemTest):
         self.run_crystal_matching_test(self.test_runs_with_image_alignment_only.__name__, cmd_line)
 
         # Check stdout for correct alignment
-        self.failUnlessStdOutContains("Image Alignment Completed - Status: 'Good Alignment' (Score=9.49)",
+        self.failUnlessStdOutContains("Image Alignment Completed - Status: 'Good Alignment'",
                                       "Crystal Matching Complete")
 
     def test_runs_with_images_and_points(self):
@@ -20,10 +20,11 @@ class TestRunFromCommandLine(SystemTest):
         self.run_crystal_matching_test(self.test_runs_with_images_and_points.__name__, cmd_line)
 
         # Check that all three points were transformed
-        self.failUnlessStdOutContains("Image Alignment Completed - Status: 'Good Alignment'",
-                                      "*** Crystal Match 1 ***",
-                                      "Crystal Movement: x=1.02 um, y=4.53 um (1 px, 4 px)",
-                                      "*** Crystal Match 2 ***",
-                                      "Match Failed",
-                                      "*** Crystal Match 3 ***",
-                                      "Crystal Movement: x=3.46 um, y=-1.21 um (3 px, -1 px)")
+        self.failUnlessStdOutContains(
+            "Image Alignment Completed - Status: 'Good Alignment'",
+            "*** Crystal Match 1 ***",
+            "Crystal Movement(delta): x=0.97 um, y=4.24 um (0.969482421875 px, 4.24475097656 px)",
+            "*** Crystal Match 2 ***",
+            "Match Failed",
+            "*** Crystal Match 3 ***",
+            "Crystal Movement(delta): x=3.41 um, y=-1.49 um (3.40673828125 px, -1.48596191406 px)")

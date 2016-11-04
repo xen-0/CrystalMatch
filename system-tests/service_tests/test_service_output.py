@@ -14,7 +14,7 @@ class TestServiceOutput(SystemTest):
     """
 
     POI_LINE_REGEX_OK = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) ; \(-?[0-9]+\.[0-9]{2}, ' \
-                        '-?[0-9]+\.[0-9]{2}\) ; 1, OK ; [0-9]+\.[0-9]{11}\n'
+                        '-?[0-9]+\.[0-9]{2}\) ; 1, OK ; [0-9]+\.[0-9]+\n'
     POI_LINE_REGEX_FAIL = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) ; \(-?[0-9]+\.[0-9]{2},' \
                           ' -?[0-9]+\.[0-9]{2}\) ; 0, FAIL ; 0\n'
 
@@ -33,7 +33,7 @@ class TestServiceOutput(SystemTest):
         )
         self.failUnlessStdOutContainsRegex(
             'align_status:1, OK\n',
-            'align_error:[0-9][0-9]?\.[0-9]{11}\n',
+            'align_error:[0-9][0-9]?\.[0-9]+\n',
         )
 
         # Test format of POI output
@@ -62,7 +62,7 @@ class TestServiceOutput(SystemTest):
         self.failIfStdOutContains("poi:")
 
     def test_format_for_failed_points(self):
-        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2.jpg 1600,1600"
+        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2.jpg 473,921"
         self.run_crystal_matching_test(self.test_format_for_failed_points.__name__, cmd_line)
 
         # Check for failed POI result
