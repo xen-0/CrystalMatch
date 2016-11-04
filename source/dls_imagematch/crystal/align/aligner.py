@@ -102,7 +102,8 @@ class ImageAligner:
 
     def _perform_match(self, detector):
         """ Perform feature matching between the two images. """
-        matcher = FeatureMatcher(self._image1.to_mono(), self._image2.to_mono(), self._detector_config)
+        # Note images are passed in backwards - FeatureMatcher was written to map points from image 2 to image 1
+        matcher = FeatureMatcher(self._image2.to_mono(), self._image1.to_mono(), self._detector_config)
         matcher.set_detector(detector)
         match_result = matcher.match_translation_only()
         return match_result

@@ -96,7 +96,8 @@ class CrystalMatch:
         trans = feature_result.transform()
         if trans is not None:
             self._status = CRYSTAL_MATCH_STATUS_OK
-            self._poi_image_2_matched = trans.transform_points([self._poi_image_2_pre_match])[0]
+            # The transform is calculated from image 1 to image 2 - Apply the transform to original POI in image 1
+            self._poi_image_2_matched = trans.transform_points([self._poi_image_1])[0]
         else:
             self._status = CRYSTAL_MATCH_STATUS_FAIL
 
