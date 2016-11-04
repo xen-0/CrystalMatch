@@ -1,5 +1,4 @@
 from os.path import realpath
-from unittest.case import skip
 
 from dls_imagematch.service.service_result import ServiceResult
 from system_test import SystemTest
@@ -17,6 +16,7 @@ class TestServiceOutput(SystemTest):
                         '-?[0-9]+\.[0-9]{2}\) ; 1, OK ; [0-9]+\.[0-9]+\n'
     POI_LINE_REGEX_FAIL = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) ; \(-?[0-9]+\.[0-9]{2},' \
                           ' -?[0-9]+\.[0-9]{2}\) ; 0, FAIL ; 0\n'
+    ALIGN_TRANSFORM_REGEX = "align_transform:[0-9]+.[0-9]+, \(-?[0-9]+\.[0-9]+, -?[0-9]+\.[0-9]+\)"
 
     def setUp(self):
         self.set_directory_paths(realpath(__file__))
@@ -69,6 +69,9 @@ class TestServiceOutput(SystemTest):
         self.failUnlessStdOutContains(ServiceResult.POI_RESULTS_HEADER)
         self.failUnlessStdOutContainsRegexString(self.POI_LINE_REGEX_FAIL, count=1)
 
-    @skip("Feature not implemented yet.")
     def test_format_of_global_transform_with_scaled_image(self):
-        self.fail("Not implemented - feature under development.")
+        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2@0.5.jpg 473,921"
+        self.run_crystal_matching_test(self.test_format_for_failed_points.__name__, cmd_line)
+
+        # Regex test the format of the global transform
+        self.failUnlessStdOutContainsRegex(self.ALIGN_TRANSFORM_REGEX)
