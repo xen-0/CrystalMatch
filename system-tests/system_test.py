@@ -251,23 +251,25 @@ class SystemTest(TestCase):
     def failIfDirExists(self, dir_path):
         self.failIf(self._is_dir(dir_path))
 
-    def failUnlessPoiAlmostEqual(self, expected):
+    def failUnlessPoiAlmostEqual(self, expected_array):
         """
         Extracts POI information from the console output and checks it against the array values using
         failUnlessAlmostEqual - default delta values are set.
         NOTE: This will fail if verbose or debug mode is active
-        :param expected: An array of POI value arrays which match the format [location, transform, success, error]
+        :param expected_array: An array of POI value arrays which match the format [location, transform, success, error]
         """
         poi_array = self.get_poi_from_std_out()
-        self.failUnlessEqual(len(expected), len(poi_array), "Unexpected number of POI.")
+        self.failUnlessEqual(len(expected_array), len(poi_array),
+                             "Unexpected number of POI. "
+                             "Expected: " + str(len(expected_array)) + " Actual: " + str(len(poi_array)))
         for i in range(len(poi_array)):
             loc, off, success, err = poi_array[i]
-            self.failUnlessAlmostEqual(expected[i][0].x, loc.x, delta=0.5)
-            self.failUnlessAlmostEqual(expected[i][0].y, loc.y, delta=0.5)
-            self.failUnlessAlmostEqual(expected[i][1].x, off.x, delta=0.5)
-            self.failUnlessAlmostEqual(expected[i][1].y, off.y, delta=0.5)
-            self.failUnlessEqual(expected[i][2], success, msg="Match boolean value mismatch")
-            self.failUnlessAlmostEqual(expected[i][3], err, msg="Error value mismatch", delta=2)
+            self.failUnlessAlmostEqual(expected_array[i][0].x, loc.x, delta=0.5)
+            self.failUnlessAlmostEqual(expected_array[i][0].y, loc.y, delta=0.5)
+            self.failUnlessAlmostEqual(expected_array[i][1].x, off.x, delta=0.5)
+            self.failUnlessAlmostEqual(expected_array[i][1].y, off.y, delta=0.5)
+            self.failUnlessEqual(expected_array[i][2], success, msg="Match boolean value mismatch")
+            self.failUnlessAlmostEqual(expected_array[i][3], err, msg="Error value mismatch", delta=2)
 
     def get_global_transform_from_std_out(self):
         """
