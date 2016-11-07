@@ -23,11 +23,11 @@ class ImageAligner:
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
-        self._resolution = px_size_2  # The resolution of the second resolution will be the working image
+        self._resolution = px_size_2  # The resolution of the second image will be the working resolution
         self._scale_factor = px_size_1 / px_size_2
 
-        logging.info("Image 1 original size: %d x %d (%d um/pixel)", image1.width(), image1.height(), px_size_1)
-        logging.info("Image 2 original size: %d x %d (%d um/pixel)", image2.width(), image2.height(), px_size_2)
+        logging.info("Image 1 original size: %d x %d (%f um/pixel)", image1.width(), image1.height(), px_size_1)
+        logging.info("Image 2 original size: %d x %d (%f um/pixel)", image2.width(), image2.height(), px_size_2)
         logging.info("Scale Factor calculated as " + str(self._scale_factor))
 
         self._image1 = SizedImage.from_image(image1, px_size_1)
