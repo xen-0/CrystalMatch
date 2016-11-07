@@ -47,9 +47,8 @@ class TestCrystalMatch(TestCase):
         mock_feature_match, mock_transform = self.mock_feature_match_result_success(mock_transformed_point)
         match.set_feature_match_result(mock_feature_match)
 
-        # Test transform is called on the offset poi in image 2
-        expected_poi_image_2_pre = starting_point + align_offset
-        mock_transform.transform_points.assert_called_once_with([expected_poi_image_2_pre])
+        # Test transform is called on the original poi from image 1
+        mock_transform.transform_points.assert_called_once_with([starting_point])
 
         # Test status of the object after successful match
         self.failUnless(match.is_success())
