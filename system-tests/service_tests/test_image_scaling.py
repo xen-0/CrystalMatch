@@ -18,7 +18,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_smaller_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg " \
-                                               "--scale_input 1 --scale_output 0.5"
+                                               "--scale_input 0.5 --scale_output 1"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check the global transformation, status and error margin
@@ -38,7 +38,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_larger_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2@0.5.jpg {resources}/A10_2.jpg " \
-                                               "--scale_input 0.5 --scale_output 1"
+                                               "--scale_input 1 --scale_output 0.5"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check the global transformation, status and error margin
@@ -58,11 +58,11 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_smaller_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image_with_points - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg 756,412 " \
-                                               "--scale_input 1 --scale_output 0.5"
+                                               "--scale_input 0.5 --scale_output 1"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check Points of interest are found and reported at correct co-ordinates
-        self.failUnlessPoiAlmostEqual([[Point(378, 206), Point(0, 0), 1, 0]])
+        self.failUnlessPoiAlmostEqual([[Point(378, 206), Point(0, 0), 1, 0]], deltas=(2, 2, 2))
 
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
@@ -72,8 +72,8 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_larger_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image_with_points - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2@0.5.jpg {resources}/A10_2.jpg 378,206 " \
-                                               "--scale_input 0.5 --scale_output 1"
+                                               "--scale_input 1 --scale_output 0.5"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check Points of interest are found and reported at correct co-ordinates
-        self.failUnlessPoiAlmostEqual([[Point(754, 410), Point(-2, -2), 1, 2.5]])
+        self.failUnlessPoiAlmostEqual([[Point(756, 413), Point(2, 2), 1, 2.5]], deltas=(2, 2, 2))

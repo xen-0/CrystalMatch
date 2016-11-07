@@ -8,7 +8,13 @@ class AlignConfig(Config):
     """ Configuration class that contains a number of options for the program. Stores options in a config
     file that can be edited externally to set the values of the options.
     """
-    def __init__(self, config_directory):
+    def __init__(self, config_directory, scale_override=None):
+        """
+        Create an Alignment configuration object from the given config directory.
+        :param config_directory:
+        :param scale_override: Optionally declare overrides for the pixel sizes - must be a
+        tuple of the format ([formulatrix image pixel size], [beam line image pixel size]).
+        """
         Config.__init__(self, join(config_directory, "align.ini"))
 
         add = self.add
@@ -35,6 +41,10 @@ class AlignConfig(Config):
         self.pixel_size_2 = add(RangeFloatConfigItem, "Pixel Size 2 (um)", default=1.0, extra_arg=[0.01, None])
         self.pixel_size_2.set_comment("The real size (in micrometers) represented by a single pixel in Image 2 (the "
                                       "beamline image).")
+
+        if scale_override is not None:
+            self.pixel_size_1.set_override(scale_override[0])
+            self.pixel_size_2.set_override(scale_override[1])
 
         self.metric_limit_low = add(RangeFloatConfigItem, "Metric Limit Low", 15.0, [0.0, None])
         self.metric_limit_low.set_comment("A metric quantifying the quality of the alignment is calculated. If the "
