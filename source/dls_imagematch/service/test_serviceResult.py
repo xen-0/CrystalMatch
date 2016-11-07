@@ -33,7 +33,7 @@ class TestServiceResult(TestCase):
 
             # Mock Crystal Match
             mock_crystal_match = create_autospec(CrystalMatch, spec_set=True)
-            mock_crystal_match.get_transformed_point = MagicMock(return_value=new_positions[i])
+            mock_crystal_match.get_transformed_poi = MagicMock(return_value=new_positions[i])
             mock_crystal_match.get_delta = MagicMock(return_value=deltas[i])
             mock_crystal_match.feature_match_result = MagicMock(return_value=mock_feature_match)
             mock_crystal_match.get_status = MagicMock(return_value=status_codes[i])
@@ -48,7 +48,7 @@ class TestServiceResult(TestCase):
         mock_aligned_image = create_autospec(AlignedImages, spec_set=True)
         mock_aligned_image.alignment_status_code = MagicMock(return_value=status)
         mock_aligned_image.overlap_metric = MagicMock(return_value=confidence)
-        mock_aligned_image.pixel_offset = MagicMock(return_value=transform)
+        mock_aligned_image.get_alignment_transform = MagicMock(return_value=transform)
         return mock_aligned_image
 
     def test_create_result_with_job_id_and_image_paths(self):
@@ -80,34 +80,32 @@ class TestServiceResult(TestCase):
         self.failIf("job_id" in output)
 
     def test_add_image_alignment_results(self):
-        mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset"])
+        mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
+                                            "get_alignment_transform"])
+        mock_aligned_image.get_alignment_transform = MagicMock(return_value=(1.0, Point(0, 0)))
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_print_without_alignment_results_shows_default_values(self, mock_print):
+        mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
+                                            "get_alignment_transform"])
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
+        result.print_results()
+
+        # Test output
+        mock_print.assert_has_calls([
+            call('align_transform:1.0, (0.00, 0.00)'),
+            call('align_status:-1, NOT SET'),
+            call('align_error:0.0')
+        ])
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_image_alignment_results_print_for_success_case(self, mock_print):
         # Set up mock for successful image match
         status = ALIGNED_IMAGE_STATUS_OK
         confidence = 9.8
-        offset = Point(3.0, 4.0)
-        mock_aligned_image = self.mock_aligned_images(confidence, status, offset)
-
-        result = ServiceResult("job-id", "fomulatrix", "beamline")
-        result.set_image_alignment_results(mock_aligned_image)
-        result.print_results()
-
-        # Test output
-        mock_print.assert_has_calls([
-            call("align_transform:1.00, " + str(offset)),
-            call("align_status:1, OK"),
-            call("align_error:9.8")])
-
-    @patch('dls_imagematch.service.service_result.print', create=True)
-    def test_image_alignment_results_print_for_failure_case(self, mock_print):
-        # Set up mock for successful image match
-        status = ALIGNED_IMAGE_STATUS_FAIL
-        confidence = 0.0
-        transform = None
+        transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
 
         result = ServiceResult("job-id", "fomulatrix", "beamline")
@@ -116,7 +114,25 @@ class TestServiceResult(TestCase):
 
         # Test output
         mock_print.assert_has_calls([
-            call("align_transform:1.00, (0.00, 0.00)"),
+            call("align_transform:" + str(transform[0]) + ", " + str(transform[1])),
+            call("align_status:1, OK"),
+            call("align_error:9.8")])
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_image_alignment_results_print_for_failure_case(self, mock_print):
+        # Set up mock for successful image match
+        status = ALIGNED_IMAGE_STATUS_FAIL
+        confidence = 0.0
+        transform = (1.0, Point(0, 0))
+        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
+        result.set_image_alignment_results(mock_aligned_image)
+        result.print_results()
+
+        # Test output
+        mock_print.assert_has_calls([
+            call("align_transform:1.0, (0.00, 0.00)"),
             call("align_status:0, FAIL"),
             call("align_error:0.0")])
 

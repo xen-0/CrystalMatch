@@ -14,10 +14,6 @@ class CrystalMatcher:
 
     def __init__(self, aligned_images, detector_config, crystal_config=None):
         self._aligned_images = aligned_images
-        self._image1 = aligned_images.image1.to_mono()
-        self._image2 = aligned_images.image2.to_mono()
-        self._pixel_size = self._image1.pixel_size()
-
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
@@ -62,23 +58,30 @@ class CrystalMatcher:
         images = self._aligned_images
         match_results = CrystalMatcherResults(images)
 
+        crystal_id = 1
         for point in image1_points:
             result = self._match_single_point(point)
+            result.print_to_log(crystal_id=crystal_id)
             match_results.append_match(result)
+            crystal_id += 1
 
         return match_results
 
     def _match_single_point(self, point):
-        image1_rect = self.make_target_region(point)
-        image2_rect = self.make_search_region(point)
+        crystal_match = CrystalMatch(point, self._aligned_images)
 
-        feature_matcher = BoundedFeatureMatcher(self._image1, self._image2, self._detector_config,
-                                                image1_rect, image2_rect)
+        image1_rect = self.make_target_region(crystal_match.get_poi_image_1())
+        image2_rect = self.make_search_region(crystal_match.get_poi_image_2_pre_match())
 
-        result = CrystalMatch(point, self._pixel_size)
-        self._perform_match(feature_matcher, result)
+        feature_matcher = BoundedFeatureMatcher(self._aligned_images.image1.to_mono(),
+                                                self._aligned_images.image2.to_mono(),
+                                                self._detector_config,
+                                                image1_rect,
+                                                image2_rect)
 
-        return result
+        self._perform_match(feature_matcher, crystal_match)
+
+        return crystal_match
 
     def _perform_match(self, feature_matcher, crystal_match):
         feature_matcher.set_use_all_detectors()
@@ -92,24 +95,22 @@ class CrystalMatcher:
         size = self._region_size_pixels()
         return Rectangle.from_center(center, size, size)
 
-    def make_search_region(self, image1_point):
+    def make_search_region(self, centre_point):
         """ Define a rectangle on image B in which to search for the matching crystal. Its narrow and tall
         as the crystal is likely to move downwards under the effect of gravity. """
-        images = self._aligned_images
         search_width, search_height = self._search_size_pixels()
         vertical_shift = self._search_vertical_shift
 
-        image2_point = image1_point - images.pixel_offset()
-        top_left = image2_point - Point(search_width/2, search_height*(1-vertical_shift))
+        top_left = centre_point - Point(search_width / 2, search_height * (1 - vertical_shift))
         rect = Rectangle.from_corner(top_left, search_width, search_height)
 
-        rect = rect.intersection(images.image2.bounds())
+        rect = rect.intersection(self._aligned_images.image2.bounds())
         return rect
 
     def _region_size_pixels(self):
-        return self._region_size_real / self._pixel_size
+        return self._region_size_real / self._aligned_images.get_working_resolution()
 
     def _search_size_pixels(self):
-        width = self._search_width_real / self._pixel_size
-        height = self._search_height_real / self._pixel_size
+        width = self._search_width_real / self._aligned_images.get_working_resolution()
+        height = self._search_height_real / self._aligned_images.get_working_resolution()
         return width, height

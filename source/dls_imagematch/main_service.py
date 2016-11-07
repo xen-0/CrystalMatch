@@ -31,14 +31,27 @@ def main():
     if config_directory is None:
         config_directory = CONFIG_DIR
     debug = hasattr(args, "debug") and args.debug
+    scale_override = _get_scale_override(args)
 
     # Run service
-    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug)
+    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug, scale_override=scale_override)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
                                             job_id=args.job)
     service_results.print_results()
+
+
+def _get_scale_override(args):
+    scale_override = None
+    if args.scale_input is not None or args.scale_output is not None:
+        if args.scale_input is None:
+            args.scale_input = 1
+        if args.scale_output is None:
+            args.scale_output = 1
+        scale_override = (args.scale_input, args.scale_output)
+
+    return scale_override
 
 
 def _parse_selected_points_from_args(args):
@@ -88,7 +101,6 @@ def _get_argument_parser():
                         metavar="path",
                         action=ReadableConfigDir,
                         help="Sets the configuration directory.")
-    # TODO: apply the scale values below to alignment image calculation.
     parser.add_argument('--scale_input',
                         metavar="scale",
                         help="The scale of the input image in micrometers per pixel. The default value is 1.0um/pixel")

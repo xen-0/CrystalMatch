@@ -1,3 +1,4 @@
+import re
 from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir, realpath, split
 from re import match, compile
@@ -5,6 +6,8 @@ from shutil import rmtree, copytree
 from string import replace
 from subprocess import call
 from unittest import TestCase
+
+from dls_util.shape.point import Point
 
 
 class SystemTest(TestCase):
@@ -101,8 +104,7 @@ class SystemTest(TestCase):
             makedirs(self._active_output_dir)
 
         # Replace tokens in the command line
-        cmd_line_args = replace(cmd_line_args, "{input}", self._input_dir())
-        cmd_line_args = replace(cmd_line_args, "{resources}", self._get_resources_dir())
+        cmd_line_args = self.substitute_tokens(cmd_line_args)
 
         # Set a location for the config if unspecified
         if self.CONFIG_FLAG not in cmd_line_args:
@@ -115,6 +117,11 @@ class SystemTest(TestCase):
         stderr_file = self._get_std_err_file("w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
+
+    def substitute_tokens(self, sub_string):
+        sub_string = replace(sub_string, "{input}", self._input_dir())
+        sub_string = replace(sub_string, "{resources}", self._get_resources_dir())
+        return sub_string
 
     def _get_resources_dir(self):
         """
@@ -145,10 +152,19 @@ class SystemTest(TestCase):
         return std_err
 
     @staticmethod
-    def _is_dir(directory_path):
-        return exists(directory_path) and isdir(directory_path)
+    def floatify_regex_match(matches):
+        float_array = []
+        for i in range(len(matches)):
+            float_array.append([])
+            for j in range(len(matches[i])):
+                float_array[i].append(float(matches[i][j]))
+        return float_array
 
     # Test Utility Methods
+
+    @staticmethod
+    def _is_dir(directory_path):
+        return exists(directory_path) and isdir(directory_path)
 
     def _get_std_err_file(self, mode):
         """
@@ -175,6 +191,27 @@ class SystemTest(TestCase):
         std_out = self._get_std_out()
         for match_line in strings:
             self.failIf(match_line in std_out, "Found in std_out when not expected: " + match_line)
+
+    def failUnlessStdOutContainsRegexString(self, regex, count=0):
+        """
+        Match a regex string to the contents of StdOut.  Optionally specify the number of matches the output must
+        contain.
+        :param count: Number of matches required, 0 disables feature and fails if the match does not appear.
+        :param regex: Regex to match.
+        :return:
+        """
+        std_out = self._get_std_out()
+        compiled_regex = compile(regex)
+        if count == 0:
+            self.failUnless(compiled_regex.search(std_out) is not None)
+        else:
+            matches = compiled_regex.findall(std_out)
+            self.failUnless(matches is not None and len(matches) == count,
+                            "Regex expected in output " + str(count) + " time(s): " + regex)
+
+    def failUnlessStdOutContainsRegex(self, *regex):
+        for r in regex:
+            self.failUnlessStdOutContainsRegexString(r, count=0)
 
     def failUnlessStdErrContains(self, *strings):
         std_err = self._get_std_err()
@@ -213,3 +250,66 @@ class SystemTest(TestCase):
 
     def failIfDirExists(self, dir_path):
         self.failIf(self._is_dir(dir_path))
+
+    def failUnlessPoiAlmostEqual(self, expected_array, deltas=(0.5, 0.5, 2.0)):
+        """
+        Extracts POI information from the console output and checks it against the array values using
+        failUnlessAlmostEqual - default delta values are set.
+        NOTE: This will fail if verbose or debug mode is active
+        :param expected_array: An array of POI value arrays which match the format [location, transform, success, error]
+        :param deltas: Set the delta values used for checks: ([location, offset, error])
+        """
+        poi_array = self.get_poi_from_std_out()
+        self.failUnlessEqual(len(expected_array), len(poi_array),
+                             "Unexpected number of POI. "
+                             "Expected: " + str(len(expected_array)) + " Actual: " + str(len(poi_array)))
+        for i in range(len(poi_array)):
+            loc, off, success, err = poi_array[i]
+            self.failUnlessAlmostEqual(expected_array[i][0].x, loc.x, delta=deltas[0])
+            self.failUnlessAlmostEqual(expected_array[i][0].y, loc.y, delta=deltas[0])
+            self.failUnlessAlmostEqual(expected_array[i][1].x, off.x, delta=deltas[1])
+            self.failUnlessAlmostEqual(expected_array[i][1].y, off.y, delta=deltas[1])
+            self.failUnlessEqual(expected_array[i][2], success, msg="Match boolean value mismatch")
+            self.failUnlessAlmostEqual(expected_array[i][3], err, msg="Error value mismatch", delta=deltas[2])
+
+    def get_global_transform_from_std_out(self):
+        """
+        Extract the global transform data from the std_out
+        :return: Scale, x translation and y translation
+        """
+        std_out = self._get_std_out()
+        re_compile = re.compile("align_transform:([0-9]+\.[0-9]+), \((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\)")
+        matches = re_compile.findall(std_out)
+        self.failUnlessEqual(1, len(matches), "Unexpected number of matches for alignment_transform")
+        float_array = self.floatify_regex_match(matches)
+        scale, x_trans, y_trans = float_array[0]
+        return scale, x_trans, y_trans
+
+    def regex_from_std_out(self, regex):
+        """
+        Search std_out and return an array of single values from std_out
+        :param regex: Regex expression containing brackets
+        :return: An array of matches
+        """
+        re_compile = re.compile(regex)
+        matches = re_compile.findall(self._get_std_out())
+        self.failIf(matches is None)
+        return matches
+
+    def get_poi_from_std_out(self):
+        """
+        Extract the output POI from the std_out file. - Note this will provide double entries with Verbose mode on.
+        :return: Array of POI in the format [location, offset, success, error].
+        """
+        std_out = self._get_std_out()
+        # Match POI lines in the output
+        reg_ex = "poi:\((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\) ; \((-?[0-9]+\.[0-9]+)," \
+                 " (-?[0-9]+\.[0-9]+)\) ; ([01]).* ; ([0-9]+\.[0-9]+)"
+        re_compile = re.compile(reg_ex)
+        matches = re_compile.findall(std_out)
+        float_array = self.floatify_regex_match(matches)
+        poi_array = []
+        for f in float_array:
+            # Extract pixel location, offset, success value and mean error
+            poi_array.append([Point(f[0], f[1]), Point(f[2], f[3]), f[4], f[5]])
+        return poi_array

@@ -1,20 +1,34 @@
 import logging
 
+from dls_imagematch.crystal.align.sized_image import SizedImage
 from dls_imagematch.feature import FeatureMatcher
 from dls_util.shape import Point
 from .aligned_images import AlignedImages
 from .exception import ImageAlignmentError
-from .sized_image import SizedImage
 
 
 class ImageAligner:
-    def __init__(self, image1, image2, align_config=None, detector_config=None):
+
+    def __init__(self, image1, image2, align_config, detector_config=None):
+        """
+        Takes two images and uses feature detection to provide a best fit alignment. The scale of the images will be
+        normalized by resizing image1 to the same resolution as image2.  Note that this does not mean the images
+        will be the same size!
+        :param image1: This image will be rescaled to the same resolution as image2.
+        :param image2: The image used to align the sample.
+        :param align_config: Configuration object for this process.
+        :param detector_config: Configuration object for the feature detector.
+        """
+        assert(align_config is not None)
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
         px_size_2 = align_config.pixel_size_2.value()
+        self._resolution = px_size_2  # The resolution of the second image will be the working resolution
+        self._scale_factor = px_size_1 / px_size_2
 
-        logging.info("Image 1 original size: %d x %d", image1.width(), image1.height())
-        logging.info("Image 2 original size: %d x %d", image2.width(), image2.height())
+        logging.info("Image 1 original size: %d x %d (%f um/pixel)", image1.width(), image1.height(), px_size_1)
+        logging.info("Image 2 original size: %d x %d (%f um/pixel)", image2.width(), image2.height(), px_size_2)
+        logging.info("Scale Factor calculated as " + str(self._scale_factor))
 
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
@@ -22,12 +36,21 @@ class ImageAligner:
         self._align_config = align_config
         self._detector_config = detector_config
 
+        self._rescale_image_1()
+
     # -------- CONFIGURATION -------------------
-    def set_align_config(self, config):
+    def set_align_config(self, config):  # pragma: no cover
         self._align_config = config
 
-    def set_detector_config(self, config):
+    def set_detector_config(self, config):  # pragma: no cover
         self._detector_config = config
+
+    def _rescale_image_1(self):
+        # Resize image A so it has the same size per pixel as image B
+        if self._scale_factor != 1:
+            self._image1 = self._image1.rescale(self._scale_factor)
+            logging.info("Rescaling image 1 by scale factor " + str(self._scale_factor) +
+                         ", new size: %d x %d", self._image1.width(), self._image1.height())
 
     # -------- FUNCTIONALITY -------------------
     def align(self):
@@ -43,11 +66,23 @@ class ImageAligner:
 
         return aligned_images
 
+    def scale_points(self, points_array):
+        """
+        Apply the scale transform from image 1 to an array of Point objects.
+        :param points_array: An array of Point objects
+        :return: A scaled array of Point object.
+        """
+        output_array = []
+        for point in points_array:
+            output_array.append(point * self._scale_factor)
+        return output_array
+
     def _default_alignment(self):
         """ Default alignment result with 0 offset. """
         translation = Point()
         description = "DISABLED!"
-        return AlignedImages(self._image1, self._image2, translation, self._align_config, description)
+        return AlignedImages(self._image1, self._image2, self._resolution, self._scale_factor,
+                             translation, self._align_config, description)
 
     def _check_config(self):
         """ Raises an exception if configuration has not been properly set. """
@@ -67,8 +102,8 @@ class ImageAligner:
 
     def _perform_match(self, detector):
         """ Perform feature matching between the two images. """
-        image1, image2 = self._get_scaled_mono_images()
-        matcher = FeatureMatcher(image1, image2, self._detector_config)
+        # Note images are passed in backwards - FeatureMatcher was written to map points from image 2 to image 1
+        matcher = FeatureMatcher(self._image2.to_mono(), self._image1.to_mono(), self._detector_config)
         matcher.set_detector(detector)
         match_result = matcher.match_translation_only()
         return match_result
@@ -80,18 +115,7 @@ class ImageAligner:
 
         translation = match_result.transform().translation()
         description = "Feature matching - " + detector
-        aligned_images = AlignedImages(self._image1, self._image2, translation, self._align_config, description)
+        aligned_images = AlignedImages(self._image1, self._image2, self._resolution, self._scale_factor,
+                                       translation, self._align_config, description)
         aligned_images.feature_match_result = match_result
         return aligned_images
-
-    def _get_scaled_mono_images(self):
-        """ Load the selected images to be matched, scale them appropriately and
-        convert to grayscale. """
-        # Resize image B so it has the same size per pixel as image A
-        # TODO: Rescale image A instead and transform the input co-ordinates accordingly.
-        factor = self._image2.pixel_size() / self._image1.pixel_size()
-
-        if factor != 1:
-            self._image2 = self._image2.rescale(factor)
-
-        return self._image1.to_mono(), self._image2.to_mono()

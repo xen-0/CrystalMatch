@@ -18,7 +18,7 @@ class SizedImage(Image):
     @staticmethod
     def from_image(image, pixel_size):
         sized_image = SizedImage(image.raw(), pixel_size)
-        sized_image.file = image.file
+        sized_image.set_file(image.get_file())
         return sized_image
 
     @staticmethod
@@ -62,3 +62,6 @@ class SizedImage(Image):
     def freq_range(self, coarseness_range, scale_factor):
         image = Image.freq_range(self, coarseness_range, scale_factor)
         return self.from_image(image, self._pixel_size)
+
+    def set_file(self, image_file):
+        self._file = image_file

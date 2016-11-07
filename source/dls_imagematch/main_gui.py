@@ -1,7 +1,8 @@
+import logging
 import sys
 
 from os.path import dirname
-from sys import path
+from sys import path, stdout
 
 from PyQt4.QtGui import QApplication
 
@@ -17,6 +18,15 @@ else:
 
 
 def main():
+
+    # Set logging level
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(stdout)
+    ch.setLevel(logging.DEBUG)
+    root.addHandler(ch)
+
+    # Run GUI
     app = QApplication(sys.argv)
     VMXiCrystalMatchMainWindow(CONFIG_DIR)
     sys.exit(app.exec_())

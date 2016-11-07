@@ -85,7 +85,7 @@ class TransformPane(QWidget):
 
     def set_crystal_match(self, crystal_match, matcher):
         self._matcher = matcher
-        self._image1_point = crystal_match.image1_point()
+        self._image1_point = crystal_match.get_poi_image_1()
         self._matches = crystal_match.feature_match_result().matches()
         self._refresh_transform()
 
@@ -103,6 +103,7 @@ class TransformPane(QWidget):
         self._slider_threshold.setEnabled(is_ransac)
 
     def _refresh_transform(self):
+        # TODO: Images are being generated using the old co-ordinate system.
         if self._matcher is None:
             return
 
