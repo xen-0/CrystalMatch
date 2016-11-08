@@ -103,9 +103,11 @@ def _get_argument_parser():
                         help="Sets the configuration directory.")
     parser.add_argument('--scale_input',
                         metavar="scale",
+                        type=float,
                         help="The scale of the input image in micrometers per pixel. The default value is 1.0um/pixel")
     parser.add_argument('--scale_output',
                         metavar="scale",
+                        type=float,
                         help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
     parser.add_argument('--version',
                         action='version',

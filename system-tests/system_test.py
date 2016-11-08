@@ -280,7 +280,7 @@ class SystemTest(TestCase):
         std_out = self._get_std_out()
         re_compile = re.compile("align_transform:([0-9]+\.[0-9]+), \((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\)")
         matches = re_compile.findall(std_out)
-        self.failUnlessEqual(1, len(matches), "Unexpected number of matches for alignment_transform")
+        self.failUnlessEqual(1, len(matches), "Unexpected no. of matches for alignment_transform: " + str(len(matches)))
         float_array = self.floatify_regex_match(matches)
         scale, x_trans, y_trans = float_array[0]
         return scale, x_trans, y_trans
