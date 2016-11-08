@@ -69,16 +69,16 @@ class TestScaleCommandLineFlags(SystemTest):
         test_name = self.test_scale_flag_with_values_causing_incorrect_alignment_returns_failure.__name__
         self.run_crystal_matching_test(test_name, cmd_line)
 
-        self.failUnlessStdErrContains("align_status:0, FAIL")
+        self.failUnlessStdOutContains("align_status:0, FAIL")
 
-    def test_scaling_causes_invalid_overlap_of_matched_areas(self):
+    def test_scaling_causing_invalid_overlap_of_matched_areas_returns_failure(self):
         """ Note: This test was added to cover a specific issue which caused a crash using the parameters below. The
         scaling causes an invalid alignment match where the proposed solution does not contain intersecting regions
         of interest causing an None value to be returned. """
         cmd_line = "{resources}/A10_2.jpg {resources}/A10_2@0.5.jpg 756,412 --scale_input 1 --scale_output 0.5"
-        test_name = self.test_scaling_causes_invalid_overlap_of_matched_areas.__name__
+        test_name = self.test_scaling_causing_invalid_overlap_of_matched_areas_returns_failure.__name__
         self.run_crystal_matching_test(test_name, cmd_line)
-        self.failUnlessStdErrContains("align_status:0, FAIL")
+        self.failUnlessStdOutContains("align_status:0, FAIL")
 
     def failUnlessGlobalAlignmentIsValid(self, expected_scale):
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()

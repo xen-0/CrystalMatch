@@ -8,10 +8,11 @@ from .overlay import Overlayer
 
 class OverlapMetric:
 
-    def __init__(self, image1, image2, trial_transforms):
+    def __init__(self, image1, image2, trial_transforms, metric_upper_limit):
         self.image1 = image1
         self.image2 = image2
         self.trial_transforms = trial_transforms
+        self._metric_upper_limit = metric_upper_limit
 
     def best_transform(self, starting_transform):
         """ For a TrialTransforms object, return the transform which has the
@@ -46,6 +47,9 @@ class OverlapMetric:
         cr1, cr2 = Overlayer.get_overlap_regions(self.image1, self.image2, offset)
 
         absdiff_image = cv2.absdiff(cr1.raw(), cr2.raw())
+        if absdiff_image is None:
+            # The match has failed - return a value above the upper limit for the metric
+            return self._metric_upper_limit + 10
         metric = np.sum(absdiff_image) / absdiff_image.size
 
         return metric
