@@ -38,7 +38,8 @@ def main():
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
-                                            job_id=args.job)
+                                            job_id=args.job,
+                                            json_output=args.json)
     service_results.print_results()
 
 
@@ -121,6 +122,9 @@ def _get_argument_parser():
     parser.add_argument('-j', '--job',
                         metavar="job_id",
                         help="Specify a job_id - this will be reported in the output to help identify this run")
+    parser.add_argument('--json',
+                        action='store_true',
+                        help="Output a JSON object.")
     return parser
 
 
