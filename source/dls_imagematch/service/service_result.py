@@ -108,6 +108,10 @@ class ServiceResult:
             output_obj['job_id'] = self._job_id
         output_obj['input_image'] = self._image_path_formulatrix
         output_obj['output_image'] = self._image_path_beamline
+        output_obj['status'] = {
+            'value': self._alignment_status_code.code,
+            'msg': self._alignment_status_code.status,
+        }
         output_obj['alignment'] = {
             'transform': {
                 'scale': self._alignment_transform_scale,
