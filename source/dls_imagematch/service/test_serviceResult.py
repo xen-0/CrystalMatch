@@ -52,11 +52,6 @@ class TestServiceResult(TestCase):
         mock_aligned_image.get_alignment_transform = MagicMock(return_value=transform)
         return mock_aligned_image
 
-    def test_create_result_with_job_id_and_image_paths(self):
-        # FIXME: missing test
-        ServiceResult("test-job-id", "test/file/path/fomulatrix", "test/file/path/beamline")
-        self.fail()
-
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_and_image_paths_printed_correctly(self, mock_print):
         result = ServiceResult("test-job-id", "test/file/path/fomulatrix", "test/file/path/beamline")
@@ -91,7 +86,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_print_without_alignment_results_shows_default_values(self, mock_print):
-        mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
+        Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
                                             "get_alignment_transform"])
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.print_results()
