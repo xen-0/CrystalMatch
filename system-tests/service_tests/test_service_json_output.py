@@ -86,25 +86,26 @@ class TestServiceOutput(SystemTest):
         self.run_crystal_matching_test(test_name + "-run_standard", cmd_line)
 
         # Test output matches json object - check this is a successful run
-        json_align_status = json['alignment']['status']
-        self.failUnlessEqual(1, json_align_status['value'])
+        self.failUnlessEqual(1, json['alignment']['status']['value'])
+        self._variable_json_object_against_last_run(json)
+
+    def _variable_json_object_against_last_run(self, json):
         # Test run info
         self.failUnlessStdOutContains(
             'input_image:"' + json['input_image'] + '"',
             'output_image:"' + json['output_image'] + '"',
             'job_id:"' + json['job_id'] + '"',
         )
-
         # Test Alignment phase
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
         self.failUnlessEqual(scale, json['alignment']['transform']['scale'])
         self.failUnlessEqual(x_trans, json['alignment']['transform']['translation']['x'])
         self.failUnlessEqual(y_trans, json['alignment']['transform']['translation']['y'])
+        json_align_status = json['alignment']['status']
         self.failUnlessStdOutContains(
             'align_status:' + str(json_align_status['value']) + ', ' + json_align_status['msg'],
             'align_error:' + str(json['alignment']['mean_error'])
         )
-
         # Test POI phase
         json_poi_array = []
         for poi in json['poi']:
