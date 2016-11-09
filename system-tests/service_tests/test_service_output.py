@@ -71,7 +71,7 @@ class TestServiceOutput(SystemTest):
 
     def test_format_of_global_transform_with_scaled_image(self):
         cmd_line = "{resources}/A10_1.jpg {resources}/A10_2@0.5.jpg 473,921"
-        self.run_crystal_matching_test(self.test_format_for_failed_points.__name__, cmd_line)
+        self.run_crystal_matching_test(self.test_format_of_global_transform_with_scaled_image.__name__, cmd_line)
 
         # Regex test the format of the global transform
         self.failUnlessStdOutContainsRegex(self.ALIGN_TRANSFORM_REGEX)
