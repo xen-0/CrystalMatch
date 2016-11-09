@@ -5,6 +5,8 @@ import logging
 import json
 from json.encoder import JSONEncoder
 
+from os.path import abspath
+
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
 from dls_util.shape.point import Point
 
@@ -29,10 +31,8 @@ class ServiceResult:
     def __init__(self, job_id, formulatrix_image_path, beamline_image_path, json_output=False):
         self.SEPARATOR = " ; "
         self._job_id = job_id
-        # TODO: make print-friendly versions of image paths.
-        # TODO: Get absolute reference to image path
-        self._image_path_formulatrix = formulatrix_image_path
-        self._image_path_beamline = beamline_image_path
+        self._image_path_formulatrix = abspath(formulatrix_image_path)
+        self._image_path_beamline = abspath(beamline_image_path)
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET

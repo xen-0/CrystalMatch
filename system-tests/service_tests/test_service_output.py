@@ -1,4 +1,4 @@
-from os.path import realpath
+from os.path import realpath, abspath
 
 from dls_imagematch.service.service_result import ServiceResult
 from system_test import SystemTest
@@ -28,8 +28,8 @@ class TestServiceOutput(SystemTest):
         # Test format of alignment output
         self.failUnlessStdOutContains(
             'job_id:"01234"',
-            'input_image:"' + self.substitute_tokens("{resources}/A10_1.jpg") + '"',
-            'output_image:"' + self.substitute_tokens("{resources}/A10_2.jpg") + '"',
+            'input_image:"' + abspath(self.substitute_tokens("{resources}/A10_1.jpg")) + '"',
+            'output_image:"' + abspath(self.substitute_tokens("{resources}/A10_2.jpg")) + '"',
         )
         self.failUnlessStdOutContainsRegex(
             'align_status:1, OK\n',

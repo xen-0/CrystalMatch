@@ -1,5 +1,5 @@
 from numbers import Number
-from os.path import realpath
+from os.path import realpath, abspath
 
 from dls_util.shape.point import Point
 from system_test import SystemTest
@@ -17,8 +17,8 @@ class TestServiceOutput(SystemTest):
         # Test Global alignment format
         json = self.read_json_object_from_std_out()
         exp_poi_len = 2
-        exp_input_image = self.substitute_tokens("{resources}/A10_1.jpg")
-        exp_output_image = self.substitute_tokens("{resources}/A10_2.jpg")
+        exp_input_image = abspath(self.substitute_tokens("{resources}/A10_1.jpg"))
+        exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         job_id = "123"
         self.failUnlessEqual(1, json['alignment']['status']['value'])
         self._validate_format_of_json_object(json, job_id, exp_input_image, exp_output_image, exp_poi_len)
@@ -32,8 +32,8 @@ class TestServiceOutput(SystemTest):
         # Test Global alignment format
         json = self.read_json_object_from_std_out()
         exp_poi_len = 0
-        exp_input_image = self.substitute_tokens("{resources}/A01_1.jpg")
-        exp_output_image = self.substitute_tokens("{resources}/A10_2.jpg")
+        exp_input_image = abspath(self.substitute_tokens("{resources}/A01_1.jpg"))
+        exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         job_id = None
         self.failUnlessEqual(0, json['alignment']['status']['value'])
         self._validate_format_of_json_object(json, job_id, exp_input_image, exp_output_image, exp_poi_len)
@@ -47,8 +47,8 @@ class TestServiceOutput(SystemTest):
         # Test Global alignment format
         json = self.read_json_object_from_std_out()
         exp_poi_len = 0
-        exp_input_image = self.substitute_tokens("{resources}/A01_1.jpg")
-        exp_output_image = self.substitute_tokens("{resources}/A10_2.jpg")
+        exp_input_image = abspath(self.substitute_tokens("{resources}/A01_1.jpg"))
+        exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         self.failUnlessEqual(0, json['alignment']['status']['value'])
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
 
@@ -60,8 +60,8 @@ class TestServiceOutput(SystemTest):
         # Test Global alignment format
         json = self.read_json_object_from_std_out()
         exp_poi_len = 1
-        exp_input_image = self.substitute_tokens("{resources}/A10_1.jpg")
-        exp_output_image = self.substitute_tokens("{resources}/A10_2.jpg")
+        exp_input_image = abspath(self.substitute_tokens("{resources}/A10_1.jpg"))
+        exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         self.failUnlessEqual(1, json['alignment']['status']['value'])
         self.failUnlessEqual(0, json['poi'][0]['status']['value'])
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
@@ -74,8 +74,8 @@ class TestServiceOutput(SystemTest):
         # Test Global alignment format
         json = self.read_json_object_from_std_out()
         exp_poi_len = 1
-        exp_input_image = self.substitute_tokens("{resources}/A10_2.jpg")
-        exp_output_image = self.substitute_tokens("{resources}/A10_2@0.5.jpg")
+        exp_input_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
+        exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2@0.5.jpg"))
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len, exp_scale=0.5)
 
     def test_json_output_matches_standard_output_data(self):
