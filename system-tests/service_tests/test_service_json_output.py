@@ -1,6 +1,7 @@
 from numbers import Number
 from os.path import realpath
 
+from dls_util.shape.point import Point
 from system_test import SystemTest
 
 
@@ -84,9 +85,35 @@ class TestServiceOutput(SystemTest):
         json = self.read_json_object_from_std_out()
         self.run_crystal_matching_test(test_name + "-run_standard", cmd_line)
 
-        # Test output matches json object
+        # Test output matches json object - check this is a successful run
+        json_align_status = json['alignment']['status']
+        self.failUnlessEqual(1, json_align_status['value'])
+        # Test run info
+        self.failUnlessStdOutContains(
+            'input_image:"' + json['input_image'] + '"',
+            'output_image:"' + json['output_image'] + '"',
+            'job_id:"' + json['job_id'] + '"',
+        )
+
+        # Test Alignment phase
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
-        self.fail()
+        self.failUnlessEqual(scale, json['alignment']['transform']['scale'])
+        self.failUnlessEqual(x_trans, json['alignment']['transform']['translation']['x'])
+        self.failUnlessEqual(y_trans, json['alignment']['transform']['translation']['y'])
+        self.failUnlessStdOutContains(
+            'align_status:' + str(json_align_status['value']) + ', ' + json_align_status['msg'],
+            'align_error:' + str(json['alignment']['mean_error'])
+        )
+
+        # Test POI phase
+        json_poi_array = []
+        for poi in json['poi']:
+            loc = Point(poi['location']['x'], poi['location']['y'])
+            tran = Point(poi['translation']['x'], poi['translation']['y'])
+            stat = poi['status']['value']
+            err = poi['mean_error']
+            json_poi_array.append([loc, tran, stat, err])
+        self.failUnlessPoiAlmostEqual(json_poi_array)
 
     def _validate_format_of_json_object(self, json, job_id, expected_input_image, expected_output_image,
                                         expected_poi_len, exp_scale=1.0):
@@ -104,7 +131,8 @@ class TestServiceOutput(SystemTest):
         self.failUnless(isinstance(json['alignment']['transform']['translation']['y'], Number))
         self.failUnless(isinstance(json['alignment']['mean_error'], Number))
         self.failUnlessEqual(expected_poi_len, len(json['poi']))
-        # Test Point 1
+
+        # Test POI
         for i in range(len(json['poi'])):
             self.failUnless(isinstance(json['poi'][i]['location']['x'], Number))
             self.failUnless(isinstance(json['poi'][i]['location']['y'], Number))
