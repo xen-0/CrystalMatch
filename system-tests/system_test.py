@@ -1,3 +1,4 @@
+import json
 import re
 from os import makedirs, listdir
 from os.path import exists, join, splitext, isdir, realpath, split
@@ -112,8 +113,9 @@ class SystemTest(TestCase):
 
         # Run Crystal Matching Algorithm with command line arguments
         command = "python -m dls_imagematch.main_service " + cmd_line_args
+        with self._get_cmd_line_file("w") as cmd_out_file:
+            cmd_out_file.writelines(command)
         stdout_file = self._get_std_out_file("w")
-        stdout_file.writelines("COMMAND LINE: " + command)
         stderr_file = self._get_std_err_file("w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
@@ -132,6 +134,14 @@ class SystemTest(TestCase):
         sys_test_root, this_file = split(realpath(__file__))
         sys_test_root = join(sys_test_root, self.RESOURCE_DIR_NAME)
         return sys_test_root
+
+    def _get_cmd_line_file(self, mode):
+        """
+        Gets a file object for the cmd_line file used to store the command being run.
+        :param mode: File read/write mode
+        :return: File object for stdout file
+        """
+        return file(join(self._active_output_dir, "cmd_line"), mode=mode)
 
     def _get_std_out_file(self, mode):
         """
@@ -280,7 +290,7 @@ class SystemTest(TestCase):
         std_out = self._get_std_out()
         re_compile = re.compile("align_transform:([0-9]+\.[0-9]+), \((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\)")
         matches = re_compile.findall(std_out)
-        self.failUnlessEqual(1, len(matches), "Unexpected number of matches for alignment_transform")
+        self.failUnlessEqual(1, len(matches), "Unexpected no. of matches for alignment_transform: " + str(len(matches)))
         float_array = self.floatify_regex_match(matches)
         scale, x_trans, y_trans = float_array[0]
         return scale, x_trans, y_trans
@@ -313,3 +323,11 @@ class SystemTest(TestCase):
             # Extract pixel location, offset, success value and mean error
             poi_array.append([Point(f[0], f[1]), Point(f[2], f[3]), f[4], f[5]])
         return poi_array
+
+    def read_json_object_from_std_out(self):
+        """
+        Assumes that the stdout is a single JSON object and attempts to interpret it - will not work if verbose or debug
+         mode are active.
+        :return: object represented by JSON.
+        """
+        return json.loads(self._get_std_out())

@@ -65,3 +65,13 @@ class TestCommandLineFlags(SystemTest):
 
         # Check for job_id in output
         self.failUnlessStdOutContains('job_id:"test_case"')
+
+    def test_json_flag_prints_json_to_console(self):
+        cmd_line = "--to_json {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_json_flag_prints_json_to_console.__name__, cmd_line)
+
+        # Check that the output contains JSON instead of human-readable output
+        self.failUnlessStdOutContains(
+            '"status": {"msg": "OK", "value": 1}'
+        )
+        self.failIfStdOutContains('align_status:1, OK')

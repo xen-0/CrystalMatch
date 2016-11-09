@@ -1,4 +1,4 @@
-from os.path import realpath
+from os.path import realpath, abspath
 
 from dls_imagematch.service.service_result import ServiceResult
 from system_test import SystemTest
@@ -28,8 +28,8 @@ class TestServiceOutput(SystemTest):
         # Test format of alignment output
         self.failUnlessStdOutContains(
             'job_id:"01234"',
-            'input_image:"' + self.substitute_tokens("{resources}/A10_1.jpg") + '"',
-            'output_image:"' + self.substitute_tokens("{resources}/A10_2.jpg") + '"',
+            'input_image:"' + abspath(self.substitute_tokens("{resources}/A10_1.jpg")) + '"',
+            'output_image:"' + abspath(self.substitute_tokens("{resources}/A10_2.jpg")) + '"',
         )
         self.failUnlessStdOutContainsRegex(
             'align_status:1, OK\n',
@@ -71,7 +71,7 @@ class TestServiceOutput(SystemTest):
 
     def test_format_of_global_transform_with_scaled_image(self):
         cmd_line = "{resources}/A10_1.jpg {resources}/A10_2@0.5.jpg 473,921"
-        self.run_crystal_matching_test(self.test_format_for_failed_points.__name__, cmd_line)
+        self.run_crystal_matching_test(self.test_format_of_global_transform_with_scaled_image.__name__, cmd_line)
 
         # Regex test the format of the global transform
         self.failUnlessStdOutContainsRegex(self.ALIGN_TRANSFORM_REGEX)

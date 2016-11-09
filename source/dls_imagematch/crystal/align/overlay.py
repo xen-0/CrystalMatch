@@ -47,7 +47,6 @@ class Overlayer:
         If image B only partially overlaps image A, only the overlapping sections of each
         are returned.
         """
-        # FIXME: If the regions do not overlap the result of this is None causing the app to crash - test and handle
         rect_a = image1.bounds()
         rect_b = image2.bounds().offset(offset)
         overlap_a_rect = rect_a.intersection(rect_b)

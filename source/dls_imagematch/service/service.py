@@ -47,13 +47,14 @@ class CrystalMatchService:
         # ch.setFormatter(formatter)
         root.addHandler(ch)
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None):
+    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None, json_output=False):
         """
         Perform image alignment and crystal matching returning a results object.
         :param job_id: Optional parameter for command line - returned in results to identify the run.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
         :param beamline_image_path: File path to the 'after' image from the Beam line.
         :param input_poi: An array of points of interest to match between the images.
+        :param json_output: Option to output a json object to std_out instead.
         :return: ServiceResult object.
         """
         # Create the images
@@ -61,7 +62,7 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path)
+        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, json_output=json_output)
 
         # Perform alignment
         aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)

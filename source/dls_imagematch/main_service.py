@@ -38,7 +38,8 @@ def main():
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
-                                            job_id=args.job)
+                                            job_id=args.job,
+                                            json_output=args.to_json)
     service_results.print_results()
 
 
@@ -103,9 +104,11 @@ def _get_argument_parser():
                         help="Sets the configuration directory.")
     parser.add_argument('--scale_input',
                         metavar="scale",
+                        type=float,
                         help="The scale of the input image in micrometers per pixel. The default value is 1.0um/pixel")
     parser.add_argument('--scale_output',
                         metavar="scale",
+                        type=float,
                         help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
     parser.add_argument('--version',
                         action='version',
@@ -119,6 +122,9 @@ def _get_argument_parser():
     parser.add_argument('-j', '--job',
                         metavar="job_id",
                         help="Specify a job_id - this will be reported in the output to help identify this run")
+    parser.add_argument('--to_json',
+                        action='store_true',
+                        help="Output a JSON object.")
     return parser
 
 

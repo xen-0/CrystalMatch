@@ -137,7 +137,7 @@ class AlignedImages:
     def overlap_metric(self):
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
-            metric_calc = OverlapMetric(self.image1, self.image2, None)
+            metric_calc = OverlapMetric(self.image1, self.image2, None, self._limit_high)
             self._metric = metric_calc.calculate_overlap_metric(self._translation)
 
         return self._metric
