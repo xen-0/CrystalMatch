@@ -3,6 +3,7 @@ from __future__ import print_function
 from unittest import TestCase
 
 from mock.mock import patch, Mock, MagicMock, call, create_autospec
+from os.path import abspath
 
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK, ALIGNED_IMAGE_STATUS_FAIL, \
     AlignedImages
@@ -52,16 +53,18 @@ class TestServiceResult(TestCase):
         return mock_aligned_image
 
     def test_create_result_with_job_id_and_image_paths(self):
-        ServiceResult("test-job-id", "test/file/path/fomulatrix", "test-file/path/beamline")
+        # FIXME: missing test
+        ServiceResult("test-job-id", "test/file/path/fomulatrix", "test/file/path/beamline")
+        self.fail()
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_and_image_paths_printed_correctly(self, mock_print):
-        result = ServiceResult("test-job-id", "test/file/path/fomulatrix", "test-file/path/beamline")
+        result = ServiceResult("test-job-id", "test/file/path/fomulatrix", "test/file/path/beamline")
         result.print_results()
 
         mock_print.assert_any_call('job_id:"test-job-id"')
-        mock_print.assert_any_call('input_image:"test/file/path/fomulatrix"')
-        mock_print.assert_any_call('output_image:"test-file/path/beamline"')
+        mock_print.assert_any_call('input_image:"' + abspath('test/file/path/fomulatrix') + '"')
+        mock_print.assert_any_call('output_image:"' + abspath('test/file/path/beamline') + '"')
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_does_not_print_if_blank(self, mock_print):
@@ -161,7 +164,7 @@ class TestServiceResult(TestCase):
 
         # Test
         mock_print.assert_has_calls([
-            call("\nco-ordinates ; transform ; status ; mean error"),
+            call("\nlocation ; transform ; status ; mean error"),
             call("poi:(100.00, 100.00) ; (3.00, 4.00) ; 1, OK ; 0.45")
         ])
 
@@ -179,7 +182,7 @@ class TestServiceResult(TestCase):
 
         # Test
         mock_print.assert_has_calls([
-            call("\nco-ordinates ; transform ; status ; mean error"),
+            call("\nlocation ; transform ; status ; mean error"),
             call("poi:(654.00, 321.00) ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
 
@@ -207,7 +210,7 @@ class TestServiceResult(TestCase):
 
         # Test
         mock_print.assert_has_calls([
-            call("\nco-ordinates ; transform ; status ; mean error"),
+            call("\nlocation ; transform ; status ; mean error"),
             call("poi:(100.00, 100.00) ; (3.00, 4.00) ; 1, OK ; 0.45"),
             call("poi:(123.00, 456.00) ; (1.00, 2.00) ; 1, OK ; 4.56"),
             call("poi:(654.00, 321.00) ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
