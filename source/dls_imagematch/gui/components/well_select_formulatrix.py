@@ -47,7 +47,7 @@ class WellSelectorFormulatrix(QGroupBox):
         self._cmbo_batch2 = QComboBox()
         self._cmbo_batch2.activated[str].connect(self._refresh_well_list)
         self._cmbo_well = QComboBox()
-        self._cmbo_well.activated[str].connect(self._emit_well_selected_signal)
+        self._cmbo_well.activated[str].connect(self.emit_well_selected_signal)
 
         # Create layout
         hbox_well_select = QHBoxLayout()
@@ -111,7 +111,7 @@ class WellSelectorFormulatrix(QGroupBox):
         files = self._get_well_files_list()
         self._populate_well_list(files)
         self._set_selected_well(current_selection)
-        self._emit_well_selected_signal()
+        self.emit_well_selected_signal()
 
     def _populate_well_list(self, files):
         for f in files:
@@ -137,7 +137,7 @@ class WellSelectorFormulatrix(QGroupBox):
         common.sort()
         return common
 
-    def _emit_well_selected_signal(self):
+    def emit_well_selected_signal(self):
         """ Select a well from the dataset to use for matching. Display the
         corresponding images in slot A and B. """
         plate_dir = join(self._samples_dir, str(self._cmbo_plate.currentText()))

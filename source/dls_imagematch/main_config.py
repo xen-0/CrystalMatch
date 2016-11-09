@@ -3,6 +3,7 @@ import sys
 from os.path import dirname
 from sys import path
 
+from PyQt4.QtCore import pyqtBoundSignal
 from PyQt4.QtGui import QMainWindow, QIcon
 from PyQt4.QtGui import QAction
 from PyQt4.QtGui import QApplication
@@ -44,6 +45,7 @@ class CrystalMatchConfigWindow(QMainWindow):
         exit_action = QAction(QIcon('exit.png'), '&Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
+        assert (isinstance(exit_action.triggered, pyqtBoundSignal))
         exit_action.triggered.connect(QApplication.quit)
 
         # Open options dialog
@@ -68,12 +70,14 @@ class CrystalMatchConfigWindow(QMainWindow):
     def _init_options_menu_item(self, name, config):
         action = QAction('&{}...'.format(name), self)
         action.setStatusTip('Open {} Options Dialog'.format(name))
+        assert (isinstance(action.triggered, pyqtBoundSignal))
         action.triggered.connect(lambda: self._open_config_dialog(config))
         return action
 
     def _init_detector_menu(self, detector):
         action = QAction(detector + "...", self)
         options = self._detector_config.get_detector_options(detector)
+        assert (isinstance(action.triggered, pyqtBoundSignal))
         action.triggered.connect(lambda: self._open_config_dialog(options))
         return action
 

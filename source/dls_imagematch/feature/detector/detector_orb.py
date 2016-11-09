@@ -140,6 +140,7 @@ class OrbDetector(Detector):
         if OPENCV_MAJOR == '2':
             constructor = cv2.ORB
         else:
+            # noinspection PyUnresolvedReferences
             constructor = cv2.ORB_create
 
         detector = constructor(nfeatures=self._n_features,

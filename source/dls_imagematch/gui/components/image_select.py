@@ -2,7 +2,7 @@ from __future__ import division
 
 import os
 
-from PyQt4.QtCore import Qt, pyqtSignal
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog, QGroupBox
 
 from dls_util.imaging import Image
@@ -30,6 +30,7 @@ class ImageSelector(QGroupBox):
         """ Create all the display elements of the widget. """
         # Load image button
         self._btn_load = QPushButton(self.BUTTON_TEXT)
+        assert (isinstance(self._btn_load.clicked, pyqtBoundSignal))
         self._btn_load.clicked.connect(self._select_image_from_file_dialog)
 
         # Selection filename - displays filename of selected images (A and B)

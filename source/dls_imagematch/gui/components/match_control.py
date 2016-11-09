@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import Qt, QThread, pyqtSignal
+from PyQt4.QtCore import Qt, QThread, pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QPushButton, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 
 from dls_imagematch.crystal import CrystalMatcher
@@ -42,10 +42,12 @@ class CrystalMatchControl(QGroupBox):
         # Matching function buttons
         self._btn_region = QPushButton("Select")
         self._btn_region.setFixedHeight(self.FRAME_SIZE)
+        assert (isinstance(self._btn_region.clicked, pyqtBoundSignal))
         self._btn_region.clicked.connect(self._fn_select_points)
 
         self._btn_locate = QPushButton("Match")
         self._btn_locate.setFixedHeight(self.FRAME_SIZE)
+        assert (isinstance(self._btn_locate.clicked, pyqtBoundSignal))
         self._btn_locate.clicked.connect(self._fn_perform_match)
         self._btn_locate.setEnabled(False)
 
@@ -99,6 +101,7 @@ class CrystalMatchControl(QGroupBox):
     def _ui_make_show_matches_button(self, i):
         btn = QPushButton("Matches")
         btn.setFixedWidth(self.FRAME_SIZE)
+        assert (isinstance(btn.clicked, pyqtBoundSignal))
         btn.clicked.connect(lambda: self._show_matches_dialog(i))
         return btn
 

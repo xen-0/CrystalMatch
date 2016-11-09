@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtCore import pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 
@@ -43,6 +43,7 @@ class FilterPane(QWidget):
         self._cmbo_include = QComboBox()
         self._cmbo_include.setFixedWidth(150)
         self._cmbo_include.addItems([self.ALL_MATCHES, self.GOOD_MATCHES, self.BAD_MATCHES, self.NO_MATCHES])
+        assert (isinstance(self._cmbo_include.currentIndexChanged, pyqtBoundSignal))
         self._cmbo_include.currentIndexChanged.connect(self._include_selection_changed)
 
         hbox2 = QHBoxLayout()
@@ -55,6 +56,7 @@ class FilterPane(QWidget):
         self._cmbo_methods = QComboBox()
         self._cmbo_methods.setFixedWidth(150)
         self._cmbo_methods.addItem(self.ALL, self.ALL)
+        assert (isinstance(self._cmbo_methods.currentIndexChanged, pyqtBoundSignal))
         self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 
         hbox3 = QHBoxLayout()

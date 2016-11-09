@@ -1,3 +1,4 @@
+from PyQt4.QtCore import pyqtBoundSignal
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction, QApplication, QMenu)
 
 from dls_imagematch.crystal.align.config import AlignConfig
@@ -89,7 +90,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         self.show()
 
         if well_selector.is_sample_dir_valid():
-            well_selector._emit_well_selected_signal()
+            well_selector.emit_well_selected_signal()
 
     def init_menu_bar(self):
         """Create and populate the menu bar. """
@@ -97,19 +98,23 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         exit_action = QAction(QIcon('exit.png'), '&Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
+        assert (isinstance(exit_action.triggered, pyqtBoundSignal))
         exit_action.triggered.connect(QApplication.quit)
 
         # Open options dialog
         crystal_opt = QAction('&Crystal Matching...', self)
         crystal_opt.setStatusTip('Open Crystal Matching Options Dialog')
+        assert (isinstance(crystal_opt.triggered, pyqtBoundSignal))
         crystal_opt.triggered.connect(lambda: self._open_config_dialog(self._crystal_config))
 
         align_opt = QAction('&Image Alignment...', self)
         align_opt.setStatusTip('Open Image Alignment Options Dialog')
+        assert(isinstance(align_opt.triggered, pyqtBoundSignal))
         align_opt.triggered.connect(lambda: self._open_config_dialog(self._align_config))
 
         gui_opt = QAction('&Gui...', self)
         gui_opt.setStatusTip('Open GUI Options Dialog')
+        assert (isinstance(gui_opt.triggered, pyqtBoundSignal))
         gui_opt.triggered.connect(lambda: self._open_config_dialog(self._gui_config))
 
         detector_menu = QMenu('Detectors', self)
@@ -119,6 +124,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
         license_opt = QAction('&Licensing...', self)
         license_opt.setStatusTip('Open Detector Licensing Options Dialog')
         config = DetectorConfig(self._gui_config.config_dir.value()).get_licensing_options()
+        assert (isinstance(license_opt.triggered, pyqtBoundSignal))
         license_opt.triggered.connect(lambda: self._open_config_dialog(config))
 
         # Create menu bar
@@ -135,6 +141,7 @@ class VMXiCrystalMatchMainWindow(QMainWindow):
 
     def _init_detector_menu(self, detector):
         action = QAction(detector + "...", self)
+        assert (isinstance(action.triggered, pyqtBoundSignal))
         action.triggered.connect(lambda: self._open_detector_config_dialog(detector))
         return action
 

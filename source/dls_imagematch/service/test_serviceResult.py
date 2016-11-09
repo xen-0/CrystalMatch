@@ -86,8 +86,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_print_without_alignment_results_shows_default_values(self, mock_print):
-        Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
-                                            "get_alignment_transform"])
+        Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset", "get_alignment_transform"])
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.print_results()
 

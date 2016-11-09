@@ -1,12 +1,10 @@
 from unittest import TestCase
-from unittest.case import skip
 
-from mock.mock import MagicMock, create_autospec, call
+from mock.mock import create_autospec
 
 from dls_imagematch.crystal.align.aligned_images import AlignedImages
 from dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, \
     CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL, CrystalMatchStatus
-from dls_imagematch.feature.match.match import FeatureMatch
 from dls_imagematch.feature.match.result import FeatureMatcherResult
 from dls_imagematch.feature.transform.trs_affine import AffineTransformation
 from dls_util.shape.point import Point

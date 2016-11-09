@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import Qt, QSize
+from PyQt4.QtCore import Qt, QSize, pyqtBoundSignal
 from PyQt4.QtGui import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QDialogButtonBox, QPushButton
 
 from dls_util.shape import Rectangle, Point
@@ -110,10 +110,13 @@ class PointSelectDialog(QDialog):
         dialog_btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
             Qt.Horizontal, self)
+        assert (isinstance(dialog_btns.accepted, pyqtBoundSignal))
+        assert (isinstance(dialog_btns.rejected, pyqtBoundSignal))
         dialog_btns.accepted.connect(self.accept)
         dialog_btns.rejected.connect(self.reject)
 
         btn_clear = QPushButton("Clear All")
+        assert (isinstance(btn_clear.clicked, pyqtBoundSignal))
         btn_clear.clicked.connect(self._frame.clear_points)
 
         hbox = QHBoxLayout()

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import Qt, pyqtSignal
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QWidget, QVBoxLayout, QTableWidget, QGroupBox, QAbstractItemView, QTableWidgetItem
 
 
@@ -42,6 +42,8 @@ class FeatureMatchTable(QWidget):
 
         table.setColumnHidden(0, True)
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        assert (isinstance(table.currentItemChanged, pyqtBoundSignal))
+        assert (isinstance(table.cellPressed, pyqtBoundSignal))
         table.currentItemChanged.connect(self._changed_selection)
         table.cellPressed.connect(self._changed_selection)
         self._table = table

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtCore import pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QPushButton, QLineEdit
 
 from dls_imagematch.feature.detector.config import DetectorConfig
@@ -53,12 +53,15 @@ class CrystalMatchPane(QWidget):
 
         self._txt_point_x = QLineEdit("0")
         self._txt_point_x.setFixedWidth(66)
+        assert (isinstance(self._txt_point_x.textChanged, pyqtBoundSignal))
         self._txt_point_x.textChanged.connect(self._point_x_text_changed)
         self._txt_point_y = QLineEdit("0")
         self._txt_point_y.setFixedWidth(67)
+        assert (isinstance(self._txt_point_y.textChanged, pyqtBoundSignal))
         self._txt_point_y.textChanged.connect(self._point_y_text_changed)
 
         btn_select_point = QPushButton("Select")
+        assert (isinstance(btn_select_point.clicked, pyqtBoundSignal))
         btn_select_point.clicked.connect(self._fn_select_crystal_point)
         btn_select_point.setFixedWidth(52)
 
@@ -94,6 +97,7 @@ class CrystalMatchPane(QWidget):
         hbox_cfg2.addStretch(1)
 
         self._btn_perform_match = QPushButton("Refresh")
+        assert (isinstance(self._btn_perform_match.clicked, pyqtBoundSignal))
         self._btn_perform_match.clicked.connect(self._fn_perform_match)
         self._btn_perform_match.setFixedWidth(80)
 
@@ -115,6 +119,7 @@ class CrystalMatchPane(QWidget):
     def _make_config_button(self, detector_type):
         button = QPushButton(detector_type)
         button.setFixedWidth(50)
+        assert (isinstance(button.clicked, pyqtBoundSignal))
         button.clicked.connect(lambda: self._open_detector_config(detector_type))
         return button
 
@@ -153,7 +158,6 @@ class CrystalMatchPane(QWidget):
         detector_config_dir = self._gui_config.config_dir.value()
         detector_config = DetectorConfig(detector_config_dir)
 
-        # TODO: add logging to the GUI
         matcher = CrystalMatcher(self._aligned_images, detector_config)
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)

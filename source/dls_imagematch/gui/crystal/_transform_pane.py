@@ -1,6 +1,6 @@
 from __future__ import division
 
-from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtCore import pyqtSignal, pyqtBoundSignal
 from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QComboBox
 
 from dls_imagematch.feature.transform.calculator import TransformCalculator
@@ -47,6 +47,7 @@ class TransformPane(QWidget):
         lbl_filter.setFixedWidth(label_width)
         self._cmbo_filter = QComboBox()
         self._cmbo_filter.setFixedWidth(150)
+        assert (isinstance(self._cmbo_filter.currentIndexChanged, pyqtBoundSignal))
         self._cmbo_filter.currentIndexChanged.connect(self._filter_selection_changed)
 
         for f in TransformCalculator.FILTERS:
@@ -62,6 +63,7 @@ class TransformPane(QWidget):
         lbl_method.setFixedWidth(label_width)
         self._cmbo_methods = QComboBox()
         self._cmbo_methods.setFixedWidth(150)
+        assert (isinstance(self._cmbo_methods.currentIndexChanged, pyqtBoundSignal))
         self._cmbo_methods.currentIndexChanged.connect(self._method_selection_changed)
 
         for method in TransformCalculator.METHODS:
