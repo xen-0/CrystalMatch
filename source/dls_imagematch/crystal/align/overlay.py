@@ -5,6 +5,9 @@ from dls_util.imaging import Image, Color
 
 
 class Overlayer:
+    def __init__(self):
+        pass
+
     @staticmethod
     def create_overlay_image(image1, image2, offset, rect_color=Color.black()):
         """ For the two images, A and B, where the position of B is offset from that of A, overlay

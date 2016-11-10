@@ -1,4 +1,7 @@
 class DetectorType:
+    def __init__(self):
+        pass
+
     ORB = "ORB"
     SIFT = "SIFT"
     SURF = "SURF"
@@ -24,6 +27,9 @@ class ExtractorType:
     """ Note: SIFT descriptors for a keypoint are an array of 128 integers; SURF descriptors are an
     array of 64 floats (in range -1 to 1); BRISK uses 64 integers, ORB and BRIEF are arrays of 32 ints
     (in range 0 to 255). """
+    def __init__(self):
+        pass
+
     # Extractor Types
     ORB = "ORB"
     SURF = "SURF"
@@ -53,6 +59,9 @@ class ExtractorType:
 
 
 class AdaptationType:
+    def __init__(self):
+        pass
+
     NONE = ""
     GRID = "Grid"
     PYRAMID = "Pyramid"
