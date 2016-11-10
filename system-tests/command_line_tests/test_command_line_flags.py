@@ -72,6 +72,6 @@ class TestCommandLineFlags(SystemTest):
 
         # Check that the output contains JSON instead of human-readable output
         self.failUnlessStdOutContains(
-            '"status": {"msg": "OK", "value": 1}'
+            '"status": {"msg": "OK", "code": 1}'
         )
         self.failIfStdOutContains('align_status:1, OK')

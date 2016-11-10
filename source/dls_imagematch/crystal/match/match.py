@@ -1,13 +1,10 @@
 import logging
 
+from dls_imagematch.util.status import StatusFlag
 
-class CrystalMatchStatus:
-    def __init__(self, code, status):
-        self.code = code
-        self.status = status
 
-    def __str__(self):
-        return str(self.code) + ", " + self.status
+class CrystalMatchStatus(StatusFlag):
+    pass
 
 # Status values
 CRYSTAL_MATCH_STATUS_STATUS_NOT_SET = CrystalMatchStatus(-1, "NOT SET")

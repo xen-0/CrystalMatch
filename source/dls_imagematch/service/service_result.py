@@ -8,7 +8,35 @@ from json.encoder import JSONEncoder
 from os.path import abspath
 
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
+from dls_imagematch.util.status import StatusFlag
 from dls_util.shape.point import Point
+
+
+class ServiceResultExitCode(StatusFlag):
+    def __init__(self, code, status, err_msg=None):
+        StatusFlag.__init__(self, code, status)
+        self.err_msg = err_msg
+
+    def __str__(self):
+        if self.err_msg is None:
+            return str(self.code)
+        else:
+            return str(self.code) + ", " + self.err_msg
+
+    def set_err_msg(self, err_msg):
+        self.err_msg = err_msg
+
+    def to_json_array(self):
+        json_array = StatusFlag.to_json_array(self)
+        if self.err_msg is not None:
+            json_array['err_msg'] = self.err_msg
+        return json_array
+
+
+# Status values
+SERVICE_RESULT_STATUS_INCOMPLETE = ServiceResultExitCode(-1, "EXITED EARLY")
+SERVICE_RESULT_STATUS_COMPLETE = ServiceResultExitCode(0, "COMPLETE")
+SERVICE_RESULT_STATUS_ERROR = ServiceResultExitCode(-1, "ERROR")
 
 
 class DecimalEncoder(JSONEncoder):
@@ -39,6 +67,7 @@ class ServiceResult:
         self._alignment_error = 0.0
         self._match_results = []
         self._json = json_output
+        self._exit_code = SERVICE_RESULT_STATUS_INCOMPLETE
 
     def set_image_alignment_results(self, aligned_images):
         """
@@ -48,6 +77,15 @@ class ServiceResult:
         self._alignment_transform_scale, self._alignment_transform_offset = aligned_images.get_alignment_transform()
         self._alignment_status_code = aligned_images.alignment_status_code()
         self._alignment_error = aligned_images.overlap_metric()
+        self._exit_code = SERVICE_RESULT_STATUS_COMPLETE
+
+    def set_err_state(self, e):
+        """
+        Sets the exit code to an error status and copies the error message from the provided exception into the output.
+        :param e: Thrown exception.
+        """
+        self._exit_code = SERVICE_RESULT_STATUS_ERROR
+        self._exit_code.set_err_msg(e.message)
 
     def append_crystal_matching_results(self, crystal_matcher_results):
         """
@@ -78,7 +116,8 @@ class ServiceResult:
         output = []
         if self._job_id and self._job_id != "":
             output = ['job_id:"' + self._job_id + '"']
-        output += ['input_image:"' + self._image_path_formulatrix + '"',
+        output += ['exit_code:' + str(self._exit_code),
+                   'input_image:"' + self._image_path_formulatrix + '"',
                    'output_image:"' + self._image_path_beamline + '"',
                    'align_transform:' + self._get_printable_alignment_transform(),
                    'align_status:' + str(self._alignment_status_code),
@@ -101,7 +140,7 @@ class ServiceResult:
                 print(line)
 
     def _print_json_object(self):
-        output_obj = {}
+        output_obj = {'exit_code': self._exit_code.to_json_array()}
 
         # Global alignment transform
         if self._job_id and self._job_id != "":
@@ -109,10 +148,7 @@ class ServiceResult:
         output_obj['input_image'] = self._image_path_formulatrix
         output_obj['output_image'] = self._image_path_beamline
         output_obj['alignment'] = {
-            'status': {
-                'value': self._alignment_status_code.code,
-                'msg': self._alignment_status_code.status,
-            },
+            'status': self._alignment_status_code.to_json_array(),
             'mean_error': self._alignment_error,
             'transform': {
                 'scale': self._alignment_transform_scale,
@@ -135,10 +171,7 @@ class ServiceResult:
                     'x': poi.get_delta().x,
                     'y': poi.get_delta().y,
                 },
-                'status': {
-                    'value': poi.get_status().code,
-                    'msg': poi.get_status().status,
-                },
+                'status': poi.get_status().to_json_array(),
                 'mean_error': poi.feature_match_result().mean_transform_error()
             })
         output_obj['poi'] = poi_array

@@ -65,13 +65,18 @@ class CrystalMatchService:
         service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, json_output=json_output)
 
         # Perform alignment
-        aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
-        service_result.set_image_alignment_results(aligned_images)
+        try:
+            aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
+            service_result.set_image_alignment_results(aligned_images)
 
-        # Perform Crystal Matching - only proceed if we have a valid alignment
-        if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
-            match_results = self._perform_matching(aligned_images, scaled_poi)
-            service_result.append_crystal_matching_results(match_results)
+            # Perform Crystal Matching - only proceed if we have a valid alignment
+            if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
+                match_results = self._perform_matching(aligned_images, scaled_poi)
+                service_result.append_crystal_matching_results(match_results)
+        except Exception as e:
+            logging.debug("ERROR: " + e.message)
+            service_result.set_err_state(e)
+
         return service_result
 
     def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):

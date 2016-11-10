@@ -1,17 +1,12 @@
+from dls_imagematch.util.status import StatusFlag
 from dls_util.imaging import Color
 from dls_util.shape import Point
 from .metric_overlap import OverlapMetric
 from .overlay import Overlayer
 
 
-class AlignedImagesStatus:
-    def __init__(self, code, status):
-        self.code = code
-        self.status = status
-
-    def __str__(self):
-        return str(self.code) + ", " + self.status
-
+class AlignedImagesStatus(StatusFlag):
+    pass
 # Status values
 ALIGNED_IMAGE_STATUS_NOT_SET = AlignedImagesStatus(-1, "NOT SET")
 ALIGNED_IMAGE_STATUS_OK = AlignedImagesStatus(1, "OK")
