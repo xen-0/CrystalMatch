@@ -111,7 +111,8 @@ class ServiceResult:
 
     def print_results(self):
         """
-        Print the contents of this results object to the console.
+        Print the contents of this results object to the console.  Returns the printed object for testing purposes.
+        :return : The printed object - JSON mode will return the full json object.
         """
         output = []
         if self._job_id and self._job_id != "":
@@ -133,11 +134,12 @@ class ServiceResult:
         logging.info("\n*************************************\n")
 
         if self._json:
-            self._print_json_object()
+            return self._print_json_object()
         else:
             # Print human readable
             for line in output:
                 print(line)
+            return output
 
     def _print_json_object(self):
         output_obj = {'exit_code': self._exit_code.to_json_array()}
@@ -176,3 +178,4 @@ class ServiceResult:
             })
         output_obj['poi'] = poi_array
         print(json.dumps(output_obj, cls=DecimalEncoder))
+        return output_obj

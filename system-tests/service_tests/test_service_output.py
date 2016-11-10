@@ -27,6 +27,7 @@ class TestServiceOutput(SystemTest):
 
         # Test format of alignment output
         self.failUnlessStdOutContains(
+            'exit_code:0',
             'job_id:"01234"',
             'input_image:"' + abspath(self.substitute_tokens("{resources}/A10_1.jpg")) + '"',
             'output_image:"' + abspath(self.substitute_tokens("{resources}/A10_2.jpg")) + '"',

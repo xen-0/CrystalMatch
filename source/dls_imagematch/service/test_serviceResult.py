@@ -209,3 +209,75 @@ class TestServiceResult(TestCase):
             call("poi:(123.00, 456.00) ; (1.00, 2.00) ; 1, OK ; 4.56"),
             call("poi:(654.00, 321.00) ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_exit_code_starting_state_is_negative_1(self, mock_print):
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
+        result.print_results()
+
+        mock_print.assert_has_calls([call('exit_code:-1')])
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_exit_code_in_std_out_success(self, mock_print):
+        # Set up mock for successful image match
+        status = ALIGNED_IMAGE_STATUS_OK
+        confidence = 9.8
+        transform = (1.0, Point(3.0, 4.0))
+        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
+        result.set_image_alignment_results(mock_aligned_image)
+        result.print_results()
+
+        # Test for exit status present in output
+        mock_print.assert_has_calls([call('exit_code:0')])
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_exit_code_in_std_out_with_error(self, mock_print):
+        # Set up mock for successful image alignment
+        status = ALIGNED_IMAGE_STATUS_OK
+        confidence = 9.8
+        transform = (1.0, Point(3.0, 4.0))
+        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
+        result.set_image_alignment_results(mock_aligned_image)
+
+        # Throw an exception and print results
+        e = Exception("test exception")
+        result.set_err_state(e)
+        result.print_results()
+
+        # Test for exit status of -1 with err message
+        mock_print.assert_has_calls([call('exit_code:-1, test exception')])
+
+    def test_exit_code_in_json_output_success(self):
+        # Set up mock for successful image alignment
+        status = ALIGNED_IMAGE_STATUS_OK
+        confidence = 9.8
+        transform = (1.0, Point(3.0, 4.0))
+        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+        result = ServiceResult("job-id", "fomulatrix", "beamline", json_output=True)
+        result.set_image_alignment_results(mock_aligned_image)
+        json_obj = result.print_results()
+
+        # Test for exit status of -1 in JSON object
+        self.failUnlessEqual(0, json_obj['exit_code']['code'])
+        self.failIf('err_msg' in json_obj['exit_code'].keys())
+
+    def test_exit_code_in_json_output_with_error(self):
+        # Set up mock for successful image alignment
+        status = ALIGNED_IMAGE_STATUS_OK
+        confidence = 9.8
+        transform = (1.0, Point(3.0, 4.0))
+        mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
+        result = ServiceResult("job-id", "fomulatrix", "beamline", json_output=True)
+        result.set_image_alignment_results(mock_aligned_image)
+
+        # Throw an exception and print results
+        e = Exception("test exception")
+        result.set_err_state(e)
+        json_obj = result.print_results()
+
+        # Test for exit status of -1 in JSON object
+        self.failUnlessEqual(-1, json_obj['exit_code']['code'])
+        self.failUnlessEqual('test exception', json_obj['exit_code']['err_msg'])

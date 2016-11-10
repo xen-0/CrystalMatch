@@ -118,6 +118,8 @@ class TestServiceOutput(SystemTest):
 
     def _validate_format_of_json_object(self, json, job_id, expected_input_image, expected_output_image,
                                         expected_poi_len, exp_scale=1.0):
+        self.failUnlessEqual(0, json['exit_code']['code'])
+        self.failIf('err_msg' in json['exit_code'].keys())
         self.failUnlessEqual(expected_input_image, json['input_image'])
         self.failUnlessEqual(expected_output_image, json['output_image'])
         if job_id is None:
