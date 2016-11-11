@@ -1,7 +1,7 @@
 import json
 import re
 from os import makedirs, listdir
-from os.path import exists, join, splitext, isdir, realpath, split
+from os.path import exists, join, splitext, isdir, realpath, split, isfile
 from re import match, compile
 from shutil import rmtree, copytree
 from string import replace
@@ -55,11 +55,16 @@ class SystemTest(TestCase):
         assert self._test_suite_dir is not None, "Test directory not set correctly!"
         return self._test_suite_dir
 
-    def _get_test_output_dir(self, test_name):
-        return join(self._get_output_dir(), test_name)
+    def get_active_test_dir(self):
+        assert hasattr(self, "_active_output_dir"), "Test directory not set"
+        assert self._active_output_dir is not None, "Test directory not set correctly!"
+        return self._active_output_dir
 
     def _input_dir(self):
         return join(self._get_test_suite_dir(), "input")
+
+    def _expected_test_dir(self):
+        return join(self._get_test_suite_dir(), "expected", self._current_test_name)
 
     def set_directory_paths(self, test_file_path):
         """
@@ -82,12 +87,7 @@ class SystemTest(TestCase):
         used by tests.  In addition, if a directory exists with the same name as the test being run the contents of that
         directory will be copied to the directory before the test begins.
 
-        The following tokens can be used in command line arguments:
-
-        {input} -> replaced with an absolute path to a directory in the test_suite_dir named 'input'.
-         usage: {input}/[file]
-        {resources} -> replace with an absolute path to a resources directory in the system tests root dir.
-         usage: {resources}/[file]
+        See self.substitute_tokens() for list of available tokens to use in command line.
 
         :param test_name: Directory name used to store output in the test suite output dir.
         :param cmd_line_args: Command line arguments to be used for the sub-process call.
@@ -95,7 +95,8 @@ class SystemTest(TestCase):
         """
 
         # Set up the output directory - copy input resources
-        self._active_output_dir = self._get_test_output_dir(test_name)
+        self._current_test_name = test_name
+        self._active_output_dir = join(self._get_output_dir(), test_name)
         if exists(self._active_output_dir):
             rmtree(self._active_output_dir)
         test_input_dir = join(self._input_dir(), test_name)
@@ -121,8 +122,18 @@ class SystemTest(TestCase):
         return self._active_output_dir
 
     def substitute_tokens(self, sub_string):
+        """
+        Makes the following string substitutions:
+
+         {input} -> replaced with an absolute path to a directory in the test_suite_dir named 'input'.
+           usage: {input}/[file]
+         {resources} -> replace with an absolute path to a resources directory in the system tests root dir.
+           usage: {resources}/[file]
+         {expected} - > replaced with an absolute path to a directory with the test name in the 'expected' directory.
+        """
         sub_string = replace(sub_string, "{input}", self._input_dir())
         sub_string = replace(sub_string, "{resources}", self._get_resources_dir())
+        sub_string = replace(sub_string, "{expected}", self._expected_test_dir())
         return sub_string
 
     def _get_resources_dir(self):
@@ -331,3 +342,24 @@ class SystemTest(TestCase):
         :return: object represented by JSON.
         """
         return json.loads(self._get_std_out())
+
+    def failUnlessFilesMatch(self, expected_file, actual_file):
+        """
+        Fail unless the give files exist, are files and their content matches.  Only works on text files.
+        :param expected_file: Expected file reference.
+        :param actual_file: Actual file reference.
+        """
+        self.failUnless(exists(expected_file) and isfile(expected_file))
+        self.failUnless(exists(actual_file) and isfile(actual_file))
+        with file(expected_file, 'r') as file_r:
+            expected_contents = file_r.readlines()
+        with file(actual_file, 'r') as file_r:
+            actual_contents = file_r.readlines()
+        self.failUnlessEqual(len(expected_contents), len(actual_contents), "File length does not match")
+        for i in range(len(expected_contents)):
+            self.failUnlessEqual(
+                expected_contents[i],
+                actual_contents[i],
+                'File Match: Mismatch on line {}: \n"{}"\nvs\n"{}"'.format(str(i),
+                                                                           expected_contents[i],
+                                                                           actual_contents[i]))
