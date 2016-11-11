@@ -4,6 +4,7 @@ from sys import stdout
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
+from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
@@ -24,6 +25,7 @@ class CrystalMatchService:
         """
         self._config_directory = config_directory
 
+        self._config_settings = SettingsConfig(config_directory)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
@@ -74,7 +76,7 @@ class CrystalMatchService:
                 match_results = self._perform_matching(aligned_images, scaled_poi)
                 service_result.append_crystal_matching_results(match_results)
         except Exception as e:
-            logging.debug("ERROR: " + e.message)
+            logging.error("ERROR: " + e.message)
             service_result.set_err_state(e)
 
         return service_result

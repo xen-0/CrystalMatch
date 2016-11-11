@@ -105,7 +105,6 @@ class TransformPane(QWidget):
         self._slider_threshold.setEnabled(is_ransac)
 
     def _refresh_transform(self):
-        # TODO: Images are being generated using the old co-ordinate system.
         if self._matcher is None:
             return
 
