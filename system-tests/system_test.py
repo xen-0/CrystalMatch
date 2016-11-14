@@ -114,10 +114,10 @@ class SystemTest(TestCase):
 
         # Run Crystal Matching Algorithm with command line arguments
         command = "python -m dls_imagematch.main_service " + cmd_line_args
-        with self._get_cmd_line_file("w") as cmd_out_file:
+        with file(self._get_cmd_line_file_path(), "w") as cmd_out_file:
             cmd_out_file.writelines(command)
-        stdout_file = self._get_std_out_file("w")
-        stderr_file = self._get_std_err_file("w")
+        stdout_file = file(self._get_std_out_file_path(), "w")
+        stderr_file = file(self._get_std_err_file_path(), "w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
 
@@ -146,31 +146,31 @@ class SystemTest(TestCase):
         sys_test_root = join(sys_test_root, self.RESOURCE_DIR_NAME)
         return sys_test_root
 
-    def _get_cmd_line_file(self, mode):
+    def _get_cmd_line_file_path(self):
         """
-        Gets a file object for the cmd_line file used to store the command being run.
-        :param mode: File read/write mode
-        :return: File object for stdout file
+        Gets a file path for the cmd_line file used to store the command being run.
+        :return: File object for cmd_line file
         """
-        return file(join(self._active_output_dir, "cmd_line"), mode=mode)
+        return join(self._active_output_dir, "cmd_line")
 
-    def _get_std_out_file(self, mode):
+    def _get_std_out_file_path(self):
         """
-        Gets the stdout file from the current active output directory
-        :param mode: File read/write mode
+        Gets the stdout file path from the current active output directory
         :return: File object for stdout file
         """
-        return file(join(self._active_output_dir, "stdout"), mode=mode)
+        return join(self._active_output_dir, "stdout")
 
     def _get_std_out(self):
-        with self._get_std_out_file("r") as std_out_file:
-            std_out = std_out_file.read()
-        return std_out
+        return self._get_file_contents(self._get_std_out_file_path())
 
     def _get_std_err(self):
-        with self._get_std_err_file("r") as std_err_file:
-            std_err = std_err_file.read()
-        return std_err
+        return self._get_file_contents(self._get_std_err_file_path())
+
+    @staticmethod
+    def _get_file_contents(file_path):
+        with file(file_path, "r") as f:
+            contents = f.read()
+        return contents
 
     @staticmethod
     def floatify_regex_match(matches):
@@ -187,31 +187,38 @@ class SystemTest(TestCase):
     def _is_dir(directory_path):
         return exists(directory_path) and isdir(directory_path)
 
-    def _get_std_err_file(self, mode):
+    def _get_std_err_file_path(self):
         """
-        Gets the stderr file from the current active output directory
-        :param mode: File read/write mode
+        Gets the stderr file path from the current active output directory
         :return: File object for stderr file
         """
-        return file(join(self._active_output_dir, "stderr"), mode=mode)
+        return join(self._active_output_dir, "stderr")
 
     def failUnlessStdOutContains(self, *strings):
         """
         Fail the current test case unless stdout contains these strings.
         :param strings: Strings to match in stdout - can be an array of string or a single string
         """
-        std_out = self._get_std_out()
-        for match_line in strings:
-            self.failUnless(match_line in std_out, "Not found in std_out: " + match_line)
+        self.failUnlessFileContains(self._get_std_out_file_path(), *strings)
 
     def failIfStdOutContains(self, *strings):
         """
         Fail the current test case if stdout contains any of these strings.
         :param strings: Strings to match in stdout - can be an array of string or a single string
         """
-        std_out = self._get_std_out()
+        self.failIfFileContains(self._get_std_out_file_path(), *strings)
+
+    def failIfFileContains(self, file_path, *strings):
+        contents = self._get_file_contents(file_path)
         for match_line in strings:
-            self.failIf(match_line in std_out, "Found in std_out when not expected: " + match_line)
+            self.failIf(match_line in contents,
+                        "Found in file (" + file_path + ") when not expected: " + match_line)
+
+    def failUnlessFileContains(self, file_path, *strings):
+        contents = self._get_file_contents(file_path)
+        for match_line in strings:
+            self.failUnless(match_line in contents,
+                            "Not found in file (" + file_path + ") when expected: " + match_line)
 
     def failUnlessStdOutContainsRegexString(self, regex, count=0):
         """
@@ -235,9 +242,7 @@ class SystemTest(TestCase):
             self.failUnlessStdOutContainsRegexString(r, count=0)
 
     def failUnlessStdErrContains(self, *strings):
-        std_err = self._get_std_err()
-        for match_line in strings:
-            self.failUnless(match_line in std_err, "Not found in std_err: " + match_line)
+        self.failUnlessFileContains(self._get_std_err_file_path(), *strings)
 
     def failUnlessStdErrContainsRegex(self, *regex):
         std_err = self._get_std_err()
@@ -247,7 +252,7 @@ class SystemTest(TestCase):
 
     def failIfStrErrHasContent(self):
         std_err = self._get_std_err()
-        self.failIf(len(std_err) > 0, "Standard err file shows errors: " + self._get_std_err_file("r").name)
+        self.failIf(len(std_err) > 0, "Standard err file shows errors: " + self._get_std_err_file_path())
 
     def failUnlessDirExists(self, directory_path):
         self.failUnless(exists(directory_path), "Directory does not exist: " + directory_path)
