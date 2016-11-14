@@ -345,7 +345,8 @@ class SystemTest(TestCase):
 
     def failUnlessFilesMatch(self, expected_file, actual_file):
         """
-        Fail unless the give files exist, are files and their content matches.  Only works on text files.
+        Fail unless the give files exist, are files and their content matches.  Only works on text files and excess
+        whitespace at the beginning or end of a line will not cause a failure.
         :param expected_file: Expected file reference.
         :param actual_file: Actual file reference.
         """
@@ -358,8 +359,8 @@ class SystemTest(TestCase):
         self.failUnlessEqual(len(expected_contents), len(actual_contents), "File length does not match")
         for i in range(len(expected_contents)):
             self.failUnlessEqual(
-                expected_contents[i],
-                actual_contents[i],
+                expected_contents[i].strip(),
+                actual_contents[i].strip(),
                 'File Match: Mismatch on line {}: \n"{}"\nvs\n"{}"'.format(str(i),
                                                                            expected_contents[i],
                                                                            actual_contents[i]))

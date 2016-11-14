@@ -13,7 +13,7 @@ class TestGlobalAlignmentTransform(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_on_identical_image(self, suffix, config_file):
         test_name = "test_alignment_on_identical_image - " + suffix
@@ -36,7 +36,7 @@ class TestGlobalAlignmentTransform(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_positive_offset_on_image_b(self, suffix, config_file):
         test_name = "test_alignment_with_positive_offset_on_image_b - " + suffix
@@ -59,7 +59,7 @@ class TestGlobalAlignmentTransform(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_negative_offset_on_image_b(self, suffix, config_file):
         test_name = "test_alignment_with_negative_offset_on_image_b - " + suffix
@@ -82,7 +82,7 @@ class TestGlobalAlignmentTransform(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_mixed_offset_on_image_b(self, suffix, config_file):
         test_name = "test_alignment_with_mixed_offset_on_image_b - " + suffix
@@ -105,7 +105,7 @@ class TestGlobalAlignmentTransform(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_mixed_offset_counterpoint_on_image_b(self, suffix, config_file):
         test_name = "test_alignment_with_mixed_offset_counterpoint_on_image_b - " + suffix

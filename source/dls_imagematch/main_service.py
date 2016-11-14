@@ -46,6 +46,7 @@ def main():
 def _get_scale_override(args):
     scale_override = None
     if args.scale_input is not None or args.scale_output is not None:
+        # FIXME: scale override cannot be applied to only one image - should override config file individually
         if args.scale_input is None:
             args.scale_input = 1
         if args.scale_output is None:

@@ -1,4 +1,6 @@
 import logging
+from logging import DEBUG, INFO
+from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
 
 from dls_imagematch.crystal.align import AlignConfig
@@ -30,24 +32,37 @@ class CrystalMatchService:
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
+        self._set_up_logging(debug, verbose)
+
+    def _set_up_logging(self, debug, verbose):
         # Set up logging
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
+        # Set up stream handler
         if debug:
-            self.set_std_out_log_level(logging.DEBUG)
-            logging.debug("DEBUG mode set")
+            root.addHandler(self.get_log_stream_handler(DEBUG))
+            logging.debug("DEBUG statements visible.")
         elif verbose:
-            self.set_std_out_log_level(logging.INFO)
-            logging.info("VERBOSE mode set")
+            root.addHandler(self.get_log_stream_handler(INFO))
+            logging.info("INFO statements visible.")
+        # Set up file handler
+        if self._config_settings.logging.value():
+            root.addHandler(self.get_log_file_handler())
+
+    def get_log_file_handler(self):
+        log_file_handler = TimedRotatingFileHandler(self._config_settings.get_log_file_path(),
+                                                    when=self._config_settings.log_rotation.value(),
+                                                    backupCount=self._config_settings.log_rotation.value())
+        log_file_handler.setLevel(self._config_settings.get_log_level())
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_file_handler.setFormatter(formatter)
+        return log_file_handler
 
     @staticmethod
-    def set_std_out_log_level(level):
-        root = logging.getLogger()
-        root.setLevel(level)
-        ch = logging.StreamHandler(stdout)
-        ch.setLevel(level)
-        # TODO: Add file logging using format below
-        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        # ch.setFormatter(formatter)
-        root.addHandler(ch)
+    def get_log_stream_handler(level):
+        stream_handler = logging.StreamHandler(stdout)
+        stream_handler.setLevel(level)
+        return stream_handler
 
     def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None, json_output=False):
         """
@@ -104,7 +119,10 @@ class CrystalMatchService:
 
         crystal_match_results = matcher.match(selected_points)
         logging.info("Crystal Matching Complete")
-        # self._popup_match_results(crystal_match_results)
+
+        # Log images
+        if self._config_settings.log_images.value():
+            self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
 
@@ -126,8 +144,9 @@ class CrystalMatchService:
             logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
             logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
 
-    @staticmethod
-    def _popup_match_results(results):
+    def _popup_match_results(self, results):
+        # FIXME: output image file
+        # self._config_settings.get_log_image_dir()
         for i in range(results.num()):
             feature_match_result = results.get_crystal_match(i).feature_match_result()
 
