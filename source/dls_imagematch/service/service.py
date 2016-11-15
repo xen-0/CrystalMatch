@@ -52,7 +52,7 @@ class CrystalMatchService:
     def get_log_file_handler(self):
         log_file_handler = TimedRotatingFileHandler(self._config_settings.get_log_file_path(),
                                                     when=self._config_settings.log_rotation.value(),
-                                                    backupCount=self._config_settings.log_rotation.value())
+                                                    backupCount=self._config_settings.log_count_limit.value())
         log_file_handler.setLevel(self._config_settings.get_log_level())
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log_file_handler.setFormatter(formatter)

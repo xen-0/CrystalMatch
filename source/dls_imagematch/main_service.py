@@ -26,7 +26,6 @@ def main():
     args = parser.parse_args()
 
     # Setup parameters
-    selected_points = _parse_selected_points_from_args(args)
     config_directory = args.config
     if config_directory is None:
         config_directory = CONFIG_DIR
@@ -35,6 +34,7 @@ def main():
 
     # Run service
     service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug, scale_override=scale_override)
+    selected_points = _parse_selected_points_from_args(args)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
