@@ -1,6 +1,5 @@
-from os.path import realpath, join
+from os.path import realpath, join, exists
 from os import listdir
-from unittest.case import skip
 
 from system_test import SystemTest
 
@@ -87,11 +86,59 @@ class TestLoggingFunctions(SystemTest):
         self.failUnlessEqual(log_files[0], "log")
         self.failIfEqual(log_files[1], "log")
 
-    @skip("Reasons")
     def test_log_image_files(self):
-        cmd_line = ""
+        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
         self.run_crystal_matching_test(self.test_log_image_files.__name__, cmd_line)
-        self.fail()
+
+        # Test poi results against log file images
+        poi_array = self.get_poi_from_std_out()
+        log_image_dir = join(self._active_log_dir(), "images")
+        self._verify_logged_image_files(log_image_dir, poi_array)
+
+    def test_log_images_with_custom_directory(self):
+        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
+        self.run_crystal_matching_test(self.test_log_images_with_custom_directory.__name__, cmd_line)
+
+        # Test for image logs files in custom directory
+        poi_array = self.get_poi_from_std_out()
+        log_image_dir = join(self.get_active_test_dir(), "test", "dir", "images")
+        self._verify_logged_image_files(log_image_dir, poi_array)
+
+    def test_log_images_not_present_if_option_disabled(self):
+        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
+        self.run_crystal_matching_test(self.test_log_images_not_present_if_option_disabled.__name__, cmd_line)
+
+        # Assert that the images directory does not exist in the default location
+        self.failUnless(exists(self._active_log_dir()))
+        self.failIf(exists(join(self._active_log_dir(), "images")))
+
+    def test_log_images_not_present_if_all_logging_disabled(self):
+        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
+        self.run_crystal_matching_test(self.test_log_images_not_present_if_all_logging_disabled.__name__, cmd_line)
+
+        # Assert that the entire log file is not present in the default location
+        self.failIf(exists(self._active_log_dir()))
+        self.failIf(exists(join(self._active_log_dir(), "images")))
+        self.failIf(exists(join(self.get_active_test_dir(), "images")))
+
+    def _verify_logged_image_files(self, log_image_dir, poi_array):
+        # Check log files
+        self.failUnless(exists(log_image_dir))
+        log_images = listdir(log_image_dir)
+        for image_name in log_images:
+            self.failUnless("Match_" in image_name)
+            self.failUnless(image_name.endswith(".jpg"))
+
+        # Verify images are only output for successful matches (this may change)
+        failures = 0
+        passes = 0
+        for poi in poi_array:
+            if poi[2] == 1.0:
+                passes += 1
+            else:
+                failures += 1
+        self.failUnless(passes > 0 and failures > 0, "Should test both passes and failures")
+        self.failUnlessEqual(len(log_images), passes)
 
     def _active_log_dir(self):
         return join(self.get_active_test_dir(), "logs")

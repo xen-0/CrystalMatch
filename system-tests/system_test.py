@@ -329,9 +329,8 @@ class SystemTest(TestCase):
         """
         std_out = self._get_std_out()
         # Match POI lines in the output
-        reg_ex = "poi:\((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\) ; \((-?[0-9]+\.[0-9]+)," \
-                 " (-?[0-9]+\.[0-9]+)\) ; ([01]).* ; ([0-9]+\.[0-9]+)"
-        re_compile = re.compile(reg_ex)
+        re_compile = re.compile("poi:\((-?[0-9.]+), (-?[0-9.]+)\) ; \((-?[0-9.]+), "
+                                "(-?[0-9.]+)\) ; ([01]).* ; ([0-9.]+)")
         matches = re_compile.findall(std_out)
         float_array = self.floatify_regex_match(matches)
         poi_array = []
