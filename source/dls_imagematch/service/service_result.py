@@ -1,13 +1,17 @@
 from __future__ import print_function
 
+from os import makedirs
+from time import strftime
+
 import numpy as np
 import logging
 import json
 from json.encoder import JSONEncoder
 
-from os.path import abspath
+from os.path import abspath, join, exists, isdir
 
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
+from dls_imagematch.feature.draw.matches import MatchPainter
 from dls_imagematch.util.status import StatusFlag
 from dls_util.shape.point import Point
 
@@ -56,7 +60,17 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, job_id, formulatrix_image_path, beamline_image_path, json_output=False):
+    def __init__(self, job_id, formulatrix_image_path, beamline_image_path, json_output=False, image_output_dir=None):
+        """
+        Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
+        image directory.
+        :param job_id: The assigned job id for this run (specific by the user)
+        :param formulatrix_image_path: Image path for the input image.
+        :param beamline_image_path: Image path for the output image.
+        :param json_output: Flag to output results to the console in JSOn format
+        :param image_output_dir: If set (not None) the app will attempt to write an image of the match to the
+        specified directory.
+        """
         self.SEPARATOR = " ; "
         self._job_id = job_id
         self._image_path_formulatrix = abspath(formulatrix_image_path)
@@ -68,6 +82,7 @@ class ServiceResult:
         self._match_results = []
         self._json = json_output
         self._exit_code = SERVICE_RESULT_STATUS_INCOMPLETE
+        self._image_output_dir = image_output_dir
 
     def set_image_alignment_results(self, aligned_images):
         """
@@ -127,12 +142,15 @@ class ServiceResult:
 
         self._append_crystal_match_results(output)
 
-        # Print separately to log file and console
+        # Log file output
         logging.info("\n*************************************\nRESULTS\n")
         for log_msg in output:
             logging.info(log_msg)
         logging.info("\n*************************************\n")
+        if self._image_output_dir is not None:
+            self._output_log_images()
 
+        # Console output
         if self._json:
             return self._print_json_object()
         else:
@@ -179,3 +197,24 @@ class ServiceResult:
         output_obj['poi'] = poi_array
         print(json.dumps(output_obj, cls=DecimalEncoder))
         return output_obj
+
+    def _output_log_images(self):
+        for i in range(len(self._match_results)):
+            crystal_match = self._match_results[i]
+            if crystal_match.is_success():
+                feature_match = crystal_match.feature_match_result()
+                painter = MatchPainter(feature_match.image1(), feature_match.image2())
+
+                image = painter.background_image()
+                image = painter.draw_matches(feature_match.good_matches(), [], image)
+
+                # Construct file path for this image.
+                filename = strftime("%Y-%m-%d_%H-%M-%S_Match_" + str(i) + ".jpg")
+                if self._job_id is not None and self._job_id.strip():
+                    job_dir_path = join(self._image_output_dir, self._job_id)
+                    if not exists(job_dir_path) or not isdir(job_dir_path):
+                        makedirs(job_dir_path)
+                    image_path = join(job_dir_path, filename)
+                else:
+                    image_path = join(self._image_output_dir, filename)
+                image.save(abspath(image_path))

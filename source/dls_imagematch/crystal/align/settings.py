@@ -70,9 +70,10 @@ class SettingsConfig(Config):
                                          "files will be stored.")
 
         self.log_images = add(BoolConfigItem, "Log Match Images", False)
-        self.log_images.set_comment("Option to output an image capture of each crystal match. NOTE: images are "
-                                    "150kb+, this option will consume a lot of hard drive space "
-                                    "compared to standard log files.")
+        self.log_images.set_comment("Option to output an image capture of each crystal match. WARNING: images are "
+                                    "150kb+ and are NOT deleted automatically, this option is intended for outputting "
+                                    "test data and will consume a lot of hard drive space compared "
+                                    "to standard log files.  This option should be turned off for standard use.")
         self.initialize_from_file()
 
     def _set_default_log_file_path(self, config_dir):
@@ -94,12 +95,12 @@ class SettingsConfig(Config):
         self._check_make_dirs(dir_path)
         return join(dir_path, self.LOG_FILE_NAME)
 
-    def get_log_image_dir(self):
+    def get_image_log_dir(self):
         """
         Returns a string path to an image directory in the log directory.  If the directory does not currently exist
         it is generated.
         """
-        image_dir = join(self.get_log_file_path(), self.LOG_IMAGE_DIR)
+        image_dir = join(self._get_log_file_dir(), self.LOG_IMAGE_DIR)
         self._check_make_dirs(image_dir)
         return image_dir
 

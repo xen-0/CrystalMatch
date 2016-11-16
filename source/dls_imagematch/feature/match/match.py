@@ -74,4 +74,3 @@ class FeatureMatch:
         f2 = features2[cv2_match.trainIdx]
         cv2_match = FeatureMatch(cv2_match, f1, f2, detector)
         return cv2_match
-

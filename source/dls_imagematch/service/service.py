@@ -10,7 +10,6 @@ from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
-from dls_imagematch.feature.draw import MatchPainter
 from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
 
@@ -79,7 +78,8 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, json_output=json_output)
+        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path,
+                                       json_output=json_output, image_output_dir=self._get_image_output_dir())
 
         # Perform alignment
         try:
@@ -95,6 +95,12 @@ class CrystalMatchService:
             service_result.set_err_state(e)
 
         return service_result
+
+    def _get_image_output_dir(self):
+        image_output_dir = None
+        if self._config_settings.log_images.value():
+            image_output_dir = self._config_settings.get_image_log_dir()
+        return image_output_dir
 
     def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):
         """
@@ -120,10 +126,6 @@ class CrystalMatchService:
         crystal_match_results = matcher.match(selected_points)
         logging.info("Crystal Matching Complete")
 
-        # Log images
-        if self._config_settings.log_images.value():
-            self._popup_match_results(crystal_match_results)
-
         return crystal_match_results
 
     @staticmethod
@@ -143,17 +145,3 @@ class CrystalMatchService:
         if match_result is not None:
             logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
             logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
-
-    def _popup_match_results(self, results):
-        # FIXME: output image file
-        # self._config_settings.get_log_image_dir()
-        for i in range(results.num()):
-            feature_match_result = results.get_crystal_match(i).feature_match_result()
-
-            painter = MatchPainter(feature_match_result.image1(), feature_match_result.image2())
-
-            image = painter.background_image()
-            # image = painter.draw_transform_shapes(self._quad1, self._quad2, image)
-            image = painter.draw_matches(feature_match_result.good_matches(), [], image)
-            # image = painter.draw_transform_points(self._image1_point, self._image2_point, image)
-            image.popup()
