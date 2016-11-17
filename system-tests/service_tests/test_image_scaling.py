@@ -13,7 +13,7 @@ class TestImageScaling(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_smaller_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image - " + suffix
@@ -33,7 +33,7 @@ class TestImageScaling(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_larger_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image - " + suffix
@@ -53,7 +53,7 @@ class TestImageScaling(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_smaller_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image_with_points - " + suffix
@@ -67,7 +67,7 @@ class TestImageScaling(SystemTest):
     @parameterized.expand([
         ("average_translation", "{resources}/configs/config_transform_av_translation"),
         ("affine_transform", "{resources}/configs/config_transform_affine_transform"),
-        ("homography", "{resources}/configs/config_transform_av_homography"),
+        ("homography", "{resources}/configs/config_transform_homography"),
     ])
     def test_alignment_with_larger_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image_with_points - " + suffix

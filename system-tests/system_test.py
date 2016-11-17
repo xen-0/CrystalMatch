@@ -1,7 +1,7 @@
 import json
 import re
 from os import makedirs, listdir
-from os.path import exists, join, splitext, isdir, realpath, split
+from os.path import exists, join, splitext, isdir, realpath, split, isfile
 from re import match, compile
 from shutil import rmtree, copytree
 from string import replace
@@ -55,11 +55,16 @@ class SystemTest(TestCase):
         assert self._test_suite_dir is not None, "Test directory not set correctly!"
         return self._test_suite_dir
 
-    def _get_test_output_dir(self, test_name):
-        return join(self._get_output_dir(), test_name)
+    def get_active_test_dir(self):
+        assert hasattr(self, "_active_output_dir"), "Test directory not set"
+        assert self._active_output_dir is not None, "Test directory not set correctly!"
+        return self._active_output_dir
 
     def _input_dir(self):
         return join(self._get_test_suite_dir(), "input")
+
+    def _expected_test_dir(self):
+        return join(self._get_test_suite_dir(), "expected", self._current_test_name)
 
     def set_directory_paths(self, test_file_path):
         """
@@ -82,12 +87,7 @@ class SystemTest(TestCase):
         used by tests.  In addition, if a directory exists with the same name as the test being run the contents of that
         directory will be copied to the directory before the test begins.
 
-        The following tokens can be used in command line arguments:
-
-        {input} -> replaced with an absolute path to a directory in the test_suite_dir named 'input'.
-         usage: {input}/[file]
-        {resources} -> replace with an absolute path to a resources directory in the system tests root dir.
-         usage: {resources}/[file]
+        See self.substitute_tokens() for list of available tokens to use in command line.
 
         :param test_name: Directory name used to store output in the test suite output dir.
         :param cmd_line_args: Command line arguments to be used for the sub-process call.
@@ -95,7 +95,8 @@ class SystemTest(TestCase):
         """
 
         # Set up the output directory - copy input resources
-        self._active_output_dir = self._get_test_output_dir(test_name)
+        self._current_test_name = test_name
+        self._active_output_dir = join(self._get_output_dir(), test_name)
         if exists(self._active_output_dir):
             rmtree(self._active_output_dir)
         test_input_dir = join(self._input_dir(), test_name)
@@ -113,16 +114,26 @@ class SystemTest(TestCase):
 
         # Run Crystal Matching Algorithm with command line arguments
         command = "python -m dls_imagematch.main_service " + cmd_line_args
-        with self._get_cmd_line_file("w") as cmd_out_file:
+        with file(self._get_cmd_line_file_path(), "w") as cmd_out_file:
             cmd_out_file.writelines(command)
-        stdout_file = self._get_std_out_file("w")
-        stderr_file = self._get_std_err_file("w")
+        stdout_file = file(self._get_std_out_file_path(), "w")
+        stderr_file = file(self._get_std_err_file_path(), "w")
         call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
 
     def substitute_tokens(self, sub_string):
+        """
+        Makes the following string substitutions:
+
+         {input} -> replaced with an absolute path to a directory in the test_suite_dir named 'input'.
+           usage: {input}/[file]
+         {resources} -> replace with an absolute path to a resources directory in the system tests root dir.
+           usage: {resources}/[file]
+         {expected} - > replaced with an absolute path to a directory with the test name in the 'expected' directory.
+        """
         sub_string = replace(sub_string, "{input}", self._input_dir())
         sub_string = replace(sub_string, "{resources}", self._get_resources_dir())
+        sub_string = replace(sub_string, "{expected}", self._expected_test_dir())
         return sub_string
 
     def _get_resources_dir(self):
@@ -135,31 +146,31 @@ class SystemTest(TestCase):
         sys_test_root = join(sys_test_root, self.RESOURCE_DIR_NAME)
         return sys_test_root
 
-    def _get_cmd_line_file(self, mode):
+    def _get_cmd_line_file_path(self):
         """
-        Gets a file object for the cmd_line file used to store the command being run.
-        :param mode: File read/write mode
-        :return: File object for stdout file
+        Gets a file path for the cmd_line file used to store the command being run.
+        :return: File object for cmd_line file
         """
-        return file(join(self._active_output_dir, "cmd_line"), mode=mode)
+        return join(self._active_output_dir, "cmd_line")
 
-    def _get_std_out_file(self, mode):
+    def _get_std_out_file_path(self):
         """
-        Gets the stdout file from the current active output directory
-        :param mode: File read/write mode
+        Gets the stdout file path from the current active output directory
         :return: File object for stdout file
         """
-        return file(join(self._active_output_dir, "stdout"), mode=mode)
+        return join(self._active_output_dir, "stdout")
 
     def _get_std_out(self):
-        with self._get_std_out_file("r") as std_out_file:
-            std_out = std_out_file.read()
-        return std_out
+        return self._get_file_contents(self._get_std_out_file_path())
 
     def _get_std_err(self):
-        with self._get_std_err_file("r") as std_err_file:
-            std_err = std_err_file.read()
-        return std_err
+        return self._get_file_contents(self._get_std_err_file_path())
+
+    @staticmethod
+    def _get_file_contents(file_path):
+        with file(file_path, "r") as f:
+            contents = f.read()
+        return contents
 
     @staticmethod
     def floatify_regex_match(matches):
@@ -176,31 +187,38 @@ class SystemTest(TestCase):
     def _is_dir(directory_path):
         return exists(directory_path) and isdir(directory_path)
 
-    def _get_std_err_file(self, mode):
+    def _get_std_err_file_path(self):
         """
-        Gets the stderr file from the current active output directory
-        :param mode: File read/write mode
+        Gets the stderr file path from the current active output directory
         :return: File object for stderr file
         """
-        return file(join(self._active_output_dir, "stderr"), mode=mode)
+        return join(self._active_output_dir, "stderr")
 
     def failUnlessStdOutContains(self, *strings):
         """
         Fail the current test case unless stdout contains these strings.
         :param strings: Strings to match in stdout - can be an array of string or a single string
         """
-        std_out = self._get_std_out()
-        for match_line in strings:
-            self.failUnless(match_line in std_out, "Not found in std_out: " + match_line)
+        self.failUnlessFileContains(self._get_std_out_file_path(), *strings)
 
     def failIfStdOutContains(self, *strings):
         """
         Fail the current test case if stdout contains any of these strings.
         :param strings: Strings to match in stdout - can be an array of string or a single string
         """
-        std_out = self._get_std_out()
+        self.failIfFileContains(self._get_std_out_file_path(), *strings)
+
+    def failIfFileContains(self, file_path, *strings):
+        contents = self._get_file_contents(file_path)
         for match_line in strings:
-            self.failIf(match_line in std_out, "Found in std_out when not expected: " + match_line)
+            self.failIf(match_line in contents,
+                        "Found in file (" + file_path + ") when not expected: " + match_line)
+
+    def failUnlessFileContains(self, file_path, *strings):
+        contents = self._get_file_contents(file_path)
+        for match_line in strings:
+            self.failUnless(match_line in contents,
+                            "Not found in file (" + file_path + ") when expected: " + match_line)
 
     def failUnlessStdOutContainsRegexString(self, regex, count=0):
         """
@@ -224,9 +242,7 @@ class SystemTest(TestCase):
             self.failUnlessStdOutContainsRegexString(r, count=0)
 
     def failUnlessStdErrContains(self, *strings):
-        std_err = self._get_std_err()
-        for match_line in strings:
-            self.failUnless(match_line in std_err, "Not found in std_err: " + match_line)
+        self.failUnlessFileContains(self._get_std_err_file_path(), *strings)
 
     def failUnlessStdErrContainsRegex(self, *regex):
         std_err = self._get_std_err()
@@ -236,7 +252,7 @@ class SystemTest(TestCase):
 
     def failIfStrErrHasContent(self):
         std_err = self._get_std_err()
-        self.failIf(len(std_err) > 0, "Standard err file shows errors: " + self._get_std_err_file("r").name)
+        self.failIf(len(std_err) > 0, "Standard err file shows errors: " + self._get_std_err_file_path())
 
     def failUnlessDirExists(self, directory_path):
         self.failUnless(exists(directory_path), "Directory does not exist: " + directory_path)
@@ -313,9 +329,8 @@ class SystemTest(TestCase):
         """
         std_out = self._get_std_out()
         # Match POI lines in the output
-        reg_ex = "poi:\((-?[0-9]+\.[0-9]+), (-?[0-9]+\.[0-9]+)\) ; \((-?[0-9]+\.[0-9]+)," \
-                 " (-?[0-9]+\.[0-9]+)\) ; ([01]).* ; ([0-9]+\.[0-9]+)"
-        re_compile = re.compile(reg_ex)
+        re_compile = re.compile("poi:\((-?[0-9.]+), (-?[0-9.]+)\) ; \((-?[0-9.]+), "
+                                "(-?[0-9.]+)\) ; ([01]).* ; ([0-9.]+)")
         matches = re_compile.findall(std_out)
         float_array = self.floatify_regex_match(matches)
         poi_array = []
@@ -331,3 +346,25 @@ class SystemTest(TestCase):
         :return: object represented by JSON.
         """
         return json.loads(self._get_std_out())
+
+    def failUnlessFilesMatch(self, expected_file, actual_file):
+        """
+        Fail unless the give files exist, are files and their content matches.  Only works on text files and excess
+        whitespace at the beginning or end of a line will not cause a failure.
+        :param expected_file: Expected file reference.
+        :param actual_file: Actual file reference.
+        """
+        self.failUnless(exists(expected_file) and isfile(expected_file))
+        self.failUnless(exists(actual_file) and isfile(actual_file))
+        with file(expected_file, 'r') as file_r:
+            expected_contents = file_r.readlines()
+        with file(actual_file, 'r') as file_r:
+            actual_contents = file_r.readlines()
+        self.failUnlessEqual(len(expected_contents), len(actual_contents), "File length does not match")
+        for i in range(len(expected_contents)):
+            self.failUnlessEqual(
+                expected_contents[i].strip(),
+                actual_contents[i].strip(),
+                'File Match: Mismatch on line {}: \n"{}"\nvs\n"{}"'.format(str(i),
+                                                                           expected_contents[i],
+                                                                           actual_contents[i]))

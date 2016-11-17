@@ -5,9 +5,10 @@
 test-images
 test-output
 sys_test_output
-distribution
+/distribution
 venv
-config
+/config
+/logs
 
 *.pyc
 gi

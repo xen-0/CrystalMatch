@@ -1,13 +1,15 @@
 import logging
+from logging import DEBUG, INFO
+from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
 
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
+from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
 from dls_imagematch.feature.detector import DetectorConfig
-from dls_imagematch.feature.draw import MatchPainter
 from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
 
@@ -24,28 +26,42 @@ class CrystalMatchService:
         """
         self._config_directory = config_directory
 
+        self._config_settings = SettingsConfig(config_directory)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
+        self._set_up_logging(debug, verbose)
+
+    def _set_up_logging(self, debug, verbose):
         # Set up logging
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
+        # Set up stream handler
         if debug:
-            self.set_std_out_log_level(logging.DEBUG)
-            logging.debug("DEBUG mode set")
+            root.addHandler(self.get_log_stream_handler(DEBUG))
+            logging.debug("DEBUG statements visible.")
         elif verbose:
-            self.set_std_out_log_level(logging.INFO)
-            logging.info("VERBOSE mode set")
+            root.addHandler(self.get_log_stream_handler(INFO))
+            logging.info("INFO statements visible.")
+        # Set up file handler
+        if self._config_settings.logging.value():
+            root.addHandler(self.get_log_file_handler())
+
+    def get_log_file_handler(self):
+        log_file_handler = TimedRotatingFileHandler(self._config_settings.get_log_file_path(),
+                                                    when=self._config_settings.log_rotation.value(),
+                                                    backupCount=self._config_settings.log_count_limit.value())
+        log_file_handler.setLevel(self._config_settings.get_log_level())
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        log_file_handler.setFormatter(formatter)
+        return log_file_handler
 
     @staticmethod
-    def set_std_out_log_level(level):
-        root = logging.getLogger()
-        root.setLevel(level)
-        ch = logging.StreamHandler(stdout)
-        ch.setLevel(level)
-        # TODO: Add file logging using format below
-        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        # ch.setFormatter(formatter)
-        root.addHandler(ch)
+    def get_log_stream_handler(level):
+        stream_handler = logging.StreamHandler(stdout)
+        stream_handler.setLevel(level)
+        return stream_handler
 
     def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None, json_output=False):
         """
@@ -62,17 +78,29 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, json_output=json_output)
+        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
+                                       json_output=json_output)
 
         # Perform alignment
-        aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
-        service_result.set_image_alignment_results(aligned_images)
+        try:
+            aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
+            service_result.set_image_alignment_results(aligned_images)
 
-        # Perform Crystal Matching - only proceed if we have a valid alignment
-        if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
-            match_results = self._perform_matching(aligned_images, scaled_poi)
-            service_result.append_crystal_matching_results(match_results)
+            # Perform Crystal Matching - only proceed if we have a valid alignment
+            if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
+                match_results = self._perform_matching(aligned_images, scaled_poi)
+                service_result.append_crystal_matching_results(match_results)
+        except Exception as e:
+            logging.error("ERROR: " + e.message)
+            service_result.set_err_state(e)
+
         return service_result
+
+    def _get_image_output_dir(self):
+        image_output_dir = None
+        if self._config_settings.log_images.value():
+            image_output_dir = self._config_settings.get_image_log_dir()
+        return image_output_dir
 
     def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):
         """
@@ -97,7 +125,6 @@ class CrystalMatchService:
 
         crystal_match_results = matcher.match(selected_points)
         logging.info("Crystal Matching Complete")
-        # self._popup_match_results(crystal_match_results)
 
         return crystal_match_results
 
@@ -118,16 +145,3 @@ class CrystalMatchService:
         if match_result is not None:
             logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
             logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
-
-    @staticmethod
-    def _popup_match_results(results):
-        for i in range(results.num()):
-            feature_match_result = results.get_crystal_match(i).feature_match_result()
-
-            painter = MatchPainter(feature_match_result.image1(), feature_match_result.image2())
-
-            image = painter.background_image()
-            # image = painter.draw_transform_shapes(self._quad1, self._quad2, image)
-            image = painter.draw_matches(feature_match_result.good_matches(), [], image)
-            # image = painter.draw_transform_points(self._image1_point, self._image2_point, image)
-            image.popup()

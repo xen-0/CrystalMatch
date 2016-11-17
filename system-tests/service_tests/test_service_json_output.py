@@ -20,7 +20,7 @@ class TestServiceOutput(SystemTest):
         exp_input_image = abspath(self.substitute_tokens("{resources}/A10_1.jpg"))
         exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         job_id = "123"
-        self.failUnlessEqual(1, json['alignment']['status']['value'])
+        self.failUnlessEqual(1, json['alignment']['status']['code'])
         self._validate_format_of_json_object(json, job_id, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_output_for_failed_image_alignment_without_points(self):
@@ -35,7 +35,7 @@ class TestServiceOutput(SystemTest):
         exp_input_image = abspath(self.substitute_tokens("{resources}/A01_1.jpg"))
         exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
         job_id = None
-        self.failUnlessEqual(0, json['alignment']['status']['value'])
+        self.failUnlessEqual(0, json['alignment']['status']['code'])
         self._validate_format_of_json_object(json, job_id, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_output_for_failed_image_alignment_with_points(self):
@@ -49,7 +49,7 @@ class TestServiceOutput(SystemTest):
         exp_poi_len = 0
         exp_input_image = abspath(self.substitute_tokens("{resources}/A01_1.jpg"))
         exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
-        self.failUnlessEqual(0, json['alignment']['status']['value'])
+        self.failUnlessEqual(0, json['alignment']['status']['code'])
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_format_for_failed_points(self):
@@ -62,8 +62,8 @@ class TestServiceOutput(SystemTest):
         exp_poi_len = 1
         exp_input_image = abspath(self.substitute_tokens("{resources}/A10_1.jpg"))
         exp_output_image = abspath(self.substitute_tokens("{resources}/A10_2.jpg"))
-        self.failUnlessEqual(1, json['alignment']['status']['value'])
-        self.failUnlessEqual(0, json['poi'][0]['status']['value'])
+        self.failUnlessEqual(1, json['alignment']['status']['code'])
+        self.failUnlessEqual(0, json['poi'][0]['status']['code'])
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_format_of_global_transform_with_scaled_image(self):
@@ -86,7 +86,7 @@ class TestServiceOutput(SystemTest):
         self.run_crystal_matching_test(test_name + "-run_standard", cmd_line)
 
         # Test output matches json object - check this is a successful run
-        self.failUnlessEqual(1, json['alignment']['status']['value'])
+        self.failUnlessEqual(1, json['alignment']['status']['code'])
         self._variable_json_object_against_last_run(json)
 
     def _variable_json_object_against_last_run(self, json):
@@ -103,7 +103,7 @@ class TestServiceOutput(SystemTest):
         self.failUnlessEqual(y_trans, json['alignment']['transform']['translation']['y'])
         json_align_status = json['alignment']['status']
         self.failUnlessStdOutContains(
-            'align_status:' + str(json_align_status['value']) + ', ' + json_align_status['msg'],
+            'align_status:' + str(json_align_status['code']) + ', ' + json_align_status['msg'],
             'align_error:' + str(json['alignment']['mean_error'])
         )
         # Test POI phase
@@ -111,13 +111,15 @@ class TestServiceOutput(SystemTest):
         for poi in json['poi']:
             loc = Point(poi['location']['x'], poi['location']['y'])
             tran = Point(poi['translation']['x'], poi['translation']['y'])
-            stat = poi['status']['value']
+            stat = poi['status']['code']
             err = poi['mean_error']
             json_poi_array.append([loc, tran, stat, err])
         self.failUnlessPoiAlmostEqual(json_poi_array)
 
     def _validate_format_of_json_object(self, json, job_id, expected_input_image, expected_output_image,
                                         expected_poi_len, exp_scale=1.0):
+        self.failUnlessEqual(0, json['exit_code']['code'])
+        self.failIf('err_msg' in json['exit_code'].keys())
         self.failUnlessEqual(expected_input_image, json['input_image'])
         self.failUnlessEqual(expected_output_image, json['output_image'])
         if job_id is None:
@@ -125,7 +127,7 @@ class TestServiceOutput(SystemTest):
         else:
             self.failUnlessEqual(job_id, json['job_id'])
         self.failUnless(json['alignment']['status']['msg'] in "OK;FAIL")
-        status_value = json['alignment']['status']['value']
+        status_value = json['alignment']['status']['code']
         self.failUnless(status_value == 1 or status_value == 0)
         self.failUnlessEqual(exp_scale, json['alignment']['transform']['scale'])
         self.failUnless(isinstance(json['alignment']['transform']['translation']['x'], Number))
@@ -140,7 +142,7 @@ class TestServiceOutput(SystemTest):
             self.failUnless(isinstance(json['poi'][i]['translation']['x'], Number))
             self.failUnless(isinstance(json['poi'][i]['translation']['y'], Number))
             self.failUnless(isinstance(json['poi'][i]['mean_error'], Number))
-            status_value = json['poi'][i]['status']['value']
+            status_value = json['poi'][i]['status']['code']
             status_msg = json['poi'][i]['status']['msg']
             self.failUnless(status_value == 1 or status_value == 0)
             self.failUnless(status_msg in "OK;FAIL")

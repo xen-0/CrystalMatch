@@ -15,28 +15,28 @@ class TestCommandLineFlags(SystemTest):
         self.run_crystal_matching_test(self.test_debug_flag_outputs_debug_text_to_console.__name__, cmd_line)
 
         # Check for known debug-level statement in the command line
-        self.failUnlessStdOutContains("DEBUG mode set")
+        self.failUnlessStdOutContains("DEBUG statements visible.")
 
     def test_debug_flag_shortcut_operates_correctly(self):
         cmd_line = "-d {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_debug_flag_shortcut_operates_correctly.__name__, cmd_line)
 
         # Check for known debug-level statement in the command line
-        self.failUnlessStdOutContains("DEBUG mode set")
+        self.failUnlessStdOutContains("DEBUG statements visible.")
 
     def test_verbose_flag_outputs_info_text_to_console(self):
         cmd_line = "--verbose {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_verbose_flag_outputs_info_text_to_console.__name__, cmd_line)
 
         # Check for known Info-level statement in the command line
-        self.failUnlessStdOutContains("VERBOSE mode set")
+        self.failUnlessStdOutContains("INFO statements visible.")
 
     def test_verbose_flag_shortcut_operates_correctly(self):
         cmd_line = "-v {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_verbose_flag_shortcut_operates_correctly.__name__, cmd_line)
 
         # Check for known Info-level statement in the command line
-        self.failUnlessStdOutContains("VERBOSE mode set")
+        self.failUnlessStdOutContains("INFO statements visible.")
 
     def test_version_flag_displays_version_number(self):
         cmd_line = "--version"
@@ -72,6 +72,6 @@ class TestCommandLineFlags(SystemTest):
 
         # Check that the output contains JSON instead of human-readable output
         self.failUnlessStdOutContains(
-            '"status": {"msg": "OK", "value": 1}'
+            '"status": {"msg": "OK", "code": 1}'
         )
         self.failIfStdOutContains('align_status:1, OK')

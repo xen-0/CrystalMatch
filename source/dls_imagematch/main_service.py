@@ -26,7 +26,6 @@ def main():
     args = parser.parse_args()
 
     # Setup parameters
-    selected_points = _parse_selected_points_from_args(args)
     config_directory = args.config
     if config_directory is None:
         config_directory = CONFIG_DIR
@@ -35,6 +34,7 @@ def main():
 
     # Run service
     service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug, scale_override=scale_override)
+    selected_points = _parse_selected_points_from_args(args)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
@@ -46,6 +46,7 @@ def main():
 def _get_scale_override(args):
     scale_override = None
     if args.scale_input is not None or args.scale_output is not None:
+        # FIXME: scale override cannot be applied to only one image - should override config file individually
         if args.scale_input is None:
             args.scale_input = 1
         if args.scale_output is None:
