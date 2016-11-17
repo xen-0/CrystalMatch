@@ -60,16 +60,15 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, job_id, formulatrix_image_path, beamline_image_path, json_output=False, image_output_dir=None):
+    def __init__(self, job_id, formulatrix_image_path, beamline_image_path, config_settings, json_output=False):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
         :param job_id: The assigned job id for this run (specific by the user)
         :param formulatrix_image_path: Image path for the input image.
         :param beamline_image_path: Image path for the output image.
+        :type config_settings: SettingsConfig
         :param json_output: Flag to output results to the console in JSOn format
-        :param image_output_dir: If set (not None) the app will attempt to write an image of the match to the
-        specified directory.
         """
         self.SEPARATOR = " ; "
         self._job_id = job_id
@@ -82,7 +81,7 @@ class ServiceResult:
         self._match_results = []
         self._json = json_output
         self._exit_code = SERVICE_RESULT_STATUS_INCOMPLETE
-        self._image_output_dir = image_output_dir
+        self._config_settings = config_settings
 
     def set_image_alignment_results(self, aligned_images):
         """
@@ -147,7 +146,7 @@ class ServiceResult:
         for log_msg in output:
             logging.info(log_msg)
         logging.info("\n*************************************\n")
-        if self._image_output_dir is not None:
+        if self._config_settings.logging.value() and self._config_settings.log_images.value():
             self._output_log_images()
 
         # Console output
@@ -211,10 +210,10 @@ class ServiceResult:
                 # Construct file path for this image.
                 filename = strftime("%Y-%m-%d_%H-%M-%S_Match_" + str(i) + ".jpg")
                 if self._job_id is not None and self._job_id.strip():
-                    job_dir_path = join(self._image_output_dir, self._job_id)
+                    job_dir_path = join(self._config_settings.get_image_log_dir(), self._job_id)
                     if not exists(job_dir_path) or not isdir(job_dir_path):
                         makedirs(job_dir_path)
                     image_path = join(job_dir_path, filename)
                 else:
-                    image_path = join(self._image_output_dir, filename)
+                    image_path = join(self._config_settings.get_image_log_dir(), filename)
                 image.save(abspath(image_path))

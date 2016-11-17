@@ -78,8 +78,8 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path,
-                                       json_output=json_output, image_output_dir=self._get_image_output_dir())
+        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
+                                       json_output=json_output)
 
         # Perform alignment
         try:

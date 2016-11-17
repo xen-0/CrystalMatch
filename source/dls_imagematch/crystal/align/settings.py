@@ -70,9 +70,10 @@ class SettingsConfig(Config):
                                          "files will be stored.")
 
         self.log_images = add(BoolConfigItem, "Log Match Images", False)
-        self.log_images.set_comment("Option to output an image capture of each crystal match. WARNING: images are "
-                                    "150kb+ and are NOT deleted automatically, this option is intended for outputting "
-                                    "test data and will consume a lot of hard drive space compared "
+        self.log_images.set_comment("Option to output an image capture of each crystal match. This option will be "
+                                    "disabled automatically if logging is inactive. WARNING: images are "
+                                    "150kb+ and are NOT deleted automatically, this option is intended for capture of "
+                                    "test data only and will consume a lot of hard drive space compared "
                                     "to standard log files.  This option should be turned off for standard use.")
         self.initialize_from_file()
 

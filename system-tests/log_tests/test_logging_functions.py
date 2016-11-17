@@ -116,7 +116,7 @@ class TestLoggingFunctions(SystemTest):
         cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
         self.run_crystal_matching_test(self.test_log_images_not_present_if_all_logging_disabled.__name__, cmd_line)
 
-        # Assert that the entire log file is not present in the default location
+        # Assert that the entire log file is absent in the default location
         self.failIf(exists(self._active_log_dir()))
         self.failIf(exists(join(self._active_log_dir(), "images")))
         self.failIf(exists(join(self.get_active_test_dir(), "images")))
