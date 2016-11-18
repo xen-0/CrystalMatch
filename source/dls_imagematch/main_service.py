@@ -33,7 +33,8 @@ def main():
     scale_override = _get_scale_override(args)
 
     # Run service
-    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug, scale_override=scale_override)
+    service = CrystalMatchService(config_directory, log_dir=args.log,
+                                  verbose=args.verbose, debug=debug, scale_override=scale_override)
     selected_points = _parse_selected_points_from_args(args)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
@@ -126,6 +127,9 @@ def _get_argument_parser():
     parser.add_argument('--to_json',
                         action='store_true',
                         help="Output a JSON object.")
+    parser.add_argument('--log',
+                        metavar="path",
+                        help="Output log files to the directory specified by path.")
     return parser
 
 

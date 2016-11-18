@@ -118,7 +118,7 @@ class SystemTest(TestCase):
             cmd_out_file.writelines(command)
         stdout_file = file(self._get_std_out_file_path(), "w")
         stderr_file = file(self._get_std_err_file_path(), "w")
-        call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
+        self._ret_code = call(command, shell=True, cwd=self._active_output_dir, stdout=stdout_file, stderr=stderr_file)
         return self._active_output_dir
 
     def substitute_tokens(self, sub_string):
@@ -181,8 +181,6 @@ class SystemTest(TestCase):
                 float_array[i].append(float(matches[i][j]))
         return float_array
 
-    # Test Utility Methods
-
     @staticmethod
     def _is_dir(directory_path):
         return exists(directory_path) and isdir(directory_path)
@@ -193,6 +191,13 @@ class SystemTest(TestCase):
         :return: File object for stderr file
         """
         return join(self._active_output_dir, "stderr")
+
+    # Test Utility Methods
+    def failIfRunFailed(self):
+        self.failUnlessEqual(0, self._ret_code)
+
+    def failUnlessRunFailed(self):
+        self.failUnlessEqual(1, self._ret_code)
 
     def failUnlessStdOutContains(self, *strings):
         """

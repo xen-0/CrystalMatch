@@ -15,10 +15,11 @@ from dls_util.imaging import Image
 
 
 class CrystalMatchService:
-    def __init__(self, config_directory, verbose=False, debug=False, scale_override=None):
+    def __init__(self, config_directory, log_dir=None, verbose=False, debug=False, scale_override=None):
         """
         Create a Crystal Matching Service object using the configuration parameters provided.
         :param config_directory: Path to the configuration directory.
+        :param log_dir: Path override for the log directory.
         :param verbose: Activates verbose logging to std_out.
         :param debug: Activates debugging logging to std_out - overrides verbose mode.
         :param scale_override: Optional override for the pixel sizes of both images - can be None or a
@@ -26,7 +27,7 @@ class CrystalMatchService:
         """
         self._config_directory = config_directory
 
-        self._config_settings = SettingsConfig(config_directory)
+        self._config_settings = SettingsConfig(config_directory, log_dir=log_dir)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)

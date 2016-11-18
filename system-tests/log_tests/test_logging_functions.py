@@ -121,6 +121,45 @@ class TestLoggingFunctions(SystemTest):
         self.failIf(exists(join(self._active_log_dir(), "images")))
         self.failIf(exists(join(self.get_active_test_dir(), "images")))
 
+    def test_logging_flag_overrides_default_log_dirs(self):
+        cmd_line = "--log test/logging/flag/ {resources}/A01_1.jpg {resources}/A01_2.jpg 345,345 567,567 123,123"
+        self.run_crystal_matching_test(self.test_logging_flag_overrides_default_log_dirs.__name__, cmd_line)
+
+        # Check specified log dir exists
+        self.failIfDirExists(join(self.get_active_test_dir(), "logs"))
+        log_dir = join(self.get_active_test_dir(), "test", "logging", "flag")
+        log_image_dir = join(log_dir, "images")
+        self.failUnlessDirContainsFile(log_dir, "log")
+        self._verify_logged_image_files(log_image_dir, self.get_poi_from_std_out())
+
+    def test_logging_flag_overrides_log_dir_in_settings_file(self):
+        cmd_line = "--log test/logging/flag/ {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_logging_flag_overrides_log_dir_in_settings_file.__name__, cmd_line)
+
+        # Check log dir exists and default and settings file dirs are absent
+        self.failIfDirExists(join(self.get_active_test_dir(), "logs"))
+        self.failIfDirExists(join(self.get_active_test_dir(), "should"))  # should/be/overidden set in config file
+        log_dir = join(self.get_active_test_dir(), "test", "logging", "flag")
+        self.failUnlessDirContainsFile(log_dir, "log")
+
+    def test_logging_flag_ignored_if_logging_disabled(self):
+        cmd_line = "--log test/logging/flag/ {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_logging_flag_ignored_if_logging_disabled.__name__, cmd_line)
+
+        # Check that all log dirs are missing
+        self.failIfDirExists(join(self.get_active_test_dir(), "logs"))
+        self.failIfDirExists(join(self.get_active_test_dir(), "should"))  # should/be/overidden set in config file
+        self.failIfDirExists(join(self.get_active_test_dir(), "test"))
+
+    def test_logging_flag_with_invalid_path_reports_error(self):
+        cmd_line = "--log test/log:ging/flag/ {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_logging_flag_with_invalid_path_reports_error.__name__, cmd_line)
+
+        # Check std_err for error message return value for failure
+        self.failUnlessStdErrContains(
+            "ERROR:root:Could not create find/create directory, path may be invalid: test/log:ging/flag/")
+        self.failUnlessRunFailed()
+
     def _verify_logged_image_files(self, log_image_dir, poi_array):
         # Check log files
         self.failUnless(exists(log_image_dir))
