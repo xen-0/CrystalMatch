@@ -54,6 +54,7 @@ class CrystalMatchService:
                                                         when=self._config_settings.log_rotation.value(),
                                                         backupCount=self._config_settings.log_count_limit.value())
             log_file_handler.setLevel(self._config_settings.get_log_level())
+            # TODO: Add job ID to log format
             formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             log_file_handler.setFormatter(formatter)
             logger.addHandler(log_file_handler)
