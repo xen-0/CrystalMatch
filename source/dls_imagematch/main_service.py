@@ -33,13 +33,12 @@ def main():
     scale_override = _get_scale_override(args)
 
     # Run service
-    service = CrystalMatchService(config_directory, log_dir=args.log,
+    service = CrystalMatchService(config_directory, log_dir=args.log, job_id=args.job,
                                   verbose=args.verbose, debug=debug, scale_override=scale_override)
     selected_points = _parse_selected_points_from_args(args)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
-                                            job_id=args.job,
                                             json_output=args.to_json)
     service_results.print_results()
 

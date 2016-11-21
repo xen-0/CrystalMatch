@@ -17,7 +17,7 @@ from dls_util.imaging import Image
 
 
 class CrystalMatchService:
-    def __init__(self, config_directory, log_dir=None, verbose=False, debug=False, scale_override=None):
+    def __init__(self, config_directory, log_dir=None, verbose=False, debug=False, scale_override=None, job_id=None):
         """
         Create a Crystal Matching Service object using the configuration parameters provided.
         :param config_directory: Path to the configuration directory.
@@ -26,8 +26,10 @@ class CrystalMatchService:
         :param debug: Activates debugging logging to std_out - overrides verbose mode.
         :param scale_override: Optional override for the pixel sizes of both images - can be None or a
         tuple of the form: ([formulatrix image pixel size], [beam line image pixel size])
+        :param job_id: Optional parameter for command line - returned in results to identify the run.
         """
         self._config_directory = config_directory
+        self._job_id = job_id
 
         self._config_settings = SettingsConfig(config_directory, log_dir=log_dir)
         self._config_detector = DetectorConfig(config_directory)
@@ -56,8 +58,11 @@ class CrystalMatchService:
                                                         when=self._config_settings.log_rotation.value(),
                                                         backupCount=self._config_settings.log_count_limit.value())
             log_file_handler.setLevel(self._config_settings.get_log_level())
-            # TODO: Add job ID to log format
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            if self._job_id:
+                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - ' +
+                                              str(self._job_id) + ' - %(message)s')
+            else:
+                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             log_file_handler.setFormatter(formatter)
             chmod(log_file_path, 0666)
             logger.addHandler(log_file_handler)
@@ -74,10 +79,9 @@ class CrystalMatchService:
         elif level == INFO:
             logging.info("INFO statements visible.")
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None, json_output=False):
+    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, json_output=False):
         """
         Perform image alignment and crystal matching returning a results object.
-        :param job_id: Optional parameter for command line - returned in results to identify the run.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
         :param beamline_image_path: File path to the 'after' image from the Beam line.
         :param input_poi: An array of points of interest to match between the images.
@@ -89,7 +93,7 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
+        service_result = ServiceResult(self._job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
                                        json_output=json_output)
 
         # Perform alignment
