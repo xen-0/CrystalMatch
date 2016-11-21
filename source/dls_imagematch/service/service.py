@@ -3,6 +3,8 @@ from logging import DEBUG, INFO
 from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
 
+from os import chmod
+
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
@@ -56,6 +58,7 @@ class CrystalMatchService:
         log_file_handler.setLevel(self._config_settings.get_log_level())
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         log_file_handler.setFormatter(formatter)
+        chmod(self._config_settings.get_log_file_path(), 0666)
         return log_file_handler
 
     @staticmethod

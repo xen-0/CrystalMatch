@@ -1,5 +1,5 @@
 import logging
-from os import makedirs
+from os import makedirs, chmod
 from os.path import join, exists, isdir, abspath
 
 from dls_util.config.config import Config
@@ -7,6 +7,8 @@ from dls_util.config.item import DirectoryConfigItem, BoolConfigItem, EnumConfig
 
 
 class SettingsConfig(Config):
+
+    LOG_DIR_PERMISSION = 0o777
 
     LOG_LEVEL_DEBUG = "debug"
     LOG_LEVEL_INFO = "info"
@@ -111,11 +113,11 @@ class SettingsConfig(Config):
     def get_log_level(self):
         return self.LOG_LEVEL_DICT[self.log_level.value()]
 
-    @staticmethod
-    def _check_make_dirs(image_dir):
-        if not exists(image_dir) or not isdir(image_dir):
+    def _check_make_dirs(self, directory):
+        if not exists(directory) or not isdir(directory):
             try:
-                makedirs(image_dir)
+                makedirs(directory)
+                chmod(directory, self.LOG_DIR_PERMISSION)
             except OSError:
-                logging.error("Could not create find/create directory, path may be invalid: " + image_dir)
+                logging.error("Could not create find/create directory, path may be invalid: " + directory)
                 exit(1)
