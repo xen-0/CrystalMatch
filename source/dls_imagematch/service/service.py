@@ -42,14 +42,14 @@ class CrystalMatchService:
         root_logger.setLevel(DEBUG)
         # Set up stream handler
         if debug:
-            self.get_log_stream_handler(DEBUG, root_logger)
+            self.add_log_stream_handler(DEBUG, root_logger)
         elif verbose:
-            self.get_log_stream_handler(INFO, root_logger)
+            self.add_log_stream_handler(INFO, root_logger)
         # Set up file handler
         if self._config_settings.logging.value():
-            self.get_log_file_handler(root_logger)
+            self.add_log_file_handler(root_logger)
 
-    def get_log_file_handler(self, logger):
+    def add_log_file_handler(self, logger):
         log_file_path = self._config_settings.get_log_file_path()
         try:
             log_file_handler = TimedRotatingFileHandler(log_file_path,
@@ -65,7 +65,7 @@ class CrystalMatchService:
             logging.error("ERROR: Could not access log file - please check permissions: " + log_file_path)
 
     @staticmethod
-    def get_log_stream_handler(level, logger):
+    def add_log_stream_handler(level, logger):
         stream_handler = logging.StreamHandler(stdout)
         stream_handler.setLevel(level)
         logger.addHandler(stream_handler)
