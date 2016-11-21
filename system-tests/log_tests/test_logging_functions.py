@@ -181,3 +181,11 @@ class TestLoggingFunctions(SystemTest):
 
     def _active_log_dir(self):
         return join(self.get_active_test_dir(), "logs")
+
+    def test_log_file_contains_job_id_if_set(self):
+        cmd_line = "-j test_job_123 {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        self.run_crystal_matching_test(self.test_log_file_contains_job_id_if_set.__name__, cmd_line)
+
+        # Verify that the log file contains the job ID
+        self.failUnlessFileContains(join(self._active_log_dir(), "log"),
+                                    ' - root - INFO - test_job_123 - job_id:"test_job_123"')
