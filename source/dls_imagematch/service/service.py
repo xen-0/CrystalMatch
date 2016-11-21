@@ -64,7 +64,7 @@ class CrystalMatchService:
             else:
                 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             log_file_handler.setFormatter(formatter)
-            chmod(log_file_path, 0666)
+            chmod(log_file_path, 0o666)
             logger.addHandler(log_file_handler)
         except IOError:
             logging.error("ERROR: Could not access log file - please check permissions: " + log_file_path)
