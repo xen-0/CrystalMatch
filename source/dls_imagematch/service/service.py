@@ -36,33 +36,39 @@ class CrystalMatchService:
 
     def _set_up_logging(self, debug, verbose):
         # Set up logging
-        root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
+        root_logger = logging.getLogger()
+        root_logger.setLevel(DEBUG)
         # Set up stream handler
         if debug:
-            root.addHandler(self.get_log_stream_handler(DEBUG))
-            logging.debug("DEBUG statements visible.")
+            self.get_log_stream_handler(DEBUG, root_logger)
         elif verbose:
-            root.addHandler(self.get_log_stream_handler(INFO))
-            logging.info("INFO statements visible.")
+            self.get_log_stream_handler(INFO, root_logger)
         # Set up file handler
         if self._config_settings.logging.value():
-            root.addHandler(self.get_log_file_handler())
+            self.get_log_file_handler(root_logger)
 
-    def get_log_file_handler(self):
-        log_file_handler = TimedRotatingFileHandler(self._config_settings.get_log_file_path(),
-                                                    when=self._config_settings.log_rotation.value(),
-                                                    backupCount=self._config_settings.log_count_limit.value())
-        log_file_handler.setLevel(self._config_settings.get_log_level())
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        log_file_handler.setFormatter(formatter)
-        return log_file_handler
+    def get_log_file_handler(self, logger):
+        log_file_path = self._config_settings.get_log_file_path()
+        try:
+            log_file_handler = TimedRotatingFileHandler(log_file_path,
+                                                        when=self._config_settings.log_rotation.value(),
+                                                        backupCount=self._config_settings.log_count_limit.value())
+            log_file_handler.setLevel(self._config_settings.get_log_level())
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            log_file_handler.setFormatter(formatter)
+            logger.addHandler(log_file_handler)
+        except IOError:
+            logging.error("ERROR: Could not access log file - please check permissions: " + log_file_path)
 
     @staticmethod
-    def get_log_stream_handler(level):
+    def get_log_stream_handler(level, logger):
         stream_handler = logging.StreamHandler(stdout)
         stream_handler.setLevel(level)
-        return stream_handler
+        logger.addHandler(stream_handler)
+        if level == DEBUG:
+            logging.debug("DEBUG statements visible.")
+        elif level == INFO:
+            logging.INFO("INFO statements visible.")
 
     def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, job_id=None, json_output=False):
         """
