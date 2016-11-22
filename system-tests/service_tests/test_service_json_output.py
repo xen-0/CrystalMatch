@@ -67,7 +67,7 @@ class TestServiceOutput(SystemTest):
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_format_of_global_transform_with_scaled_image(self):
-        cmd_line = "--to_json --scale_input 0.5 {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg 473,921"
+        cmd_line = "--to_json --scale 0.5:1 {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg 473,921"
         self.run_crystal_matching_test(self.test_json_format_of_global_transform_with_scaled_image.__name__, cmd_line)
 
         # Read the output into a JSON object and test it against expected values
