@@ -18,7 +18,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_smaller_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg " \
-                                               "--scale_input 0.5 --scale_output 1"
+                                               "--scale 0.5:1"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check the global transformation, status and error margin
@@ -38,7 +38,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_larger_beam_line_image(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2@0.5.jpg {resources}/A10_2.jpg " \
-                                               "--scale_input 1 --scale_output 0.5"
+                                               "--scale 1:0.5"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check the global transformation, status and error margin
@@ -58,7 +58,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_smaller_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_smaller_beam_line_image_with_points - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2.jpg {resources}/A10_2@0.5.jpg 756,412 " \
-                                               "--scale_input 0.5 --scale_output 1"
+                                               "--scale 0.5:1"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check Points of interest are found and reported at correct co-ordinates
@@ -72,7 +72,7 @@ class TestImageScaling(SystemTest):
     def test_alignment_with_larger_beam_line_image_with_points(self, suffix, config_file):
         test_name = "test_alignment_with_larger_beam_line_image_with_points - " + suffix
         cmd_line = "--config " + config_file + " {resources}/A10_2@0.5.jpg {resources}/A10_2.jpg 378,206 " \
-                                               "--scale_input 1 --scale_output 0.5"
+                                               "--scale 1:0.5"
         self.run_crystal_matching_test(test_name, cmd_line)
 
         # Check Points of interest are found and reported at correct co-ordinates

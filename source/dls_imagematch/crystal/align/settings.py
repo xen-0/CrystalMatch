@@ -1,5 +1,5 @@
 import logging
-from os import makedirs
+from os import makedirs, chmod
 from os.path import join, exists, isdir, abspath
 
 from dls_util.config.config import Config
@@ -7,6 +7,8 @@ from dls_util.config.item import DirectoryConfigItem, BoolConfigItem, EnumConfig
 
 
 class SettingsConfig(Config):
+
+    LOG_DIR_PERMISSION = 0o777
 
     LOG_LEVEL_DEBUG = "debug"
     LOG_LEVEL_INFO = "info"
@@ -36,7 +38,7 @@ class SettingsConfig(Config):
     """
     Configuration class that holds application level settings such as logging options etc.
     """
-    def __init__(self, config_dir):
+    def __init__(self, config_dir, log_dir=None):
         Config.__init__(self, join(config_dir, 'settings.ini'))
 
         add = self.add
@@ -53,6 +55,9 @@ class SettingsConfig(Config):
         self.log_path.set_comment("Sets the directory in which log files are stored. Leaving this blank will set the "
                                   "default path - log files will be stored in a directory called 'logs' next to the "
                                   "current config directory.")
+
+        if log_dir is not None:
+            self.log_path.set_override(log_dir)
 
         self.log_level = add(EnumConfigItem, "Log Level", default=self.LOG_LEVEL_INFO, extra_arg=self.LOG_LEVEL_LIST)
         self.log_level.set_comment("Sets the log level for the log files being generated.")
@@ -108,7 +113,11 @@ class SettingsConfig(Config):
     def get_log_level(self):
         return self.LOG_LEVEL_DICT[self.log_level.value()]
 
-    @staticmethod
-    def _check_make_dirs(image_dir):
-        if not exists(image_dir) or not isdir(image_dir):
-            makedirs(image_dir)
+    def _check_make_dirs(self, directory):
+        if not exists(directory) or not isdir(directory):
+            try:
+                makedirs(directory)
+                chmod(directory, self.LOG_DIR_PERMISSION)
+            except OSError:
+                logging.error("Could not create find/create directory, path may be invalid: " + directory)
+                exit(1)

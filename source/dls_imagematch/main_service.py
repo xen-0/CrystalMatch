@@ -33,27 +33,29 @@ def main():
     scale_override = _get_scale_override(args)
 
     # Run service
-    service = CrystalMatchService(config_directory, verbose=args.verbose, debug=debug, scale_override=scale_override)
+    service = CrystalMatchService(config_directory, log_dir=args.log, job_id=args.job,
+                                  verbose=args.verbose, debug=debug, scale_override=scale_override)
     selected_points = _parse_selected_points_from_args(args)
     service_results = service.perform_match(args.image_input.name,
                                             args.image_output.name,
                                             selected_points,
-                                            job_id=args.job,
                                             json_output=args.to_json)
     service_results.print_results()
 
 
 def _get_scale_override(args):
-    scale_override = None
-    if args.scale_input is not None or args.scale_output is not None:
-        # FIXME: scale override cannot be applied to only one image - should override config file individually
-        if args.scale_input is None:
-            args.scale_input = 1
-        if args.scale_output is None:
-            args.scale_output = 1
-        scale_override = (args.scale_input, args.scale_output)
-
-    return scale_override
+    if args.scale is not None:
+        try:
+            scales = args.scale.split(":")
+            assert(len(scales) == 2)
+            return float(scales[0]), float(scales[1])
+        except AssertionError:
+            raise AssertionError("Scale flag requires two values separated by a colon':'. Value given: " +
+                                 str(args.scale))
+        except ValueError:
+            raise ValueError("Scale must be given as a pair of float values separated by a colon (':'). Value given: " +
+                             str(args.scale))
+    return None
 
 
 def _parse_selected_points_from_args(args):
@@ -103,14 +105,11 @@ def _get_argument_parser():
                         metavar="path",
                         action=ReadableConfigDir,
                         help="Sets the configuration directory.")
-    parser.add_argument('--scale_input',
+    parser.add_argument('--scale',
                         metavar="scale",
-                        type=float,
-                        help="The scale of the input image in micrometers per pixel. The default value is 1.0um/pixel")
-    parser.add_argument('--scale_output',
-                        metavar="scale",
-                        type=float,
-                        help="The scale of the output image in micrometers per pixel. The default value is 1.0um/pixel")
+                        help="The scale between the input and output images given as two floats separated by a colon, "
+                             "note this is relative (1:2 is the same as 2:4) and a value must be specified for each "
+                             "image using the format '[input_image_resolution]:[output_image_resolution]'.")
     parser.add_argument('--version',
                         action='version',
                         version=VersionHandler.version_string())
@@ -126,6 +125,9 @@ def _get_argument_parser():
     parser.add_argument('--to_json',
                         action='store_true',
                         help="Output a JSON object.")
+    parser.add_argument('--log',
+                        metavar="path",
+                        help="Output log files to the directory specified by path.")
     return parser
 
 
