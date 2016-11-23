@@ -8,20 +8,21 @@ from dls_imagematch.service.service import CrystalMatchService
 
 # CONFIGURATION
 ######################################################################
-MAIN_DIR = "../test-images/Formulatrix/46412/449"
+MAIN_DIR = "../test-images/Formulatrix/46532/545"
 TARGET_DIR_LIST = [
-    "../test-images/Formulatrix/46412/452",
-    "../test-images/Formulatrix/46412/455",
-    "../test-images/Formulatrix/46412/458",
-    "../test-images/Formulatrix/46412/461",
-    "../test-images/Formulatrix/46412/464",
-    "../test-images/Formulatrix/46412/527",
-    "../test-images/Formulatrix/46412/533",
-    "../test-images/Formulatrix/46412/581",
-    "../test-images/Formulatrix/46412/584",
+    # "../test-images/Formulatrix/46532/548",
+    # "../test-images/Formulatrix/46532/551",
+    # "../test-images/Formulatrix/46532/554",
+    # "../test-images/Formulatrix/46532/557",
+    # "../test-images/Formulatrix/46532/560",
+    # "../test-images/Formulatrix/46532/563",
+    # "../test-images/Formulatrix/46532/629",
+    # "../test-images/Formulatrix/46532/635",
+    "../test-images/Formulatrix/46532/644",
 ]
 CONFIG_DIR = "../config"
 UNMATCHED_DIR_NAME = "unmatched"
+ACCEPTABLE_ERROR_THRESHOLD = 13
 ######################################################################
 
 
@@ -89,9 +90,8 @@ def compare_image_directories(target_dir):
             candidate_image = join(get_unmatched_dir(target_dir), potential_img_name)
             results = alignment_service.perform_match(target_image, candidate_image, [])
             # noinspection PyProtectedMember
-            if results._alignment_status_code.code == 1:
-                # noinspection PyProtectedMember
-                err_val = results._alignment_error
+            err_val = results._alignment_error
+            if err_val < ACCEPTABLE_ERROR_THRESHOLD:
                 break
             index += 1
         if index < len(unmatched_list_2):
