@@ -83,16 +83,20 @@ def compare_image_directories(target_dir):
     for unmatched_img_name in unmatched_list_1:
         index = 0
         target_image = join(get_unmatched_dir(MAIN_DIR), unmatched_img_name)
+        err_val = 0
         while index < len(unmatched_list_2):
             potential_img_name = unmatched_list_2[index]
             candidate_image = join(get_unmatched_dir(target_dir), potential_img_name)
             results = alignment_service.perform_match(target_image, candidate_image, [])
             # noinspection PyProtectedMember
             if results._alignment_status_code.code == 1:
+                # noinspection PyProtectedMember
+                err_val = results._alignment_error
                 break
             index += 1
         if index < len(unmatched_list_2):
-            print 'Match found "' + unmatched_img_name + '" -> "' + potential_img_name + '"'
+            print 'Match found "' + unmatched_img_name + '" -> "' + potential_img_name + \
+                  '" (err: ' + str(err_val) + ')'
             move_matched_files(MAIN_DIR, target_dir, unmatched_img_name, potential_img_name)
             unmatched_list_2.remove(potential_img_name)
         else:
