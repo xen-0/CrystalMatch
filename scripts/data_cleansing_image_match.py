@@ -2,6 +2,7 @@
 # images in the second directory which do not match their counterparts in the main directory. Any images for which a
 # match cannot be found at the end of the process will be left in the 'unmatched' directory created in each target
 # directory.
+from multiprocessing import Pool
 from os import listdir, makedirs, rename
 from os.path import join, exists, isdir
 from dls_imagematch.service.service import CrystalMatchService
@@ -10,14 +11,14 @@ from dls_imagematch.service.service import CrystalMatchService
 ######################################################################
 MAIN_DIR = "../test-images/Formulatrix/46532/545"
 TARGET_DIR_LIST = [
-    # "../test-images/Formulatrix/46532/548",
-    # "../test-images/Formulatrix/46532/551",
-    # "../test-images/Formulatrix/46532/554",
-    # "../test-images/Formulatrix/46532/557",
-    # "../test-images/Formulatrix/46532/560",
-    # "../test-images/Formulatrix/46532/563",
-    # "../test-images/Formulatrix/46532/629",
-    # "../test-images/Formulatrix/46532/635",
+    "../test-images/Formulatrix/46532/548",
+    "../test-images/Formulatrix/46532/551",
+    "../test-images/Formulatrix/46532/554",
+    "../test-images/Formulatrix/46532/557",
+    "../test-images/Formulatrix/46532/560",
+    "../test-images/Formulatrix/46532/563",
+    "../test-images/Formulatrix/46532/629",
+    "../test-images/Formulatrix/46532/635",
     "../test-images/Formulatrix/46532/644",
 ]
 CONFIG_DIR = "../config"
@@ -107,7 +108,77 @@ def compare_image_directories(target_dir):
     for file_name in listdir(get_unmatched_dir(MAIN_DIR)):
         rename(join(get_unmatched_dir(MAIN_DIR), file_name), join(MAIN_DIR, file_name))
 
-for dir_path in TARGET_DIR_LIST:
-    print "Starting directory '" + dir_path + "'..."
-    compare_image_directories(dir_path)
-    print "Done!\n\n"
+
+# class Worker:
+#     def __init__(self):
+#
+
+# noinspection PyProtectedMember
+def something(bundle):
+    candidate_name, image1, image2 = bundle
+    service = CrystalMatchService(CONFIG_DIR)
+    result = service.perform_match(image1, image2, [])
+    return candidate_name, result._alignment_status_code.code, result._alignment_error
+
+
+# noinspection PyProtectedMember
+def exhaustive_compare_image_directories(target_dir):
+    dir_list_1 = []
+    dir_list_2 = []
+
+    # Get file lists
+    for file_name in listdir(MAIN_DIR):
+        if validate_image_file(file_name):
+            dir_list_1.append(file_name)
+    for file_name in listdir(target_dir):
+        if validate_image_file(file_name):
+            dir_list_2.append(file_name)
+
+    # Compare lists
+    match_list = []
+    for original_image in dir_list_1:
+        jobs = []
+        for target_image in dir_list_2:
+            jobs.append((target_image, join(MAIN_DIR, original_image), join(target_dir, target_image)))
+            break
+
+        # Set up a worker pool for this job set
+        worker_pool = Pool()
+        results = worker_pool.imap(something, jobs)
+        worker_pool.close()
+        worker_pool.join()
+
+        # interpret the results.
+        best_match = None
+        min_err = 9999
+        for i in range(results._length):
+            candidate_name, state_code, error = results.next()
+            if state_code == 1 and error < min_err:
+                best_match = candidate_name
+                min_err = error
+        if best_match is not None:
+            print "Suggested match: '" + original_image + "' -> '" + str(best_match) + \
+                          "' (err: " + str(min_err) + ")"
+            match_list.append((original_image, best_match, min_err))
+        else:
+            print "No match found: '" + original_image + "'"
+
+    # Move files
+    cpy_dir = join(target_dir, "matched")
+    if not exists(cpy_dir):
+        makedirs(cpy_dir)
+    for m in match_list:
+        original_image, best_match, min_err = m
+        old_file = join(target_dir, best_match)
+        new_file = join(cpy_dir, original_image)
+        if exists(old_file):
+            rename(old_file, new_file)
+        else:
+            print "Conflicted file! '" + old_file + "' could not be copied to '" + new_file + "'"
+
+
+if __name__ == '__main__':
+    for dir_path in TARGET_DIR_LIST:
+        print "Starting directory '" + dir_path + "'..."
+        exhaustive_compare_image_directories(dir_path)
+        print "Done!\n\n"
