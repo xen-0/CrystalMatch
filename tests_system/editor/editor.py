@@ -153,5 +153,3 @@ class TestEditor(QMainWindow):
 
     def _save_all(self):
         self._test_suite.save_to_file()
-
-
