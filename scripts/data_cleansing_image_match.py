@@ -1,12 +1,25 @@
-# Run on two image directories
+# Uses the alignment stage of the CrystalMatch algorithm to compare images in two directories and attempt to rename
+# images in the second directory which do not match their counterparts in the main directory. Any images for which a
+# match cannot be found at the end of the process will be left in the 'unmatched' directory created in each target
+# directory.
 from os import listdir, makedirs, rename
 from os.path import join, exists, isdir
 from dls_imagematch.service.service import CrystalMatchService
 
 # CONFIGURATION
 ######################################################################
-TARGET_DIR_1 = "../test-images/Formulatrix/46412/449"
-TARGET_DIR_2 = "../test-images/Formulatrix/46412/584"
+MAIN_DIR = "../test-images/Formulatrix/46412/449"
+TARGET_DIR_LIST = [
+    "../test-images/Formulatrix/46412/452",
+    "../test-images/Formulatrix/46412/455",
+    "../test-images/Formulatrix/46412/458",
+    "../test-images/Formulatrix/46412/461",
+    "../test-images/Formulatrix/46412/464",
+    "../test-images/Formulatrix/46412/527",
+    "../test-images/Formulatrix/46412/533",
+    "../test-images/Formulatrix/46412/581",
+    "../test-images/Formulatrix/46412/584",
+]
 CONFIG_DIR = "../config"
 UNMATCHED_DIR_NAME = "unmatched"
 ######################################################################
@@ -22,10 +35,6 @@ def get_unmatched_dir(parent_dir):
         makedirs(unmatched_dir)
     return unmatched_dir
 
-dir_list_1 = listdir(TARGET_DIR_1)
-dir_list_2 = listdir(TARGET_DIR_2)
-alignment_service = CrystalMatchService(CONFIG_DIR)
-
 
 def move_to_unmatched(parent_dir, file_name):
     unmatched_dir = get_unmatched_dir(parent_dir)
@@ -40,49 +49,61 @@ def move_matched_files(parent_dir_1, parent_dir_2, true_file_name, replaced_file
     rename(join(unmatched_dir, replaced_file_name), join(parent_dir_2, true_file_name))
 
 
-for image_name in dir_list_1:
-    # Skip non-image files
-    if not validate_image_file(image_name):
-        print "Skipping in src dir: " + image_name
-        continue
-    # Check matching image names first
-    if image_name in dir_list_2:
-        dir_list_2.remove(image_name)
-        image_1 = join(TARGET_DIR_1, image_name)
-        image_2 = join(TARGET_DIR_2, image_name)
-        results = alignment_service.perform_match(image_1, image_2, [])
-        # noinspection PyProtectedMember
-        if results._alignment_status_code.code != 1:
-            move_to_unmatched(TARGET_DIR_1, image_name)
-            move_to_unmatched(TARGET_DIR_2, image_name)
-    else:
-        # Move to unmatched for the second pass
-        move_to_unmatched(TARGET_DIR_1, image_name)
+def compare_image_directories(target_dir):
+    dir_list_1 = listdir(MAIN_DIR)
+    dir_list_2 = listdir(target_dir)
+    alignment_service = CrystalMatchService(CONFIG_DIR)
+    for image_name in dir_list_1:
+        # Skip non-image files
+        if not validate_image_file(image_name):
+            print "Skipping in src dir: " + image_name
+            continue
+        # Check matching image names first
+        if image_name in dir_list_2:
+            dir_list_2.remove(image_name)
+            image_1 = join(MAIN_DIR, image_name)
+            image_2 = join(target_dir, image_name)
+            results = alignment_service.perform_match(image_1, image_2, [])
+            # noinspection PyProtectedMember
+            if results._alignment_status_code.code != 1:
+                move_to_unmatched(MAIN_DIR, image_name)
+                move_to_unmatched(target_dir, image_name)
+        else:
+            # Move to unmatched for the second pass
+            move_to_unmatched(MAIN_DIR, image_name)
+    for unmatched_file in dir_list_2:
+        if not validate_image_file(unmatched_file):
+            print "Skipping in dst dir: " + unmatched_file
+            continue
+        move_to_unmatched(target_dir, unmatched_file)
 
-for unmatched_file in dir_list_2:
-    if not validate_image_file(unmatched_file):
-        print "Skipping in dst dir: " + unmatched_file
-        continue
-    move_to_unmatched(TARGET_DIR_2, unmatched_file)
+    # Second Pass - iterate over each image in unmatched attempting to find a match.
+    unmatched_list_1 = listdir(get_unmatched_dir(MAIN_DIR))
+    unmatched_list_2 = listdir(get_unmatched_dir(target_dir))
+    for unmatched_img_name in unmatched_list_1:
+        index = 0
+        target_image = join(get_unmatched_dir(MAIN_DIR), unmatched_img_name)
+        while index < len(unmatched_list_2):
+            potential_img_name = unmatched_list_2[index]
+            candidate_image = join(get_unmatched_dir(target_dir), potential_img_name)
+            results = alignment_service.perform_match(target_image, candidate_image, [])
+            # noinspection PyProtectedMember
+            if results._alignment_status_code.code == 1:
+                break
+            index += 1
+        if index < len(unmatched_list_2):
+            print 'Match found "' + unmatched_img_name + '" -> "' + potential_img_name + '"'
+            move_matched_files(MAIN_DIR, target_dir, unmatched_img_name, potential_img_name)
+            unmatched_list_2.remove(potential_img_name)
+        else:
+            print 'No match found for "' + unmatched_img_name + '"'
 
-# Second Pass - iterate over each image in unmatched attempting to find a match.
-unmatched_list_1 = listdir(get_unmatched_dir(TARGET_DIR_1))
-unmatched_list_2 = listdir(get_unmatched_dir(TARGET_DIR_2))
+    # Finally restore images in the main unmatched directory as they may be required for next comparison
+    print "Relocating files from '" + get_unmatched_dir(MAIN_DIR) + "'..."
+    for file_name in listdir(get_unmatched_dir(MAIN_DIR)):
+        rename(join(get_unmatched_dir(MAIN_DIR), file_name), join(MAIN_DIR, file_name))
 
-for unmatched_img_name in unmatched_list_1:
-    index = 0
-    target_image = join(get_unmatched_dir(TARGET_DIR_1), unmatched_img_name)
-    while index < len(unmatched_list_2):
-        potential_img_name = unmatched_list_2[index]
-        candidate_image = join(get_unmatched_dir(TARGET_DIR_2), potential_img_name)
-        results = alignment_service.perform_match(target_image, candidate_image, [])
-        # noinspection PyProtectedMember
-        if results._alignment_status_code.code == 1:
-            break
-        index += 1
-    if index < len(unmatched_list_2):
-        print 'Match found "' + unmatched_img_name + '" -> "' + potential_img_name + '"'
-        move_matched_files(TARGET_DIR_1, TARGET_DIR_2, unmatched_img_name, potential_img_name)
-        unmatched_list_2.remove(potential_img_name)
-    else:
-        print 'No match found for "' + unmatched_img_name + '"'
+for dir_path in TARGET_DIR_LIST:
+    print "Starting directory '" + dir_path + "'..."
+    compare_image_directories(dir_path)
+    print "Done!\n\n"
