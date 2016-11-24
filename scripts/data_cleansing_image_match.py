@@ -12,18 +12,28 @@ from dls_imagematch.service.service import CrystalMatchService
 
 # CONFIGURATION
 ######################################################################
-MAIN_DIR = "../test-images/Formulatrix/46532/545"
 TARGET_DIR_LIST = [
-    # "../test-images/Formulatrix/46532/548",
-    # "../test-images/Formulatrix/46532/551",
-    # "../test-images/Formulatrix/46532/554",
-    # "../test-images/Formulatrix/46532/557",
-    # "../test-images/Formulatrix/46532/560",
-    # "../test-images/Formulatrix/46532/563",
-    # "../test-images/Formulatrix/46532/629",
-    "../test-images/Formulatrix/46532/635",
-    # "../test-images/Formulatrix/46532/644",
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/548"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/551"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/554"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/557"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/560"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/563"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/629"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/635"],
+    ["../test-images/Formulatrix/46532/545", "../test-images/Formulatrix/46532/644"],
+
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/452"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/455"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/458"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/461"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/464"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/527"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/533"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/581"],
+    ["../test-images/Formulatrix/46412/449", "../test-images/Formulatrix/46412/584"],
 ]
+
 CONFIG_DIR = "../config"
 UNMATCHED_DIR_NAME = "unmatched"
 PARALLEL_PROCESSES = None  # Set to None to create one process for each core
@@ -63,12 +73,12 @@ def run_match(bundle):
 
 
 # noinspection PyProtectedMember
-def exhaustive_compare_image_directories(target_dir):
+def exhaustive_compare_image_directories(main_dir, target_dir):
     main_dir_list = []
     target_dir_list = []
 
     # Get file lists
-    for file_name in listdir(MAIN_DIR):
+    for file_name in listdir(main_dir):
         if validate_image_file(file_name):
             main_dir_list.append(file_name)
     for file_name in listdir(target_dir):
@@ -84,7 +94,7 @@ def exhaustive_compare_image_directories(target_dir):
     for target_img_name in target_dir_list:
         jobs = []
         for orig_img_name in main_dir_list:
-            jobs.append((orig_img_name, join(target_dir, target_img_name), join(MAIN_DIR, orig_img_name)))
+            jobs.append((orig_img_name, join(target_dir, target_img_name), join(main_dir, orig_img_name)))
 
         # Set up a worker pool for this job set
         worker_pool = Pool(PARALLEL_PROCESSES)
@@ -96,10 +106,8 @@ def exhaustive_compare_image_directories(target_dir):
         csv_data = []
         for i in range(results._length):
             candidate_name, state_code, error_value = results.next()
-            # TODO: Output match data to csv file
             if state_code == 1:
                 csv_data.append([candidate_name, error_value])
-        # TODO: print to console
         if len(csv_data) > 0:
             csv_data = sorted(csv_data, key=lambda x: x[1])
             best_match = csv_data[0][0]
@@ -109,9 +117,13 @@ def exhaustive_compare_image_directories(target_dir):
             if exists(new_img_path):
                 # Create a dir and copy both matches into it - add a suffix to each file name
                 makedirs(new_img_dir)
+                # Move existing files
                 existing_file = get_unique_filename(new_img_dir, best_match)
                 rename(new_img_path, existing_file)
-                rename(splitext(new_img_path)[0] + '.csv', splitext(existing_file)[0] + '.csv')
+                existing_csv_file = splitext(new_img_path)[0] + '.csv'
+                if exists(existing_csv_file):
+                    rename(existing_csv_file, splitext(existing_file)[0] + '.csv')
+                # Place new file
                 new_image_path = get_unique_filename(new_img_dir, best_match)
                 rename(old_file_path, new_image_path)
             elif exists(new_img_dir) and isdir(new_img_dir):
@@ -146,6 +158,6 @@ def get_unique_filename(directory, filename):
 
 if __name__ == '__main__':
     for dir_path in TARGET_DIR_LIST:
-        print "Starting directory '" + dir_path + "'..."
-        exhaustive_compare_image_directories(dir_path)
+        print "Comparing directory '" + dir_path[0] + "' to '" + dir_path[1] + "'..."
+        exhaustive_compare_image_directories(dir_path[0], dir_path[1])
         print "Done!\n\n"
