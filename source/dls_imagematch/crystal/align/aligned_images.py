@@ -118,7 +118,7 @@ class AlignedImages:
     def overlay(self, rect_color=Color.black()):
         """ An image which consists of Image A with the overlapping regions of Image B in a 50:50 blend. """
         if self._overlay is None:
-            # DEV NOTE: translation is the transform from image A to image B - the offset is the inverse of this.
+            # DEV NOTE: Overlayer uses the offset of image B from Image A - the translation must be inverted
             self._overlay = Overlayer.create_overlay_image(self.image1, self.image2, -self._translation, rect_color)
         return self._overlay
 
@@ -131,7 +131,7 @@ class AlignedImages:
         """ Metric which gives an indication of the quality of the alignment (lower is better). """
         if self._metric is None:
             metric_calc = OverlapMetric(self.image1, self.image2, self._limit_high)
-            # DEV Note: metric calc assumes image B is offset from image A - this is the inverse of the translation
+            # DEV NOTE: Overlayer uses the offset of image B from Image A - the translation must be inverted
             self._metric = metric_calc.calculate_overlap_metric(-self._translation)
         return self._metric
 
