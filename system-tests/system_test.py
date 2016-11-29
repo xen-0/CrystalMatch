@@ -300,7 +300,8 @@ class SystemTest(TestCase):
             self.failUnlessAlmostEqual(expected_array[i][0].y, loc.y, delta=deltas[0])
             self.failUnlessAlmostEqual(expected_array[i][1].x, off.x, delta=deltas[1])
             self.failUnlessAlmostEqual(expected_array[i][1].y, off.y, delta=deltas[1])
-            self.failUnlessEqual(expected_array[i][2], success, msg="Match boolean value mismatch")
+            self.failUnlessEqual(expected_array[i][2], success, msg="POI result expected " + str(expected_array[i][2])
+                                                                    + " but result was " + str(success))
             self.failUnlessAlmostEqual(expected_array[i][3], err, msg="Error value mismatch", delta=deltas[2])
 
     def get_global_transform_from_std_out(self):

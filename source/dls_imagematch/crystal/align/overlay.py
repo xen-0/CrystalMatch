@@ -23,7 +23,6 @@ class Overlayer:
             return background
 
         # Blend the two overlapping regions
-        # Todo: handle case where overlap doesn't work because images are different sizes
         perc_a, perc_b = 0.5, 0.5
         blended = cv2.addWeighted(overlap_a.raw(), perc_a, overlap_b.raw(), perc_b, 0)
         background.paste(Image(blended), Point(max(offset.x, 0), max(offset.y, 0)))
