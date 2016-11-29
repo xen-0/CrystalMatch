@@ -8,33 +8,10 @@ from .overlay import Overlayer
 
 class OverlapMetric:
 
-    def __init__(self, image1, image2, trial_transforms, metric_upper_limit):
+    def __init__(self, image1, image2, metric_upper_limit):
         self.image1 = image1
         self.image2 = image2
-        self.trial_transforms = trial_transforms
         self._metric_upper_limit = metric_upper_limit
-
-    def best_transform(self, starting_transform):
-        """ For a TrialTransforms object, return the transform which has the
-        minimum metric value.
-        """
-        metrics = []
-
-        transforms = [starting_transform + tr for tr in self.trial_transforms]
-
-        for transform in transforms:
-            offset = transform.intify()
-            metric = self.calculate_overlap_metric(offset)
-            metrics.append(metric)
-
-        # Extract the best transformation (and associated abs_diff image)
-        best = np.argmin(metrics)
-        best_transform = transforms[best]
-
-        # Whether or not the best transform candidate is actually the identity (i.e. no change)
-        is_identity = (best == 0)
-
-        return best_transform, is_identity
 
     def calculate_overlap_metric(self, offset):
         """ For two images, A and B, where B is offset relative to A, calculate the average
