@@ -89,11 +89,11 @@ def _get_argument_parser():
                                                  "on an input image to the coordinate-space of an output image while "
                                                  "accounting for possible movement of crystals in the sample.")
     parser.add_argument('image_input',
-                        metavar="input_image",
+                        metavar="Formulatrix_image",
                         type=file,
-                        help='Input Image file corresponding to the co-ordinates provided.')
+                        help='Image file from the Formulatrix - selected_point should correspond to co-ordinates on this image.')
     parser.add_argument('image_output',
-                        metavar="output_image",
+                        metavar="beamline_image",
                         type=file,
                         help='Image file on which to find translated co-ordinates.')
     parser.add_argument('selected_points',
