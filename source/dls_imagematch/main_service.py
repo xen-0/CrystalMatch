@@ -91,7 +91,8 @@ def _get_argument_parser():
     parser.add_argument('image_input',
                         metavar="Formulatrix_image",
                         type=file,
-                        help='Image file from the Formulatrix - selected_point should correspond to co-ordinates on this image.')
+                        help='Image file from the Formulatrix - selected_point should correspond to co-ordinates on '
+                             'this image.')
     parser.add_argument('image_output',
                         metavar="beamline_image",
                         type=file,
@@ -107,7 +108,7 @@ def _get_argument_parser():
                         help="Sets the configuration directory.")
     parser.add_argument('--scale',
                         metavar="scale",
-                        help="The scale between the input and output images given as two floats separated by a colon, "
+                        help="The scale between the Formulatrix and beamline given as two floats separated by a colon, "
                              "note this is relative (1:2 is the same as 2:4) and a value must be specified for each "
                              "image using the format '[input_image_resolution]:[output_image_resolution]'.")
     parser.add_argument('--version',
@@ -115,19 +116,19 @@ def _get_argument_parser():
                         version=VersionHandler.version_string())
     parser.add_argument('-v', '--verbose',
                         action="store_true",
-                        help="increase output verbosity")
+                        help="Increase output verbosity.")
     parser.add_argument('-d', '--debug',
                         action="store_true",
-                        help="output debug information to the console")
+                        help="Output debug information to the console.")
     parser.add_argument('-j', '--job',
                         metavar="job_id",
-                        help="Specify a job_id - this will be reported in the output to help identify this run")
+                        help="Specify a job_id - this will be reported in the output to help identify this run.")
     parser.add_argument('--to_json',
                         action='store_true',
                         help="Output a JSON object.")
     parser.add_argument('--log',
                         metavar="path",
-                        help="Output log files to the directory specified by path.")
+                        help="Write log files to the directory specified by path.")
     return parser
 
 
