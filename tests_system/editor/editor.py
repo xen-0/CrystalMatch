@@ -1,5 +1,8 @@
 from os.path import dirname
 from sys import path
+
+from magnifying_image_view import MagnifyingImageView
+
 path.append(dirname(path[0]))
 
 from PyQt4 import QtGui
@@ -84,8 +87,7 @@ class TestEditor(QMainWindow):
 
     def _ui_make_image_frame(self, img_num):
         ImageSelector.IMAGE_SIZE = 600
-        frame = ImageSelector("Image {}".format(img_num), None)
-        frame.set_button_visible(False)
+        frame = MagnifyingImageView("Image {}".format(img_num))
 
         btn_points = QPushButton("Select Points")
         btn_points.clicked.connect(lambda: self._select_points_clicked(img_num))
@@ -119,8 +121,8 @@ class TestEditor(QMainWindow):
         """ Called when a new case is selected in the list; displays the case's image 1 with points marked. """
         case = self._get_selected_case()
         if case is not None:
-            self._frame_1.set_image(case.image_marked(1))
-            self._frame_2.set_image(case.image_marked(2))
+            self._frame_1.set_image(case.image_path(1))
+            self._frame_2.set_image(case.image_path(2))
 
     def _select_points_clicked(self, img_num):
         """ Called when the select points button is pushed. Displays a dialog that allows the user to
