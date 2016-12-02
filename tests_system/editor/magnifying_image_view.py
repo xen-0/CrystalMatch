@@ -28,7 +28,7 @@ class MagnifyingImageView(QGroupBox):
 
 
 class MagnifyingGraphicsView(QGraphicsView):
-    MIN_DRAG_SIZE = 100
+    MIN_DRAG_LENGTH = 10
     MAX_SCALE_FACTOR = 7.5  # DEV NOTE: past 7.5 scale the image view goes entirely black - out of memory?
 
     def __init__(self, viewer_size, parent=None):
@@ -53,9 +53,9 @@ class MagnifyingGraphicsView(QGraphicsView):
         if self._original_pixmap is None:
             return
         rect = self._get_q_rect(event.pos(), self._mouse_down_location)
-        drag_area = rect.height() * rect.width()
+        drag_length = rect.height() + rect.width()
         QGraphicsView.mouseReleaseEvent(self, event)
-        if self._mouse_drag_event and drag_area > self.MIN_DRAG_SIZE:
+        if self._mouse_drag_event and drag_length > self.MIN_DRAG_LENGTH:
             self._toggle_zoom_on_rect(rect)
         else:
             print "Click"
@@ -65,8 +65,10 @@ class MagnifyingGraphicsView(QGraphicsView):
             self._scale_factor = 1.0
             self._rescale_pixmap()
             return
-        w_scale = float(self._viewer_size) / float(q_rect.width())
-        h_scale = float(self._viewer_size) / float(q_rect.height())
+        w = q_rect.width() if q_rect.width() != 0 else 1
+        h = q_rect.height() if q_rect.height() != 0 else 1
+        w_scale = float(self._viewer_size) / float(w)
+        h_scale = float(self._viewer_size) / float(h)
         self._scale_factor = min(w_scale, h_scale)
 
         # Calculate Relative centre
