@@ -6,11 +6,9 @@ from magnifying_image_view import MagnifyingImageView
 path.append(dirname(path[0]))
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QPushButton
+from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout
 
-from dls_util.imaging import Color
 from dls_imagematch.gui.components import ImageSelector
-from dls_imagematch.gui.crystal import PointSelectDialog
 
 
 class TestEditor(QMainWindow):
@@ -140,8 +138,13 @@ class TestEditor(QMainWindow):
             self._point_list_data.append((pt_1, pt_2))
         # Print the results to the list
         for p in self._point_list_data:
-            # TODO: Handle None? shouldn't come up with validation
-            self._point_list.addItem(str(p[0]) + " -> " + str(p[1]))
+            str_1 = str(p[0]) if p[0] is not None else "?"
+            str_2 = str(p[1]) if p[1] is not None else "?"
+            self._point_list.addItem(str_1 + " -> " + str_2)
+
+        # Write points to the displayed images
+        self._frame_1.update_points_data(points_1)
+        self._frame_2.update_points_data(points_2)
 
     def _save_all(self):
         self._test_suite.save_to_file()
