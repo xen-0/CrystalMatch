@@ -142,8 +142,9 @@ class TestEditor(QMainWindow):
 
     def _get_selected_point(self):
         index = self._get_selected_index(self._point_list)
-        if 0 <= index < len(self._point_list_data):
-            return self._point_list_data[index]
+        case = self._get_selected_case()
+        if 0 <= index < case.max_num_points():
+            return case.get_points_at_index(index)
         return None
 
     @staticmethod
@@ -174,7 +175,7 @@ class TestEditor(QMainWindow):
         case = self._get_selected_case()
         points_1 = case.image_points(1)
         points_2 = case.image_points(2)
-        self._point_list_data = []
+        point_list_data = []
         # Build the data model from case data
         for i in range(max(len(points_1), len(points_2))):
             pt_1, pt_2 = None, None
@@ -182,9 +183,9 @@ class TestEditor(QMainWindow):
                 pt_1 = points_1[i]
             if i < len(points_2):
                 pt_2 = points_2[i]
-            self._point_list_data.append((pt_1, pt_2))
+            point_list_data.append((pt_1, pt_2))
         # Print the results to the list
-        for p in self._point_list_data:
+        for p in point_list_data:
             str_1 = str(p[0]) if p[0] is not None else "?"
             str_2 = str(p[1]) if p[1] is not None else "?"
             self._point_list.addItem(str_1 + " -> " + str_2)

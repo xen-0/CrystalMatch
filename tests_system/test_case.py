@@ -112,6 +112,16 @@ class CrystalTestCase:
     def image_points(self, img_num):
         return self._get_image(img_num).points()
 
+    def max_num_points(self):
+        return max(len(self.image_points(1)), len(self.image_points(2)))
+
+    def get_points_at_index(self, index):
+        points_1 = self.image_points(1)
+        points_2 = self.image_points(2)
+        pt_1 = points_1[index] if len(points_1) > index else None
+        pt_2 = points_1[index] if len(points_2) > index else None
+        return pt_1, pt_2
+
     def image_path(self, img_num):
         return self._get_image(img_num).full_path(self._path_prefix)
 
