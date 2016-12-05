@@ -1,9 +1,9 @@
+from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QMessageBox, \
+    QPushButton
 
 from magnifying_image_view import MagnifyingImageView
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QPushButton, \
-    QMessageBox
 
 
 class TestEditor(QMainWindow):
@@ -59,10 +59,14 @@ class TestEditor(QMainWindow):
         self._button_add_point = QPushButton("Add/Update (shortcut:U)", None)
         self._button_add_point.clicked.connect(self._submit_poi)
 
+        self._button_delete_point = QPushButton("Delete (shortcut:Del)", None)
+        self._button_delete_point.clicked.connect(self._delete_poi)
+
         vbox_left = QVBoxLayout()
         vbox_left.addWidget(self._case_list)
         vbox_left.addWidget(self._point_list)
         vbox_left.addWidget(self._button_add_point)
+        vbox_left.addWidget(self._button_delete_point)
 
         for case in self._cases:
             self._case_list.addItem(case.name)
@@ -120,6 +124,13 @@ class TestEditor(QMainWindow):
         else:
             case.add_poi(point_1, point_2)
         self._load_points_for_selected_case()
+
+    def _delete_poi(self):
+        case = self._get_selected_case()
+        point = self._get_selected_point()
+        if case is not None and point is not None:
+            case.delete_poi(self._get_selected_index(self._point_list))
+            self._load_points_for_selected_case()
 
     def _select_point(self):
         point_set = self._get_selected_point()
@@ -187,8 +198,11 @@ class TestEditor(QMainWindow):
         QMainWindow.keyReleaseEvent(self, *args, **kwargs)
         if len(args) == 1:
             q_key_press_event = args[0]
-            if q_key_press_event.key() == Qt.Key_U:
+            key = q_key_press_event.key()
+            if key == Qt.Key_U:
                 self._submit_poi()
+            elif key == Qt.Key_Delete:
+                self._delete_poi()
 
     def _save_all(self):
         self._test_suite.save_to_file()
