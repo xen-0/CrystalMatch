@@ -28,6 +28,12 @@ class _ImageWithPoints:
     def add_point(self, point):
         self._points.append(point)
 
+    def update_poi(self, index, point):
+        if index >= len(self._points):
+            self._points.append(point)
+        else:
+            self._points[index] = point
+
     def set_points(self, points):
         self._points = points
 
@@ -109,6 +115,10 @@ class CrystalTestCase:
     def add_poi(self, point_1, point_2):
         self._image1.add_point(point_1)
         self._image2.add_point(point_2)
+
+    def update_poi(self, index, point_1, point_2):
+        self._image1.update_poi(index, point_1)
+        self._image2.update_poi(index, point_2)
 
     def set_image_path(self, path, img_num):
         self._get_image(img_num).set_path(path)

@@ -25,6 +25,7 @@ class TestEditor(QMainWindow):
 
         self.show()
 
+    # noinspection PyUnresolvedReferences
     def init_menu_bar(self):
         """Create and populate the menu bar. """
         # Exit Application
@@ -44,6 +45,7 @@ class TestEditor(QMainWindow):
         file_menu.addAction(exit_action)
         file_menu.addAction(save_action)
 
+    # noinspection PyUnresolvedReferences
     def _init_ui(self):
         # --- Test Case List widget ---
         self._case_list = QListWidget()
@@ -90,7 +92,8 @@ class TestEditor(QMainWindow):
         self.setCentralWidget(main_widget)
         self.show()
 
-    def _ui_make_image_frame(self, img_num):
+    @staticmethod
+    def _ui_make_image_frame(img_num):
         frame = MagnifyingImageView("Image {}".format(img_num))
 
         vbox = QVBoxLayout()
@@ -100,23 +103,23 @@ class TestEditor(QMainWindow):
         return frame, vbox
 
     def _submit_poi(self):
+        # Run checks to ensure points and case are set correctly
         case = self._get_selected_case()
         if case is None:
             return
         point_index = self._get_selected_index(self._point_list)
+        point_1 = self._frame_1.get_selected_point()
+        point_2 = self._frame_2.get_selected_point()
+        if point_1 is None or point_2 is None:
+            QMessageBox().warning(self, "POI Selecting Error", "Please select 2 points.", QMessageBox.Ok)
+            return
+
+        # Handle differently depending on a new POI or an update
         if point_index != -1:
-            # TODO: For selected point - Update entry in list
-            print "This should update an existing point"
-            pass
+            case.update_poi(point_index, point_1, point_2)
         else:
-            # TODO: For unselected point - add new entry
-            point_1 = self._frame_1.get_selected_point()
-            point_2 = self._frame_2.get_selected_point()
-            if point_1 is not None and point_2 is not None:
-                case.add_poi(point_1, point_2)
-                self._load_points_for_selected_case()
-            else:
-                QMessageBox().warning(self, "POI Selecting Error", "Please select 2 points.", QMessageBox.Ok)
+            case.add_poi(point_1, point_2)
+        self._load_points_for_selected_case()
 
     def _select_point(self):
         point_set = self._get_selected_point()
@@ -126,7 +129,7 @@ class TestEditor(QMainWindow):
 
     def _get_selected_point(self):
         index = self._get_selected_index(self._point_list)
-        if index != -1:
+        if 0 <= index < len(self._point_list_data):
             return self._point_list_data[index]
         return None
 
@@ -172,6 +175,9 @@ class TestEditor(QMainWindow):
             str_1 = str(p[0]) if p[0] is not None else "?"
             str_2 = str(p[1]) if p[1] is not None else "?"
             self._point_list.addItem(str_1 + " -> " + str_2)
+
+        # Add the 'new item' entry
+        self._point_list.addItem("New...")
 
         # Write points to the displayed images
         self._frame_1.update_points_data(points_1)
