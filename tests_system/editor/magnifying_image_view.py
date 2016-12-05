@@ -74,13 +74,15 @@ class MagnifyingGraphicsView(QGraphicsView):
     def select_point(self, x, y):
         self.selected_point = (x, y)
         self._redraw()
-        self._draw_point(x, y, colour=QColor("#00FF00"))
 
     def _redraw(self):
         self._new_scene_from_pixmap(self._pixmap)
         self._draw_points_data()
+        if self.selected_point is not None:
+            self._draw_point(self.selected_point[0], self.selected_point[1], colour=QColor("#00FF00"))
 
     def update_points_data(self, points_data):
+        self.selected_point = None
         self._points_data = points_data
         self._redraw()
 
@@ -99,6 +101,7 @@ class MagnifyingGraphicsView(QGraphicsView):
 
     def set_image(self, img):
         self._points_data = None
+        self.selected_point = None
         self._pixmap = QPixmap(img)
         self._new_scene_from_pixmap(self._pixmap, reset_zoom=True)
 
