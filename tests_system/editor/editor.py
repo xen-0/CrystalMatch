@@ -54,8 +54,15 @@ class TestEditor(QMainWindow):
     def _init_ui(self):
         # --- Test Case List widget ---
         self._case_list = QListWidget()
-        self._case_list.setFixedSize(300, 700)
+        self._case_list.setFixedSize(300, 350)
         self._case_list.clicked.connect(self._new_selection)
+
+        self._point_list = QListWidget()
+        self._point_list.setFixedSize(300, 350)
+
+        vbox_left = QVBoxLayout()
+        vbox_left.addWidget(self._case_list)
+        vbox_left.addWidget(self._point_list)
 
         for case in self._cases:
             self._case_list.addItem(case.name)
@@ -71,7 +78,7 @@ class TestEditor(QMainWindow):
         hbox_frame.addStretch(1)
 
         hbox = QHBoxLayout()
-        hbox.addWidget(self._case_list)
+        hbox.addLayout(vbox_left)
         hbox.addLayout(hbox_frame)
         hbox.addStretch(1)
 
@@ -89,16 +96,8 @@ class TestEditor(QMainWindow):
         ImageSelector.IMAGE_SIZE = 600
         frame = MagnifyingImageView("Image {}".format(img_num))
 
-        btn_points = QPushButton("Select Points")
-        btn_points.clicked.connect(lambda: self._select_points_clicked(img_num))
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(btn_points)
-        hbox.addStretch(1)
-
         vbox = QVBoxLayout()
         vbox.addWidget(frame)
-        vbox.addLayout(hbox)
         vbox.addStretch(1)
 
         return frame, vbox
@@ -123,35 +122,26 @@ class TestEditor(QMainWindow):
         if case is not None:
             self._frame_1.set_image(case.image_path(1))
             self._frame_2.set_image(case.image_path(2))
+            self._load_points_for_selected_case()
 
-    def _select_points_clicked(self, img_num):
-        """ Called when the select points button is pushed. Displays a dialog that allows the user to
-        select points on the first image. """
+    def _load_points_for_selected_case(self):
+        self._point_list.clear()
         case = self._get_selected_case()
-        if case is None:
-            return
-
-        image = case.image(img_num)
-
-        ok, points = self._get_points_from_user_selection(image)
-        if ok:
-            case.set_image_points(points, img_num)
-            self._new_selection()
-
-    def _get_points_from_user_selection(self, image):
-        """ Display a dialog and return the result to the caller. """
-        max_points = 10
-        size = 100
-        color = Color.green()
-        dialog = PointSelectDialog(self, image, max_points, size, color)
-        result_ok = dialog.exec_()
-
-        points = []
-        if result_ok:
-            points = dialog.selected_points()
-            points = [p.intify() for p in points]
-
-        return result_ok, points
+        points_1 = case.image_points(1)
+        points_2 = case.image_points(2)
+        self._point_list_data = []
+        # Build the data model from case data
+        for i in range(max(len(points_1), len(points_2))):
+            pt_1, pt_2 = None, None
+            if i < len(points_1):
+                pt_1 = points_1[i]
+            if i < len(points_2):
+                pt_2 = points_2[i]
+            self._point_list_data.append((pt_1, pt_2))
+        # Print the results to the list
+        for p in self._point_list_data:
+            # TODO: Handle None? shouldn't come up with validation
+            self._point_list.addItem(str(p[0]) + " -> " + str(p[1]))
 
     def _save_all(self):
         self._test_suite.save_to_file()
