@@ -2,6 +2,8 @@ from PyQt4.QtCore import Qt, QRectF
 from PyQt4.QtGui import QGroupBox, QGraphicsView, QVBoxLayout, QGraphicsScene, QPixmap, QPen, QColor, QApplication
 from PyQt4.QtOpenGL import QGLWidget
 
+from dls_util.shape.point import Point
+
 
 class MagnifyingImageView(QGroupBox):
     VIEWER_SIZE = 800
@@ -31,6 +33,10 @@ class MagnifyingImageView(QGroupBox):
 
     def select_point(self, point):
         self._image_view.select_point(point.x, point.y)
+
+    def get_selected_point(self):
+        s_point = self._image_view.selected_point
+        return None if s_point is None else Point(s_point[0], s_point[1])
 
 
 class MagnifyingGraphicsView(QGraphicsView):

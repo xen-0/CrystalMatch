@@ -25,6 +25,9 @@ class _ImageWithPoints:
         self._path = path
         self._points = []
 
+    def add_point(self, point):
+        self._points.append(point)
+
     def set_points(self, points):
         self._points = points
 
@@ -103,15 +106,9 @@ class CrystalTestCase:
     def image_path(self, img_num):
         return self._get_image(img_num).full_path(self._path_prefix)
 
-    def set_image_points(self, points, img_num):
-        if img_num == 1:
-            self._images[0].set_points(points)
-            self._images[1].set_points(points)
-        else:
-            if len(points) != len(self._images[0].points()):
-                raise ValueError("Number of points must be the same for each image")
-
-            self._images[1].set_points(points)
+    def add_poi(self, point_1, point_2):
+        self._image1.add_point(point_1)
+        self._image2.add_point(point_2)
 
     def set_image_path(self, path, img_num):
         self._get_image(img_num).set_path(path)

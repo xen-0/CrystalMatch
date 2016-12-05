@@ -1,16 +1,9 @@
-from os.path import dirname
-from sys import path
-
 from PyQt4.QtCore import Qt
 
 from magnifying_image_view import MagnifyingImageView
-
-path.append(dirname(path[0]))
-
 from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QKeySequence
-
-from dls_imagematch.gui.components import ImageSelector
+from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QPushButton, \
+    QMessageBox
 
 
 class TestEditor(QMainWindow):
@@ -61,9 +54,13 @@ class TestEditor(QMainWindow):
         self._point_list.setFixedSize(300, 350)
         self._point_list.clicked.connect(self._select_point)
 
+        self._button_add_point = QPushButton("Add/Update (shortcut:U)", None)
+        self._button_add_point.clicked.connect(self._submit_poi)
+
         vbox_left = QVBoxLayout()
         vbox_left.addWidget(self._case_list)
         vbox_left.addWidget(self._point_list)
+        vbox_left.addWidget(self._button_add_point)
 
         for case in self._cases:
             self._case_list.addItem(case.name)
@@ -101,6 +98,25 @@ class TestEditor(QMainWindow):
         vbox.addStretch(1)
 
         return frame, vbox
+
+    def _submit_poi(self):
+        case = self._get_selected_case()
+        if case is None:
+            return
+        point_index = self._get_selected_index(self._point_list)
+        if point_index != -1:
+            # TODO: For selected point - Update entry in list
+            print "This should update an existing point"
+            pass
+        else:
+            # TODO: For unselected point - add new entry
+            point_1 = self._frame_1.get_selected_point()
+            point_2 = self._frame_2.get_selected_point()
+            if point_1 is not None and point_2 is not None:
+                case.add_poi(point_1, point_2)
+                self._load_points_for_selected_case()
+            else:
+                QMessageBox().warning(self, "POI Selecting Error", "Please select 2 points.", QMessageBox.Ok)
 
     def _select_point(self):
         point_set = self._get_selected_point()
@@ -160,6 +176,13 @@ class TestEditor(QMainWindow):
         # Write points to the displayed images
         self._frame_1.update_points_data(points_1)
         self._frame_2.update_points_data(points_2)
+
+    def keyReleaseEvent(self, *args, **kwargs):
+        QMainWindow.keyReleaseEvent(self, *args, **kwargs)
+        if len(args) == 1:
+            q_key_press_event = args[0]
+            if q_key_press_event.key() == Qt.Key_U:
+                self._submit_poi()
 
     def _save_all(self):
         self._test_suite.save_to_file()
