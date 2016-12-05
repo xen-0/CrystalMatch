@@ -29,6 +29,9 @@ class MagnifyingImageView(QGroupBox):
     def update_points_data(self, points_data):
         self._image_view.update_points_data(points_data)
 
+    def select_point(self, point):
+        self._image_view.select_point(point.x, point.y)
+
 
 class MagnifyingGraphicsView(QGraphicsView):
     POI_MARKER_SIZE_RELATIVE = 0.005  # Sets the POI markers based on the width of the pixmap
@@ -39,6 +42,7 @@ class MagnifyingGraphicsView(QGraphicsView):
         self._pixmap = None
         self._points_data = None
         self._scene = None
+        self.selected_point = None
 
     def _reset_zoom(self):
         self.fitInView(QRectF(self._pixmap.rect()))
@@ -59,8 +63,12 @@ class MagnifyingGraphicsView(QGraphicsView):
             else:
                 self._zoom_in(centre_point=scene_pos)
         elif event.button() == Qt.LeftButton:
-            self._redraw()
-            self._draw_point(scene_pos.x(), scene_pos.y(), colour=QColor("#00FF00"))
+            self.select_point(scene_pos.x(), scene_pos.y())
+
+    def select_point(self, x, y):
+        self.selected_point = (x, y)
+        self._redraw()
+        self._draw_point(x, y, colour=QColor("#00FF00"))
 
     def _redraw(self):
         self._new_scene_from_pixmap(self._pixmap)

@@ -1,12 +1,14 @@
 from os.path import dirname
 from sys import path
 
+from PyQt4.QtCore import Qt
+
 from magnifying_image_view import MagnifyingImageView
 
 path.append(dirname(path[0]))
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout
+from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QKeySequence
 
 from dls_imagematch.gui.components import ImageSelector
 
@@ -57,6 +59,7 @@ class TestEditor(QMainWindow):
 
         self._point_list = QListWidget()
         self._point_list.setFixedSize(300, 350)
+        self._point_list.clicked.connect(self._select_point)
 
         vbox_left = QVBoxLayout()
         vbox_left.addWidget(self._case_list)
@@ -91,7 +94,6 @@ class TestEditor(QMainWindow):
         self.show()
 
     def _ui_make_image_frame(self, img_num):
-        ImageSelector.IMAGE_SIZE = 600
         frame = MagnifyingImageView("Image {}".format(img_num))
 
         vbox = QVBoxLayout()
@@ -100,15 +102,28 @@ class TestEditor(QMainWindow):
 
         return frame, vbox
 
-    def _get_selected_index(self):
-        selected = self._case_list.selectedIndexes()
+    def _select_point(self):
+        point_set = self._get_selected_point()
+        if point_set is not None:
+            self._frame_1.select_point(point_set[0])
+            self._frame_2.select_point(point_set[1])
+
+    def _get_selected_point(self):
+        index = self._get_selected_index(self._point_list)
+        if index != -1:
+            return self._point_list_data[index]
+        return None
+
+    @staticmethod
+    def _get_selected_index(list_widget):
+        selected = list_widget.selectedIndexes()
         if any(selected):
             return selected[0].row()
         else:
             return -1
 
     def _get_selected_case(self):
-        index = self._get_selected_index()
+        index = self._get_selected_index(self._case_list)
         if index != -1:
             return self._cases[index]
         else:
