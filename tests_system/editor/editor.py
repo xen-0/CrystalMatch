@@ -1,7 +1,7 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, QWidget, QVBoxLayout, QMessageBox, \
-    QPushButton
+    QPushButton, QLabel
 
 from magnifying_image_view import MagnifyingImageView
 
@@ -34,16 +34,10 @@ class TestEditor(QMainWindow):
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(QtGui.qApp.quit)
 
-        save_action = QAction(QIcon('exit.png'), '&Save', self)
-        save_action.setShortcut('Ctrl+S')
-        save_action.setStatusTip('Save All')
-        save_action.triggered.connect(self._save_all)
-
         # Create menu bar
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu('&File')
         file_menu.addAction(exit_action)
-        file_menu.addAction(save_action)
 
     # noinspection PyUnresolvedReferences
     def _init_ui(self):
@@ -81,9 +75,15 @@ class TestEditor(QMainWindow):
         hbox_frame.addLayout(vbox_frame_2)
         hbox_frame.addStretch(1)
 
+        self._zoom_instructions = QLabel("Zoom in - right click, zoom out - shift + right click, reset zoom - "
+                                         "ctrl + right click.")
+        vbox_frame_set = QVBoxLayout()
+        vbox_frame_set.addLayout(hbox_frame)
+        vbox_frame_set.addWidget(self._zoom_instructions)
+
         hbox = QHBoxLayout()
         hbox.addLayout(vbox_left)
-        hbox.addLayout(hbox_frame)
+        hbox.addLayout(vbox_frame_set)
         hbox.addStretch(1)
 
         vbox_main = QVBoxLayout()
@@ -124,6 +124,7 @@ class TestEditor(QMainWindow):
         else:
             case.add_poi(point_1, point_2)
         self._load_points_for_selected_case()
+        self._save_all()
 
     def _delete_poi(self):
         case = self._get_selected_case()
@@ -131,6 +132,7 @@ class TestEditor(QMainWindow):
         if case is not None and point is not None:
             case.delete_poi(self._get_selected_index(self._point_list))
             self._load_points_for_selected_case()
+            self._save_all()
 
     def _select_point(self):
         point_set = self._get_selected_point()
