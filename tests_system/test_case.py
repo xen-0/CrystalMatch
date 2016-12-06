@@ -119,7 +119,7 @@ class CrystalTestCase:
         points_1 = self.image_points(1)
         points_2 = self.image_points(2)
         pt_1 = points_1[index] if len(points_1) > index else None
-        pt_2 = points_1[index] if len(points_2) > index else None
+        pt_2 = points_2[index] if len(points_2) > index else None
         return pt_1, pt_2
 
     def image_path(self, img_num):
