@@ -42,6 +42,7 @@ class MagnifyingImageView(QGroupBox):
 class MagnifyingGraphicsView(QGraphicsView):
     POI_MARKER_SIZE_RELATIVE = 0.005  # Sets the POI markers based on the width of the pixmap
     SCALE_STEP_SIZE = 1.5
+    DRAG_ZOOM_MIN_SIZE = 10  # Sets the threshold for turning a click into drag-zoom - relative to viewer-size
 
     def __init__(self, parent=None):
         super(MagnifyingGraphicsView, self).__init__(parent)
@@ -49,9 +50,10 @@ class MagnifyingGraphicsView(QGraphicsView):
         self._points_data = None
         self._scene = None
         self.selected_point = None
+        self._mouse_down_pos = None
 
     def _reset_zoom(self):
-        self.fitInView(QRectF(self._pixmap.rect()))
+        self.fitInView(QRectF(self._pixmap.rect()), Qt.KeepAspectRatio)
 
     def mouseReleaseEvent(self, event):
         QGraphicsView.mouseReleaseEvent(self, event)
@@ -69,7 +71,26 @@ class MagnifyingGraphicsView(QGraphicsView):
             else:
                 self._zoom_in(centre_point=scene_pos)
         elif event.button() == Qt.LeftButton:
-            self.select_point(scene_pos.x(), scene_pos.y())
+            if self._is_drag_zoom_operation(self._mouse_down_pos, event.pos()):
+                self._zoom_to_area(self._mouse_down_pos, event.pos())
+            else:
+                self.select_point(scene_pos.x(), scene_pos.y())
+            self._mouse_down_pos = None
+
+    def _zoom_to_area(self, pos_1, pos_2):
+        zoom_area = self._get_q_rect(self.mapToScene(pos_1), self.mapToScene(pos_2))
+        self.fitInView(zoom_area, Qt.KeepAspectRatio)
+
+    def _is_drag_zoom_operation(self, pos_1, pos_2):
+        if pos_1 is None or pos_2 is None:
+            return False
+        drag_vector = pos_1 - pos_2
+        return drag_vector.manhattanLength() > self.DRAG_ZOOM_MIN_SIZE
+
+    def mousePressEvent(self, event):
+        QGraphicsView.mousePressEvent(self, event)
+        if event.button() == Qt.LeftButton:
+            self._mouse_down_pos = event.pos()
 
     def select_point(self, x, y):
         self.selected_point = (x, y)
@@ -128,3 +149,11 @@ class MagnifyingGraphicsView(QGraphicsView):
 
         if centre_point is not None:
             self.centerOn(centre_point)
+
+    @staticmethod
+    def _get_q_rect(pos_1, pos_2):
+        x = min(pos_1.x(), pos_2.x())
+        y = min(pos_1.y(), pos_2.y())
+        w = max(pos_1.x(), pos_2.x()) - min(pos_1.x(), pos_2.x())
+        h = max(pos_1.y(), pos_2.y()) - min(pos_1.y(), pos_2.y())
+        return QRectF(x, y, w, h)
