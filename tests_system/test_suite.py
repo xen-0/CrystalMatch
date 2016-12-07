@@ -41,7 +41,7 @@ class CrystalTestSuite:
                 try:
                     case = CrystalTestSuite._case_from_line(line, image_dir)
                     cases.append(case)
-                except ValueError as ex:
+                except ValueError:
                     print("Failed to parse line: '{}'".format(line))
 
         return cases
@@ -50,7 +50,3 @@ class CrystalTestSuite:
     def _case_from_line(line, image_dir):
         case = CrystalTestCase.deserialize(line, image_dir)
         return case
-
-
-
-

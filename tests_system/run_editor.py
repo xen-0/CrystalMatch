@@ -1,19 +1,19 @@
 import sys
 
 from PyQt4 import QtGui
-from editor.editor import TestEditor
-from test_suite import CrystalTestSuite
+
+from file_manager.file_manager import FileManager
 
 
 def main():
-    config_dir = "../config/"
-    case_file = "./data/cases_blank.csv"
-    img_dir = "../test-images/Formulatrix/"
-
-    suite = CrystalTestSuite(case_file, img_dir)
+    data_sets_dir = "../test-images/data-sets/"
+    img_dir_root = "../test-images/"
 
     app = QtGui.QApplication(sys.argv)
-    ex = TestEditor(suite)
+
+    # noinspection PyUnusedLocal
+    manager = FileManager(data_sets_dir, img_dir_root)
+
     sys.exit(app.exec_())
 
 

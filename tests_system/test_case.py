@@ -1,5 +1,7 @@
 import os
 
+from os.path import join
+
 from dls_util.shape import Point
 from dls_util.imaging import Image, Color
 
@@ -81,7 +83,7 @@ class _ImageWithPoints:
 
     @staticmethod
     def check_file_exists(prefix, file_path):
-        if not os.path.isfile(prefix + file_path):
+        if not os.path.isfile(join(prefix, file_path)):
             raise ValueError("File: '{}', does not exist!".format(file_path))
 
 
