@@ -62,11 +62,11 @@ class MagnifyingGraphicsView(QGraphicsView):
         # noinspection PyArgumentList
         modifiers = QApplication.keyboardModifiers()
         scene_pos = self.mapToScene(event.pos())
-        if event.button() == Qt.RightButton:
+        if modifiers == Qt.ControlModifier:
+            self._reset_zoom()
+        elif event.button() == Qt.RightButton:
             if modifiers == Qt.ShiftModifier:
                 self._zoom_out()
-            elif modifiers == Qt.ControlModifier:
-                self._reset_zoom()
             else:
                 self._zoom_in(centre_point=scene_pos)
         elif event.button() == Qt.LeftButton:

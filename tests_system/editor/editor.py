@@ -76,7 +76,7 @@ class TestEditor(QMainWindow):
         hbox_frame.addStretch(1)
 
         self._zoom_instructions = QLabel("Zoom in - right click;  Zoom out - shift + right click\nReset zoom - "
-                                         "ctrl + right click;  Area Zoom (for touch screen) - left click + drag")
+                                         "ctrl + right/left click;  Area Zoom (for touch screen) - left click + drag")
         vbox_frame_set = QVBoxLayout()
         vbox_frame_set.addLayout(hbox_frame)
         vbox_frame_set.addWidget(self._zoom_instructions)
