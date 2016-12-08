@@ -43,11 +43,11 @@ class TestEditor(QMainWindow):
     def _init_ui(self):
         # --- Test Case List widget ---
         self._case_list = QListWidget()
-        self._case_list.setFixedSize(300, 350)
+        self._case_list.setFixedSize(200, 350)
         self._case_list.clicked.connect(self._new_selection)
 
         self._point_list = QListWidget()
-        self._point_list.setFixedSize(300, 350)
+        self._point_list.setFixedSize(200, 350)
         self._point_list.clicked.connect(self._select_point)
 
         self._button_add_point = QPushButton("Add/Update (shortcut:U)", None)
@@ -98,7 +98,7 @@ class TestEditor(QMainWindow):
 
     @staticmethod
     def _ui_make_image_frame(img_num):
-        frame = MagnifyingImageView("Image {}".format(img_num))
+        frame = MagnifyingImageView("Image {}".format(img_num), viewer_size=600)
 
         vbox = QVBoxLayout()
         vbox.addWidget(frame)
