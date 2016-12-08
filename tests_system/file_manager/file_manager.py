@@ -4,10 +4,16 @@ from string import strip
 
 from PyQt4.QtGui import QMainWindow, QListWidget, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSpacerItem, \
     QMessageBox, QLineEdit, QLabel
+from enum import Enum
 
 from editor.editor import TestEditor
 from file_selector import DirSelector
 from test_suite import CrystalTestSuite
+
+
+class EnumTestSuiteType(Enum):
+    poi_case = 1
+    alignment_case = 2
 
 
 class FileManager(QMainWindow):
@@ -44,6 +50,7 @@ class FileManager(QMainWindow):
         self._list_poi_datasets = QListWidget()
         self._list_poi_datasets.doubleClicked.connect(self._open_poi_data_set)
         self._list_align_datasets = QListWidget()
+        self._list_align_datasets.doubleClicked.connect(self._open_alignment_editor)
         self._load_datasets()
 
         vbox_poi = QVBoxLayout()
@@ -65,6 +72,7 @@ class FileManager(QMainWindow):
         self._button_new_poi_test.clicked.connect(self._new_poi_data_set)
 
         self._button_new_align_test = QPushButton("New Alignment Test")
+        self._button_new_align_test.clicked.connect(self._new_alignment_data_set)
 
         vbox_new_file = QVBoxLayout()
         vbox_new_file.addWidget(self._file_select_1)
@@ -105,15 +113,38 @@ class FileManager(QMainWindow):
         poi_data_set_path = join(self._poi_test_dir, str(poi_data_set_file.text()))
         self._open_poi_editor(poi_data_set_path)
 
+    def _open_alignment_data_set(self):
+        align_data_set_file = self._list_align_datasets.selectedItems()[0]
+        align_data_set_file = join(self._align_test_dir, str(align_data_set_file.text()))
+        self._open_alignment_editor(align_data_set_file)
+
+    def _new_poi_data_set(self):
+        self._create_new_data_set(EnumTestSuiteType.poi_case)
+
+    def _new_alignment_data_set(self):
+        self._create_new_data_set(EnumTestSuiteType.alignment_case)
+
+    # Internal Logic
     def _open_poi_editor(self, poi_data_set_path):
         test_suite = CrystalTestSuite(poi_data_set_path, self._img_dir_root)
         self._active_windows.append(TestEditor(test_suite))
 
-    def _new_poi_data_set(self):
-        new_file_path = self._generate_new_file_path(self._poi_test_dir)
+    def _open_alignment_editor(self, file_path):
+        # TODO: Add code to launch alignment editor
+        print "Alignment Editor under construction..."
+        # test_suite = CrystalTestSuite(file_path, self._img_dir_root)
+        # self._active_windows.append(TestEditor(test_suite))
+
+    def _create_new_data_set(self, test_type):
+        if test_type is EnumTestSuiteType.poi_case:
+            parent_dir = self._poi_test_dir
+        elif test_type is EnumTestSuiteType.alignment_case:
+            parent_dir = self._align_test_dir
+        else:
+            raise ValueError("test_type not recognised - expected EnumTestSuiteType value.")
+        new_file_path = self._generate_new_file_path(parent_dir)
         dir_1 = self._file_select_1.get_dir()
         dir_2 = self._file_select_2.get_dir()
-
         # Validate directories
         if self._is_valid_dir(dir_1) and self._is_valid_dir(dir_2) and self._is_valid_new_file_path(new_file_path):
             new_test_suite = CrystalTestSuite(new_file_path, self._img_dir_root)
@@ -122,7 +153,10 @@ class FileManager(QMainWindow):
 
             # Reload the data set lists and open the editor
             self._load_datasets()
-            self._open_poi_editor(new_file_path)
+            if test_type is EnumTestSuiteType.poi_case:
+                self._open_poi_editor(new_file_path)
+            elif test_type is EnumTestSuiteType.alignment_case:
+                self._open_alignment_editor(new_file_path)
 
     def _is_valid_new_file_path(self, new_file_path):
         if basename(new_file_path) == ".csv":
