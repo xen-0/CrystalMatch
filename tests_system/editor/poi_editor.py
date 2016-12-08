@@ -6,11 +6,11 @@ from PyQt4.QtGui import QMainWindow, QIcon, QAction, QListWidget, QHBoxLayout, Q
 from magnifying_image_view import MagnifyingImageView
 
 
-class TestEditor(QMainWindow):
+class PoiTestEditor(QMainWindow):
     """ Small GUI utility to allow configuration options for the Crystal image matching application to be set.
     """
     def __init__(self, test_suite):
-        super(TestEditor, self).__init__()
+        super(PoiTestEditor, self).__init__()
 
         self._test_suite = test_suite
         self._cases = self._test_suite.cases
@@ -22,8 +22,6 @@ class TestEditor(QMainWindow):
 
         self._init_ui()
         self._new_selection()
-
-        self.show()
 
     # noinspection PyUnresolvedReferences
     def init_menu_bar(self):

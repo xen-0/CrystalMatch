@@ -6,7 +6,8 @@ from PyQt4.QtGui import QMainWindow, QListWidget, QVBoxLayout, QHBoxLayout, QWid
     QMessageBox, QLineEdit, QLabel
 from enum import Enum
 
-from editor.editor import TestEditor
+from editor.align_editor import AlignmentTestEditor
+from editor.poi_editor import PoiTestEditor
 from file_selector import DirSelector
 from test_suite import CrystalTestSuite
 
@@ -50,7 +51,7 @@ class FileManager(QMainWindow):
         self._list_poi_datasets = QListWidget()
         self._list_poi_datasets.doubleClicked.connect(self._open_poi_data_set)
         self._list_align_datasets = QListWidget()
-        self._list_align_datasets.doubleClicked.connect(self._open_alignment_editor)
+        self._list_align_datasets.doubleClicked.connect(self._open_alignment_data_set)
         self._load_datasets()
 
         vbox_poi = QVBoxLayout()
@@ -127,13 +128,11 @@ class FileManager(QMainWindow):
     # Internal Logic
     def _open_poi_editor(self, poi_data_set_path):
         test_suite = CrystalTestSuite(poi_data_set_path, self._img_dir_root)
-        self._active_windows.append(TestEditor(test_suite))
+        self._active_windows.append(PoiTestEditor(test_suite))
 
     def _open_alignment_editor(self, file_path):
-        # TODO: Add code to launch alignment editor
-        print "Alignment Editor under construction..."
-        # test_suite = CrystalTestSuite(file_path, self._img_dir_root)
-        # self._active_windows.append(TestEditor(test_suite))
+        test_suite = CrystalTestSuite(file_path, self._img_dir_root)
+        self._active_windows.append(AlignmentTestEditor(test_suite))
 
     def _create_new_data_set(self, test_type):
         if test_type is EnumTestSuiteType.poi_case:
