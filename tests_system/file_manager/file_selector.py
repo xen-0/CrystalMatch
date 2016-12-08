@@ -1,14 +1,17 @@
-from PyQt4.QtGui import QComboBox, QGroupBox, QTextEdit, QLineEdit, QHBoxLayout, QPushButton, QDialog, QFileDialog
+from PyQt4.QtCore import QString
+from PyQt4.QtGui import QGroupBox, QLineEdit, QHBoxLayout, QPushButton, QFileDialog
 
 
 class DirSelector(QGroupBox):
     """A custom widget which allows use"""
 
-    def __init__(self, title, height):
+    def __init__(self, title, height, default=None):
         QGroupBox.__init__(self)
         self.setTitle(title)
         self.setFixedHeight(height)
         self._init_ui()
+        if default is not None:
+            self._text_directory.setText(QString(default))
 
     def get_dir(self):
         return str(self._text_directory.text())

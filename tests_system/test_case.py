@@ -155,6 +155,12 @@ class CrystalTestCase:
         return self._image1.serialize() + "," + self._image2.serialize()
 
     @staticmethod
+    def create_new(path_prefix, image_path_1, image_path_2):
+        img_with_pts_1 = _ImageWithPoints(image_path_1, [])
+        img_with_pts_2 = _ImageWithPoints(image_path_2, [])
+        return CrystalTestCase(path_prefix, img_with_pts_1, img_with_pts_2)
+
+    @staticmethod
     def deserialize(string, image_dir=""):
         """ From format:
             <image 1 path>,<x1>;<y1>:<x2>;<y2>,<image 2 path>,<x1>;<y1>:<x2>;<y2>
