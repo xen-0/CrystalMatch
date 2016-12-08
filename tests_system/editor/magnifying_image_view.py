@@ -9,8 +9,8 @@ class MagnifyingImageView(QGroupBox):
     def __init__(self, title, viewer_size=600):
         super(MagnifyingImageView, self).__init__()
         self.setTitle(title)
-        self._init_ui()
         self._viewer_size = viewer_size
+        self._init_ui()
 
     def _init_ui(self):
         self._image_view = MagnifyingGraphicsView()
