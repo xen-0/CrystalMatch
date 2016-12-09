@@ -1,4 +1,4 @@
-from PyQt4.QtCore import Qt, QRectF
+from PyQt4.QtCore import QRectF, Qt
 from PyQt4.QtGui import QGroupBox, QGraphicsView, QLabel, QVBoxLayout, QGraphicsScene, QPixmap, QGraphicsItem
 from PyQt4.QtOpenGL import QGLWidget
 
@@ -14,7 +14,7 @@ class OverlayImageView(QGroupBox):
         self._image_view.setAlignment(Qt.AlignCenter)
         self._image_view.setViewport(QGLWidget())
 
-        self._zoom_instructions = QLabel("Write some damn instructions, Chris")
+        self._zoom_instructions = QLabel("Zoom on area: Right-click + drag\nReset Zoom: Right-click")
 
         vbox = QVBoxLayout()
         vbox.addWidget(self._image_view)
@@ -42,14 +42,13 @@ class OverlayImageView(QGroupBox):
 
 
 class _OverlayGraphicsView(QGraphicsView):
+    DRAG_ZOOM_MIN_SIZE = 10  # Sets the threshold for turning a click into drag-zoom - relative to viewer-size
 
     def __init__(self):
-        # TODO: add magnification
-        # TODO: Add zoom reset
-        # TODO: Add label to document controls
         super(_OverlayGraphicsView, self).__init__()
         self._background = None
         self._overlay = None
+        self._mouse_down_pos = None
 
     def overlay_images(self, img_1, img_2):
         pixmap_1 = QPixmap(img_1)
@@ -66,7 +65,7 @@ class _OverlayGraphicsView(QGraphicsView):
         self.setScene(new_scene)
 
         # Put entire image in view
-        self.fitInView(QRectF(pixmap_1.rect().united(pixmap_2.rect())), Qt.KeepAspectRatio)
+        self._reset_zoom()
 
     def set_opacity(self, opacity):
         self._overlay.setOpacity(opacity)
@@ -74,3 +73,40 @@ class _OverlayGraphicsView(QGraphicsView):
     def update_overlay_pos(self, mod_x, mod_y):
         pos = self._overlay.pos()
         self._overlay.setPos(pos.x() + mod_x, pos.y() + mod_y)
+
+    def mousePressEvent(self, event):
+        QGraphicsView.mousePressEvent(self, event)
+        if event.button() == Qt.RightButton:
+            self._mouse_down_pos = event.pos()
+
+    def mouseReleaseEvent(self, event):
+        QGraphicsView.mouseReleaseEvent(self, event)
+        # Check for drag zoom on the right mouse button
+        if self._mouse_down_pos is not None and event.button() == Qt.RightButton:
+            if self._is_drag_zoom_operation(self._mouse_down_pos, event.pos()):
+                self._zoom_to_area(self._mouse_down_pos, event.pos())
+            else:
+                self._reset_zoom()
+            self._mouse_down_pos = None
+
+    def _reset_zoom(self):
+        zoom_rect = QRectF(self._overlay.sceneBoundingRect().united(self._background.sceneBoundingRect()))
+        self.fitInView(zoom_rect, Qt.KeepAspectRatio)
+
+    def _is_drag_zoom_operation(self, pos_1, pos_2):
+        if pos_1 is None or pos_2 is None:
+            return False
+        drag_vector = pos_1 - pos_2
+        return drag_vector.manhattanLength() > self.DRAG_ZOOM_MIN_SIZE
+
+    def _zoom_to_area(self, pos_1, pos_2):
+        zoom_area = self._get_q_rect(self.mapToScene(pos_1), self.mapToScene(pos_2))
+        self.fitInView(zoom_area, Qt.KeepAspectRatio)
+
+    @staticmethod
+    def _get_q_rect(pos_1, pos_2):
+        x = min(pos_1.x(), pos_2.x())
+        y = min(pos_1.y(), pos_2.y())
+        w = max(pos_1.x(), pos_2.x()) - min(pos_1.x(), pos_2.x())
+        h = max(pos_1.y(), pos_2.y()) - min(pos_1.y(), pos_2.y())
+        return QRectF(x, y, w, h)

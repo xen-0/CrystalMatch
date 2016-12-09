@@ -57,13 +57,13 @@ class AlignmentTestEditor(QMainWindow):
         # Transparency controls
         elif key == Qt.Key_Q:
             # Show image 1
-            self._viewer.set_overlay_opacity(0.2)
+            self._viewer.set_overlay_opacity(0.1)
         elif key == Qt.Key_E:
             # Show image 2
-            self._viewer.set_overlay_opacity(1)
+            self._viewer.set_overlay_opacity(0.9)
         elif key == Qt.Key_R:
             # Overlay images
-            self._viewer.set_overlay_opacity(0.8)
+            self._viewer.set_overlay_opacity(0.5)
         # Other Controls
         elif key == Qt.Key_Enter:
             # Save and move to next record
