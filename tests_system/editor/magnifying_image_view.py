@@ -1,26 +1,32 @@
 from PyQt4.QtCore import Qt, QRectF
-from PyQt4.QtGui import QGroupBox, QGraphicsView, QVBoxLayout, QGraphicsScene, QPixmap, QPen, QColor, QApplication
+from PyQt4.QtGui import QGroupBox, QGraphicsView, QVBoxLayout, QGraphicsScene, QPixmap, QPen, QColor, QApplication, \
+    QLabel
 from PyQt4.QtOpenGL import QGLWidget
 
 from dls_util.shape.point import Point
 
 
 class MagnifyingImageView(QGroupBox):
-    def __init__(self, title, viewer_size=600):
+    def __init__(self, title, viewer_size=None):
         super(MagnifyingImageView, self).__init__()
         self.setTitle(title)
         self._viewer_size = viewer_size
         self._init_ui()
 
     def _init_ui(self):
-        self._image_view = MagnifyingGraphicsView()
-        self._image_view.setFixedWidth(self._viewer_size)
-        self._image_view.setFixedHeight(self._viewer_size)
+        self._image_view = _MagnifyingGraphicsView()
+        if self._viewer_size is not None:
+            self._image_view.setFixedWidth(self._viewer_size)
+            self._image_view.setFixedHeight(self._viewer_size)
         self._image_view.setAlignment(Qt.AlignCenter)
         self._image_view.setViewport(QGLWidget())
 
+        self._zoom_instructions = QLabel("Zoom in - right click;  Zoom out - shift + right click\nReset zoom - "
+                                         "ctrl + right/left click;  Area Zoom (for touch screen) - left click + drag")
+
         vbox = QVBoxLayout()
         vbox.addWidget(self._image_view)
+        vbox.addWidget(self._zoom_instructions)
 
         self.setLayout(vbox)
 
@@ -38,13 +44,13 @@ class MagnifyingImageView(QGroupBox):
         return None if s_point is None else Point(s_point[0], s_point[1])
 
 
-class MagnifyingGraphicsView(QGraphicsView):
+class _MagnifyingGraphicsView(QGraphicsView):
     POI_MARKER_SIZE_RELATIVE = 0.005  # Sets the POI markers based on the width of the pixmap
     SCALE_STEP_SIZE = 1.5
     DRAG_ZOOM_MIN_SIZE = 10  # Sets the threshold for turning a click into drag-zoom - relative to viewer-size
 
     def __init__(self, parent=None):
-        super(MagnifyingGraphicsView, self).__init__(parent)
+        super(_MagnifyingGraphicsView, self).__init__(parent)
         self._pixmap = None
         self._points_data = None
         self._scene = None

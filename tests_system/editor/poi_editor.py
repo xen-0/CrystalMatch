@@ -73,15 +73,9 @@ class PoiTestEditor(QMainWindow):
         hbox_frame.addLayout(vbox_frame_2)
         hbox_frame.addStretch(1)
 
-        self._zoom_instructions = QLabel("Zoom in - right click;  Zoom out - shift + right click\nReset zoom - "
-                                         "ctrl + right/left click;  Area Zoom (for touch screen) - left click + drag")
-        vbox_frame_set = QVBoxLayout()
-        vbox_frame_set.addLayout(hbox_frame)
-        vbox_frame_set.addWidget(self._zoom_instructions)
-
         hbox = QHBoxLayout()
         hbox.addLayout(vbox_left)
-        hbox.addLayout(vbox_frame_set)
+        hbox.addLayout(hbox_frame)
         hbox.addStretch(1)
 
         vbox_main = QVBoxLayout()
