@@ -1,5 +1,5 @@
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QMainWindow, QListWidget, QHBoxLayout, QWidget, QDesktopWidget
+from PyQt4.QtGui import QMainWindow, QListWidget, QHBoxLayout, QWidget, QDesktopWidget, QLabel, QVBoxLayout
 
 from editor.overlay_image_view import OverlayImageView
 
@@ -17,12 +17,18 @@ class AlignmentTestEditor(QMainWindow):
         self._case_list.setFixedWidth(200)
         self._case_list.clicked.connect(self._open_test_case)
         self._populate_test_case_list()
+        self._instructions = QLabel("Move overlay: w/a/s/d\nShow image 1/2: q/e\n"
+                                    "Overlay Images: r\nSave Changes: Enter")
+
+        left_vbox = QVBoxLayout()
+        left_vbox.addWidget(self._case_list)
+        left_vbox.addWidget(self._instructions)
 
         # Set up viewer
         self._viewer = OverlayImageView("Overlay Viewer")
 
         main_layout = QHBoxLayout()
-        main_layout.addWidget(self._case_list)
+        main_layout.addLayout(left_vbox)
         main_layout.addWidget(self._viewer)
         main_widget = QWidget()
         main_widget.setLayout(main_layout)
@@ -44,7 +50,6 @@ class AlignmentTestEditor(QMainWindow):
         q_key_press_event = args[0]
         key = q_key_press_event.key()
 
-        # TODO: document controls in label
         # Movement controls
         if key == Qt.Key_W:
             self._viewer.update_overlay_pos(0, -1)
