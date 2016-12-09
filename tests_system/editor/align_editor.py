@@ -18,7 +18,7 @@ class AlignmentTestEditor(QMainWindow):
         self._case_list.clicked.connect(self._open_test_case)
         self._populate_test_case_list()
         self._instructions = QLabel("Move overlay: w/a/s/d\nShow image 1/2: q/e\n"
-                                    "Overlay Images: r\nSave Changes: Enter")
+                                    "Overlay Images: r\nSave Changes: Enter/Tab")
 
         left_vbox = QVBoxLayout()
         left_vbox.addWidget(self._case_list)
@@ -44,6 +44,7 @@ class AlignmentTestEditor(QMainWindow):
     def _open_test_case(self):
         case = self._get_selected_case()
         self._viewer.overlay_images(case.image_path(1), case.image_path(2))
+        self._current_case_index = self._get_selected_index()
 
     def keyReleaseEvent(self, *args, **kwargs):
         QMainWindow.keyReleaseEvent(self, *args, **kwargs)
@@ -70,13 +71,21 @@ class AlignmentTestEditor(QMainWindow):
             # Overlay images
             self._viewer.set_overlay_opacity(0.5)
         # Other Controls
-        elif key == Qt.Key_Enter:
+        elif key == Qt.Key_Return or key == Qt.Key_Tab:
             # Save and move to next record
             # TODO: Save to file
-            # TODO: Move to next record
+            self._next_case()
             pass
 
     # Internal methods
+    def _next_case(self):
+        if self._current_case_index is not None:
+            self._current_case_index += 1
+            if self._current_case_index > len(self._test_suite.cases):
+                self._current_case_index = 0
+            self._case_list.setCurrentRow(self._current_case_index)
+            self._open_test_case()
+
     def _get_selected_index(self):
         selected_indexes = self._case_list.selectedIndexes()
         if any(selected_indexes):
