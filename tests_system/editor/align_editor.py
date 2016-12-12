@@ -14,7 +14,7 @@ class AlignmentTestEditor(QMainWindow):
     def _init_ui(self):
         # Set up test case list
         self._case_list = QListWidget()
-        self._case_list.setFixedWidth(200)
+        self._case_list.setFixedWidth(300)
         self._case_list.clicked.connect(self._open_test_case)
         self._populate_test_case_list()
         self._instructions = QLabel("Move overlay: w/a/s/d\nShow image 1/2: q/e\n"
