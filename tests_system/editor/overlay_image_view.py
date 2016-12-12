@@ -4,6 +4,10 @@ from PyQt4.QtOpenGL import QGLWidget
 
 
 class OverlayImageView(QGroupBox):
+    """
+    Takes two images, sets the first image as an overlay and the second as the background.  The user can adjust
+    the image alignment using the mouse and the offset can be returned.
+    """
     def __init__(self, title):
         super(OverlayImageView, self).__init__()
         self.setTitle(title)
@@ -32,6 +36,11 @@ class OverlayImageView(QGroupBox):
         """
         self._image_view.set_opacity(opacity)
 
+    def set_overlay_pos(self, x, y):
+        print x
+        print y
+        self._image_view.set_overlay_pos(x, y)
+
     def update_overlay_pos(self, mod_x, mod_y):
         """
         Modify the position of the overlay.
@@ -40,8 +49,15 @@ class OverlayImageView(QGroupBox):
         """
         self._image_view.update_overlay_pos(mod_x, mod_y)
 
+    def get_overlay_pos(self):
+        return self._image_view.get_overlay_pos()
+
 
 class _OverlayGraphicsView(QGraphicsView):
+    """
+    Takes two images, sets the first image as an overlay and the second as the background.  The user can adjust
+    the image alignment using the mouse and the offset can be returned.
+    """
     DRAG_ZOOM_MIN_SIZE = 10  # Sets the threshold for turning a click into drag-zoom - relative to viewer-size
 
     def __init__(self):
@@ -55,9 +71,9 @@ class _OverlayGraphicsView(QGraphicsView):
         pixmap_2 = QPixmap(img_2)
 
         new_scene = QGraphicsScene()
-        new_scene.addPixmap(pixmap_1)
-        self._background = new_scene.items()[0]
         new_scene.addPixmap(pixmap_2)
+        self._background = new_scene.items()[0]
+        new_scene.addPixmap(pixmap_1)
         self._overlay = new_scene.items()[0]
         self._overlay.setFlag(QGraphicsItem.ItemIsMovable)
         self.set_opacity(0.5)
@@ -67,8 +83,14 @@ class _OverlayGraphicsView(QGraphicsView):
         # Put entire image in view
         self._reset_zoom()
 
+    def get_overlay_pos(self):
+        return self._overlay.pos().x(), self._overlay.pos().y()
+
     def set_opacity(self, opacity):
         self._overlay.setOpacity(opacity)
+
+    def set_overlay_pos(self, x, y):
+        self._overlay.setPos(x, y)
 
     def update_overlay_pos(self, mod_x, mod_y):
         pos = self._overlay.pos()

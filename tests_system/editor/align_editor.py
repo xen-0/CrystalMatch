@@ -44,6 +44,8 @@ class AlignmentTestEditor(QMainWindow):
     def _open_test_case(self):
         case = self._get_selected_case()
         self._viewer.overlay_images(case.image_path(1), case.image_path(2))
+        x, y = case.get_offset()
+        self._viewer.set_overlay_pos(x, y)
         self._current_case_index = self._get_selected_index()
 
     def keyReleaseEvent(self, *args, **kwargs):
@@ -73,7 +75,10 @@ class AlignmentTestEditor(QMainWindow):
         # Other Controls
         elif key == Qt.Key_Return or key == Qt.Key_Tab:
             # Save and move to next record
-            # TODO: Save to file
+            x, y = self._viewer.get_overlay_pos()
+            case = self._test_suite.cases[self._current_case_index]
+            case.set_offset(x, y)
+            self._test_suite.save_to_file()
             self._next_case()
             pass
 

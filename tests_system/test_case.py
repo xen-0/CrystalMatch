@@ -91,12 +91,13 @@ class CrystalTestCase:
     """ Represents a crystal matching system test case. The case contains the paths of the two image files,
     the user selected points in the first image, and the expected result points in the second image.
     """
-    def __init__(self, path_prefix, image_1, image_2):
+    def __init__(self, path_prefix, image_1, image_2, alignment_offset=Point(0, 0)):
         self._path_prefix = path_prefix
 
         self._image1 = image_1
         self._image2 = image_2
         self._images = [self._image1, self._image2]
+        self._alignment_offset = alignment_offset
 
         self.name = image_1.path()
 
@@ -104,6 +105,12 @@ class CrystalTestCase:
     def _get_image(self, img_num):
         self.check_valid_image_number(img_num)
         return self._images[img_num-1]
+
+    def set_offset(self, x, y):
+        self._alignment_offset = Point(int(x), int(y))
+
+    def get_offset(self):
+        return self._alignment_offset.x, self._alignment_offset.y
 
     def image(self, img_num):
         return self._get_image(img_num).image(self._path_prefix)
@@ -152,7 +159,7 @@ class CrystalTestCase:
     # -------- FUNCTIONALITY -----------------------
     def serialize(self):
         """ Generate a string representation of this object that can be written to file. """
-        return self._image1.serialize() + "," + self._image2.serialize()
+        return self._image1.serialize() + "," + self._image2.serialize() + "," + self._serialize_offset()
 
     @staticmethod
     def create_new(path_prefix, image_path_1, image_path_2):
@@ -166,7 +173,7 @@ class CrystalTestCase:
             <image 1 path>,<x1>;<y1>:<x2>;<y2>,<image 2 path>,<x1>;<y1>:<x2>;<y2>
         """
         tokens = string.split(",")
-        if len(tokens) != 4:
+        if len(tokens) != 4 and len(tokens) != 5:
             raise ValueError("Cannot deserialize crystal test case string.")
 
         string1 = tokens[0] + "," + tokens[1]
@@ -175,10 +182,22 @@ class CrystalTestCase:
         string2 = tokens[2] + "," + tokens[3]
         image2 = _ImageWithPoints.deserialize(string2, image_dir)
 
+        offset = Point(0, 0) if len(tokens) == 4 else CrystalTestCase.deserialize_offset(tokens[4])
+
         # Create test case
-        case = CrystalTestCase(image_dir, image1, image2)
+        case = CrystalTestCase(image_dir, image1, image2, alignment_offset=offset)
         case.name = tokens[0].strip() + " -> " + tokens[2].strip()
         return case
+
+    def _serialize_offset(self):
+        return str(self._alignment_offset.x) + ";" + str(self._alignment_offset.y)
+
+    @staticmethod
+    def deserialize_offset(offset_str):
+        tokens = offset_str.split(";")
+        if len(tokens) != 2:
+            raise ValueError("Invalid alignment offset value.")
+        return Point(int(tokens[0]), int(tokens[1]))
 
     @staticmethod
     def check_valid_image_number(number):
