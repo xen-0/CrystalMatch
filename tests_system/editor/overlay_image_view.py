@@ -37,8 +37,6 @@ class OverlayImageView(QGroupBox):
         self._image_view.set_opacity(opacity)
 
     def set_overlay_pos(self, x, y):
-        print x
-        print y
         self._image_view.set_overlay_pos(x, y)
 
     def update_overlay_pos(self, mod_x, mod_y):
