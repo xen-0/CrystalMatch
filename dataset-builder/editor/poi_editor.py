@@ -42,11 +42,11 @@ class PoiTestEditor(QMainWindow):
         # --- Test Case List widget ---
         self._case_list = QListWidget()
         self._case_list.setFixedSize(200, 350)
-        self._case_list.clicked.connect(self._new_selection)
+        self._case_list.itemSelectionChanged.connect(self._new_selection)
 
         self._point_list = QListWidget()
         self._point_list.setFixedSize(200, 350)
-        self._point_list.clicked.connect(self._select_point)
+        self._point_list.itemSelectionChanged.connect(self._select_point)
 
         self._button_add_point = QPushButton("Add/Update (shortcut:U)", None)
         self._button_add_point.clicked.connect(self._submit_poi)
@@ -66,6 +66,9 @@ class PoiTestEditor(QMainWindow):
         # --- Image frames ---
         self._frame_1, vbox_frame_1 = self._ui_make_image_frame(1)
         self._frame_2, vbox_frame_2 = self._ui_make_image_frame(2)
+        self._instructions = QLabel("Submit POI: Tab\n"
+                                    "Submit POI and move to next result: Enter\n"
+                                    "Delete selected POI: Del")
 
         # --- Layout ---
         hbox_frame = QHBoxLayout()
@@ -73,9 +76,13 @@ class PoiTestEditor(QMainWindow):
         hbox_frame.addLayout(vbox_frame_2)
         hbox_frame.addStretch(1)
 
+        vbox_instructions = QVBoxLayout()
+        vbox_instructions.addLayout(hbox_frame)
+        vbox_instructions.addWidget(self._instructions)
+
         hbox = QHBoxLayout()
         hbox.addLayout(vbox_left)
-        hbox.addLayout(hbox_frame)
+        hbox.addLayout(vbox_instructions)
         hbox.addStretch(1)
 
         vbox_main = QVBoxLayout()
@@ -98,7 +105,7 @@ class PoiTestEditor(QMainWindow):
 
         return frame, vbox
 
-    def _submit_poi(self):
+    def _submit_poi(self, show_alerts=True):
         # Run checks to ensure points and case are set correctly
         case = self._get_selected_case()
         if case is None:
@@ -107,7 +114,8 @@ class PoiTestEditor(QMainWindow):
         point_1 = self._frame_1.get_selected_point()
         point_2 = self._frame_2.get_selected_point()
         if point_1 is None or point_2 is None:
-            QMessageBox().warning(self, "POI Selecting Error", "Please select 2 points.", QMessageBox.Ok)
+            if show_alerts:
+                QMessageBox().warning(self, "POI Selecting Error", "Please select 2 points.", QMessageBox.Ok)
             return
 
         # Handle differently depending on a new POI or an update
@@ -194,10 +202,19 @@ class PoiTestEditor(QMainWindow):
         if len(args) == 1:
             q_key_press_event = args[0]
             key = q_key_press_event.key()
-            if key == Qt.Key_U:
+            if key == Qt.Key_Tab:
                 self._submit_poi()
+            elif key == Qt.Key_Return:
+                self._submit_poi(show_alerts=False)
+                self._select_next_test_case()
             elif key == Qt.Key_Delete:
                 self._delete_poi()
+
+    def _select_next_test_case(self):
+        next_index = self._get_selected_index(self._case_list) + 1
+        if next_index >= len(self._cases):
+            next_index = 0
+        self._case_list.setCurrentRow(next_index)
 
     def _save_all(self):
         self._test_suite.save_to_file()
