@@ -66,8 +66,8 @@ class PoiTestEditor(QMainWindow):
         # --- Image frames ---
         self._frame_1, vbox_frame_1 = self._ui_make_image_frame(1)
         self._frame_2, vbox_frame_2 = self._ui_make_image_frame(2)
-        self._instructions = QLabel("Submit POI: Tab\n"
-                                    "Submit POI and move to next result: Enter\n"
+        self._instructions = QLabel("Save POI: Tab\n"
+                                    "Save POI and move to next result: Enter\n"
                                     "Delete selected POI: Del")
 
         # --- Layout ---
