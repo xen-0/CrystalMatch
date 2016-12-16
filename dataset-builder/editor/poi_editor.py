@@ -41,11 +41,11 @@ class PoiTestEditor(QMainWindow):
     def _init_ui(self):
         # --- Test Case List widget ---
         self._case_list = QListWidget()
-        self._case_list.setFixedSize(200, 350)
+        self._case_list.setFixedWidth(300)
         self._case_list.itemSelectionChanged.connect(self._new_selection)
 
         self._point_list = QListWidget()
-        self._point_list.setFixedSize(200, 350)
+        self._point_list.setFixedWidth(300)
         self._point_list.itemSelectionChanged.connect(self._select_point)
 
         self._button_add_point = QPushButton("Add/Update (shortcut:U)", None)
@@ -74,7 +74,6 @@ class PoiTestEditor(QMainWindow):
         hbox_frame = QHBoxLayout()
         hbox_frame.addLayout(vbox_frame_1)
         hbox_frame.addLayout(vbox_frame_2)
-        hbox_frame.addStretch(1)
 
         vbox_instructions = QVBoxLayout()
         vbox_instructions.addLayout(hbox_frame)
@@ -83,12 +82,10 @@ class PoiTestEditor(QMainWindow):
         hbox = QHBoxLayout()
         hbox.addLayout(vbox_left)
         hbox.addLayout(vbox_instructions)
-        hbox.addStretch(1)
 
         vbox_main = QVBoxLayout()
         vbox_main.setSpacing(10)
         vbox_main.addLayout(hbox)
-        vbox_main.addStretch(1)
 
         main_widget = QWidget()
         main_widget.setLayout(vbox_main)
@@ -97,11 +94,9 @@ class PoiTestEditor(QMainWindow):
 
     @staticmethod
     def _ui_make_image_frame(img_num):
-        frame = MagnifyingImageView("Image {}".format(img_num), viewer_size=600)
-
+        frame = MagnifyingImageView("Image {}".format(img_num))
         vbox = QVBoxLayout()
         vbox.addWidget(frame)
-        vbox.addStretch(1)
 
         return frame, vbox
 

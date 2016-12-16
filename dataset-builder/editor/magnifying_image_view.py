@@ -7,17 +7,13 @@ from dls_util.shape.point import Point
 
 
 class MagnifyingImageView(QGroupBox):
-    def __init__(self, title, viewer_size=None):
+    def __init__(self, title):
         super(MagnifyingImageView, self).__init__()
         self.setTitle(title)
-        self._viewer_size = viewer_size
         self._init_ui()
 
     def _init_ui(self):
         self._image_view = _MagnifyingGraphicsView()
-        if self._viewer_size is not None:
-            self._image_view.setFixedWidth(self._viewer_size)
-            self._image_view.setFixedHeight(self._viewer_size)
         self._image_view.setAlignment(Qt.AlignCenter)
         self._image_view.setViewport(QGLWidget())
 
