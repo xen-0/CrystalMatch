@@ -102,7 +102,7 @@ class FocusStackerMain(QMainWindow):
         files = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
 
         # Filter for image files
-        included_extensions = ['jpg', 'bmp', 'png', 'gif', 'jpeg']
+        included_extensions = ['jpg', 'bmp', 'png', 'gif', 'jpeg', 'tif']
         image_files = [fn for fn in files if any(fn.lower().endswith(ext) for ext in included_extensions)]
 
         folder_path += "\\"

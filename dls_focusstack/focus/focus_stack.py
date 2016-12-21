@@ -10,7 +10,7 @@ class FocusStack:
         self._images = images
         self._config = config
 
-    def composite(self, with_align=True):
+    def composite(self, with_align=False):
         """ Finds the points of best focus in all images and produces a merged result """
         cfg = self._config
 
@@ -43,8 +43,9 @@ class FocusStack:
             image2 = images[i]
             matcher = FeatureMatcher(image1, image2)
             matcher.set_detector(method)
+            matcher.set_transform_method("Homography")
 
-            transform = matcher.match()
+            transform = matcher.match().transform()
             transformed_image = transform.inverse_transform_image(image2, image2.size())
             transformed_image.save("{}aligned{}.png".format(out_dir, i))
             #transformed_image.popup()
@@ -73,17 +74,15 @@ class FocusStack:
 
     @staticmethod
     def _determine_focused_pixels(images, laplacians):
-        output = np.zeros(shape=images[0].raw().shape, dtype=images[0].raw().dtype)
 
-        width, height = images[0].size()
-        for y in range(0, height):
-            for x in range(0, width):
-                yxlaps = abs(laplacians[:, y, x])
-                index = (np.where(yxlaps == max(yxlaps)))[0][0]
-                output[y, x] = images[index].raw()[y, x]
+        max_values = laplacians[0].copy()
+        for i in range(1, len(laplacians)):
+            max_values = np.maximum(max_values, laplacians[i])
+
+        output = images[0].raw().copy()
+        for i in range(len(laplacians)):
+            mask = laplacians[i] == max_values
+            mask = np.reshape(np.repeat(mask, 3), output.shape)
+            output = np.where(mask, images[i].raw(), output)
 
         return Image(output)
-
-
-
-
