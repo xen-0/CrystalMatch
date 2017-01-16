@@ -7,9 +7,9 @@ from os.path import isfile, join
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
 
-from dls_focusstack.focus_config import FocusConfig
-from dls_focusstack.gui import *
+from config.focus_config import FocusConfig
 from dls_focusstack.focus import FocusStack
+from dls_focusstack.gui import *
 
 sys.path.append("..")
 
@@ -122,13 +122,3 @@ class FocusStackerMain(QMainWindow):
             self._frame.display_image(merged)
             merged.save("{}merged.png".format(self._config.output_dir.value()))
             merged.popup()
-
-
-def main():
-    app = QApplication(sys.argv)
-    ex = FocusStackerMain()
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    main()
