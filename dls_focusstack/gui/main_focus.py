@@ -1,8 +1,8 @@
 from __future__ import division
 
 import sys
-from os import listdir
-from os.path import isfile, join
+from os import listdir, makedirs
+from os.path import isfile, join, exists, isdir
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
@@ -15,14 +15,16 @@ sys.path.append("..")
 
 
 class FocusStackerMain(QMainWindow):
-    def __init__(self, config_file):
+    def __init__(self, config_file, output_dir, default_input_dir=""):
         super(FocusStackerMain, self).__init__()
 
         self._config = FocusConfig(config_file)
 
         self.init_ui()
-
-        self.open_folder(self._config.input_dir.value())
+        self._output_dir = output_dir
+        if not (exists(output_dir) and isdir(output_dir)):
+            makedirs(output_dir)
+        self.open_folder(default_input_dir)
 
     def init_ui(self):
         """ Create all elements of the user interface. """
@@ -118,5 +120,5 @@ class FocusStackerMain(QMainWindow):
             print("Complete")
 
             self._frame.display_image(merged)
-            merged.save("{}merged.png".format(self._config.output_dir.value()))
+            merged.save(join(self._output_dir, "merged.png"))
             merged.popup()
