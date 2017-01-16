@@ -15,12 +15,10 @@ sys.path.append("..")
 
 
 class FocusStackerMain(QMainWindow):
-    CONFIG_FILE = "../config/config-focus.ini"
-
-    def __init__(self):
+    def __init__(self, config_file):
         super(FocusStackerMain, self).__init__()
 
-        self._config = FocusConfig(FocusStackerMain.CONFIG_FILE)
+        self._config = FocusConfig(config_file)
 
         self.init_ui()
 
