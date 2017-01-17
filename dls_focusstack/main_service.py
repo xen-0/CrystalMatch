@@ -1,8 +1,11 @@
 import argparse
+import logging
+from logging import DEBUG, INFO
 
 from os.path import split, exists, isdir, isfile
 
 from os import makedirs, remove
+from sys import stdout
 
 CONFIG_FILE = "../config/focus_stack.ini"
 
@@ -10,13 +13,12 @@ CONFIG_FILE = "../config/focus_stack.ini"
 def _get_argument_parser():
     parser = argparse.ArgumentParser(description="Takes a z-stack of images and creates a composite using the "
                                                  "in-focus sections of each image.")
-    # TODO: check images exist
     parser.add_argument('image_stack',
                         metavar="image_path",
                         type=file,
                         nargs="*",
                         help="A list of image files - each image represents a level of the z-stack.")
-    parser.add_argument('-o',
+    parser.add_argument('-o', '--output',
                         metavar="output_path",
                         help="Specify output file - default is to create a file called 'output.png' in the working "
                              "directory. This will overwrite existing files, if the path does not exist the app "
@@ -40,20 +42,41 @@ def process_output_file_path(path):
         remove(path)
 
 
+def set_up_logging(debug, verbose):
+    # Set up logging
+    root_logger = logging.getLogger()
+    root_logger.setLevel(DEBUG)
+    # Set up stream handler
+    if debug:
+        add_log_stream_handler(DEBUG, root_logger)
+    elif verbose:
+        add_log_stream_handler(INFO, root_logger)
+
+
+def add_log_stream_handler(level, logger):
+    stream_handler = logging.StreamHandler(stdout)
+    stream_handler.setLevel(level)
+    logger.addHandler(stream_handler)
+    if level == DEBUG:
+        logging.debug("DEBUG statements visible.")
+    elif level == INFO:
+        logging.info("INFO statements visible.")
+
+
 def handle_error(e):
     """
     A placeholder method for dealing with errors raised during runtime - these need to be reported in JSON mode.
     :param e: Exception being raised
     """
-    print "ERROR"
-    print e
+    logging.error(e)
 
 
 def main():
     try:
         parser = _get_argument_parser()
         args = parser.parse_args()
-        process_output_file_path(args.o)
+        set_up_logging(args.debug, args.verbose)
+        process_output_file_path(args.output)
     except IOError as e:
         handle_error(e)
 
