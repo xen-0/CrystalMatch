@@ -1,4 +1,5 @@
 import cv2
+import logging
 import numpy as np
 from os.path import join
 
@@ -34,17 +35,17 @@ class FocusStack:
     def _compute_laplacians(images, kernel_size, blur_size):
         """ Compute the gradient map of the image """
 
-        print("Computing the laplacian of the blurred images")
+        logging.info("Computing the laplacian of the blurred images")
         laps = []
         for i in range(len(images)):
-            print "Lap {}".format(i)
+            logging.info("Lap {}".format(i))
             image = images[i].to_mono().raw()
             blurred = cv2.GaussianBlur(image, (blur_size, blur_size), 0)
             result = cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
             laps.append(result)
 
         laps = np.asarray(laps)
-        print "Shape of array of laplacians = {}".format(laps.shape)
+        logging.debug("Shape of array of laplacians = {}".format(laps.shape))
 
         return laps
 
