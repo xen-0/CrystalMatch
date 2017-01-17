@@ -5,7 +5,7 @@ from os import listdir, makedirs
 from os.path import isfile, join, exists, isdir
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
 from config.focus_config import FocusConfig
 from dls_focusstack.focus import FocusStack
@@ -15,10 +15,10 @@ sys.path.append("..")
 
 
 class FocusStackerMain(QMainWindow):
-    def __init__(self, config_file, output_dir, default_input_dir=""):
+    def __init__(self, config_dir, output_dir, default_input_dir=""):
         super(FocusStackerMain, self).__init__()
 
-        self._config = FocusConfig(config_file)
+        self._config_dir = config_dir
 
         self.init_ui()
         self._output_dir = output_dir
@@ -94,7 +94,7 @@ class FocusStackerMain(QMainWindow):
         self.open_folder(folder_path)
 
     def _fn_config_dialog(self):
-        dialog = FocusConfigDialog(self._config)
+        dialog = FocusConfigDialog(FocusConfig(join(self._config_dir, FocusStack.CONFIG_FILE_NAME)))
         dialog.exec_()
 
     def open_folder(self, folder_path):
@@ -114,11 +114,11 @@ class FocusStackerMain(QMainWindow):
         images = self._image_list.get_checked_images()
 
         if len(images) > 1:
-            stacker = FocusStack(images, self._config)
+            stacker = FocusStack(images, self._config_dir)
             merged = stacker.composite()
 
             print("Complete")
 
             self._frame.display_image(merged)
             merged.save(join(self._output_dir, "merged.png"))
-            merged.popup()
+            # merged.popup()

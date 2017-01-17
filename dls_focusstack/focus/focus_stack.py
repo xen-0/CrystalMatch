@@ -1,18 +1,26 @@
 import cv2
 import numpy as np
+from os.path import join
 
+from config.focus_config import FocusConfig
 from dls_util.imaging import Image
 
 
 class FocusStack:
-    def __init__(self, images, config):
-        self._images = images
-        self._config = config
+    CONFIG_FILE_NAME = "focus_stack.ini"
+
+    def __init__(self, image_file_list, config_dir):
+        self._image_file_list = image_file_list
+        self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
 
     def composite(self):
         """ Finds the points of best focus in all images and produces a merged result """
         cfg = self._config
-        images = self._images
+
+        # Convert images to util Image class
+        images = []
+        for file_obj in self._image_file_list:
+            images.append(Image.from_file(file_obj.name))
 
         kernel_size = cfg.kernel_size.value()
         blur_radius = cfg.blur_radius.value()

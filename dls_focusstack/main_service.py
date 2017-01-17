@@ -31,8 +31,7 @@ class FocusStackService:
             args = parser.parse_args()
             self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
-            # TODO: uncomment line below once modifying FocusStack
-            # FocusStack(args.image_stack, args.config)
+            FocusStack(args.image_stack, args.config)
         except IOError as e:
             self._handle_error(e)
 
