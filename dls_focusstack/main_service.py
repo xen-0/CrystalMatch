@@ -7,7 +7,17 @@ from os.path import split, exists, isdir, isfile
 from os import makedirs, remove
 from sys import stdout
 
-CONFIG_FILE = "../config/focus_stack.ini"
+import sys
+
+from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
+from focus.focus_stack import FocusStack
+
+# Detect if the program is running from source or has been bundled
+IS_BUNDLED = getattr(sys, 'frozen', False)
+if IS_BUNDLED:
+    CONFIG_DIR = "./" + ReadableConfigDir.CONFIG_DIR_NAME + "/"
+else:
+    CONFIG_DIR = "../" + ReadableConfigDir.CONFIG_DIR_NAME + "/"
 
 
 class FocusStackService:
@@ -21,6 +31,8 @@ class FocusStackService:
             args = parser.parse_args()
             self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
+            # TODO: uncomment line below once modifying FocusStack
+            # FocusStack(args.image_stack, args.config)
         except IOError as e:
             self._handle_error(e)
 
@@ -31,7 +43,7 @@ class FocusStackService:
         parser.add_argument('image_stack',
                             metavar="image_path",
                             type=file,
-                            nargs="*",
+                            nargs="+",
                             help="A list of image files - each image represents a level of the z-stack.")
         parser.add_argument('-o', '--output',
                             metavar="output_path",
@@ -44,6 +56,12 @@ class FocusStackService:
         parser.add_argument('-d', '--debug',
                             action="store_true",
                             help="Output debug information to the console.")
+        parser.add_argument('--config',
+                            metavar="path",
+                            action=ReadableConfigDir,
+                            default="./config",
+                            help="Path to the config directory. If it does not exist one will be created with "
+                                 "default settings.")
         return parser
 
     @staticmethod
