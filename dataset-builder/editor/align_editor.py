@@ -30,7 +30,6 @@ class AlignmentTestEditor(QMainWindow):
         self._scale_view = QVBoxLayout()
         self._scale_view.addLayout(self._scale_value_box)
         self._scale_view.addWidget(self._scale_submit)
-        # TODO: Apply scale changes to overlap image
 
         self._scale_group_box = QGroupBox()
         self._scale_group_box.setTitle("Scale for data set:")
@@ -73,16 +72,19 @@ class AlignmentTestEditor(QMainWindow):
             sr2 = float(self._scale_right_value.text())
             self._test_suite.set_scale_ratio(sr1, sr2)
             self._test_suite.save_to_file()
+            # Reopen the current test case
+            self._open_test_case()
         except ValueError:
             QMessageBox().warning(self, "Invalid scale values",
                                   "Scale values must be valid floating points or integer numbers!")
 
     def _open_test_case(self):
         case = self._get_selected_case()
-        self._viewer.overlay_images(case.image_path(1), case.image_path(2))
-        x, y = case.get_offset()
-        self._viewer.set_overlay_pos(x, y)
-        self._current_case_index = self._get_selected_index()
+        if case is not None:
+            self._viewer.overlay_images(case.image_path(1), case.image_path(2), self._test_suite.calculate_scale())
+            x, y = case.get_offset()
+            self._viewer.set_overlay_pos(x, y)
+            self._current_case_index = self._get_selected_index()
 
     def keyReleaseEvent(self, *args, **kwargs):
         QMainWindow.keyReleaseEvent(self, *args, **kwargs)

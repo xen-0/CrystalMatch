@@ -28,6 +28,8 @@ class CrystalTestSuite:
 
     def set_scale_ratio(self, sr1, sr2): self._scale_ratio = (sr1, sr2)
 
+    def calculate_scale(self): return self._scale_ratio[1] / self._scale_ratio[0]
+
     def save_to_file(self):
         if not os.path.exists(os.path.dirname(self._case_file)):
             os.makedirs(os.path.dirname(self._case_file))
