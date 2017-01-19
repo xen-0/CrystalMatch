@@ -55,9 +55,17 @@ class _ImageWithPoints:
         return len(self._points)
 
     def serialize(self):
-        """ Generate a string representation of this object that can be written to file. """
-        str_points = [p.serialize() for p in self.points()]
-        return self.path() + "," + ":".join(str_points)
+        """ Generate a representation of this object that can be written to json. """
+        return {
+            "image": self.path(),
+            "points": self._serialize_points()
+        }
+
+    def _serialize_points(self):
+        output = []
+        for point in self.points():
+            output.append({"x": point.x, "y": point.y})
+        return output
 
     @staticmethod
     def deserialize(string, image_dir=""):
@@ -158,8 +166,12 @@ class CrystalTestCase:
 
     # -------- FUNCTIONALITY -----------------------
     def serialize(self):
-        """ Generate a string representation of this object that can be written to file. """
-        return self._image1.serialize() + "," + self._image2.serialize() + "," + self._serialize_offset()
+        output = {
+            "offset": self._serialize_offset(),
+            "formulatrix": self._image1.serialize(),
+            "beamline": self._image2.serialize()
+        }
+        return output
 
     @staticmethod
     def create_new(path_prefix, image_path_1, image_path_2):
@@ -190,7 +202,7 @@ class CrystalTestCase:
         return case
 
     def _serialize_offset(self):
-        return str(self._alignment_offset.x) + ";" + str(self._alignment_offset.y)
+        return {"x": self._alignment_offset.x, "y": self._alignment_offset.y}
 
     @staticmethod
     def deserialize_offset(offset_str):

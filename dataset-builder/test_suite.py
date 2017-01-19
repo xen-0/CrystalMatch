@@ -1,3 +1,4 @@
+import json
 import os
 
 from os import listdir
@@ -31,13 +32,26 @@ class CrystalTestSuite:
     def calculate_scale(self): return self._scale_ratio[1] / self._scale_ratio[0]
 
     def save_to_file(self):
-        if not os.path.exists(os.path.dirname(self._case_file)):
-            os.makedirs(os.path.dirname(self._case_file))
+        #TODO: remove temporary filename convertor
+        if self._case_file.endswith(".csv"):
+            file_name = self._case_file.replace(".csv", ".json")
+        else:
+            file_name = self._case_file
+        if not os.path.exists(os.path.dirname(file_name)):
+            os.makedirs(os.path.dirname(file_name))
 
-        with open(self._case_file, 'w') as f:
-            f.write(self.FILE_INDICATOR_SCALE + str(self._scale_ratio[0]) + "," + str(self._scale_ratio[1]) + "\n")
-            for case in self.cases:
-                f.write(case.serialize() + "\n")
+        output = {
+            "dataset": {
+                "relative_scale": {
+                    "formulatrix": self._scale_ratio[0], "beamline": self._scale_ratio[1]
+                },
+                "test_cases": []
+            }}
+
+        for case in self.cases:
+            output["dataset"]["test_cases"].append(case.serialize())
+        with open(file_name, 'w') as f:
+            json.dump(output, f)
 
     def create_cases_from_files(self, dir_1, dir_2):
         """ Compare two directories and create a new case for every image file with the same name. """
