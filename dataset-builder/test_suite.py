@@ -1,8 +1,5 @@
 import json
-import os
-
 from os import listdir
-
 from os.path import splitext, join, relpath
 
 from test_case import CrystalTestCase
@@ -12,7 +9,6 @@ class CrystalTestSuite:
     """ Stores a suite of crystal matching system test data and handles saving/loading from file.
     """
     ACCEPTED_IMAGE_FORMATS = [".jpg", ".jpeg", ".tif"]
-    FILE_INDICATOR_SCALE = "!scale!"
 
     def __init__(self, case_file, image_directory):
         self._case_file = case_file
@@ -32,14 +28,6 @@ class CrystalTestSuite:
     def calculate_scale(self): return self._scale_ratio[1] / self._scale_ratio[0]
 
     def save_to_file(self):
-        #TODO: remove temporary filename convertor
-        if self._case_file.endswith(".csv"):
-            file_name = self._case_file.replace(".csv", ".json")
-        else:
-            file_name = self._case_file
-        if not os.path.exists(os.path.dirname(file_name)):
-            os.makedirs(os.path.dirname(file_name))
-
         output = {
             "dataset": {
                 "relative_scale": {
@@ -50,7 +38,7 @@ class CrystalTestSuite:
 
         for case in self.cases:
             output["dataset"]["test_cases"].append(case.serialize())
-        with open(file_name, 'w') as f:
+        with open(self._case_file, 'w') as f:
             json.dump(output, f)
 
     def create_cases_from_files(self, dir_1, dir_2):
@@ -72,38 +60,19 @@ class CrystalTestSuite:
         """ Load the test data from the specified csv file. The image directory is prepended to every image
         file given in the test data (This is just to save space in the csv file). """
         cases = []
-
         try:
             with open(case_file) as f:
-                lines = f.readlines()
+                json_data = json.load(f)
+            dataset = json_data["dataset"]
 
-                for line in lines:
-                    if line.strip().startswith("#") or line.strip() == "":
-                        continue
-                    if line.strip().startswith(self.FILE_INDICATOR_SCALE):
-                        # This line indicates the scale ratio between the images
-                        self._set_scale_ratio_from_line(line)
-                        continue
-                    try:
-                        case = CrystalTestSuite._case_from_line(line, image_dir)
-                        cases.append(case)
-                    except ValueError:
-                        print("Failed to parse line: '{}'".format(line))
+            # Load scale ratio
+            self.set_scale_ratio(dataset["relative_scale"]["formulatrix"], dataset["relative_scale"]["beamline"])
+
+            # Load test cases
+            for test_case in dataset["test_cases"]:
+                cases.append(CrystalTestCase.deserialize(test_case, image_dir))
         except IOError:
             # This is not necessarily a problem - this could be a new Test Suite
             print "WARNING: Data set file does not exist."
 
         return cases
-
-    def _set_scale_ratio_from_line(self, line):
-        ratio_line = line.strip()[len(self.FILE_INDICATOR_SCALE):]
-        tokens = ratio_line.split(",")
-        if len(tokens) == 2:
-            self._scale_ratio = (float(tokens[0].strip()), float(tokens[1].strip()))
-        else:
-            print ("Failed to set scale from line: " + line)
-
-    @staticmethod
-    def _case_from_line(line, image_dir):
-        case = CrystalTestCase.deserialize(line, image_dir)
-        return case

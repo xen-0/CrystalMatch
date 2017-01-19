@@ -97,17 +97,12 @@ class FileManager(QMainWindow):
         data_set_file = self._list_datasets.selectedItems()[0]
         data_set_file_path = join(self._data_sets_dir, str(data_set_file.text()))
 
-        #TODO: remove temp conversion code:
-        test_suite = CrystalTestSuite(data_set_file_path, self._img_dir_root)
-        test_suite.save_to_file()
-        self._load_datasets()
-
-        # if self._radio_align_editor.isChecked():
-        #     self._open_alignment_editor(data_set_file_path)
-        # elif self._radio_poi_editor.isChecked():
-        #     self._open_poi_editor(data_set_file_path)
-        # else:
-        #     raise Exception("Editor type not set")
+        if self._radio_align_editor.isChecked():
+            self._open_alignment_editor(data_set_file_path)
+        elif self._radio_poi_editor.isChecked():
+            self._open_poi_editor(data_set_file_path)
+        else:
+            raise Exception("Editor type not set")
 
     def _new_data_set(self):
         new_file_path = self._generate_new_file_path(self._data_sets_dir)
