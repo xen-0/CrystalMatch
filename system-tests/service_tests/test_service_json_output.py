@@ -98,9 +98,9 @@ class TestServiceOutput(SystemTest):
         )
         # Test Alignment phase
         scale, x_trans, y_trans = self.get_global_transform_from_std_out()
-        self.failUnlessEqual(scale, json['alignment']['transform']['scale'])
-        self.failUnlessEqual(x_trans, json['alignment']['transform']['translation']['x'])
-        self.failUnlessEqual(y_trans, json['alignment']['transform']['translation']['y'])
+        self.failUnlessEqual(scale, json['alignment']['scale'])
+        self.failUnlessEqual(x_trans, json['alignment']['translation']['x'])
+        self.failUnlessEqual(y_trans, json['alignment']['translation']['y'])
         json_align_status = json['alignment']['status']
         self.failUnlessStdOutContains(
             'align_status:' + str(json_align_status['code']) + ', ' + json_align_status['msg'],
@@ -129,9 +129,9 @@ class TestServiceOutput(SystemTest):
         self.failUnless(json['alignment']['status']['msg'] in "OK;FAIL")
         status_value = json['alignment']['status']['code']
         self.failUnless(status_value == 1 or status_value == 0)
-        self.failUnlessEqual(exp_scale, json['alignment']['transform']['scale'])
-        self.failUnless(isinstance(json['alignment']['transform']['translation']['x'], Number))
-        self.failUnless(isinstance(json['alignment']['transform']['translation']['y'], Number))
+        self.failUnlessEqual(exp_scale, json['alignment']['scale'])
+        self.failUnless(isinstance(json['alignment']['translation']['x'], Number))
+        self.failUnless(isinstance(json['alignment']['translation']['y'], Number))
         self.failUnless(isinstance(json['alignment']['mean_error'], Number))
         self.failUnlessEqual(expected_poi_len, len(json['poi']))
 

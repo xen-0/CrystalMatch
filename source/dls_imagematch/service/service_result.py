@@ -169,12 +169,10 @@ class ServiceResult:
         output_obj['alignment'] = {
             'status': self._alignment_status_code.to_json_array(),
             'mean_error': self._alignment_error,
-            'transform': {
-                'scale': self._alignment_transform_scale,
-                'translation': {
-                    'x': self._alignment_transform_offset.x,
-                    'y': self._alignment_transform_offset.y,
-                }
+            'scale': self._alignment_transform_scale,
+            'translation': {
+                'x': self._alignment_transform_offset.x,
+                'y': self._alignment_transform_offset.y,
             }
         }
 
