@@ -1,8 +1,8 @@
 # Crystal Match - System User Guide
 
-*Software version: V0.1.1*
+*Software version: V0.1.4*
 
-*Last Updated: 30/11/2016*
+*Last Updated: 24/01/2016*
 
 *Contributions:*
 
@@ -59,9 +59,9 @@ CrystalMatch provides all output in pixels for accuracy and is unit-agnostic.
 
 The Feature Matching does not account for scaling and assumes that both the Formulatrix and beamline image have the same resolution.
 
-The scale can be specified using the `--scale s1:s2` flag where s1 and s2 are the pixels per `[unit]` (resolution) of the Formulatrix and beamline images respectively. Note that the actual unit used does not matter but the values must be relative to each other.
+The scale can be specified using the `--scale r1:r2` flag where r1 and r2 are the resolutions in `[unit]` per pixel of the Formulatrix and beamline images respectively. Note that the unit used does not matter but the values must be relative to each other.
 
-The default values for scale are set in the Alignment phase configuration file (`align.ini`) and can be modified - these will still be overridden by the command-line flag.
+The default values for scale are set in the Alignment phase configuration file (`align.ini`) and can be modified - these will be overridden by the command-line flag.
 
 ### Configuration and Log Files
 
