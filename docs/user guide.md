@@ -93,9 +93,8 @@ CrystalMatch outputs results in a human-readable format by default - when being 
     * `status` - Alignment status.
         * `code` - `1` for success or `0` for failure.
         * `msg` - Human readable error message.
-    * `transform` - The scale and translation combination required to map a POI from the Formulatrix image to the Beamline image.
-        * `scale` - Scale between Formulatrix and Beamline images - this is this is calculated from the input scale ratio.
-        * `translation` (x and y values) - The translation required to map a point from the Formulatrix image to the Beamline image.
+    * `scale` - Scale between Formulatrix and Beamline images - this is this is calculated from the input scale ratio.
+    * `translation` (x and y values) - The translation required to map a point from the Formulatrix image to the Beamline image.
     * `mean-error` - Mean error value after image alignment.
 * `poi` (optional, array) - An array of Crystal Matching phase results - will not be present if input points were not specified or Alignment phase failed.
     * `status` - Results status
