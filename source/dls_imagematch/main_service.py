@@ -108,9 +108,10 @@ def _get_argument_parser():
                         help="Sets the configuration directory.")
     parser.add_argument('--scale',
                         metavar="scale",
-                        help="The scale between the Formulatrix and beamline given as two floats separated by a colon, "
-                             "note this is relative (1:2 is the same as 2:4) and a value must be specified for each "
-                             "image using the format '[input_image_resolution]:[output_image_resolution]'.")
+                        help="The scale between the Formulatrix and beamline image given as the resolution of each "
+                             "image separated by a colon. Note this is relative (1:2 is the same as 2:4) and a value "
+                             "must be specified for each image using the format "
+                             "'[Formulatrix_image_resolution]:[beamline_image_resolution]'.")
     parser.add_argument('--version',
                         action='version',
                         version=VersionHandler.version_string())
