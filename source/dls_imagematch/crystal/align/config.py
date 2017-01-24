@@ -46,12 +46,12 @@ class AlignConfig(Config):
             self.pixel_size_1.set_override(scale_override[0])
             self.pixel_size_2.set_override(scale_override[1])
 
-        self.metric_limit_low = add(RangeFloatConfigItem, "Metric Limit Low", 15.0, [0.0, None])
+        self.metric_limit_low = add(RangeFloatConfigItem, "Metric Limit Low", 30.0, [0.0, None])
         self.metric_limit_low.set_comment("A metric quantifying the quality of the alignment is calculated. If the "
                                           "metric is below this value, it is considered a good fit; if it is above, "
                                           "then the fit is considered poor.")
 
-        self.metric_limit_high = add(RangeFloatConfigItem, "Metric Limit High", 25.0, [0.0, None])
+        self.metric_limit_high = add(RangeFloatConfigItem, "Metric Limit High", 40.0, [0.0, None])
         self.metric_limit_high.set_comment("A metric quantifying the quality of the alignment is calculated. If the "
                                            "metric is below this value, it is considered a poor fit; if it is above, "
                                            "then the fit is considered to have failed totally, i.e. the images are "
