@@ -74,7 +74,7 @@ class TestScaleCommandLineFlags(SystemTest):
         test_name = "test_scale_flags_with_invalid_value_raises_error_" + name
         self.run_crystal_matching_test(test_name, cmd_line)
         self.failUnlessStdErrContains("Scale must be given as a pair of float values separated by a colon (':'). "
-                                           "Value given:")
+                                      "Value given:")
 
     def test_scale_flag_with_values_causing_incorrect_alignment_returns_failure(self):
         # Run app wit scale deliberately inverted
