@@ -55,29 +55,27 @@ class _ImageWithPoints:
         return len(self._points)
 
     def serialize(self):
-        """ Generate a string representation of this object that can be written to file. """
-        str_points = [p.serialize() for p in self.points()]
-        return self.path() + "," + ":".join(str_points)
+        """ Generate a representation of this object that can be written to json. """
+        return {
+            "image": self.path(),
+            "points": self._serialize_points()
+        }
+
+    def _serialize_points(self):
+        output = []
+        for point in self.points():
+            output.append({"x": point.x, "y": point.y})
+        return output
 
     @staticmethod
-    def deserialize(string, image_dir=""):
-        """ From format:
-            <image path>,<x1>;<y1>:<x2>;<y2>:...
-        """
-        tokens = string.split(",")
-        if len(tokens) != 2:
-            raise ValueError("Cannot deserialize crystal test case string.")
-
-        path = tokens[0].strip()
-        str_points = [p for p in tokens[1].strip().split(":") if any(p)]
-
+    def deserialize(json_object, image_dir):
+        path = json_object["image"]
         _ImageWithPoints.check_file_exists(image_dir, path)
 
         # Extract selected point coordinates
         points = []
-        for str_point in str_points:
-            point = Point.deserialize(str_point)
-            points.append(point)
+        for pt in json_object["points"]:
+            points.append(Point(pt["x"], pt["y"]))
 
         return _ImageWithPoints(path, points)
 
@@ -158,8 +156,12 @@ class CrystalTestCase:
 
     # -------- FUNCTIONALITY -----------------------
     def serialize(self):
-        """ Generate a string representation of this object that can be written to file. """
-        return self._image1.serialize() + "," + self._image2.serialize() + "," + self._serialize_offset()
+        output = {
+            "offset": self._serialize_offset(),
+            "formulatrix": self._image1.serialize(),
+            "beamline": self._image2.serialize()
+        }
+        return output
 
     @staticmethod
     def create_new(path_prefix, image_path_1, image_path_2):
@@ -168,36 +170,19 @@ class CrystalTestCase:
         return CrystalTestCase(path_prefix, img_with_pts_1, img_with_pts_2)
 
     @staticmethod
-    def deserialize(string, image_dir=""):
-        """ From format:
-            <image 1 path>,<x1>;<y1>:<x2>;<y2>,<image 2 path>,<x1>;<y1>:<x2>;<y2>
-        """
-        tokens = string.split(",")
-        if len(tokens) != 4 and len(tokens) != 5:
-            raise ValueError("Cannot deserialize crystal test case string.")
+    def deserialize(json_object, image_dir):
+        image1 = _ImageWithPoints.deserialize(json_object["formulatrix"], image_dir)
+        image2 = _ImageWithPoints.deserialize(json_object["beamline"], image_dir)
 
-        string1 = tokens[0] + "," + tokens[1]
-        image1 = _ImageWithPoints.deserialize(string1, image_dir)
-
-        string2 = tokens[2] + "," + tokens[3]
-        image2 = _ImageWithPoints.deserialize(string2, image_dir)
-
-        offset = Point(0, 0) if len(tokens) == 4 else CrystalTestCase.deserialize_offset(tokens[4])
+        offset = Point(json_object["offset"]["x"], json_object["offset"]["y"])
 
         # Create test case
         case = CrystalTestCase(image_dir, image1, image2, alignment_offset=offset)
-        case.name = tokens[0].strip() + " -> " + tokens[2].strip()
+        case.name = json_object["formulatrix"]["image"] + " -> " + json_object["beamline"]["image"]
         return case
 
     def _serialize_offset(self):
-        return str(self._alignment_offset.x) + ";" + str(self._alignment_offset.y)
-
-    @staticmethod
-    def deserialize_offset(offset_str):
-        tokens = offset_str.split(";")
-        if len(tokens) != 2:
-            raise ValueError("Invalid alignment offset value.")
-        return Point(int(tokens[0]), int(tokens[1]))
+        return {"x": self._alignment_offset.x, "y": self._alignment_offset.y}
 
     @staticmethod
     def check_valid_image_number(number):

@@ -26,8 +26,14 @@ class OverlayImageView(QGroupBox):
 
         self.setLayout(vbox)
 
-    def overlay_images(self, img_1, img_2):
-        self._image_view.overlay_images(img_1, img_2)
+    def overlay_images(self, img_1, img_2, scale):
+        """
+        Load images into the overlay view
+        :param img_1: image 1
+        :param img_2: image 2
+        :param scale: the scaling applied to image 1 only.
+        """
+        self._image_view.overlay_images(img_1, img_2, scale=scale)
 
     def set_overlay_opacity(self, opacity):
         """
@@ -64,9 +70,20 @@ class _OverlayGraphicsView(QGraphicsView):
         self._overlay = None
         self._mouse_down_pos = None
 
-    def overlay_images(self, img_1, img_2):
+    def overlay_images(self, img_1, img_2, scale=1.0):
+        """
+        Add overlay images to the graphics view
+        :param img_1: image 1
+        :param img_2: image 2
+        :param scale: the scaling applied to image 1 before adding it to the graphics view.
+        """
         pixmap_1 = QPixmap(img_1)
         pixmap_2 = QPixmap(img_2)
+
+        # Scale the pixmap of image 1
+        pixmap_1 = pixmap_1.scaled(int(pixmap_1.width() * scale),
+                                   int(pixmap_1.height() * scale),
+                                   Qt.KeepAspectRatio)
 
         new_scene = QGraphicsScene()
         new_scene.addPixmap(pixmap_2)
