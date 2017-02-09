@@ -4,7 +4,7 @@ from dls_util.shape.point import Point
 from system_test import SystemTest
 
 
-class TestCrsytalStageConfigFile(SystemTest):
+class TestCrystalStageConfigFile(SystemTest):
     def setUp(self):
         self.set_directory_paths(realpath(__file__))
 
