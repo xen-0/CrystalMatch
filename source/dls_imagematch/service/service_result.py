@@ -183,6 +183,7 @@ class ServiceResult:
         # POI description
         poi_array = []
         for poi in self._match_results:
+            mean_error = poi.feature_match_result().mean_transform_error() if poi.is_success() else 0
             poi_array.append({
                 'location': {
                     'x': poi.get_transformed_poi().x,
@@ -193,7 +194,7 @@ class ServiceResult:
                     'y': poi.get_delta().y,
                 },
                 'status': poi.get_status().to_json_array(),
-                'mean_error': poi.feature_match_result().mean_transform_error()
+                'mean_error': mean_error
             })
         output_obj['poi'] = poi_array
         print(json.dumps(output_obj, cls=DecimalEncoder))
