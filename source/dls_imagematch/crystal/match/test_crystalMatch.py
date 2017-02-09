@@ -4,7 +4,7 @@ from mock.mock import create_autospec
 
 from dls_imagematch.crystal.align.aligned_images import AlignedImages
 from dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, \
-    CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL, CrystalMatchStatus
+    CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL, CrystalMatchStatus, CRYSTAL_MATCH_STATUS_DISABLED
 from dls_imagematch.feature.match.result import FeatureMatcherResult
 from dls_imagematch.feature.transform.trs_affine import AffineTransformation
 from dls_util.shape.point import Point
@@ -12,11 +12,11 @@ from dls_util.shape.point import Point
 
 class TestCrystalMatch(TestCase):
     @staticmethod
-    def mock_create_crystal_match(align_offset, resolution, starting_point):
+    def mock_create_crystal_match(align_offset, resolution, starting_point, perform_poi_match=True):
         mock_aligned_images = create_autospec(AlignedImages)
         mock_aligned_images.pixel_offset.return_value = align_offset
         mock_aligned_images.get_working_resolution.return_value = resolution
-        crystal_match = CrystalMatch(starting_point, mock_aligned_images)
+        crystal_match = CrystalMatch(starting_point, mock_aligned_images, perform_poi=perform_poi_match)
         return crystal_match
 
     def test_create_crystal_match(self):
@@ -119,6 +119,24 @@ class TestCrystalMatch(TestCase):
         self.failUnlessEqual("-1, NOT SET", str(CRYSTAL_MATCH_STATUS_STATUS_NOT_SET))
         self.failUnlessEqual("1, OK", str(CRYSTAL_MATCH_STATUS_OK))
         self.failUnlessEqual("0, FAIL", str(CRYSTAL_MATCH_STATUS_FAIL))
+        self.failUnlessEqual("2, DISABLED", str(CRYSTAL_MATCH_STATUS_DISABLED))
+
+    def test_crystal_match_status_default_status_is_enabled(self):
+        starting_point = Point(4, 7)
+        align_offset = Point(2, 2)
+        resolution = 1.5
+
+        match = self.mock_create_crystal_match(align_offset, resolution, starting_point)
+        self.failUnlessEqual(CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, match.get_status())
+
+    def test_crystal_match_status_can_be_set_to_disabled(self):
+
+        starting_point = Point(4, 7)
+        align_offset = Point(2, 2)
+        resolution = 1.5
+
+        match = self.mock_create_crystal_match(align_offset, resolution, starting_point, perform_poi_match=False)
+        self.failUnlessEqual(CRYSTAL_MATCH_STATUS_DISABLED, match.get_status())
 
     @staticmethod
     def mock_feature_match_result_failure():
