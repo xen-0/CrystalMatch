@@ -360,8 +360,8 @@ class SystemTest(TestCase):
         :param expected_file: Expected file reference.
         :param actual_file: Actual file reference.
         """
-        self.failUnless(exists(expected_file) and isfile(expected_file))
-        self.failUnless(exists(actual_file) and isfile(actual_file))
+        self.failUnless(exists(expected_file) and isfile(expected_file), "Expected file not found.")
+        self.failUnless(exists(actual_file) and isfile(actual_file), "Actual file not found.")
         with file(expected_file, 'r') as file_r:
             expected_contents = file_r.readlines()
         with file(actual_file, 'r') as file_r:
