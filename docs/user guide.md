@@ -1,8 +1,8 @@
 # Crystal Match - System User Guide
 
-*Software version: V0.1.4*
+*Software version: V0.1.5*
 
-*Last Updated: 24/01/2017*
+*Last Updated: 09/02/2017*
 
 *Contributions:*
 
@@ -29,7 +29,7 @@ Crystal Match is implemented in Python and uses different Feature Matching techn
 
 **The Alignment phase** uses a single Feature Matcher (ORB at time of writing) to compare the Formulatrix and Beamline images calculating a translation between the two.  Note that this does not take into account scaling between the images which must be set manually.  If this process fails the sample cannot be aligned and the second phase is abandoned.
 
-**The Crystal Matching phase** uses the average result of a series of localised Feature Matchers to map a Point of Interest (POI) marked on the Formulatrix Image to a location in the Beamline image.  It does this by taking a Region of Interest (ROI) around the POI and comparing it to a larger ROI in the Beamline image to allow for movement of the crystal.  If this process fails the co-ordinates reported will have the transform from the Alignment phase applied accounting for the plate alignment but not the possible movement of the crystal.
+**The Crystal Matching phase** uses the average result of a series of localised Feature Matchers to map a Point of Interest (POI) marked on the Formulatrix Image to a location in the Beamline image.  It does this by taking a Region of Interest (ROI) around the POI and comparing it to a larger ROI in the Beamline image to allow for movement of the crystal.  If this process fails the co-ordinates reported will have the transform from the Alignment phase applied accounting for the plate alignment but not the possible movement of the crystal. This phase can be disabled in the configuration file.
 
 ### Assumptions
 
@@ -73,7 +73,7 @@ The configuration files are designed to allow limited changes to be made to the 
 
 * `settings.ini` - App level settings - primarily log file options.
 * `align.ini` - Settings for the Alignment phase including acceptance metrics, Feature Matcher used and default scaling options.
-* `crystal.ini` - Settings for the Crytal Matching phase such as the size of ROI and the transform method.
+* `crystal.ini` - Settings for the Crystal Matching phase such as the size of ROI and the transform method - the Crystal Matching phase can also be disabled in this file.  POI will be calculated based on the global alignment only and the results returned with a status flag of `2, DISABLED`.
 * `gui.ini` - The GUI is currently for testing purposes only and cannot be accessed in the compiled app - this file should be ignored.
 * `licensing.ini` - Activate/Deactivate SIFT and SURF proprietary algorithms in the OpenCV toolbox.  These are not currently free for commercial use.
 * `det_*.ini` - Where `*` is the name of a feature detector. Settings specific to that detector.
@@ -98,7 +98,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
     * `mean-error` - Mean error value after image alignment.
 * `poi` (optional, array) - An array of Crystal Matching phase results - will not be present if input points were not specified or Alignment phase failed.
     * `status` - Results status
-        * `code` - `1` for success or `0` for failure.
+        * `code` - `0` for failure, `1` for success or `2` if the option if POI analysis is disabled in the configuration file (`crystal.ini`).
         * `msg` - Human readable error message.
     * `location` (x and y values) - Calculated location of the POI in the co-ordinate space of the Beamline image. Note that if the match fails this will be the original point with the Alignment transform applied.
     * `translation` (x and y values) - The translation required to account for Crystal movement (excludes Alignment transform).
