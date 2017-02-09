@@ -127,7 +127,7 @@ class FileManager(QMainWindow):
         self._active_windows.append(AlignmentTestEditor(test_suite))
 
     def _is_valid_new_file_path(self, new_file_path):
-        if basename(new_file_path) == ".csv":
+        if basename(new_file_path) == ".json":
             QMessageBox().warning(self, "Invalid Filename",
                                   "Please enter a file name!")
             return False
@@ -139,8 +139,8 @@ class FileManager(QMainWindow):
 
     def _generate_new_file_path(self, parent_dir):
         new_file_name = strip(str(self._text_new_file_name.text()))
-        if not new_file_name.endswith(".csv"):
-            new_file_name += ".csv"
+        if not new_file_name.endswith(".json"):
+            new_file_name += ".json"
         new_file_path = join(parent_dir, new_file_name)
         return new_file_path
 
