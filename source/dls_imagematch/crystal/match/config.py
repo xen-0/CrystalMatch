@@ -2,6 +2,7 @@ from os.path import join
 
 from dls_imagematch.feature import TransformCalculator
 from dls_util.config import Config, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
+from dls_util.config.item import BoolConfigItem
 from .matcher import CrystalMatcher
 
 
@@ -26,6 +27,11 @@ class CrystalMatchConfig(Config):
         def_width = CrystalMatcher.DEFAULT_WIDTH
         def_height = CrystalMatcher.DEFAULT_HEIGHT
         def_shift = CrystalMatcher.DEFAULT_VERTICAL_SHIFT
+
+        self.active_status = add(BoolConfigItem, "Perform POI Analysis", default=True)
+        self.active_status.set_comment("If this option is disabled the program shall skip the image matching for "
+                                       "individual POI and return results which apply only the Alignment transform "
+                                       "instead.")
 
         self.region_size = add(RangeIntConfigItem, "Region Size (um)", default=def_size, extra_arg=[10, None])
         self.region_size.set_comment("Size of the region around the user selected point in the first image to be "

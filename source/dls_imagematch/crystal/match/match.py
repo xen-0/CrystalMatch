@@ -10,11 +10,12 @@ class CrystalMatchStatus(StatusFlag):
 CRYSTAL_MATCH_STATUS_STATUS_NOT_SET = CrystalMatchStatus(-1, "NOT SET")
 CRYSTAL_MATCH_STATUS_OK = CrystalMatchStatus(1, "OK")
 CRYSTAL_MATCH_STATUS_FAIL = CrystalMatchStatus(0, "FAIL")
+CRYSTAL_MATCH_STATUS_DISABLED = CrystalMatchStatus(2, "DISABLED")
 
 
 class CrystalMatch:
     """  Represents a match between the position of a crystal in two separate images. """
-    def __init__(self, start_point, aligned_images):
+    def __init__(self, start_point, aligned_images, perform_poi=True):
         """
         Initialize a new CrystalMatch object. Note that You must call the set_feature_match_result
         method to set the transformation (and therefore calculate the matching position in Image 2).
@@ -26,7 +27,7 @@ class CrystalMatch:
         self._poi_image_2_pre_match = start_point + self._aligned_images.pixel_offset()
         self._poi_image_2_matched = None
         self._feature_match_result = None
-        self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET
+        self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET if perform_poi else CRYSTAL_MATCH_STATUS_DISABLED
 
     def is_success(self):
         return self._status == CRYSTAL_MATCH_STATUS_OK
@@ -110,9 +111,7 @@ class CrystalMatch:
             logging.info("*** Crystal Match ***")
 
         logging.info("- Input POI: ({} px, {} px)".format(self.get_poi_image_1().x, self.get_poi_image_1().y))
-        if not self.is_success():
-            logging.info("-- Match Failed")
-        else:
+        if self.is_success():
             logging.debug("- Matching Time: {:.4f}".format(self._feature_match_result.time_match()))
             logging.debug("- Transform Time: {:.4f}".format(self._feature_match_result.time_transform()))
 
@@ -125,3 +124,7 @@ class CrystalMatch:
             offset_real = self.get_delta_real()
             offset_pixel = self.get_delta()
             logging.info(delta.format(offset_real.x, offset_real.y, offset_pixel.x, offset_pixel.y))
+        elif self._status == CRYSTAL_MATCH_STATUS_DISABLED:
+            logging.info("-- Matching Disabled")
+        else:
+            logging.info("-- Match Failed")

@@ -11,6 +11,7 @@ from json.encoder import JSONEncoder
 from os.path import abspath, join, exists, isdir
 
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
+from dls_imagematch.crystal.match.match import CRYSTAL_MATCH_STATUS_DISABLED
 from dls_imagematch.feature.draw.matches import MatchPainter
 from dls_imagematch.util.status import StatusFlag
 from dls_util.shape.point import Point
@@ -120,7 +121,10 @@ class ServiceResult:
             line += str(crystal_match.get_transformed_poi()) + self.SEPARATOR
             line += str(crystal_match.get_delta()) + self.SEPARATOR
             line += str(crystal_match.get_status()) + self.SEPARATOR
-            line += str(crystal_match.feature_match_result().mean_transform_error())
+            if crystal_match.get_status() == CRYSTAL_MATCH_STATUS_DISABLED:
+                line += "0"
+            else:
+                line += str(crystal_match.feature_match_result().mean_transform_error())
             output_list.append(line)
 
     def print_results(self):

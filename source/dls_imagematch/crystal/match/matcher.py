@@ -13,6 +13,7 @@ class CrystalMatcher:
     DEFAULT_VERTICAL_SHIFT = 0.75
 
     def __init__(self, aligned_images, detector_config, crystal_config=None):
+        self._perform_poi_analysis = True
         self._aligned_images = aligned_images
         self._region_size_real = self.DEFAULT_REGION_SIZE
         self._search_width_real = self.DEFAULT_WIDTH
@@ -27,6 +28,7 @@ class CrystalMatcher:
 
     # -------- CONFIGURATION -------------------
     def set_from_crystal_config(self, config):
+        self._perform_poi_analysis = config.active_status.value()
         self._region_size_real = config.region_size.value()
         self._search_width_real = config.search_width.value()
         self._search_height_real = config.search_height.value()
@@ -68,18 +70,19 @@ class CrystalMatcher:
         return match_results
 
     def _match_single_point(self, point):
-        crystal_match = CrystalMatch(point, self._aligned_images)
+        crystal_match = CrystalMatch(point, self._aligned_images, perform_poi=self._perform_poi_analysis)
 
-        image1_rect = self.make_target_region(crystal_match.get_poi_image_1())
-        image2_rect = self.make_search_region(crystal_match.get_poi_image_2_pre_match())
+        if self._perform_poi_analysis:
+            image1_rect = self.make_target_region(crystal_match.get_poi_image_1())
+            image2_rect = self.make_search_region(crystal_match.get_poi_image_2_pre_match())
 
-        feature_matcher = BoundedFeatureMatcher(self._aligned_images.image1.to_mono(),
-                                                self._aligned_images.image2.to_mono(),
-                                                self._detector_config,
-                                                image1_rect,
-                                                image2_rect)
+            feature_matcher = BoundedFeatureMatcher(self._aligned_images.image1.to_mono(),
+                                                    self._aligned_images.image2.to_mono(),
+                                                    self._detector_config,
+                                                    image1_rect,
+                                                    image2_rect)
 
-        self._perform_match(feature_matcher, crystal_match)
+            self._perform_match(feature_matcher, crystal_match)
 
         return crystal_match
 
