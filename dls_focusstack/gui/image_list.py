@@ -21,6 +21,7 @@ class ImageList(QGroupBox):
 
         self._init_ui()
         self.setTitle("Images")
+        self._image_files = None
 
     def _init_ui(self):
         """ Create all the display elements of the widget. """
@@ -46,9 +47,10 @@ class ImageList(QGroupBox):
 
     def set_images(self, image_files):
         self._list.clear()
-
-        for file in image_files:
-            item = ImageItem(file)
+        self._image_files = []
+        for file_path in image_files:
+            self._image_files.append(file(file_path))
+            item = ImageItem(file_path)
             self._list.addItem(item)
 
     def _new_selection_made(self):
@@ -71,7 +73,7 @@ class ImageList(QGroupBox):
         for i in range(self._list.count()):
             item = self._list.item(i)
             if item.checkState() == 2:
-                checked.append(item.image)
+                checked.append(self._image_files[i])
 
         return checked
 

@@ -1,25 +1,27 @@
 import cv2
+import logging
 import numpy as np
+from os.path import join
 
-from dls_imagematch.feature import FeatureMatcher
+from config.focus_config import FocusConfig
 from dls_util.imaging import Image
 
 
 class FocusStack:
-    def __init__(self, images, config):
-        self._images = images
-        self._config = config
+    CONFIG_FILE_NAME = "focus_stack.ini"
 
-    def composite(self, with_align=False):
+    def __init__(self, image_file_list, config_dir):
+        self._image_file_list = image_file_list
+        self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
+
+    def composite(self):
         """ Finds the points of best focus in all images and produces a merged result """
         cfg = self._config
 
-        if with_align:
-            method = cfg.align_method.value()
-            out_dir = cfg.output_dir.value()
-            images = self._align_images(self._images, method, out_dir)
-        else:
-            images = self._images
+        # Convert images to util Image class
+        images = []
+        for file_obj in self._image_file_list:
+            images.append(Image.from_file(file_obj.name))
 
         kernel_size = cfg.kernel_size.value()
         blur_radius = cfg.blur_radius.value()
@@ -30,45 +32,20 @@ class FocusStack:
         return focused_image
 
     @staticmethod
-    def _align_images(images, method, out_dir):
-        aligned_images = []
-
-        # TODO - Frame-by-frame alignment where each frame is aligned with the previous one. This will mean
-        # TODO - that the transform for a frame needs to be the product of all transforms that proceeded it
-
-        image1 = images[0]
-        for i in range(1, len(images)):
-            print("Aligning image {}/{}".format(i+1, len(images)))
-            #image1 = images[i-1]
-            image2 = images[i]
-            matcher = FeatureMatcher(image1, image2)
-            matcher.set_detector(method)
-            matcher.set_transform_method("Homography")
-
-            transform = matcher.match().transform()
-            transformed_image = transform.inverse_transform_image(image2, image2.size())
-            transformed_image.save("{}aligned{}.png".format(out_dir, i))
-            #transformed_image.popup()
-
-            aligned_images.append(transformed_image)
-
-        return aligned_images
-
-    @staticmethod
     def _compute_laplacians(images, kernel_size, blur_size):
         """ Compute the gradient map of the image """
 
-        print("Computing the laplacian of the blurred images")
+        logging.info("Computing the laplacian of the blurred images")
         laps = []
         for i in range(len(images)):
-            print "Lap {}".format(i)
+            logging.info("Lap {}".format(i))
             image = images[i].to_mono().raw()
             blurred = cv2.GaussianBlur(image, (blur_size, blur_size), 0)
             result = cv2.Laplacian(blurred, cv2.CV_64F, ksize=kernel_size)
             laps.append(result)
 
         laps = np.asarray(laps)
-        print "Shape of array of laplacians = {}".format(laps.shape)
+        logging.debug("Shape of array of laplacians = {}".format(laps.shape))
 
         return laps
 

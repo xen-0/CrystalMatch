@@ -1,30 +1,30 @@
 from __future__ import division
 
 import sys
-from os import listdir
-from os.path import isfile, join
+from os import listdir, makedirs
+from os.path import isfile, join, exists, isdir
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QApplication, QAction)
+from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
-from dls_focusstack.focus_config import FocusConfig
-from dls_focusstack.gui import *
+from config.focus_config import FocusConfig
 from dls_focusstack.focus import FocusStack
+from dls_focusstack.gui import *
 
 sys.path.append("..")
 
 
 class FocusStackerMain(QMainWindow):
-    CONFIG_FILE = "../config/config-focus.ini"
-
-    def __init__(self):
+    def __init__(self, config_dir, output_dir, default_input_dir=""):
         super(FocusStackerMain, self).__init__()
 
-        self._config = FocusConfig(FocusStackerMain.CONFIG_FILE)
+        self._config_dir = config_dir
 
         self.init_ui()
-
-        self.open_folder(self._config.input_dir.value())
+        self._output_dir = output_dir
+        if not (exists(output_dir) and isdir(output_dir)):
+            makedirs(output_dir)
+        self.open_folder(default_input_dir)
 
     def init_ui(self):
         """ Create all elements of the user interface. """
@@ -94,7 +94,7 @@ class FocusStackerMain(QMainWindow):
         self.open_folder(folder_path)
 
     def _fn_config_dialog(self):
-        dialog = FocusConfigDialog(self._config)
+        dialog = FocusConfigDialog(FocusConfig(join(self._config_dir, FocusStack.CONFIG_FILE_NAME)))
         dialog.exec_()
 
     def open_folder(self, folder_path):
@@ -114,21 +114,11 @@ class FocusStackerMain(QMainWindow):
         images = self._image_list.get_checked_images()
 
         if len(images) > 1:
-            stacker = FocusStack(images, self._config)
+            stacker = FocusStack(images, self._config_dir)
             merged = stacker.composite()
 
             print("Complete")
 
             self._frame.display_image(merged)
-            merged.save("{}merged.png".format(self._config.output_dir.value()))
-            merged.popup()
-
-
-def main():
-    app = QApplication(sys.argv)
-    ex = FocusStackerMain()
-    sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    main()
+            merged.save(join(self._output_dir, "merged.png"))
+            # merged.popup()
