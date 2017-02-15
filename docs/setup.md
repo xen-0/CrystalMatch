@@ -23,6 +23,7 @@ The following steps will help you prepare an appropriate Python environment to r
     * PyQt4
     * mock (Testing only - standard in Python v3.3+ but required for unit tests to run under v2.7)
     * nose_parameterized (Testing only)
+    * workflows - written by Markus Gerstel (Diamond GDA group).  This is required for ActiveMQ integration in the Focus Stacking service.
     
 * Some of these packages can be installed using `pip`. To do this:
     * Open cmd.exe (being sure to ‘Run as Administrator’)
@@ -58,7 +59,7 @@ In order to run unit tests in Pycharm right-click on a python module and select 
 
 The professional (paid licence) edition of Pycharm incorporates the `coverage` Python library which provides a rough indication of how much of the code is covered by unit tests.  The `coverage` tool can be run outside of Pycharm but has not been tested.
 
-**NOTE:** Avoid running unit tests for the entire repository as system tests also use the python `unittest` framework and take considerably longer to run.
+**NOTE:** System tests also use the python `unittest` framework, running all tests in the repository will take considerably longer than running only the unit tests.
 
 System Tests
 ============
