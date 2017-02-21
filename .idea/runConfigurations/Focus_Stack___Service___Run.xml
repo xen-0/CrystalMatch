@@ -6,14 +6,14 @@
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dls_extended_focus" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <module name="diamond-imagematch" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dls_focusstack/main_service.py" />
-    <option name="PARAMETERS" value="&quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL10-z400-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL1-z-500-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL2-z-400-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL3-z-300-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL4-z-200-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL5-z-100-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL6-z0-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL7-z100-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL8-z200-20161108-154320.tif&quot; &quot;./test-images/Focus Stacking/VMXI-AA005-G07-1-R0DRP1/VMXI-AA005-G07-1-R0DRP1-FL9-z300-20161108-154320.tif&quot; -o &quot;./test-output/focus_stacking/output.png&quot; -d" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dls_extended_focus/service_start.py" />
+    <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <method />
   </configuration>

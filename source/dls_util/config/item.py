@@ -82,6 +82,17 @@ class ConfigItem:
         return value
 
 
+class StringItem(ConfigItem):
+    """ Config item that stores a string value."""
+    DATA_TYPE = str
+
+    def __init__(self, tag, default):
+        ConfigItem.__init__(self, tag, default)
+
+    def from_file_string(self, value_string):
+        self._value = value_string
+
+
 class IntConfigItem(ConfigItem):
     """ Config item that stores an integer. Constructor may also take a 'units' parameter which is a
     string that represents the units of the value. This can be used in the UI.
