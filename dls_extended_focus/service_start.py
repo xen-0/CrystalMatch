@@ -45,7 +45,7 @@ def main():
     connection = stomp.Connection(host_and_ports=[("localhost", 61613)])
     connection.start()
     connection.connect(wait=True)
-    request = '{"target_dir": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test","output_path": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test/output.tif"}'
+    request = '{"job_id": "test_job", "target_dir": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test","output_path": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test/output.tif"}'
     # request = '{"target_dir": "C:\\\\Users\\\\marcs\\\\Developer\\\\Diamond\\\\diamond-imagematch\\\\test-images\\\\Focus Stacking\\\\VMXI-AA005-G07-1-R0DRP1\\\\levels","output_path": "C:\\\\Users\\\\marcs\\\\Desktop\\\\service_output.jpg"}'
     connection.send(ExtendedFocusService.INPUT_QUEUE, request)
 
