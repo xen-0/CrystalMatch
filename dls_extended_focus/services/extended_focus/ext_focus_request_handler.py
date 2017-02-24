@@ -38,12 +38,12 @@ class ExtendedFocusServiceRequestHandler(ConnectionListener):
             self._send_error_response("The Extended Focus Service failed - please access the service logs on server.")
 
     def _send_success(self, output_path):
-        response = {"status": 0, "output_path": output_path}
+        response = {"response_code": 0, "output_path": output_path}
         msg = json.dumps(response)
         self._connection.send(self._output_queue, msg)
 
     def _send_error_response(self, err_msg):
-        response = {"status": 1, "err_msg": err_msg}
+        response = {"response_code": 1, "err_msg": err_msg}
         msg = json.dumps(response)
         self._connection.send(self._output_queue, msg)
 
