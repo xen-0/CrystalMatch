@@ -17,19 +17,22 @@ class ExtendedFocusServiceRequestHandler(ConnectionListener):
 
     def on_message(self, headers, body):
         super(ExtendedFocusServiceRequestHandler, self).on_message(headers, body)
+        # TODO: test this on the live activeMQ server
+        job_id = headers["job_id"] if "job_id" in headers.keys() else ""
         try:
             request = json.loads(body)
             if self.validate_request(request):
-                job_id = request["job_id"]
+                if job_id == "":
+                    # TODO: Consult with GDA team - should mismatched job_id be a fatal error?
+                    job_id = request["job_id"]
                 self._file_manager.set_target_dir(request["target_dir"])
                 self._file_manager.set_output_path(request["output_path"])
                 self.run_extended_focus_client(job_id, self._file_manager)
             else:
-                job_id = request["job_id"] if "job_id" in request.keys() else ""
                 logging.error("Invalid request received: " + body)
                 self._send_error_response(job_id, "Invalid JSON request received - missing objects.")
         except ValueError as e:
-            self._send_error_response("", "Malformed JSON request received - could not decode: " + body)
+            self._send_error_response(job_id, "Malformed JSON request received - could not decode: " + body)
             logging.error("Malformed JSON request received: " + e.message)
 
     def run_extended_focus_client(self, job_id, file_manager):
@@ -37,7 +40,8 @@ class ExtendedFocusServiceRequestHandler(ConnectionListener):
         if result == 0:
             self._send_success(job_id, file_manager.original_output_path())
         else:
-            self._send_error_response(job_id, "The Extended Focus Service failed - please access the service logs on server.")
+            self._send_error_response(job_id, "The Extended Focus Service failed - "
+                                              "please access the service logs on server.")
 
     def _send_success(self, job_id, output_path):
         response = {"job_id": job_id, "response_code": 0, "output_path": output_path}
