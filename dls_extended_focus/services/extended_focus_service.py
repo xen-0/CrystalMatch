@@ -5,6 +5,7 @@ import stomp
 
 from extended_focus.ext_focus_config import ExtendedFocusConfig
 from services.extended_focus.ext_focus_request_handler import ExtendedFocusServiceRequestHandler
+from util.file_path_manager import FilePathManager
 
 
 class ExtendedFocusService:
@@ -19,6 +20,7 @@ class ExtendedFocusService:
         self._port = self._config.port.value()
         self._connection = None
         self.log("Setting id: " + str(self._id))
+        self._file_manager = FilePathManager(self._config.win_net_prefix.value())
 
     def start(self):
         # TODO: test for closed/invalid connection as well
@@ -27,6 +29,7 @@ class ExtendedFocusService:
             self._connection = stomp.Connection(host_and_ports=[(self._host, self._port)])
             self._connection.set_listener('Extended Focus Service',
                                           ExtendedFocusServiceRequestHandler(self._connection,
+                                                                             self._file_manager,
                                                                              self.OUTPUT_QUEUE,
                                                                              self._config_dir))
             self._connection.start()

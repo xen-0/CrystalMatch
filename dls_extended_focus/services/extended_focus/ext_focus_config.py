@@ -1,7 +1,21 @@
 from os.path import join
 
 from dls_util.config.config import Config
-from dls_util.config.item import StringItem, IntConfigItem
+from dls_util.config.item import StringItem, IntConfigItem, EnumConfigItem
+
+
+class PlatformEnumConfigItem(object, EnumConfigItem):
+    AUTO = "AUTO"
+    WINDOWS = "WINDOWS"
+    LINUX = "LINUX"
+    DETECTION_SETTINGS = [AUTO, WINDOWS, LINUX]
+
+    def value(self):
+        value = super(PlatformEnumConfigItem, self).value()
+        if value is self.AUTO:
+            return None
+        else:
+            return value == self.WINDOWS
 
 
 class ExtendedFocusConfig(Config):
@@ -26,12 +40,14 @@ class ExtendedFocusConfig(Config):
         self.port = add(IntConfigItem, "Port", 61613)
         self.port.set_comment("Port number for the STOMP broker (Active MQ server or similar).")
 
-        self.path_conversions = add(StringItem, "File Path Conversions", "dls@//dc/dls")
-        self.path_conversions.set_comment("This service was originally designed to run on a Windows machine "
-                                          "within the Diamond network. GDA provides network paths in Linux "
-                                          "style which need to be converted for use on Windows - by default "
-                                          "/dls will be converted to //dc/dls. Additional entries can be "
-                                          "added by appending a semi-colon (;), the @ symbol denotes the "
-                                          "conversion from left to right.")
+        self.win_detect = add(EnumConfigItem, "Windows Detection",
+                              PlatformEnumConfigItem.AUTO,
+                              PlatformEnumConfigItem.DETECTION_SETTINGS)
+        self.win_detect.set_comment("Allows the platform for the service to be set manually if auto-detection does "
+                                    "not function.")
+
+        self.win_net_prefix = add(StringItem, "Windows Network Prefix", "\\\\dc")
+        self.win_net_prefix.set_comment("This service will be called from a Linux environment but may run on Windows.  "
+                                        "If a Windows system is detected ")
 
         self.initialize_from_file()

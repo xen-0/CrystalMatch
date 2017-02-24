@@ -54,4 +54,10 @@ class HeliconConfig(Config):
                                    "visible transition areas. For B method this value defines how depth map will "
                                    "be smoothed out.")
 
+        self.timeout = add(IntConfigItem, "Timeout Period", 20)
+        self.timeout.set_comment("The timeout period when calling Helicon Focus - the command line version of HF will "
+                                 "hang if there is an error due to a message box which must be dismissed by hand.  We "
+                                 "must time this out to prevent this stalling the service. NOTE: If the service is "
+                                 "running correctly but is delayed this may cause the timeout to trigger.")
+
         self.initialize_from_file()
