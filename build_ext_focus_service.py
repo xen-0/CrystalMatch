@@ -11,6 +11,15 @@ ARCHIVE_TYPE = "zip"
 
 dist_dir = join(DIST_PARENT_DIR, DIST_NAME)
 
+# Remove config and log directories from the source files.
+print "Cleaning source directory..."
+config_dir = "./dls_extended_focus/config"
+logs_dir = "./dls_extended_focus/logs"
+if exists(config_dir):
+    rmtree(config_dir)
+if exists(logs_dir):
+    rmtree(logs_dir)
+
 # Remove existing resources
 print "Deleting existing resources..."
 if exists(dist_dir) and isdir(dist_dir):

@@ -6,8 +6,12 @@ test-images
 test-output
 sys_test_output
 /distribution
-build
-dist
+/build
+/dist
+
+/dls_extended_focus/config
+/dls_extended_focus/logs
+
 venv
 /config
 /logs

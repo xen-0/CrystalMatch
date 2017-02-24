@@ -3,7 +3,7 @@ import time
 from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
 
-from os.path import split, exists, isdir
+from os.path import split, exists, isdir, realpath, join
 
 from os import makedirs
 
@@ -11,15 +11,15 @@ import stomp
 from services.extended_focus_service import ExtendedFocusService
 
 
-def start_logging():
-    # TODO: set log file path
+def start_logging(run_dir):
     # TODO: error to console if file logging not active
+    # TODO: make log level and backup count configurable
     level = logging.DEBUG
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
 
     # File logging
-    log_path = "../logs/service/service_runner.log"
+    log_path = join(run_dir, "logs/service/service_runner.log")
     log_dir, log_file_name = split(log_path)
     if not exists(log_dir) or not isdir(log_dir):
         makedirs(log_dir)
@@ -37,16 +37,15 @@ def start_logging():
 
 
 def main():
-    start_logging()
-    # TODO: set config file path based on run type (bundled/unbundled)
-    ExtendedFocusService("./config").start()
+    run_dir, script_name = split(realpath(__file__))
+    start_logging(run_dir)
+    ExtendedFocusService(join(run_dir, "config")).start()
 
     # Send test messages
     connection = stomp.Connection(host_and_ports=[("localhost", 61613)])
     connection.start()
     connection.connect(wait=True)
     request = '{"job_id": "test_job", "target_dir": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test","output_path": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test/output.tif"}'
-    # request = '{"target_dir": "C:\\\\Users\\\\marcs\\\\Developer\\\\Diamond\\\\diamond-imagematch\\\\test-images\\\\Focus Stacking\\\\VMXI-AA005-G07-1-R0DRP1\\\\levels","output_path": "C:\\\\Users\\\\marcs\\\\Desktop\\\\service_output.jpg"}'
     connection.send(ExtendedFocusService.INPUT_QUEUE, request)
 
     while 1:
