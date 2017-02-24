@@ -1,7 +1,7 @@
-call ExtFocusImgSrvVenv\Scripts\activate
-if errorlevel 1 (
+CALL %0\..\ExtFocusImgSrvVenv\Scripts\activate
+IF errorlevel 1 (
     ECHO Could not start Virtual Environment.
     PAUSE
 ) ELSE (
-    call cmd /K python service_start.py
+    CALL cmd /K python %0\..\service_start.py
 )
