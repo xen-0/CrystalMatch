@@ -10,7 +10,7 @@ from util.file_path_manager import FilePathManager
 
 class ExtendedFocusService:
     INPUT_QUEUE = '/queue/vmxi_extended_focus_service.input'
-    OUTPUT_QUEUE = '/queue/vmxi_extended_focus_service.output'
+    OUTPUT_QUEUE = '/topic/vmxi_extended_focus_service.output'
 
     def __init__(self, config_dir):
         self._config_dir = config_dir
