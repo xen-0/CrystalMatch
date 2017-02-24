@@ -6,6 +6,8 @@ test-images
 test-output
 sys_test_output
 /distribution
+build
+dist
 venv
 /config
 /logs
