@@ -38,8 +38,8 @@ def start_logging():
 
 def main():
     start_logging()
-    # TODO: set config file path
-    ExtendedFocusService("../config").start()
+    # TODO: set config file path based on run type (bundled/unbundled)
+    ExtendedFocusService("./config").start()
 
     # Send test messages
     connection = stomp.Connection(host_and_ports=[("localhost", 61613)])
