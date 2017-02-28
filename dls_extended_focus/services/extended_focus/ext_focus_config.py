@@ -1,3 +1,4 @@
+import logging
 from os.path import join
 
 from dls_util.config.config import Config
@@ -18,6 +19,25 @@ class PlatformEnumConfigItem(object, EnumConfigItem):
             return value == self.WINDOWS
 
 
+class LogLevelEnumConfigItem(object, EnumConfigItem):
+    ERROR = "ERROR"
+    INFO = "INFO"
+    DEBUG = "DEBUG"
+    OFF = "OFF"
+    LOG_LEVEL_SETTINGS = [ERROR, INFO, DEBUG, OFF]
+
+    def value(self):
+        value = super(LogLevelEnumConfigItem, self).value()
+        if value is self.ERROR:
+            return logging.ERROR
+        elif value is self.INFO:
+            return logging.INFO
+        elif value is self.DEBUG:
+            return logging.DEBUG
+        else:
+            return None
+
+
 class ExtendedFocusConfig(Config):
     """
     Configuration file for the extended focus services. The service is designed to run a script to combine
@@ -26,6 +46,7 @@ class ExtendedFocusConfig(Config):
     CONFIG_FILE_NAME = "ext_focus_service.ini"
 
     def __init__(self, config_dir):
+        self._config_dir = config_dir
         Config.__init__(self, join(config_dir, self.CONFIG_FILE_NAME))
 
         add = self.add
@@ -50,4 +71,13 @@ class ExtendedFocusConfig(Config):
         self.win_net_prefix.set_comment("This service will be called from a Linux environment but may run on Windows.  "
                                         "If a Windows system is detected ")
 
+        self.log_level = add(EnumConfigItem, "Log level", LogLevelEnumConfigItem.DEBUG, LogLevelEnumConfigItem.LOG_LEVEL_SETTINGS)
+        self.log_level.set_comment("Sets the logging level")
+
+        self.log_length = add(IntConfigItem, "Log length (hours)", 672)
+        self.log_length.set_comment("Sets the length of log records - the default is 28 days")
+
         self.initialize_from_file()
+
+    def parent_directory(self):
+        return self._config_dir
