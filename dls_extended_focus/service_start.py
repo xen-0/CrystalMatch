@@ -1,13 +1,9 @@
 import logging
 import time
 from logging.handlers import TimedRotatingFileHandler
-from sys import stdout
-
-from os.path import split, exists, isdir, realpath, join
-
 from os import makedirs
-
-import stomp
+from os.path import split, exists, isdir, realpath, join
+from sys import stdout
 
 from services.extended_focus.ext_focus_config import ExtendedFocusConfig
 from services.extended_focus_service import ExtendedFocusService
@@ -42,17 +38,6 @@ def main():
     config = ExtendedFocusConfig(join(run_dir, "config"))
     start_logging(run_dir, config)
     ExtendedFocusService(config).start()
-
-    # Send test messages
-    connection = stomp.Connection(host_and_ports=[("localhost", 61613)])
-    connection.start()
-    connection.connect(wait=True)
-    request = '{' \
-              '"job_id": "test_job",' \
-              '"target_dir": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test",' \
-              '"output_path": "/dls/i02-2/data/cm16780/cm16780-1/image_stack/extended_focus_service_test/output.tif"' \
-              '}'
-    connection.send(ExtendedFocusService.INPUT_QUEUE, request, headers={"job_id": "test_job"})
 
     while 1:
         # TODO: End when no active services.
