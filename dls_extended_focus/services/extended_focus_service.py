@@ -32,7 +32,7 @@ class ExtendedFocusService:
                                                                              self._config.parent_directory()))
             self._connection.start()
             self._connection.connect(wait=True)
-            self._connection.subscribe(destination=self.INPUT_QUEUE, id=self._id, ack='auto')
+            self._connection.subscribe(destination=self.INPUT_QUEUE, id=self._id, ack='client-individual')
         else:
             self.log("Service already active.")
 
