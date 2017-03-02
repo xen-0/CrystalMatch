@@ -18,7 +18,7 @@ class ExtendedFocusService:
         self._port = self._config.port.value()
         self._connection = None
         self.log("Setting id: " + str(self._id))
-        self._file_manager = FilePathManager(self._config.win_net_prefix.value())
+        self._file_manager = FilePathManager(self._config)
 
     def start(self):
         # TODO: test for closed/invalid connection as well

@@ -6,17 +6,10 @@ from dls_util.config.item import StringItem, IntConfigItem, EnumConfigItem
 
 
 class PlatformEnumConfigItem(object, EnumConfigItem):
-    AUTO = "AUTO"
-    WINDOWS = "WINDOWS"
-    LINUX = "LINUX"
-    DETECTION_SETTINGS = [AUTO, WINDOWS, LINUX]
-
-    def value(self):
-        value = super(PlatformEnumConfigItem, self).value()
-        if value is self.AUTO:
-            return None
-        else:
-            return value == self.WINDOWS
+    CONFIG_AUTO = "AUTO"
+    CONFIG_WINDOWS = "WINDOWS"
+    CONFIG_OFF = "OFF"
+    DETECTION_SETTINGS = [CONFIG_AUTO, CONFIG_WINDOWS, CONFIG_OFF]
 
 
 class LogLevelEnumConfigItem(object, EnumConfigItem):
@@ -61,17 +54,24 @@ class ExtendedFocusConfig(Config):
         self.port = add(IntConfigItem, "Port", 61613)
         self.port.set_comment("Port number for the STOMP broker (Active MQ server or similar).")
 
-        self.win_detect = add(EnumConfigItem, "Windows Detection",
-                              PlatformEnumConfigItem.AUTO,
-                              PlatformEnumConfigItem.DETECTION_SETTINGS)
-        self.win_detect.set_comment("Allows the platform for the service to be set manually if auto-detection does "
-                                    "not function.")
+        self.platform_detection = add(EnumConfigItem, "Platform Detection",
+                                      PlatformEnumConfigItem.CONFIG_AUTO,
+                                      PlatformEnumConfigItem.DETECTION_SETTINGS)
+        self.platform_detection.set_comment("By default the app will try to determine if the Windows platform is "
+                                            "being used and append a prefix to file paths to account for a modified "
+                                            "network path.  This app was written to support a Linux path format and "
+                                            "it is assumed that to run on a Windows device a mapped drive or "
+                                            "alternative network path must be used.  The Windows Network Prefix can "
+                                            "be used to set the prefix.  If the value is OFF then both setting "
+                                            "will be ignored, the value WINDOWS will force it's use.")
 
         self.win_net_prefix = add(StringItem, "Windows Network Prefix", "\\\\dc")
-        self.win_net_prefix.set_comment("This service will be called from a Linux environment but may run on Windows.  "
-                                        "If a Windows system is detected ")
+        self.win_net_prefix.set_comment("This service will be called from a Linux environment but may run on "
+                                        "Windows.  If Platform Detection is set to WINDOWS or AUTO and Windows is "
+                                        "detected this prefix will be added to all filepaths received by the service.")
 
-        self.log_level = add(EnumConfigItem, "Log level", LogLevelEnumConfigItem.DEBUG, LogLevelEnumConfigItem.LOG_LEVEL_SETTINGS)
+        self.log_level = add(EnumConfigItem, "Log level",
+                             LogLevelEnumConfigItem.DEBUG, LogLevelEnumConfigItem.LOG_LEVEL_SETTINGS)
         self.log_level.set_comment("Sets the logging level")
 
         self.log_length = add(IntConfigItem, "Log length (hours)", 672)

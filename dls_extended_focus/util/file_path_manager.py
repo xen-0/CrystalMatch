@@ -2,11 +2,7 @@ import platform
 
 from os.path import normpath
 
-
-class PlatformDetectionException(Exception):
-    def __init__(self, *args, **kwargs):
-        super(PlatformDetectionException, self).__init__(*args, **kwargs)
-        self.message = "Platform detection failed - please set the platform in the configuration file."
+from services.extended_focus.ext_focus_config import PlatformEnumConfigItem
 
 
 class FilePathManager:
@@ -15,19 +11,32 @@ class FilePathManager:
     and Linux network paths.
     """
 
-    def __init__(self, windows_network_prefix, is_windows=None):
+    def __init__(self, config):
         """
-        :param windows_network_prefix: The network prefix to add to paths on Windows machines.
-        :param is_windows: Boolean value, if this is declared it will override the automatic detection of Windows.
+        :param ExtendedFocusConfig config: Configuration instance.
         """
-        self._windows_network_prefix = windows_network_prefix
-        platform_name = platform.system()
-        if platform_name == "Windows" or platform_name == "Linux":
-            self._is_windows = (platform_name == "Windows") if is_windows is None else is_windows
-        else:
-            raise PlatformDetectionException()
+        self._use_network_prefix = self._should_use_network_prefix(config)
+        self._network_prefix = config.win_net_prefix.value()
+
         self._target_dir = None
         self._output_path = None
+
+    @staticmethod
+    def _should_use_network_prefix(config):
+        """
+        Based on the entry in the config file determine whether the Windows network prefix should be applied to
+        file paths.
+        :param ExtendedFocusConfig config: Configuration instance.
+        :return: Boolean.
+        """
+        option = config.platform_detection.value()
+        if option is PlatformEnumConfigItem.CONFIG_AUTO:
+            platform_name = platform.system()
+            return platform_name == "Windows"
+        elif option is PlatformEnumConfigItem.CONFIG_OFF:
+            return False
+        elif option is PlatformEnumConfigItem.CONFIG_WINDOWS:
+            return True
 
     def set_target_dir(self, target_path):
         """
@@ -56,9 +65,9 @@ class FilePathManager:
         :param path: Path to convert.
         :return: Windows network path for the input path.
         """
-        if self._is_windows:
+        if self._use_network_prefix:
             norm_path = normpath(path)
-            path = self._windows_network_prefix
+            path = self._network_prefix
             if not norm_path.startswith("\\"):
                 path += "\\"
             path += norm_path

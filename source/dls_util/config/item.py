@@ -87,6 +87,7 @@ class StringItem(ConfigItem):
 
     def __init__(self, tag, default):
         ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "String"
 
     def from_file_string(self, value_string):
         self._value = value_string
