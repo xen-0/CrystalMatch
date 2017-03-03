@@ -1,8 +1,9 @@
 import json
-import logging
 
+# noinspection PyPackageRequirements
 from stomp import ConnectionListener
 
+from services.extended_focus.ext_focus_response import ExtendedFocusServiceResponse
 from services.extended_focus.helicon_client import HeliconRunner
 
 
@@ -19,59 +20,56 @@ class ExtendedFocusServiceRequestHandler(ConnectionListener):
 
     def on_message(self, headers, body):
         super(ExtendedFocusServiceRequestHandler, self).on_message(headers, body)
-        job_id = headers["job_id"] if "job_id" in headers.keys() else None
+        # Start constructing a response
+        job_id = headers['job_id'] if 'job_id' in headers.keys() else None
+        response = ExtendedFocusServiceResponse(job_id, headers['message-id'], headers['subscription'])
+        request, response = self.validate_request(body, response)
+        if response.is_error():
+            response.send_and_acknowledge(self._connection, self._output_queue)
+        else:
+            # Configure response
+            response.set_job_id(request["job_id"])
+            response.set_output_path(request["output_path"])
+
+            # Set file manager
+            self._file_manager.set_target_dir(request["target_dir"])
+            self._file_manager.set_output_path(request["output_path"])
+
+            self.run_extended_focus_client(response, self._file_manager)
+
+    def run_extended_focus_client(self, response, file_manager):
+        updated_response = self._client.run(response, file_manager)
+        updated_response.send_and_acknowledge(self._connection, self._output_queue)
+
+    @staticmethod
+    def validate_request(body, response):
+        """
+        Validate the request and set an error response if necessary
+        :param body: The body content of the request message.
+        :param response: The request object - should contain the job_id if it was included in the headers.
+        :return: The request as a parsed JSON object and a response object (possibly with an updated error message)
+        """
         try:
             request = json.loads(body)
-            if self.validate_request(request, job_id, headers['message-id'], headers['subscription']):
-                job_id = request["job_id"]
-                self._file_manager.set_target_dir(request["target_dir"])
-                self._file_manager.set_output_path(request["output_path"])
-                self.run_extended_focus_client(job_id,
-                                               self._file_manager,
-                                               headers['message-id'],
-                                               headers['subscription'])
+            keys = request.keys()
+
+            # Check and set the job_id against the header - ensures errors are reported against the correct job in GDA.
+            header_job_id = response.get_job_id()
+            if "job_id" not in keys:
+                response.set_err_message('"job_id" missing from JSON request.')
+                return request, response
+            elif header_job_id is not None and header_job_id != request["job_id"]:
+                err = "Mismatched job_id found in request - '" + \
+                      header_job_id + "' in header and '" + request["job_id"] + "' in JSON."
+                response.set_err_message(err)
+            response.set_job_id(request['job_id'])
+
+            # Perform other checks
+            if "output_path" not in keys or "target_dir" not in keys:
+                err = "Invalid request received - required keys missing from request JSON: " + json.dumps(request)
+                response.set_err_message(err)
+            # TODO: Check files exist and are accessible - prevent unnecessary timeout if we know this is going to fail
+            return request, response
         except ValueError as e:
-            err = "Malformed JSON request received: " + e.message
-            logging.error(err)
-            self._send_error_response(job_id, err,
-                                      headers['message-id'], headers['subscription'])
-
-    def run_extended_focus_client(self, job_id, file_manager, message_id, subscription_id):
-        result = self._client.run(file_manager.target_dir(), file_manager.output_path())
-        if result == 0:
-            self._send_success(job_id, file_manager.original_output_path(), message_id, subscription_id)
-        else:
-            logging.error("Extended Focus client failed.")
-            self._send_error_response(job_id,
-                                      "The Extended Focus Service failed - please check "
-                                      "logs on server for more information.",
-                                      message_id,
-                                      subscription_id)
-
-    def _send_success(self, job_id, output_path, message_id, subscription_id):
-        response = {"job_id": job_id, "response_code": 0, "output_path": output_path}
-        msg = json.dumps(response)
-        self._connection.send(self._output_queue, msg)
-        self._connection.ack(message_id, subscription_id)
-
-    def _send_error_response(self, job_id, err_msg, message_id, subscription_id):
-        response = {"job_id": job_id, "response_code": 1, "err_msg": err_msg}
-        msg = json.dumps(response)
-        self._connection.send(self._output_queue, msg)
-        self._connection.ack(message_id, subscription_id)
-
-    def validate_request(self, request, header_job_id, message_id, subscription_id):
-        keys = request.keys()
-        err = None
-        if "output_path" not in keys or "target_dir" not in keys or "job_id" not in keys:
-            err = "Invalid request received - required keys missing from request JSON: " + json.dumps(request)
-            logging.error(err)
-        elif header_job_id is not None and header_job_id != request["job_id"]:
-            err = "Mismatched job_id found in request - '" + \
-                  header_job_id + "' in header and '" + request["job_id"] + "' in JSON."
-
-        if err is None:
-            return True
-        logging.error(err)
-        self._send_error_response(header_job_id, err, message_id, subscription_id)
-        return False
+            response.set_err_message("Malformed JSON request received: " + e.message)
+            return None, response
