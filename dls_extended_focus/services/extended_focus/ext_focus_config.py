@@ -71,7 +71,7 @@ class ExtendedFocusConfig(Config):
                                         "detected this prefix will be added to all filepaths received by the service.")
 
         self.log_level = add(EnumConfigItem, "Log level",
-                             LogLevelEnumConfigItem.DEBUG, LogLevelEnumConfigItem.LOG_LEVEL_SETTINGS)
+                             LogLevelEnumConfigItem.INFO, LogLevelEnumConfigItem.LOG_LEVEL_SETTINGS)
         self.log_level.set_comment("Sets the logging level")
 
         self.log_length = add(IntConfigItem, "Log length (hours)", 672)

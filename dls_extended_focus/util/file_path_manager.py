@@ -1,6 +1,5 @@
 import platform
-
-from os.path import normpath, exists, split, isdir, splitext
+from os.path import normpath, exists, isdir, splitext
 
 from services.extended_focus.ext_focus_config import PlatformEnumConfigItem
 

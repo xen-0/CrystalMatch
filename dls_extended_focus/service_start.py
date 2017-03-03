@@ -7,17 +7,18 @@ from sys import stdout
 
 from services.extended_focus.ext_focus_config import ExtendedFocusConfig
 from services.extended_focus_service import ExtendedFocusService
+from version import VersionHandler
 
 
-def start_logging(run_dir, config):
+def start_logging(config):
     level = config.log_level.value()
     if level is not None:
         root_logger = logging.getLogger()
         root_logger.setLevel(level)
 
         # File logging
-        log_path = join(run_dir, "logs/service/service_runner.log")
-        log_dir, log_file_name = split(log_path)
+        log_dir = join(get_root_dir(), "logs", "service")
+        log_path = join(log_dir, "service_runner.log")
         if not exists(log_dir) or not isdir(log_dir):
             makedirs(log_dir)
         log_handler = TimedRotatingFileHandler(log_path, when='H', backupCount=config.log_length.value())
@@ -33,10 +34,25 @@ def start_logging(run_dir, config):
     # TODO: add some logging!
 
 
+def get_root_dir():
+    """
+    During development the config and log files appear in the package - these should be removed during deployment #
+    to cause this method to deafult to the directory above. This allows the configuration file to remain
+    persistent between versions.
+    :return: Root dir
+    """
+    run_dir, script = split(realpath(__file__))
+    config_dir = join(run_dir, "config")
+    if exists(config_dir) and isdir(config_dir):
+        return run_dir
+    else:
+        return join(run_dir, "..")
+
+
 def main():
-    run_dir, script_name = split(realpath(__file__))
-    config = ExtendedFocusConfig(join(run_dir, "config"))
-    start_logging(run_dir, config)
+    print "Starting Extended Focus Service, " + VersionHandler.version()
+    config = ExtendedFocusConfig(join(get_root_dir(), "config"))
+    start_logging(config)
     ExtendedFocusService(config).start()
 
     while 1:

@@ -9,7 +9,6 @@ sys_test_output
 /build
 /dist
 
-/dls_extended_focus/config
 /dls_extended_focus/logs
 
 venv
