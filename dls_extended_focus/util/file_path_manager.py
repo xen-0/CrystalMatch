@@ -1,6 +1,6 @@
 import platform
 
-from os.path import normpath
+from os.path import normpath, exists, split, isdir, splitext
 
 from services.extended_focus.ext_focus_config import PlatformEnumConfigItem
 
@@ -10,6 +10,8 @@ class FilePathManager:
     Manages file paths for the Extended Focus Service and automatically converts between Windows
     and Linux network paths.
     """
+
+    ALLOWED_OUTPUT_EXTENSIONS = [".jpg", ".tif"]
 
     def __init__(self, config):
         """
@@ -58,6 +60,32 @@ class FilePathManager:
 
     def original_output_path(self):
         return self._output_path
+
+    def validate(self):
+        """
+        Validate the current directories and return an error message if appropriate.
+        :return: An error message or None.
+        """
+        if not self._validate_output_path():
+            return "Output path is invalid, must have the correct file " \
+                   "extension " + self._get_allowed_things() + ": " + self.output_path()
+        elif not self._validate_target_dir():
+            return "Target directory cannot be reached: " + self.target_dir()
+        return None
+
+    def _get_allowed_things(self):
+        output = "("
+        for ext in self.ALLOWED_OUTPUT_EXTENSIONS:
+            output += ext + ", "
+        return output[:(len(output) - 2)] + ")"
+
+    def _validate_target_dir(self):
+        target_dir = self.target_dir()
+        return exists(target_dir) and isdir(target_dir)
+
+    def _validate_output_path(self):
+        file_path, ext = splitext(self.output_path())
+        return ext in self.ALLOWED_OUTPUT_EXTENSIONS
 
     def _convert_path(self, path):
         """
