@@ -36,7 +36,6 @@ class HeliconRunner:
 
         # Attempt to run Helicon Focus
         process = None
-        return_val = 0
         try:
             process = Popen(cmd_line, stdout=PIPE, shell=True)
             return_val = process.wait(timeout=self._timeout)

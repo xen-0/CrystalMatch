@@ -53,9 +53,11 @@ def main():
     print "Starting Extended Focus Service, " + VersionHandler.version()
     config = ExtendedFocusConfig(join(get_root_dir(), "config"))
     start_logging(config)
-    ExtendedFocusService(config).start()
+    service = ExtendedFocusService(config)
+    service.start()
 
     while 1:
+        service.maintain_connection()
         # TODO: End when no active services.
         time.sleep(2)
 
