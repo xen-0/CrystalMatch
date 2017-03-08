@@ -40,12 +40,13 @@ class HeliconRunner:
             process = Popen(cmd_line, stdout=PIPE, shell=True)
             return_val = process.wait(timeout=self._timeout)
             # return call(cmd_line, shell=True, timeout=self._timeout)
+            if return_val != 0:
+                response.set_err_message("The Helicon Focus client failed - please server logs for details.")
         except TimeoutExpired:
             # FIXME: A Helicon process gets left running at this point.  Work out how to shut it down to prevent
             #        them building up on the server.
             if process is not None:
                 process.kill()
-            return_val = 1
-        if return_val != 0:
-            response.set_err_message("The Helicon Focus client failed - please server logs for details.")
+            response.set_err_message("The Helicon Focus client timed out.")
+
         return response
