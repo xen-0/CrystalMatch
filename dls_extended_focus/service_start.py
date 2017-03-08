@@ -1,10 +1,10 @@
 import logging
-import time
 from logging.handlers import TimedRotatingFileHandler
 from os import makedirs
 from os.path import split, exists, isdir, realpath, join
 from sys import stdout
 
+from gui.ext_focus_service_gui import ExtendedFocusServiceGUI
 from services.extended_focus.ext_focus_config import ExtendedFocusConfig
 from services.extended_focus_service import ExtendedFocusService
 from version import VersionHandler
@@ -54,12 +54,10 @@ def main():
     config = ExtendedFocusConfig(join(get_root_dir(), "config"))
     start_logging(config)
     service = ExtendedFocusService(config)
-    service.start()
 
-    while 1:
-        service.maintain_connection()
-        # TODO: End when no active services.
-        time.sleep(2)
+    gui = ExtendedFocusServiceGUI(service)
+    gui.mainloop()
+
 
 if __name__ == '__main__':
     main()
