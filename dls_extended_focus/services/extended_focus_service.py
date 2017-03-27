@@ -68,7 +68,8 @@ class ExtendedFocusService(ConnectionListener):
 
     def force_stop(self):
         self._service_should_run = False
-        self._connection.disconnect()
+        if self.is_connected():
+            self._connection.disconnect()
 
     def is_connected(self):
         return self._connection is not None and self._connection.is_connected()
