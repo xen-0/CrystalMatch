@@ -30,6 +30,7 @@ class ExtendedFocusServiceGUI(Tk):
         self.val_job_id = self._create_field(self.frm_request, "Job ID", "TEST_00000")
         self.val_target_dir = self._create_field(self.frm_request, "Target Dir", "")
         self.val_output_dir = self._create_field(self.frm_request, "Output Path", "")
+        self.val_num_reqs = self._create_field(self.frm_request, "Num. of requests", "1")
 
         self.button_send_req = Button(self.frm_request, text="Send Request", command=self._send_request)
         self.button_send_req.pack(fill=X, padx=2, pady=2)
@@ -62,8 +63,13 @@ class ExtendedFocusServiceGUI(Tk):
     # Button functions
 
     def _send_request(self):
+        try:
+            num_reqs = int(self.val_num_reqs.get())
+        except ValueError:
+            num_reqs = 1
+            self.val_num_reqs.set(num_reqs)
         self._service.send_test_request(
-            TestRequest(self.val_job_id.get(), self.val_target_dir.get(), self.val_output_dir.get()))
+            TestRequest(self.val_job_id.get(), self.val_target_dir.get(), self.val_output_dir.get()), num_reqs)
 
     def _start_service(self):
         self.button_start["state"] = DISABLED

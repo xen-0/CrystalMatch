@@ -88,13 +88,14 @@ class ExtendedFocusService(ConnectionListener):
                 self._run_extended_focus_client(response, self._file_manager)
         self._service_state.set_idle()
 
-    def send_test_request(self, test_request):
+    def send_test_request(self, test_request, num_requests):
         """
         Send a test message to the ActiveMQ service - if the service is not connected this request is ignored.
         :param TestRequest test_request: A TestRequest object representing the message to send.
+        :param num_requests: The number of requests to send to the active MQ.
         """
         if self.is_connected():
-            test_request.send(self._connection, self.INPUT_QUEUE)
+            test_request.send(self._connection, self.INPUT_QUEUE, n=num_requests)
 
     def _run_keep_alive_thread(self):
         """
