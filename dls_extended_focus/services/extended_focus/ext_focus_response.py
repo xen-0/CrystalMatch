@@ -33,7 +33,7 @@ class ExtendedFocusServiceResponse:
         :param destination: Destination string for queue or topic.
         """
         body = self._generate_response_body()
-        connection.send(destination, body)
+        connection.send(destination, body, headers={"job_id": self.get_job_id()})
         connection.ack(self._message_id, self._subscription_id)
 
     def _generate_response_body(self):
