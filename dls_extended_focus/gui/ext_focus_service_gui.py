@@ -1,6 +1,8 @@
 from Tkconstants import X, DISABLED, NORMAL, SUNKEN, Y, LEFT, W
 from Tkinter import Tk, Button, LabelFrame, Entry, StringVar, Label
 
+from services.extended_focus.test_request import TestRequest
+
 
 class ExtendedFocusServiceGUI(Tk):
     def __init__(self, ext_focus_service):
@@ -29,7 +31,7 @@ class ExtendedFocusServiceGUI(Tk):
         self.val_target_dir = self._create_field(self.frm_request, "Target Dir", "")
         self.val_target_dir = self._create_field(self.frm_request, "Output Path", "")
 
-        self.button_send_req = Button(self.frm_request, text="Send Request", command=self._send_request())
+        self.button_send_req = Button(self.frm_request, text="Send Request", command=self._send_request)
         self.button_send_req.pack(fill=X, padx=2, pady=2)
         self.frm_request.pack(fill=X, padx=2, pady=2)
 
@@ -60,8 +62,8 @@ class ExtendedFocusServiceGUI(Tk):
     # Button functions
 
     def _send_request(self):
-        # TODO: send request
-        pass
+        self._service.send_test_request(
+            TestRequest(self.val_job_id.get(), self.val_target_dir.get(), self.val_output_dir.get()))
 
     def _start_service(self):
         self.button_start["state"] = DISABLED
