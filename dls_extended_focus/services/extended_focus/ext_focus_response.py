@@ -9,6 +9,7 @@ class ExtendedFocusServiceResponse:
         self._message_id = message_id
         self._job_id = job_id
         self._err_msg = None
+        self._err = None
 
     def is_error(self):
         return self._err_msg is not None
@@ -22,8 +23,9 @@ class ExtendedFocusServiceResponse:
     def set_output_path(self, output_path):
         self._output_path = output_path
 
-    def set_err_message(self, err_msg):
+    def set_err_message(self, err, err_msg=None):
         logging.error(err_msg)
+        self._err = err
         self._err_msg = err_msg
 
     def send_and_acknowledge(self, connection, destination):
@@ -43,5 +45,7 @@ class ExtendedFocusServiceResponse:
             response["response_code"] = 0
         else:
             response["err_msg"] = self._err_msg
+            response["err_code"] = self._err[0]
+            response["err_info"] = self._err[1]
             response["response_code"] = 1
         return json.dumps(response)

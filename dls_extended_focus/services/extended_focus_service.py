@@ -9,6 +9,8 @@ import stomp
 from stomp import ConnectionListener
 from stomp.exception import ConnectFailedException
 
+from services.extended_focus.error_codes import MISSING_FIELD_ERR, JOB_ID_MISMATCH_ERR, MISSING_JOB_ID_ERR, \
+    MALFORMED_JSON_ERR
 from services.extended_focus.ext_focus_response import ExtendedFocusServiceResponse
 from services.extended_focus.helicon_client import HeliconRunner
 from util.file_path_manager import FilePathManager
@@ -135,33 +137,33 @@ class ExtendedFocusService(ConnectionListener):
             # Check and set the job_id against the header - ensures errors are reported against the correct job in GDA.
             header_job_id = response.get_job_id()
             if "job_id" not in keys:
-                response.set_err_message('"job_id" missing from JSON request.')
+                response.set_err_message(MISSING_JOB_ID_ERR)
                 return request, response
             elif header_job_id is not None and header_job_id != request["job_id"]:
                 err = "Mismatched job_id found in request - '" + \
                       header_job_id + "' in header and '" + request["job_id"] + "' in JSON."
-                response.set_err_message(err)
+                response.set_err_message(JOB_ID_MISMATCH_ERR, err_msg=err)
             response.set_job_id(request['job_id'])
             response.set_output_path(request["output_path"])
 
             # Check keys exist
             if "output_path" not in keys or "target_dir" not in keys:
                 err = "Invalid request received - required keys missing from request JSON: " + json.dumps(request)
-                response.set_err_message(err)
+                response.set_err_message(MISSING_FIELD_ERR, err_msg=err)
                 return request, response
 
             # Set and validate the file manager
             self._file_manager.set_target_dir(request["target_dir"])
             self._file_manager.set_output_path(request["output_path"])
-            err_msg = self._file_manager.validate()
-            if err_msg is not None:
-                response.set_err_message(err_msg)
+            err, err_msg = self._file_manager.validate()
+            if err is not None:
+                response.set_err_message(err, err_msg=err_msg)
                 return request, response
 
             # Checks complete
             return request, response
         except ValueError as e:
-            response.set_err_message("Malformed JSON request received: " + e.message)
+            response.set_err_message(MALFORMED_JSON_ERR, err_msg="Malformed JSON request received: " + e.message)
             return None, response
 
     @staticmethod

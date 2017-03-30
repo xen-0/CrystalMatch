@@ -1,6 +1,7 @@
 import platform
 from os.path import normpath, exists, isdir, splitext
 
+from services.extended_focus.error_codes import INVALID_OUT_PATH_ERR, INVALID_TARGET_DIR_ERR
 from services.extended_focus.ext_focus_config import PlatformEnumConfigItem
 
 
@@ -63,14 +64,14 @@ class FilePathManager:
     def validate(self):
         """
         Validate the current directories and return an error message if appropriate.
-        :return: An error message or None.
+        :return: An error code and message or None.
         """
         if not self._validate_output_path():
-            return "Output path is invalid, must have the correct file " \
+            return INVALID_OUT_PATH_ERR, "Output path is invalid, must have the correct file " \
                    "extension " + self._get_allowed_things() + ": " + self.output_path()
         elif not self._validate_target_dir():
-            return "Target directory cannot be reached: " + self.target_dir()
-        return None
+            return INVALID_TARGET_DIR_ERR, "Target directory cannot be reached: " + self.target_dir()
+        return None, None
 
     def _get_allowed_things(self):
         output = "("

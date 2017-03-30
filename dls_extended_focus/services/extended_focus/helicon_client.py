@@ -1,6 +1,7 @@
 # noinspection PyPackageRequirements
 from subprocess32 import TimeoutExpired, Popen, PIPE
 
+from services.extended_focus.error_codes import HELICON_TIMEOUT_ERR, HELICON_ERR
 from services.extended_focus.helicon_config import HeliconConfig
 
 
@@ -41,12 +42,12 @@ class HeliconRunner:
             return_val = process.wait(timeout=self._timeout)
             # return call(cmd_line, shell=True, timeout=self._timeout)
             if return_val != 0:
-                response.set_err_message("The Helicon Focus client failed - please server logs for details.")
+                response.set_err_message(HELICON_ERR)
         except TimeoutExpired:
             # FIXME: A Helicon process gets left running at this point.  Work out how to shut it down to prevent
             #        them building up on the server.
             if process is not None:
                 process.kill()
-            response.set_err_message("The Helicon Focus client timed out.")
+            response.set_err_message(HELICON_TIMEOUT_ERR)
 
         return response
