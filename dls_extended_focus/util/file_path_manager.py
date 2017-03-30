@@ -1,7 +1,8 @@
 import platform
+from os import walk
 from os.path import normpath, exists, isdir, splitext
 
-from services.extended_focus.error_codes import INVALID_OUT_PATH_ERR, INVALID_TARGET_DIR_ERR
+from services.extended_focus.error_codes import INVALID_OUT_PATH_ERR, INVALID_TARGET_DIR_ERR, EMPTY_TARGET_DIR_ERR
 from services.extended_focus.ext_focus_config import PlatformEnumConfigItem
 
 
@@ -11,7 +12,7 @@ class FilePathManager:
     and Linux network paths.
     """
 
-    ALLOWED_OUTPUT_EXTENSIONS = [".jpg", ".tif"]
+    ALLOWED_OUTPUT_EXTENSIONS = [".jpg", ".jpeg", ".tif", ".tiff"]
 
     def __init__(self, config):
         """
@@ -68,16 +69,29 @@ class FilePathManager:
         """
         if not self._validate_output_path():
             return INVALID_OUT_PATH_ERR, "Output path is invalid, must have the correct file " \
-                   "extension " + self._get_allowed_things() + ": " + self.output_path()
+                   "extension " + self._get_allowed_file_extensions_str() + ": " + self.output_path()
         elif not self._validate_target_dir():
             return INVALID_TARGET_DIR_ERR, "Target directory cannot be reached: " + self.target_dir()
+        elif not self._validate_target_dir_not_empty():
+            return EMPTY_TARGET_DIR_ERR, "Valid file extensions " + self._get_allowed_file_extensions_str() + \
+                   " not found: " + self.target_dir()
         return None, None
 
-    def _get_allowed_things(self):
+    def _get_allowed_file_extensions_str(self):
         output = "("
         for ext in self.ALLOWED_OUTPUT_EXTENSIONS:
             output += ext + ", "
         return output[:(len(output) - 2)] + ")"
+
+    def _validate_target_dir_not_empty(self):
+        for dir_path, dir_names, file_names in walk(self.target_dir()):
+            for f in file_names:
+                fn, ext = splitext(f)
+                if ext in self.ALLOWED_OUTPUT_EXTENSIONS:
+                    # At least one valid file exists
+                    return True
+            # We only want immediate children - return after one step of walk
+            return False
 
     def _validate_target_dir(self):
         target_dir = self.target_dir()

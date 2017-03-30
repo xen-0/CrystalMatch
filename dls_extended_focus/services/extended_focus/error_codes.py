@@ -18,3 +18,5 @@ HELICON_ERR = (107, "Helicon Focus returned an error response - please check log
                     "error message.")
 
 MALFORMED_JSON_ERR = (108, "Malformed JSON request in STOMP message body.")
+
+EMPTY_TARGET_DIR_ERR = (109, "Target directory does not contain any valid files for stacking.")
