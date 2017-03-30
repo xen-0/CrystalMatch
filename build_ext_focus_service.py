@@ -16,7 +16,10 @@ print "Deleting existing resources..."
 if exists(dist_dir) and isdir(dist_dir):
     rmtree(dist_dir)
 makedirs(dist_dir)
-remove(dist_dir + "." + ARCHIVE_TYPE)
+
+archive_path = dist_dir + "." + ARCHIVE_TYPE
+if exists(archive_path):
+    remove(archive_path)
 
 # Copy Files to distribution directory
 print "Copying source files to distribution..."

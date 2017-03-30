@@ -1,6 +1,6 @@
 # Version information for Extended Focus Service
-__version__ = "v0.0.2"
-__date__ = "03/03/2017"
+__version__ = "v0.0.3"
+__date__ = "30/03/2017"
 
 
 class VersionHandler:
