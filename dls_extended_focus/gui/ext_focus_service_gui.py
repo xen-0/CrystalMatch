@@ -29,7 +29,7 @@ class ExtendedFocusServiceGUI(Tk):
 
         self.val_job_id = self._create_field(self.frm_request, "Job ID", "TEST_00000")
         self.val_target_dir = self._create_field(self.frm_request, "Target Dir", "")
-        self.val_target_dir = self._create_field(self.frm_request, "Output Path", "")
+        self.val_output_dir = self._create_field(self.frm_request, "Output Path", "")
 
         self.button_send_req = Button(self.frm_request, text="Send Request", command=self._send_request)
         self.button_send_req.pack(fill=X, padx=2, pady=2)
