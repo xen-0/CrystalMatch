@@ -11,10 +11,11 @@ sys_test_output
 
 /dls_extended_focus/logs
 
-venv
+venv*
 /config
 /logs
 
 *.pyc
 gi
 .idea/dictionaries/marcs.xml
+.idea/other.xml

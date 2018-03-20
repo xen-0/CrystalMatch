@@ -1,7 +1,8 @@
 from os.path import join
 
-from dls_util.config import Config, IntConfigItem, RangeIntConfigItem,\
-    FloatConfigItem, RangeFloatConfigItem, EnumConfigItem, BoolConfigItem
+from dls_util.config.config import Config
+from dls_util.config.item import IntConfigItem, RangeIntConfigItem, FloatConfigItem, RangeFloatConfigItem, \
+    EnumConfigItem, BoolConfigItem
 from .detector import Detector
 from .detector_brisk import BriskDetector
 from .detector_orb import OrbDetector

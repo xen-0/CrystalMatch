@@ -1,7 +1,8 @@
 from os.path import join
 
 from dls_imagematch.feature.detector import DetectorType
-from dls_util.config import Config, EnumConfigItem, BoolConfigItem, RangeFloatConfigItem
+from dls_util.config.config import Config
+from dls_util.config.item import EnumConfigItem, BoolConfigItem, RangeFloatConfigItem
 
 
 class AlignConfig(Config):
