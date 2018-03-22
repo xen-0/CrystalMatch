@@ -66,7 +66,7 @@ class TestServiceOutput(SystemTest):
         self.failIfStdOutContains("poi:")
 
     def test_format_for_failed_points(self):
-        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2.jpg 473,921"
+        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2.jpg 11,11"
         self.run_crystal_matching_test(self.test_format_for_failed_points.__name__, cmd_line)
 
         # Check for failed POI result

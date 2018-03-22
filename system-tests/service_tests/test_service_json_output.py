@@ -53,7 +53,7 @@ class TestServiceOutput(SystemTest):
         self._validate_format_of_json_object(json, None, exp_input_image, exp_output_image, exp_poi_len)
 
     def test_json_format_for_failed_points(self):
-        cmd_line = "--to_json {resources}/A10_1.jpg {resources}/A10_2.jpg 473,921"
+        cmd_line = "--to_json {resources}/A10_1.jpg {resources}/A10_2.jpg 11,11"
         self.run_crystal_matching_test(self.test_json_format_for_failed_points.__name__, cmd_line)
 
         # Read the output into a JSON object and test it against expected values
