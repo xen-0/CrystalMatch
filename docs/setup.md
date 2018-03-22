@@ -1,16 +1,47 @@
+Setting up the Development Environment
+======================================
+
+This application is written in Python (v2.7) and was developed under Windows but should be portable to other platforms.
+
+The following steps will help you prepare an appropriate Python environment to run this program. These instructions assume that you will use the 32-bit version on Python 2.7.11. The program should also run correctly under other versions of Python (e.g. 3.4, 3.5, 64bit), however due to an error in later versions of OpenCV (v3) on Windows, some features may not work correctly.
+
+The guide below provides set-up instructions for both the Diamond Light Source python environment (dls-python) and Windows.
+
 Recommended IDE
-===============
+---------------
 This application has been developed using the JetBrains PyCharm IDE. While the source code can be used separately using the information below, Pycharm is a highly recommended development tool.
 
 A free community edition of Pycharm is available from <https://www.jetbrains.com/pycharm/>; the professional edition has additional features which are useful but not essential to this project.
 
 The configuration files for Pycharm are located in `.idea` directories in the repository. The root level directory also contains example run configurations and should be detected automatically when opening the project with Pycharm for the first time.
 
-Using the Source Code - Windows
-===============================
-This application is written in Python (v2.7) and was developed under Windows but should be portable to other platforms.
+DLS Linux Setup
+---------------
 
-The following steps will help you prepare an appropriate Python environment to run this program. These instructions assume that you will use the 32-bit version on Python 2.7.11. The program should also run correctly under other versions of Python (e.g. 3.4, 3.5, 64bit), however due to an error in later versions of OpenCV (v3) on Windows, seem features may not work correctly.
+This project is designed to be run at the Diamond Light Source using the Red Hat Linux and DLS-Python distributions available in-house.  The following steps are required when setting up a development environment for CrystalMatch in Pycharm.
+
+* Download the repository from Github and open the directory in Pycharm (professional and community editions available through terminal).
+* Create a new virtual environment from dls-python:
+    * Open a terminal in the CrystalMatch directory and type the following commands
+    
+    ```
+    > virtualenv -p /dls_sw/prod/tools/RHEL6-x86_64/Python/2-7-3/prefix/bin/dls-python venv --system-site-packages
+    ```
+    NOTE: this creates a virtual from dls-python which fulfills most of the dependencies except `mock` which is only required for unit tests.
+    
+    * Update the mock module - required for the unittests.  In the same terminal type
+    
+    ```
+    > source venv/bin/activate
+    > pip install mock --upgrade
+    ```
+    
+* Set interpreter - Open `File -> Settings -> Project -> Project Interpreter -> [cog icon] -> New Local...`. Add the virtual environment from the previous step as an existing virtual.
+* In the settings also change `Tools -> Python Integrated Tools -> Default Test Runner` to be `UnitTest` - this is required for system and unit tests to run correctly.
+* In the Project Explorer right-click on source directories (Source, dataset-builder etc.) and mark them as source root directories.
+
+Using the Source Code - Windows
+-------------------------------
 
 * Install the appropriate version of Python by downloading the Windows binary installer from <https://www.python.org/downloads/release/python-2711/>
     * You want the one labelled 'Windows x86 MSI installer'
@@ -20,7 +51,7 @@ The following steps will help you prepare an appropriate Python environment to r
     * enum
     * numpy
     * OpenCV
-    * PyQt4
+    * PyQt5
     * mock (Testing only - standard in Python v3.3+ but required for unit tests to run under v2.7)
     * nose_parameterized (Testing only)
     * workflows - written by Markus Gerstel (Diamond GDA group).  This is required for ActiveMQ integration in the Focus Stacking service.
@@ -31,13 +62,14 @@ The following steps will help you prepare an appropriate Python environment to r
     * Install enum by typing `pip install enum`
     
 * The easiest way to install the other packages is to download the precompiled binaries from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>. To install each one, open cmd.exe and type `pip install filename`. Download the most recent version of each for your version of Python (2.7, 32bit). For OpenCV you should get version 2 rather than 3 if available, as some features may not work under version 3:
+    * NOTE: the packages below are outdated - see `requirements.txt`
     * numpy-1.11.0+mkl-cp27-cp27m-win32.whl
     * opencv_python-2.4.12-cp27-none-win32.whl
     * PyQt4-4.11.4-cp27-none-win32.whl
 
 
 Running from the Command Line
-=============================
+-----------------------------
 
 To run the service from the command line the root directory of project (ie: the root of the git repository) must be added to the `PYTHONPATH` environment variable.
 
@@ -51,7 +83,7 @@ NOTE: A `config` directory will be added to the current working directory unless
 
 
 Unit Testing
-============
+------------
 
 Unit tests have been in-lined with the module structure - unit tests for a class will be located in a file named `test_[file name]`.
 
@@ -62,7 +94,7 @@ The professional (paid licence) edition of Pycharm incorporates the `coverage` P
 **NOTE:** System tests also use the python `unittest` framework, running all tests in the repository will take considerably longer than running only the unit tests.
 
 System Tests
-============
+------------
 
 At the time of writing system testing does not cover the application exhaustively - tests were added late in the development process and have been written to cover features as they are added or updated.
 
