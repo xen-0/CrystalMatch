@@ -6,10 +6,16 @@ test-images
 test-output
 sys_test_output
 /distribution
-venv
+/build
+/dist
+
+/dls_extended_focus/logs
+
+venv*
 /config
 /logs
 
 *.pyc
 gi
 .idea/dictionaries/marcs.xml
+.idea/other.xml

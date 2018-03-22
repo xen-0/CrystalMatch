@@ -156,9 +156,14 @@ class TestLoggingFunctions(SystemTest):
         self.run_crystal_matching_test(self.test_logging_flag_with_invalid_path_reports_error.__name__, cmd_line)
 
         # Check std_err for error message return value for failure
-        self.failUnlessStdErrContains(
-            "ERROR:root:Could not create find/create directory, path may be invalid: test/log:ging/flag/")
-        self.failUnlessRunFailed()
+        try:
+            self.failUnlessStdErrContains(
+                "ERROR:root:Could not create find/create directory, path may be invalid: test/log:ging/flag/")
+            self.failUnlessRunFailed()
+        except AssertionError:
+            # Note - this error is only really possible in Windows, if the file has been created successfully then
+            # this is probably a Linux system and the test should pass.
+            self.failUnlessDirContainsFile(join(self.get_active_test_dir(), "test", "log:ging", "flag"), "log")
 
     def _verify_logged_image_files(self, log_image_dir, poi_array):
         # Check log files

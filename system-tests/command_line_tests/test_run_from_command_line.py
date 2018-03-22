@@ -23,8 +23,8 @@ class TestRunFromCommandLine(SystemTest):
         self.failUnlessStdOutContains(
             "Image Alignment Completed - Status: 'Good Alignment'",
             "*** Crystal Match 1 ***",
-            "Crystal Movement(delta): x=0.97 um, y=4.24 um (0.969482421875 px, 4.24475097656 px)",
+            "Crystal Movement(delta): x=0.97 um, y=4.24 um",
             "*** Crystal Match 2 ***",
             "Match Failed",
             "*** Crystal Match 3 ***",
-            "Crystal Movement(delta): x=3.41 um, y=-1.49 um (3.40673828125 px, -1.48596191406 px)")
+            "Crystal Movement(delta): x=3.41 um, y=-1.49 um")

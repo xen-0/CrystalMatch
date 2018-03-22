@@ -1,4 +1,3 @@
-from dls_util.imaging import Color
 from .config import Config
 
 
@@ -80,6 +79,18 @@ class ConfigItem:
     def _clean(self, value):
         """ Perform any additional cleanup/processing on the value. Implement in subclass if needed. """
         return value
+
+
+class StringItem(ConfigItem):
+    """ Config item that stores a string value."""
+    DATA_TYPE = str
+
+    def __init__(self, tag, default):
+        ConfigItem.__init__(self, tag, default)
+        self._acceptable_values = "String"
+
+    def from_file_string(self, value_string):
+        self._value = value_string
 
 
 class IntConfigItem(ConfigItem):
@@ -214,19 +225,6 @@ class DirectoryConfigItem(ConfigItem):
 
     def _clean(self, value):
         return str(value).strip()
-
-
-class ColorConfigItem(ConfigItem):
-    """ Config item that stores a color. """
-    DATA_TYPE = Color
-
-    """ Config item that stores a color. """
-    def __init__(self, tag, default):
-        ConfigItem.__init__(self, tag, default)
-        self._acceptable_values = "Comma-separated RGBA values, e.g. '255,128,50,255'"
-
-    def from_file_string(self, string):
-        self._value = Color.from_string(string)
 
 
 class BoolConfigItem(ConfigItem):

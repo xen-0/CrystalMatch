@@ -46,11 +46,19 @@ class CrystalTestSuite:
         file_list_1 = listdir(dir_1)
         file_list_2 = listdir(dir_2)
         candidate_list = [x for x in file_list_1 if self._has_image_extension(x)]
+
+        # Strip file extensions from list 2
+        matchable_file_list_2 = [splitext(x)[0] for x in file_list_2]
+
         for file_name in candidate_list:
-            if file_name in file_list_2:
+            try:
+                match_index = matchable_file_list_2.index(splitext(file_name)[0])
                 img_1 = relpath(join(dir_1, file_name), self._image_directory)
-                img_2 = relpath(join(dir_2, file_name), self._image_directory)
+                img_2 = relpath(join(dir_2, file_list_2[match_index]), self._image_directory)
                 self.cases.append(CrystalTestCase.create_new(self._image_directory, img_1, img_2))
+            except ValueError:
+                # No match found for that file, keep searching...
+                pass
 
     def _has_image_extension(self, file_name):
         path, ext = splitext(file_name)

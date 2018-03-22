@@ -6,7 +6,7 @@ from PyQt4.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QP
 from dls_imagematch.feature.detector.config import DetectorConfig
 from dls_imagematch.feature.detector.types import DetectorType
 from dls_util.shape import Point
-from dls_util.config import ConfigDialog
+from dls_util.config.dialog import ConfigDialog
 
 from dls_imagematch.crystal import CrystalMatcher
 from dls_util.widget import Slider

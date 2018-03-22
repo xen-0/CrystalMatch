@@ -1,3 +1,6 @@
+from pkg_resources import require
+require("numpy==1.11.1")
+
 from unittest import TestCase
 
 from mock.mock import create_autospec, MagicMock, patch

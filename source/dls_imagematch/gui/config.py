@@ -1,6 +1,8 @@
 from os.path import join
 
-from dls_util.config import Config, DirectoryConfigItem, ColorConfigItem
+from dls_util.config.config import Config
+from dls_util.config.item import DirectoryConfigItem
+from dls_util.config.item_colour import ColorConfigItem
 from dls_util.imaging import Color
 
 

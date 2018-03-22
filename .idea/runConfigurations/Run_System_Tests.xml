@@ -8,18 +8,12 @@
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <module name="diamond-imagematch" />
+    <module name="CrystalMatch" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="" />
-    <option name="CLASS_NAME" value="" />
-    <option name="METHOD_NAME" value="" />
-    <option name="FOLDER_NAME" value="$PROJECT_DIR$/system-tests" />
-    <option name="TEST_TYPE" value="TEST_FOLDER" />
-    <option name="PATTERN" value="" />
-    <option name="USE_PATTERN" value="false" />
-    <option name="PUREUNITTEST" value="true" />
-    <option name="PARAMS" value="" />
-    <option name="USE_PARAM" value="false" />
+    <option name="_new_pattern" value="&quot;&quot;" />
+    <option name="_new_additionalArguments" value="&quot;&quot;" />
+    <option name="_new_target" value="&quot;.&quot;" />
+    <option name="_new_targetType" value="&quot;PATH&quot;" />
     <method />
   </configuration>
 </component>
