@@ -1,3 +1,6 @@
+from pkg_resources import require
+require("numpy==1.11.1")
+
 import sys
 
 from PyQt4 import QtGui

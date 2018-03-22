@@ -27,18 +27,19 @@ This project is designed to be run at the Diamond Light Source using the Red Hat
     ```
     > virtualenv -p /dls_sw/prod/tools/RHEL6-x86_64/Python/2-7-3/prefix/bin/dls-python venv --system-site-packages
     ```
-    NOTE: this creates a virtual from dls-python which fulfills most of the dependencies except `mock` which is only required for unit tests.
+    NOTE: this creates a virtual from dls-python which fulfills most dependencies except those required for unit tests.
     
-    * Update the mock module - required for the unittests.  In the same terminal type
+    * Update the mock and nose-parameterized modules - required for the unittests.  In the same terminal type
     
     ```
     > source venv/bin/activate
     > pip install mock --upgrade
+    > pip install nose_parameterized
     ```
     
 * Set interpreter - Open `File -> Settings -> Project -> Project Interpreter -> [cog icon] -> New Local...`. Add the virtual environment from the previous step as an existing virtual.
 * In the settings also change `Tools -> Python Integrated Tools -> Default Test Runner` to be `UnitTest` - this is required for system and unit tests to run correctly.
-* In the Project Explorer right-click on source directories (Source, dataset-builder etc.) and mark them as source root directories.
+* In the Project Explorer right-click on source directories (Source, dataset-builder, system-tests etc.) and mark them as source root directories.
 
 Using the Source Code - Windows
 -------------------------------
