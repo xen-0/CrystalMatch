@@ -1,7 +1,9 @@
 import json
 from os import listdir
+
 from os.path import splitext, join, relpath
 
+from dls_util.shape import Point
 from test_case import CrystalTestCase
 
 
@@ -18,8 +20,6 @@ class CrystalTestSuite:
 
     def testable_cases(self):
         return [c for c in self.cases if c.is_testable_case()]
-
-    def image_directory(self): return self._image_directory
 
     def scale_ratio(self): return self._scale_ratio
 
@@ -40,6 +40,21 @@ class CrystalTestSuite:
             output["dataset"]["test_cases"].append(case.serialize())
         with open(self._case_file, 'w') as f:
             json.dump(output, f)
+
+    def add_test_case(self, formulatrix_img, beamline_img, points):
+        """
+        Add a new test to the test suite - does not save the changes to file!
+        :param formulatrix_img: Path to the formulatrix image.
+        :param beamline_img: Path to the beamline extended focus image.
+        :param points: a list of Point objects
+        :return the new CrystalTestCase object
+        """
+        new_test_case = CrystalTestCase.create_new(self._image_directory, formulatrix_img, beamline_img)
+        self.cases.append(new_test_case)
+        for p in points:
+            assert isinstance(p, Point)
+            new_test_case.add_poi(p, p)
+        return new_test_case
 
     def create_cases_from_files(self, dir_1, dir_2):
         """ Compare two directories and create a new case for every image file with the same name. """
