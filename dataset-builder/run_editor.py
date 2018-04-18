@@ -9,8 +9,8 @@ from file_manager.file_manager import FileManager
 
 
 def main():
-    data_sets_dir = "../test-images/data-sets/"
-    img_dir_root = "../test-images/"
+    data_sets_dir = "../data-sets/"
+    img_dir_root = "/"
 
     app = QtGui.QApplication(sys.argv)
 
