@@ -1,4 +1,5 @@
-from dls_util.config import Config, IntConfigItem, DirectoryConfigItem
+from dls_util.config.config import Config
+from dls_util.config.item import IntConfigItem
 
 
 class FocusConfig(Config):

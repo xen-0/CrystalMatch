@@ -1,4 +1,4 @@
-from dls_util.config import ConfigDialog
+from dls_util.config.dialog import ConfigDialog
 
 
 class FocusConfigDialog(ConfigDialog):
@@ -15,12 +15,12 @@ class FocusConfigDialog(ConfigDialog):
         add = self.add_item
 
         self.start_group("Image Alignment")
-        add(cfg.align_method)
+        #add(cfg.align_method)
 
         self.start_group("Focus Stacking")
         add(cfg.kernel_size)
         add(cfg.blur_radius)
 
         self.start_group("Directories")
-        add(cfg.input_dir)
-        add(cfg.output_dir)
+        #add(cfg.input_dir)
+        #add(cfg.output_dir)
