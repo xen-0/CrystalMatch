@@ -8,7 +8,7 @@ from PyQt4.QtGui import QApplication
 from gui.main_focus import FocusStackerMain
 
 CONFIG_DIR = os.path.join('..', 'config')
-DEFAULT_INPUT_DIR = os.path.join('..','test-images', 'Focus Stacking', 'VMXI-AA0019-H01-1-R0DRP1', 'levels')
+DEFAULT_INPUT_DIR = os.path.join('..','test-images', 'Focus', 'VMXI-AA0019-H01-1-R0DRP1', 'levels')
 OUTPUT_DIR = os.path.join('..', 'test-output', 'focus_stacking')
 
 

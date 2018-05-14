@@ -106,7 +106,7 @@ class FocusStackerMain(QMainWindow):
         image_files = [fn for fn in files if any(fn.lower().endswith(ext) for ext in included_extensions)]
 
         folder_path += "/"
-        #"\\" - TODO beter way of doing this
+        #"\\" - TODO better way of doing this
         files = [folder_path + f for f in image_files]
 
         self._image_list.set_images(files)
