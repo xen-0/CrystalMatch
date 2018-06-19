@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
 from config.focus_config import FocusConfig
-from dls_focusstack.focus import FocusStack
+from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
 from dls_focusstack.gui import *
 
 sys.path.append("..")

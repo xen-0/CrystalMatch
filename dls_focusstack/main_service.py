@@ -1,5 +1,6 @@
 from pkg_resources import require
 require("numpy==1.11.1")
+require("scipy")
 import argparse
 import logging
 from logging import DEBUG, INFO
@@ -12,7 +13,7 @@ from sys import stdout
 import sys
 
 from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
-from focus.focus_stack import FocusStack
+from focus.focus_stack_lap_pyramid import FocusStack
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)

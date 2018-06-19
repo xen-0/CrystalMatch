@@ -2,6 +2,7 @@ import os
 
 from pkg_resources import require
 require("numpy==1.11.1")
+require("scipy")
 import sys
 from PyQt4.QtGui import QApplication
 
