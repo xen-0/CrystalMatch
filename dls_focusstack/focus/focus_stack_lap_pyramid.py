@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 
@@ -17,7 +19,10 @@ class FocusStack:
         self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
 
     def composite(self):
+        t1 = time.clock()
         images = self.find_sharp()
+        t2 = time.clock() - t1
+        print 'time fft:', t2
         images = np.array(images, dtype=images[0].dtype)
 
         #TODO:Implement alignment algo
@@ -39,7 +44,6 @@ class FocusStack:
         for file_obj in self._image_file_list:
             img_color = cv2.imread(file_obj.name)
             img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
-            #img = img_color
             detector = SharpnessDetector(img)
             detector.runFFT()
             sd[num] = detector
@@ -53,7 +57,9 @@ class FocusStack:
 
         # take all the images which have fft higher than the cut off
         for j in range(1, n):
+
             if sd[j].getFFT() > level:
                 images.append(sd[j].getImage())
-
+                print 'name: ', self._image_file_list[j]
+                print 'level:', sd[j].getFFT()
         return images

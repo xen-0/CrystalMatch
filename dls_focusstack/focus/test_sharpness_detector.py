@@ -17,4 +17,7 @@ class TestSharpnessDetector(TestCase):
                          (1, 3, 4, 5),
                          (1, 0, 2, 5)])
         sh = SharpnessDetector(img)
-        sh.furier()
+        r = sh.furier()
+        r1 = sh.furier2()
+
+
