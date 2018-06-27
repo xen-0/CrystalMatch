@@ -11,6 +11,7 @@ from os import makedirs, remove
 from sys import stdout
 
 import sys
+import time
 
 from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
 from focus.focus_stack_lap_pyramid import FocusStack
@@ -34,9 +35,11 @@ class FocusStackService:
             args = parser.parse_args()
             self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
+            t1 = time.clock()
             stacker = FocusStack(args.image_stack, args.config)
             focused_image = stacker.composite()
             focused_image.save(args.output)
+            print 'time:', time.clock() - t1
         except IOError as e:
             self._handle_error(e)
 

@@ -133,8 +133,9 @@ class pyramid:
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
         for layer in range(layers):
-            gray_image = cv2.cvtColor(images[layer].astype(np.float32), cv2.COLOR_BGR2GRAY).astype(np.uint8)
-            probabilities = self.get_probabilities(gray_image)
+            #gray_image = cv2.cvtColor(images[layer].astype(np.float32), cv2.COLOR_BGR2GRAY).astype(np.uint8)
+            #probabilities = self.get_probabilities(gray_image)
+            gray_image = images[layer].astype(np.uint8)
             entropies[layer] = self.entropy(gray_image, kernel_size)
             deviations[layer] = self.deviation(gray_image, kernel_size)
 
@@ -143,8 +144,8 @@ class pyramid:
         fused = np.zeros(images.shape[1:], dtype=np.float64)
 
         for layer in range(layers):
-            fused += np.where(best_e[:, :, np.newaxis] == layer, images[layer], 0)
-            fused += np.where(best_d[:, :, np.newaxis] == layer, images[layer], 0)
+            fused += np.where(best_e[:, :] == layer, images[layer], 0)
+            fused += np.where(best_d[:, :] == layer, images[layer], 0)
 
         return (fused / 2).astype(images.dtype)
 
@@ -160,14 +161,15 @@ class pyramid:
         region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
         for layer in range(layers):
-            gray_lap = cv2.cvtColor(laplacians[layer].astype(np.float32), cv2.COLOR_BGR2GRAY)
+            #gray_lap = cv2.cvtColor(laplacians[layer].astype(np.float32), cv2.COLOR_BGR2GRAY)
+            gray_lap = laplacians[layer]
             region_energies[layer] = self.region_energy(gray_lap)
 
         best_re = np.argmax(region_energies, axis=0)
         fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
 
         for layer in range(layers):
-            fused += np.where(best_re[:, :, np.newaxis] == layer, laplacians[layer], 0)
+            fused += np.where(best_re[:, :] == layer, laplacians[layer], 0)
 
         return fused
 
