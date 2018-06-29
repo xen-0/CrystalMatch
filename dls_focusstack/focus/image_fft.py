@@ -4,13 +4,11 @@ import cv2
 import numpy as np
 
 
-class SharpnessDetector:
+class Image_FFT:
 
-    LAPLACE_VAR_TRESH = 76.9
-    FURIER_TRESH = 450
-
-    def __init__(self, input_img):
+    def __init__(self, input_img,number):
         self.img = input_img
+        self.image_number = number
         self.fft_level = None
 
     def runFFT(self):
@@ -22,6 +20,9 @@ class SharpnessDetector:
 
     def getImage(self):
         return self.img
+
+    def getImageNumber(self):
+        return self.image_number
 
     def furier(self):
         time1 = time.clock()
@@ -41,7 +42,8 @@ class SharpnessDetector:
         time2 = time.clock() - time1
         return result
 
-#algorithm porvided by Charles Mitta - a slight modification of the optimal sizes has been added to speed up the porcedure
+    #algorithm porvided by Charles Mitta - a slight modification of the optimal sizes
+    # has been added to speed up the procedure
     def furier2(self):
         time1 = time.clock()
         rows, cols = self.img.shape
@@ -55,7 +57,6 @@ class SharpnessDetector:
         h1, w1 = fft_abs1.shape
         # -1 is the last element, last excluded
         part1 = fft_abs1[int(0.05 * h1) : int(0.95 * h1)-1, int(0.05 * w1) : -1] #zero frequency is in the top left corner
-        #part1 = fft_abs1[int(0.05 * h1) : -1, int(0.05 * w1) : -1]
         output = np.mean(part1)
         time3 = time.clock()-time1
         return output

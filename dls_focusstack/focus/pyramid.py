@@ -4,12 +4,14 @@
 import cv2
 import numpy as np
 from scipy import ndimage
+from multiprocessing import Pool
 
 class pyramid:
 
     def __init__(self, aligned_images, config):
         self.images = aligned_images
         self.config = config
+
 
     def generating_kernel(a):
         kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])

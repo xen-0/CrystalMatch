@@ -7,16 +7,16 @@ require("numpy==1.11.1")
 import numpy as np
 
 
-from focus.sharpness_detector import SharpnessDetector
+from focus.image_fft import Image_FFT
 
 
-class TestSharpnessDetector(TestCase):
+class TestImageFFT(TestCase):
 
     def test_furier(self):
         img =  np.array([(0, 2, 3, 4),
                          (1, 3, 4, 5),
                          (1, 0, 2, 5)])
-        sh = SharpnessDetector(img)
+        sh = Image_FFT(img)
         r = sh.furier()
         r1 = sh.furier2()
 

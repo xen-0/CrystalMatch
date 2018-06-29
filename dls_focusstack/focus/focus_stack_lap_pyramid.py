@@ -1,4 +1,5 @@
 import time
+from multiprocessing import Process, Queue, current_process, Pool
 
 import cv2
 import numpy as np
@@ -8,7 +9,17 @@ from dls_util.imaging import Image
 from focus.pyramid import pyramid
 from os.path import join
 
-from focus.sharpness_detector import SharpnessDetector
+from focus.image_fft import Image_FFT
+
+IMG_TO_STACK = 8 #how many images will be stacked
+
+
+def f(file_obj,q,count):
+    img_color = cv2.imread(file_obj.name)
+    img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
+    image_fft = Image_FFT(img, count)
+    image_fft.runFFT()
+    q.put(image_fft)
 
 
 class FocusStack:
@@ -34,32 +45,58 @@ class FocusStack:
         return Image(stacked_image)
 
     def find_sharp(self):
-        images = []
-        n = len(self._image_file_list)
-        sd = [None]*n
-        num = 0
-        level = 0
 
-        #calculate fft of every image
+        q = Queue()
+
+        #processes = [Process(target=f, args=(file_obj,q)) for file_obj in self._image_file_list]
+        processes=[]
+        count = 1
         for file_obj in self._image_file_list:
-            img_color = cv2.imread(file_obj.name)
-            img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
-            detector = SharpnessDetector(img)
-            detector.runFFT()
-            sd[num] = detector
-            num = num + 1
+            process = Process(target=f, args=(file_obj,q,count))
+            processes.append(process)
+            count = count+1
 
-        #find the fft cut off
-        for i in range(1, n-1):
-            if (sd[i+1].getFFT() - sd[i].getFFT())/sd[i].getFFT() > 0.05: #5%
-                level = sd [i].getFFT()
-                break
+        for p in processes:
+            p.start()
 
-        # take all the images which have fft higher than the cut off
-        for j in range(1, n):
+        sd = [q.get() for p in processes]
 
-            if sd[j].getFFT() > level:
-                images.append(sd[j].getImage())
-                print 'name: ', self._image_file_list[j]
-                print 'level:', sd[j].getFFT()
+        for p in processes:
+            p.join()
+
+        images = self.images_to_stack(sd)
+        #take n images from the stuck
         return images
+
+
+    def images_to_stack(self, sd):
+        n = len(sd)
+        level = 0
+        max = None
+        images = []
+        for s in sd:
+            fft = s.getFFT()
+            if fft > level:
+                level = fft
+                max = s.getImageNumber()
+
+        range = self.find_range(max,n)
+        for s in sd:
+            if s.getImageNumber() in range:
+                images.append(s.getImage())
+
+        return images
+
+
+    @staticmethod
+    def find_range(max,n):
+        if max -(IMG_TO_STACK / 2) < 1:
+            return range(1, IMG_TO_STACK)
+        elif max + (IMG_TO_STACK / 2) > n:
+            return range(-IMG_TO_STACK, n)
+        else:
+            return range(max - IMG_TO_STACK / 2, max + IMG_TO_STACK / 2)
+
+
+
+
