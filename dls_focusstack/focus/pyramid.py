@@ -4,7 +4,6 @@
 import cv2
 import numpy as np
 from scipy import ndimage
-from multiprocessing import Pool
 
 class pyramid:
 
@@ -17,19 +16,6 @@ class pyramid:
         kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
         return np.outer(kernel, kernel)
 
-    def reduce_layer(self, layer, kernel=generating_kernel(0.4)):
-        if len(layer.shape) == 2:
-            convolution = self.convolve(layer, kernel)
-            return convolution[::2, ::2]
-
-        ch_layer = self.reduce_layer(layer[:, :, 0])
-        next_layer = np.zeros(list(ch_layer.shape) + [layer.shape[2]], dtype=ch_layer.dtype)
-        next_layer[:, :, 0] = ch_layer
-
-        for channel in range(1, layer.shape[2]):
-            next_layer[:, :, channel] = self.reduce_layer(layer[:, :, channel])
-
-        return next_layer
 
     def expand_layer(self, layer, kernel=generating_kernel(0.4)):
         if len(layer.shape) == 2:
@@ -50,23 +36,23 @@ class pyramid:
     def convolve(self, image, kernel=generating_kernel(0.4)):
         return ndimage.convolve(image.astype(np.float64), kernel, mode='mirror')
 
-    def gaussian_pyramid(self, levels):
+    def gaussian_pyramid(self, depth):
         pyramid = [self.images.astype(np.float64)]
         num_images = self.images.shape[0]
 
-        while levels > 0:
-            next_layer = self.reduce_layer(pyramid[-1][0])
+        while depth > 0:
+            next_layer = cv2.pyrDown(pyramid[-1][0]) #image
             next_layer_size = [num_images] + list(next_layer.shape)
             pyramid.append(np.zeros(next_layer_size, dtype=next_layer.dtype))
             pyramid[-1][0] = next_layer
             for layer in range(1, self.images.shape[0]):
-                pyramid[-1][layer] = self.reduce_layer(pyramid[-2][layer])
-            levels = levels - 1
+                pyramid[-1][layer] = cv2.pyrDown(pyramid[-2][layer]) #downscaled image
+            depth = depth - 1
 
         return pyramid
 
-    def laplacian_pyramid(self, levels):
-        gaussian = self.gaussian_pyramid(levels)
+    def laplacian_pyramid(self, depth):
+        gaussian = self.gaussian_pyramid(depth)
 
         pyramid = [gaussian[-1]]
         for level in range(len(gaussian) - 1, 0, -1):
@@ -84,7 +70,7 @@ class pyramid:
     def collapse(self, pyramid):
         image = pyramid[-1]
         for layer in pyramid[-2::-1]:
-            expanded = self.expand_layer(image)
+            expanded = cv2.pyrUp(image)
             if expanded.shape != layer.shape:
                 expanded = expanded[:layer.shape[0], :layer.shape[1]]
             image = expanded + layer

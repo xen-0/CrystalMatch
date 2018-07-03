@@ -16,7 +16,7 @@ class TestImageFFT(TestCase):
         img =  np.array([(0, 2, 3, 4),
                          (1, 3, 4, 5),
                          (1, 0, 2, 5)])
-        sh = Image_FFT(img)
+        sh = Image_FFT(img,1)
         r = sh.furier()
         r1 = sh.furier2()
 
