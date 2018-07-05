@@ -5,9 +5,9 @@ Filtering is carried out by a REGEX applied to the image paths.
 from test_suite import CrystalTestSuite
 
 
-copy_from = "../data-sets/GDA_master_2018_04_18.json"
-copy_to = "../data-sets/mitegen-pre-2018-04-18.json"
-regex_string = ".*VMXi-AB(0094|0095|0148|0168|0192|0193|0275|0276|0377|0446|0447|0448).*"
+copy_from = "../data-sets/GDA_2018_07_04.json"
+copy_to = "../data-sets/VMXi-AB0634.json"
+regex_string = ".*VMXi-AB0634.*"
 
 # Load the test suite and copy to another dataset
 original_test_suite = CrystalTestSuite(copy_from, "/")

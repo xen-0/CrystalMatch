@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/GDA_log_extraction.py" />
-    <option name="PARAMETERS" value="../data-sets/output.json /dls_sw/i02-2/logs/gda-server-20180517.log.gz" />
+    <option name="PARAMETERS" value="../data-sets/output.json /dls_sw/i02-2/logs/gda-server-20180704.log.gz" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
