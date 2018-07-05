@@ -11,27 +11,9 @@ class pyramid:
         self.images = aligned_images
         self.config = config
 
-
     def generating_kernel(a):
         kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
         return np.outer(kernel, kernel)
-
-
-    def expand_layer(self, layer, kernel=generating_kernel(0.4)):
-        if len(layer.shape) == 2:
-            expand = np.zeros((2 * layer.shape[0], 2 * layer.shape[1]), dtype=np.float64)
-            expand[::2, ::2] = layer;
-            convolution = self.convolve(expand, kernel)
-            return 4. * convolution
-
-        ch_layer = self.expand_layer(layer[:, :, 0])
-        next_layer = np.zeros(list(ch_layer.shape) + [layer.shape[2]], dtype=ch_layer.dtype)
-        next_layer[:, :, 0] = ch_layer
-
-        for channel in range(1, layer.shape[2]):
-            next_layer[:, :, channel] = self.expand_layer(layer[:, :, channel])
-
-        return next_layer
 
     def convolve(self, image, kernel=generating_kernel(0.4)):
         return ndimage.convolve(image.astype(np.float64), kernel, mode='mirror')
@@ -60,7 +42,7 @@ class pyramid:
             pyramid.append(np.zeros(gauss.shape, dtype=gauss.dtype))
             for layer in range(self.images.shape[0]):
                 gauss_layer = gauss[layer]
-                expanded = self.expand_layer(gaussian[level][layer])
+                expanded = cv2.pyrUp(gaussian[level][layer])
                 if expanded.shape != gauss_layer.shape:
                     expanded = expanded[:gauss_layer.shape[0], :gauss_layer.shape[1]]
                 pyramid[-1][layer] = gauss_layer - expanded
@@ -121,8 +103,6 @@ class pyramid:
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
         for layer in range(layers):
-            #gray_image = cv2.cvtColor(images[layer].astype(np.float32), cv2.COLOR_BGR2GRAY).astype(np.uint8)
-            #probabilities = self.get_probabilities(gray_image)
             gray_image = images[layer].astype(np.uint8)
             entropies[layer] = self.entropy(gray_image, kernel_size)
             deviations[layer] = self.deviation(gray_image, kernel_size)
@@ -149,7 +129,6 @@ class pyramid:
         region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
         for layer in range(layers):
-            #gray_lap = cv2.cvtColor(laplacians[layer].astype(np.float32), cv2.COLOR_BGR2GRAY)
             gray_lap = laplacians[layer]
             region_energies[layer] = self.region_energy(gray_lap)
 

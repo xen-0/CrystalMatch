@@ -1,4 +1,4 @@
-IMG_TO_STACK = 8 #how many images will be stacked
+IMG_TO_STACK = 12 #how many images will be stacked
 
 class SharpnessDetector(object):
 
