@@ -1,4 +1,5 @@
 import json
+import re
 from os import listdir
 
 from os.path import splitext, join, relpath
@@ -40,6 +41,9 @@ class CrystalTestSuite:
             output["dataset"]["test_cases"].append(case.serialize())
         with open(self._case_file, 'w') as f:
             json.dump(output, f)
+
+    def append_test_case(self, testCase):
+        self.cases.append(testCase)
 
     def add_test_case(self, formulatrix_img, beamline_img, points):
         """
@@ -99,3 +103,17 @@ class CrystalTestSuite:
             print "WARNING: Data set file does not exist."
 
         return cases
+
+    def filter_by_path_match(self, new_test_suite, regex_string):
+        """
+        :type new_test_suite: CrystalTestSuite
+        """
+        count = 0
+        for case in self.cases:
+            if re.match(regex_string, case.image_path(1)) is not None \
+                    or re.match(regex_string, case.image_path(2)) is not None:
+                print ("Found match : " + case.image_path(1) + " -> " + case.image_path(2))
+                count += 1
+                new_test_suite.append_test_case(case)
+        print ("Found " + str(count) + " matches.")
+        return new_test_suite
