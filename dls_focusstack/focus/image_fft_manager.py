@@ -24,8 +24,6 @@ class ImageFFTManager:
     def read_ftt_images(self):
 
         q = Queue()
-
-        #processes = [Process(target=f, args=(file_obj,q)) for file_obj in self._image_file_list]
         processes=[]
         count = 1
         for file_obj in self._image_file_list:
