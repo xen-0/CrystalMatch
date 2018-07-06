@@ -5,9 +5,6 @@ import cv2
 import numpy as np
 from scipy import ndimage
 
-from focus.gaussian_pyramid import gaussian_pyramid
-
-
 class pyramid:
 
     def __init__(self, aligned_images, config):
@@ -22,9 +19,6 @@ class pyramid:
         return ndimage.convolve(image.astype(np.float64), kernel, mode='mirror')
 
     def gaussian_pyramid(self, depth):
-        return gaussian_pyramid(self.images, depth).calculate_pyramid()
-
-    def gaussian_pyramid_old(self, depth):
         pyramid = [self.images.astype(np.float64)]
         num_images = self.images.shape[0]
 
