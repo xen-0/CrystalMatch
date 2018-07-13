@@ -6,7 +6,7 @@ import numpy as np
 
 from focus.image_fft import Image_FFT
 
-def f(file_obj,q,count):
+def fft(file_obj,q,count):
     img_color = cv2.imread(file_obj.name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = Image_FFT(img, count)
@@ -27,7 +27,7 @@ class ImageFFTManager:
         processes=[]
         count = 1
         for file_obj in self._image_file_list:
-            process = Process(target=f, args=(file_obj,q,count))
+            process = Process(target=fft, args=(file_obj,q,count))
             processes.append(process)
             count = count+1
 
