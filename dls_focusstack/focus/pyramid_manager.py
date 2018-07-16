@@ -48,6 +48,8 @@ class PyramidManager:
         gaussian_array = gaussian.get_pyramid_array()
 
         pyramid = [gaussian_array[-1]]
+
+
         for level in range(len(gaussian_array) - 1, 0, -1):
             gauss = gaussian_array[level - 1]
             pyramid.append(np.zeros(gauss.shape, dtype=gauss.dtype))

@@ -1,11 +1,17 @@
 #This is code take from https://github.com/sjawhar/focus-stacking
 #which implements the methods described in http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf
+from multiprocessing import Queue, Process
 
-import cv2
 import numpy as np
 
 from focus.pyramid_layer import PyramidLayer
 
+def entropy_diviation(pyramid_layer,kernel_size,q):
+    gray_image = pyramid_layer
+    gray_image.entropy(kernel_size)
+    gray_image.deviation(kernel_size)
+
+    q.put(gray_image)
 
 class Pyramid:
 
@@ -15,11 +21,10 @@ class Pyramid:
     def get_pyramid_array(self):
         return self.pyramid_array
 
-
     def fuse(self, kernel_size):
         fused = [self.get_fused_base(kernel_size)]
-        for layer in range(len(self.pyramid_array) - 2, -1, -1):
-            fused.append(self.get_fused_laplacian(layer))
+        for level in range(len(self.pyramid_array) - 2, -1, -1):
+            fused.append(self.get_fused_laplacian(level))
 
         return fused[::-1]
 
@@ -28,10 +33,25 @@ class Pyramid:
         layers = images.shape[0]
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
+
+        q = Queue()
+        processes = []
         for layer in range(layers):
             gray_image = PyramidLayer(images[layer].astype(np.uint8))
-            entropies[layer] = gray_image.entropy(kernel_size)
-            deviations[layer] = gray_image.deviation(kernel_size)
+            gray_image.set_layer_number(layer)
+
+            process = Process(target=entropy_diviation, args=(gray_image, kernel_size, q))
+            process.start()
+            processes.append(process)
+
+        for layer in range(layers):
+            #should always do all threads as all the processes are the same and should take roghly the same time
+            l = q.get()
+            entropies[l.get_layer_number()] = l.get_entropies()
+            deviations[l.get_layer_number()] = l.get_diviations()
+
+        for p in processes:
+            p.join() #this one won't work if there is still something in the quie
 
         best_e = np.argmax(entropies, axis=0)
         best_d = np.argmax(deviations, axis=0)
@@ -43,8 +63,8 @@ class Pyramid:
 
         return (fused / 2).astype(images.dtype)
 
-    def get_fused_laplacian(self, layer):
-        laplacians = self.pyramid_array[layer]
+    def get_fused_laplacian(self, level):
+        laplacians = self.pyramid_array[level]
         layers = laplacians.shape[0]
         region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 

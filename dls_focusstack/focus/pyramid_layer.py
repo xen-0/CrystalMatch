@@ -6,12 +6,24 @@ class PyramidLayer:
 
     def __init__(self, array):
         self.layer_array = array
+        self.layer_number = 0
+        self.diviations = []
+        self.entropies = []
+
+
+    def set_layer_number(self, number):
+        self.layer_number = number
+
+    def get_layer_number(self):
+        return self.layer_number
+
 
     def region_energy(self):
         a = 0.4
         kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
         kernel = np.outer(kernel, kernel)
-        return ndimage.convolve(np.square(self.layer_array).astype(np.float64), kernel, mode='mirror')
+        return  ndimage.convolve(np.square(self.layer_array).astype(np.float64), kernel, mode='mirror')
+
 
     def get_probabilities(self):
         levels, counts = np.unique(self.layer_array.astype(np.uint8), return_counts=True)
@@ -34,7 +46,10 @@ class PyramidLayer:
                 area = padded_image[row + pad_amount + offset[:, np.newaxis], column + pad_amount + offset]
                 entropies[row, column] = _area_entropy(area, probabilities)
 
-        return entropies
+        self.entropies = entropies
+
+    def get_entropies(self):
+        return self.entropies
 
     def deviation(self, kernel_size):
         def _area_deviation(area):
@@ -50,4 +65,7 @@ class PyramidLayer:
                 area = padded_image[row + pad_amount + offset[:, np.newaxis], column + pad_amount + offset]
                 deviations[row, column] = _area_deviation(area)
 
-        return deviations
+        self.diviations = deviations
+
+    def get_diviations(self):
+        return self.diviations
