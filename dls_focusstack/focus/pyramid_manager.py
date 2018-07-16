@@ -13,7 +13,6 @@ class PyramidManager:
     def __init__(self, aligned_images, config):
         self.images = aligned_images
         self.config = config
-        self.pyramid = Pyramid(self.images, self.config)
 
     def get_pyramid_fusion(self):
         smallest_side = min(self.images[0].shape[:2])
@@ -22,65 +21,42 @@ class PyramidManager:
         depth = int(np.log2(smallest_side / min_size))
         kernel_size = cfg.kernel_size.value()
 
-        pyramid = self.pyramid.laplacian_pyramid(depth)
+        pyramid = self.laplacian_pyramid(depth)
 
-        fusion = self.fuse_pyramid(pyramid, kernel_size)
+        pyramid_fusion = pyramid.fuse(kernel_size)
 
-        return self.collapse(fusion)
+        return pyramid_fusion.collapse()
 
+    def gaussian_pyramid(self, depth):
+        pyramid_array = [self.images.astype(np.float64)]
+        num_images = self.images.shape[0]
 
-    @staticmethod
-    def collapse(pyramid):
-        image = pyramid[-1]
-        for layer in pyramid[-2::-1]:
-            expanded = cv2.pyrUp(image)
-            if expanded.shape != layer.shape:
-                expanded = expanded[:layer.shape[0], :layer.shape[1]]
-            image = expanded + layer
+        while depth > 0:
+            image_zero = pyramid_array[-1][0]
+            next_level = cv2.pyrDown(image_zero)  # image
+            next_level_size = [num_images] + list(next_level.shape)
+            pyramid_array.append(np.zeros(next_level_size, dtype=next_level.dtype))  # pyramid extended
+            pyramid_array[-1][0] = next_level
+            for layer in range(1, num_images):
+                next_image = cv2.pyrDown(pyramid_array[-2][layer])  # -2 due to the extension above
+                pyramid_array[-1][layer] = next_image  # downscaled image
+            depth = depth - 1
 
-        return image
+        return Pyramid(pyramid_array)
 
+    def laplacian_pyramid(self, depth):
+        gaussian = self.gaussian_pyramid(depth)
+        gaussian_array = gaussian.get_pyramid_array()
 
-    def get_fused_base(self, pyramid, kernel_size):
-        images = pyramid[-1]
-        layers = images.shape[0]
-        entropies = np.zeros(images.shape[:3], dtype=np.float64)
-        deviations = np.copy(entropies)
-        for layer in range(layers):
-            gray_image = images[layer].astype(np.uint8)
-            entropies[layer] = self.pyramid.entropy(gray_image, kernel_size)
-            deviations[layer] = self.pyramid.deviation(gray_image, kernel_size)
+        pyramid = [gaussian_array[-1]]
+        for level in range(len(gaussian_array) - 1, 0, -1):
+            gauss = gaussian_array[level - 1]
+            pyramid.append(np.zeros(gauss.shape, dtype=gauss.dtype))
+            for layer in range(self.images.shape[0]):
+                gauss_layer = gauss[layer]
+                expanded = cv2.pyrUp(gaussian_array[level][layer])
+                if expanded.shape != gauss_layer.shape:
+                    expanded = expanded[:gauss_layer.shape[0], :gauss_layer.shape[1]]
+                pyramid[-1][layer] = gauss_layer - expanded
 
-        best_e = np.argmax(entropies, axis=0)
-        best_d = np.argmax(deviations, axis=0)
-        fused = np.zeros(images.shape[1:], dtype=np.float64)
-
-        for layer in range(layers):
-            fused += np.where(best_e[:, :] == layer, images[layer], 0)
-            fused += np.where(best_d[:, :] == layer, images[layer], 0)
-
-        return (fused / 2).astype(images.dtype)
-
-    def fuse_pyramid(self, pyramid, kernel_size):
-        fused = [self.get_fused_base(pyramid, kernel_size)]
-        for layer in range(len(pyramid) - 2, -1, -1):
-            fused.append(self.get_fused_laplacian(pyramid,layer))
-
-        return fused[::-1]
-
-    def get_fused_laplacian(self, pyramid, layer):
-        laplacians = pyramid[layer]
-        layers = laplacians.shape[0]
-        region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
-
-        for layer in range(layers):
-            gray_lap = laplacians[layer]
-            region_energies[layer] = +self.pyramid.region_energy(gray_lap)
-
-        best_re = np.argmax(region_energies, axis=0)
-        fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
-
-        for layer in range(layers):
-            fused += np.where(best_re[:, :] == layer, laplacians[layer], 0)
-
-        return fused
+        return Pyramid(pyramid[::-1])  # revert the sequence
