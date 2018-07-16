@@ -7,9 +7,9 @@ import numpy as np
 from config.focus_config import FocusConfig
 from dls_util.imaging import Image
 from focus.image_fft_manager import ImageFFTManager
-from focus.pyramid import pyramid
 from os.path import join
 
+from focus.pyramid_manager import PyramidManager
 from focus.sharpness_detector import SharpnessDetector
 
 
@@ -36,7 +36,7 @@ class FocusStack:
         #aligned_images, gray_images = self.align(images)
 
         #stacked_image = pyramid(aligned_images, self._config).get_pyramid_fusion()
-        stacked_image = pyramid(images, self._config).get_pyramid_fusion()
+        stacked_image = PyramidManager(images, self._config).get_pyramid_fusion()
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         return Image(stacked_image)
 

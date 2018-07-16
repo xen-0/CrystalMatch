@@ -5,30 +5,25 @@ import cv2
 import numpy as np
 from scipy import ndimage
 
-class pyramid:
+class Pyramid:
 
     def __init__(self, aligned_images, config):
         self.images = aligned_images
         self.config = config
-
-    def generating_kernel(a):
-        kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
-        return np.outer(kernel, kernel)
-
-    def convolve(self, image, kernel=generating_kernel(0.4)):
-        return ndimage.convolve(image.astype(np.float64), kernel, mode='mirror')
 
     def gaussian_pyramid(self, depth):
         pyramid = [self.images.astype(np.float64)]
         num_images = self.images.shape[0]
 
         while depth > 0:
-            next_layer = cv2.pyrDown(pyramid[-1][0]) #image
-            next_layer_size = [num_images] + list(next_layer.shape)
-            pyramid.append(np.zeros(next_layer_size, dtype=next_layer.dtype))
-            pyramid[-1][0] = next_layer
+            image_zero = pyramid[-1][0]
+            next_level = cv2.pyrDown(image_zero) #image
+            next_level_size = [num_images] + list(next_level.shape)
+            pyramid.append(np.zeros(next_level_size, dtype=next_level.dtype))#pyramid extended
+            pyramid[-1][0] = next_level
             for layer in range(1, num_images):
-                pyramid[-1][layer] = cv2.pyrDown(pyramid[-2][layer]) #downscaled image
+                next_image = cv2.pyrDown(pyramid[-2][layer]) #-2 due to the extension above
+                pyramid[-1][layer] = next_image #downscaled image
             depth = depth - 1
 
         return pyramid
@@ -47,9 +42,10 @@ class pyramid:
                     expanded = expanded[:gauss_layer.shape[0], :gauss_layer.shape[1]]
                 pyramid[-1][layer] = gauss_layer - expanded
 
-        return pyramid[::-1]
+        return pyramid[::-1]#revert the sequence
 
-    def collapse(self, pyramid):
+    @staticmethod
+    def collapse(pyramid):
         image = pyramid[-1]
         for layer in pyramid[-2::-1]:
             expanded = cv2.pyrUp(image)
@@ -59,18 +55,20 @@ class pyramid:
 
         return image
 
-    def get_probabilities(self, gray_image):
+    @staticmethod
+    def get_probabilities(gray_image):
         levels, counts = np.unique(gray_image.astype(np.uint8), return_counts=True)
         probabilities = np.zeros((256,), dtype=np.float64)
         probabilities[levels] = counts.astype(np.float64) / counts.sum()
         return probabilities
 
-    def entropy(self, image, kernel_size):
+    @staticmethod
+    def entropy(image, kernel_size):
         def _area_entropy(area, probabilities):
             levels = area.flatten()
             return -1. * (levels * np.log(probabilities[levels])).sum()
 
-        probabilities = self.get_probabilities(image)
+        probabilities = Pyramid.get_probabilities(image)
         pad_amount = int((kernel_size - 1) / 2)
         padded_image = cv2.copyMakeBorder(image, pad_amount, pad_amount, pad_amount, pad_amount, cv2.BORDER_REFLECT101)
         entropies = np.zeros(image.shape[:2], dtype=np.float64)
@@ -82,7 +80,8 @@ class pyramid:
 
         return entropies
 
-    def deviation(self, image, kernel_size):
+    @staticmethod
+    def deviation(image, kernel_size):
         def _area_deviation(area):
             average = np.average(area).astype(np.float64)
             return np.square(area - average).sum() / area.size
@@ -98,14 +97,15 @@ class pyramid:
 
         return deviations
 
-    def get_fused_base(self, images, kernel_size):
+    @staticmethod
+    def get_fused_base(images, kernel_size):
         layers = images.shape[0]
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
         for layer in range(layers):
             gray_image = images[layer].astype(np.uint8)
-            entropies[layer] = self.entropy(gray_image, kernel_size)
-            deviations[layer] = self.deviation(gray_image, kernel_size)
+            entropies[layer] = pyramid.entropy(gray_image, kernel_size)
+            deviations[layer] = pyramid.deviation(gray_image, kernel_size)
 
         best_e = np.argmax(entropies, axis=0)
         best_d = np.argmax(deviations, axis=0)
@@ -117,20 +117,22 @@ class pyramid:
 
         return (fused / 2).astype(images.dtype)
 
-    def fuse_pyramids(self,pyramids, kernel_size):
-        fused = [self.get_fused_base(pyramids[-1], kernel_size)]
+    @staticmethod
+    def fuse_pyramids(pyramids, kernel_size):
+        fused = [pyramid.get_fused_base(pyramids[-1], kernel_size)]
         for layer in range(len(pyramids) - 2, -1, -1):
-            fused.append(self.get_fused_laplacian(pyramids[layer]))
+            fused.append(pyramid.get_fused_laplacian(pyramids[layer]))
 
         return fused[::-1]
 
-    def get_fused_laplacian(self,laplacians):
+    @staticmethod
+    def get_fused_laplacian(laplacians):
         layers = laplacians.shape[0]
         region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
         for layer in range(layers):
             gray_lap = laplacians[layer]
-            region_energies[layer] = self.region_energy(gray_lap)
+            region_energies[layer] = pyramid.region_energy(gray_lap)
 
         best_re = np.argmax(region_energies, axis=0)
         fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
@@ -140,8 +142,12 @@ class pyramid:
 
         return fused
 
-    def region_energy(self, laplacian):
-        return self.convolve(np.square(laplacian))
+    @staticmethod
+    def region_energy(laplacian):
+        a = 0.4
+        kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
+        kernel = np.outer(kernel, kernel)
+        return ndimage.convolve(np.square(laplacian).astype(np.float64), kernel, mode='mirror')
 
     def get_pyramid_fusion(self):
         smallest_side = min(self.images[0].shape[:2])
@@ -153,4 +159,4 @@ class pyramid:
         pyramids = self.laplacian_pyramid(depth)
         fusion = self.fuse_pyramids(pyramids, kernel_size)
 
-        return self.collapse(fusion)
+        return pyramid.collapse(fusion)
