@@ -15,22 +15,13 @@ class Pyramid:
     def get_pyramid_array(self):
         return self.pyramid_array
 
-    def collapse(self):
-        image = self.pyramid_array[-1]
-        for layer in self.pyramid_array[-2::-1]:
-            expanded = cv2.pyrUp(image)
-            if expanded.shape != layer.shape:
-                expanded = expanded[:layer.shape[0], :layer.shape[1]]
-            image = expanded + layer
-
-        return image
 
     def fuse(self, kernel_size):
         fused = [self.get_fused_base(kernel_size)]
         for layer in range(len(self.pyramid_array) - 2, -1, -1):
             fused.append(self.get_fused_laplacian(layer))
 
-        return Pyramid(fused[::-1])
+        return fused[::-1]
 
     def get_fused_base(self, kernel_size):
         images = self.pyramid_array[-1]

@@ -3,7 +3,6 @@
 
 import cv2
 import numpy as np
-from scipy import ndimage
 
 from focus.pyramid import Pyramid
 
@@ -20,12 +19,12 @@ class PyramidManager:
         min_size = cfg.pyramid_min_size.value()
         depth = int(np.log2(smallest_side / min_size))
         kernel_size = cfg.kernel_size.value()
-
+        #create pyramid
         pyramid = self.laplacian_pyramid(depth)
-
-        pyramid_fusion = pyramid.fuse(kernel_size)
-
-        return pyramid_fusion.collapse()
+        #fuse pyramid
+        fusion = pyramid.fuse(kernel_size)
+        #collaps pyramid
+        return self.collapse(fusion)
 
     def gaussian_pyramid(self, depth):
         pyramid_array = [self.images.astype(np.float64)]
@@ -60,3 +59,13 @@ class PyramidManager:
                 pyramid[-1][layer] = gauss_layer - expanded
 
         return Pyramid(pyramid[::-1])  # revert the sequence
+
+    def collapse(self, pyramid_array):
+        image = pyramid_array[-1]
+        for layer in pyramid_array[-2::-1]:
+            expanded = cv2.pyrUp(image)
+            if expanded.shape != layer.shape:
+                expanded = expanded[:layer.shape[0], :layer.shape[1]]
+            image = expanded + layer
+
+        return image
