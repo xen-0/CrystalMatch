@@ -4,15 +4,11 @@ from scipy import ndimage
 
 class PyramidLayer:
 
-    def __init__(self, array):
+    def __init__(self, array, number):
         self.layer_array = array
-        self.layer_number = 0
+        self.layer_number = number
         self.diviations = []
         self.entropies = []
-
-
-    def set_layer_number(self, number):
-        self.layer_number = number
 
     def get_layer_number(self):
         return self.layer_number

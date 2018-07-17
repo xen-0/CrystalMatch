@@ -31,11 +31,12 @@ class FocusStackService:
 
     def run(self):
         try:
+            t1 = time.clock()
             parser = self._get_argument_parser()
             args = parser.parse_args()
             self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
-            t1 = time.clock()
+
             stacker = FocusStack(args.image_stack, args.config)
             focused_image = stacker.composite()
             focused_image.save(args.output)

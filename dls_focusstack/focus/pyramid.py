@@ -13,6 +13,23 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
 
     q.put(gray_image)
 
+def fused_laplacian(laplacians, q):
+    layers = laplacians.shape[0]
+    region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
+
+    for layer in range(layers):
+        gray_lap = PyramidLayer(laplacians[layer],layer)
+        region_energies[layer] = gray_lap.region_energy()
+
+    best_re = np.argmax(region_energies, axis=0)
+    fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
+
+    for layer in range(layers):
+        fused += np.where(best_re[:, :] == layer, laplacians[layer], 0)
+
+    q.put(fused)
+
+
 class Pyramid:
 
     def __init__(self, pyramid_array):
@@ -23,10 +40,20 @@ class Pyramid:
 
     def fuse(self, kernel_size):
         fused = [self.get_fused_base(kernel_size)]
+        q = Queue()
+        processes = []
         for level in range(len(self.pyramid_array) - 2, -1, -1):
-            fused.append(self.get_fused_laplacian(level))
+            laplacians = self.pyramid_array[level]
 
-        return fused[::-1]
+            process = Process(target=fused_laplacian, args=(laplacians, q))
+            process.start()
+            processes.append(process)
+
+        for level in range(len(self.pyramid_array) - 2, -1, -1):
+            pyramid_level = q.get()
+            fused.append(pyramid_level)
+        fused.sort(key=len, reverse=True)  # fused[::-1]
+        return fused
 
     def get_fused_base(self, kernel_size):
         images = self.pyramid_array[-1]
@@ -37,8 +64,7 @@ class Pyramid:
         q = Queue()
         processes = []
         for layer in range(layers):
-            gray_image = PyramidLayer(images[layer].astype(np.uint8))
-            gray_image.set_layer_number(layer)
+            gray_image = PyramidLayer(images[layer].astype(np.uint8), layer)
 
             process = Process(target=entropy_diviation, args=(gray_image, kernel_size, q))
             process.start()
@@ -63,19 +89,3 @@ class Pyramid:
 
         return (fused / 2).astype(images.dtype)
 
-    def get_fused_laplacian(self, level):
-        laplacians = self.pyramid_array[level]
-        layers = laplacians.shape[0]
-        region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
-
-        for layer in range(layers):
-            gray_lap = PyramidLayer(laplacians[layer])
-            region_energies[layer] = gray_lap.region_energy()
-
-        best_re = np.argmax(region_energies, axis=0)
-        fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
-
-        for layer in range(layers):
-            fused += np.where(best_re[:, :] == layer, laplacians[layer], 0)
-
-        return fused
