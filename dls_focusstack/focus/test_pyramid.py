@@ -35,7 +35,7 @@ class TestPyramid(TestCase):
         self.assertEquals(p[1][0].shape, (2,2)) #first image
         self.assertEquals(p[1][1].shape, (2,2))  #second image
         #size of second level one fought of first
-        self.assertEquals(p[2][1].shape, (1,1))  # second image
+        self.assertEquals(p[2][1].shape, (1,1))
         #zero level of the pyramid is made out of input images
         self.assertEquals(p[0][0][0][0], 10)
 

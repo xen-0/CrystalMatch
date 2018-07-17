@@ -8,12 +8,16 @@ from focus.pyramid import Pyramid
 
 
 class PyramidManager:
+    """This is a pyramid manages class."""
 
     def __init__(self, aligned_images, config):
         self.images = aligned_images
         self.config = config
 
     def get_pyramid_fusion(self):
+        """This is the function which maintains the steps of pyramid processing.
+        It creates the laplacian pyramid,
+        starts the fusion process which flattens the pyramid along layers and finally collapses the pyramid."""
         smallest_side = min(self.images[0].shape[:2])
         cfg = self.config
         min_size = cfg.pyramid_min_size.value()
@@ -26,7 +30,9 @@ class PyramidManager:
         #collaps pyramid
         return self.collapse(fusion)
 
-    def gaussian_pyramid(self, depth):
+    #this is only used by the laplacian pyramid function
+    def _gaussian_pyramid(self, depth):
+        """Creates the gaussian pyramid of a certain depth"""
         pyramid_array = [self.images.astype(np.float64)]
         num_images = self.images.shape[0]
 
@@ -44,11 +50,11 @@ class PyramidManager:
         return Pyramid(pyramid_array)
 
     def laplacian_pyramid(self, depth):
-        gaussian = self.gaussian_pyramid(depth)
+        """Create laplacian pyramid of a certain depth."""
+        gaussian = self._gaussian_pyramid(depth)
         gaussian_array = gaussian.get_pyramid_array()
 
         pyramid = [gaussian_array[-1]]
-
 
         for level in range(len(gaussian_array) - 1, 0, -1):
             gauss = gaussian_array[level - 1]
@@ -63,6 +69,7 @@ class PyramidManager:
         return Pyramid(pyramid[::-1])  # revert the sequence
 
     def collapse(self, pyramid_array):
+        """Collapse the pyramid - effectively flatten a fused pyramid along levels to get one all in focus image."""
         image = pyramid_array[-1]
         for layer in pyramid_array[-2::-1]:
             expanded = cv2.pyrUp(image)

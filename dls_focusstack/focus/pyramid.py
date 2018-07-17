@@ -1,12 +1,14 @@
-#This is code take from https://github.com/sjawhar/focus-stacking
-#which implements the methods described in http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf
+"""This is code taken from https://github.com/sjawhar/focus-stacking
+which implements the methods described in http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf"""
 from multiprocessing import Queue, Process
 
 import numpy as np
 
-from focus.pyramid_layer import PyramidLayer
+from pyramid_layer import PyramidLayer
 
 def entropy_diviation(pyramid_layer,kernel_size,q):
+    """On the top level of the pyramid (the one with the lowest resolution) two fusion operators:
+    entropy and deviation are used"""
     gray_image = pyramid_layer
     gray_image.entropy(kernel_size)
     gray_image.deviation(kernel_size)
@@ -14,6 +16,7 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
     q.put(gray_image)
 
 def fused_laplacian(laplacians, q):
+    """On other levels of the pyramid one fusion operator: region energy is used"""
     layers = laplacians.shape[0]
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
@@ -29,9 +32,10 @@ def fused_laplacian(laplacians, q):
 
     q.put(fused)
 
-
 class Pyramid:
-
+    """Pyramid has is an array with 4 dimensions: level, layer, image wight and image height
+    number of levels is defined by pyramid depth
+    number of layers is the number of input images each one focused on a different z-level"""
     def __init__(self, pyramid_array):
         self.pyramid_array = pyramid_array
 
@@ -39,6 +43,9 @@ class Pyramid:
         return self.pyramid_array
 
     def fuse(self, kernel_size):
+        """Function which fuses each level of the pyramid using appropriate fusion operators
+        the output is a 3 dimensional array (level, image wight, image high)
+        - the input array is flattened along layers"""
         fused = [self.get_fused_base(kernel_size)]
         q = Queue()
         processes = []
@@ -56,6 +63,7 @@ class Pyramid:
         return fused
 
     def get_fused_base(self, kernel_size):
+        """Fuses the base of the pyramid - the one with the lowest resolution."""
         images = self.pyramid_array[-1]
         layers = images.shape[0]
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
@@ -71,13 +79,13 @@ class Pyramid:
             processes.append(process)
 
         for layer in range(layers):
-            #should always do all threads as all the processes are the same and should take roghly the same time
-            l = q.get()
+            #should always do all threads as all the processes are the same and should take roughly the same time
+            l = q.get() #picks the first one which is ready
             entropies[l.get_layer_number()] = l.get_entropies()
             deviations[l.get_layer_number()] = l.get_diviations()
 
         for p in processes:
-            p.join() #this one won't work if there is still something in the quie
+            p.join() #this one won't work if there is still something in the Queue
 
         best_e = np.argmax(entropies, axis=0)
         best_d = np.argmax(deviations, axis=0)

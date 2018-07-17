@@ -3,6 +3,9 @@ import numpy as np
 from scipy import ndimage
 
 class PyramidLayer:
+    """Pyramid layer - part of a pyramid of a particular level and layer.
+    Operators used in the laplacian pyramid fusion process(flattening pyramid along layers)
+    are implemented in this class"""
 
     def __init__(self, array, number):
         self.layer_array = array
@@ -13,21 +16,22 @@ class PyramidLayer:
     def get_layer_number(self):
         return self.layer_number
 
-
     def region_energy(self):
+        """Region energy operator used during laplacian pyramid fusion on all but the base level."""
         a = 0.4
         kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
         kernel = np.outer(kernel, kernel)
         return  ndimage.convolve(np.square(self.layer_array).astype(np.float64), kernel, mode='mirror')
 
-
     def get_probabilities(self):
+        """Probabilities show how many points of a given color (grayscale level) there is in an input image/array."""
         levels, counts = np.unique(self.layer_array.astype(np.uint8), return_counts=True)
         probabilities = np.zeros((256,), dtype=np.float64)
         probabilities[levels] = counts.astype(np.float64) / counts.sum()
         return probabilities
 
     def entropy(self, kernel_size):
+        """Entropy operator used during laplacian pyramid fusion on the base level."""
         def _area_entropy(area, probabilities):
             levels = area.flatten()
             return -1. * (levels * np.log(probabilities[levels])).sum()
@@ -48,6 +52,7 @@ class PyramidLayer:
         return self.entropies
 
     def deviation(self, kernel_size):
+        """Deviation operator used during laplacian pyramid fusion on the base level."""
         def _area_deviation(area):
             average = np.average(area).astype(np.float64)
             return np.square(area - average).sum() / area.size
