@@ -33,7 +33,7 @@ class PyramidLayer:
     def entropy(self, kernel_size):
         """Entropy operator used during laplacian pyramid fusion on the base level."""
         def _area_entropy(area, probabilities):
-            levels = area.flatten()
+            levels = area.astype(np.uint8).flatten()
             return -1. * (levels * np.log(probabilities[levels])).sum()
 
         probabilities = self.get_probabilities()

@@ -92,7 +92,6 @@ class TestPyramidManager(TestCase):
         self.assertEquals(result[0][0], test[0][0])
 
     def test_get_pyramid_fusion_calls_once_laplacian_pyramid_and_collapse(self):
-        #gaussian pyramid
         self._config.pyramid_min_size.value.return_value = 1
         p = PyramidManager(self._images, self._config)
         p.laplacian_pyramid = MagicMock(return_value = MagicMock())
@@ -100,4 +99,3 @@ class TestPyramidManager(TestCase):
         p.get_pyramid_fusion()
         p.collapse.assert_called_once()
         p.laplacian_pyramid.assert_called_once()
-

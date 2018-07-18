@@ -72,7 +72,7 @@ class Pyramid:
         q = Queue()
         processes = []
         for layer in range(layers):
-            gray_image = PyramidLayer(images[layer].astype(np.uint8), layer)
+            gray_image = PyramidLayer(images[layer], layer)
 
             process = Process(target=entropy_diviation, args=(gray_image, kernel_size, q))
             process.start()
