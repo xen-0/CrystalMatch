@@ -4,6 +4,7 @@ from multiprocessing import Queue, Process
 
 import numpy as np
 
+
 from pyramid_layer import PyramidLayer
 
 def entropy_diviation(pyramid_layer,kernel_size,q):
@@ -59,7 +60,7 @@ class Pyramid:
         for level in range(len(self.pyramid_array) - 2, -1, -1):
             pyramid_level = q.get()
             fused.append(pyramid_level)
-        fused.sort(key=len, reverse=True)  # fused[::-1]
+        fused.sort(key=len, reverse=True)  # highest resolution on level 0
         return fused
 
     def get_fused_base(self, kernel_size):
@@ -68,7 +69,6 @@ class Pyramid:
         layers = images.shape[0]
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
-
         q = Queue()
         processes = []
         for layer in range(layers):

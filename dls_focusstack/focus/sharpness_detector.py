@@ -2,7 +2,7 @@ IMG_TO_STACK = 12 #how many images will be stacked
 
 class SharpnessDetector(object):
     """Class which applies the result of image FFT calculation to find images which will be stacked.
-    This is an initial filtering step used currently in the process - may be redundant in the future."""
+    This is an initial filtering step used currently in the process."""
 
     def __init__(self, img_fft):
         self.fft_img = img_fft
@@ -31,11 +31,11 @@ class SharpnessDetector(object):
     def find_range(self, max):
         """Function which defines the range of images to stack."""
         n = len(self.fft_img)
-        if max -(IMG_TO_STACK / 2) < 1:
+        if IMG_TO_STACK >= n:
+            return range(1, IMG_TO_STACK)
+        elif max -(IMG_TO_STACK / 2) < 1:
             return range(1, IMG_TO_STACK)
         elif max + (IMG_TO_STACK / 2) > n:
             return range(-IMG_TO_STACK, n)
         else:
             return range(max - IMG_TO_STACK / 2, max + IMG_TO_STACK / 2)
-
-
