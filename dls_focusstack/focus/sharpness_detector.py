@@ -1,3 +1,5 @@
+import logging
+
 IMG_TO_STACK = 12 #how many images will be stacked
 
 class SharpnessDetector(object):
@@ -20,11 +22,15 @@ class SharpnessDetector(object):
             if fft > level:
                 level = fft
                 max = s.getImageNumber()
-
+        logger = logging.getLogger(__name__)
+        logger.debug("Image: " + str(max) + " has best value of FFT: " + str(level))
         range = self.find_range(max)
+
         for s in self.fft_img:
             if s.getImageNumber() in range:
                 images.append(s.getImage())
+
+        logger.debug("First image number : " + str(range[0])  + " last image number : " + str(len(range)) + " added to stack" )
 
         return images
 

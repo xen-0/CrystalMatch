@@ -1,4 +1,7 @@
 from pkg_resources import require
+
+from version import VersionHandler
+
 require("numpy==1.11.1")
 require("scipy")
 import argparse
@@ -34,13 +37,15 @@ class FocusStackService:
             t1 = time.clock()
             parser = self._get_argument_parser()
             args = parser.parse_args()
-            self._set_up_logging(args.debug, args.verbose)
+            logger = self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
-
+            logger.info("Starting Extended Focus Service, " + VersionHandler.version())
+            logger.debug("Input directory "+ str(args.image_stack))
             stacker = FocusStack(args.image_stack, args.config)
             focused_image = stacker.composite()
             focused_image.save(args.output)
-            print 'time:', time.clock() - t1
+            calculation_time = time.clock() - t1
+            logger.debug("Calculation time, " + str(calculation_time))
         except IOError as e:
             self._handle_error(e)
 
@@ -85,21 +90,23 @@ class FocusStackService:
         # Set up logging
         root_logger = logging.getLogger()
         root_logger.setLevel(DEBUG)
+
         # Set up stream handler
+
         if debug:
             self._add_log_stream_handler(DEBUG, root_logger)
         elif verbose:
             self._add_log_stream_handler(INFO, root_logger)
 
+        return root_logger
+
     @staticmethod
     def _add_log_stream_handler(level, logger):
         stream_handler = logging.StreamHandler(stdout)
         stream_handler.setLevel(level)
+        formatter = logging.Formatter('%(asctime)s -  %(name)s - %(levelname)s - %(message)s')
+        stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
-        if level == DEBUG:
-            logging.debug("DEBUG statements visible.")
-        elif level == INFO:
-            logging.info("INFO statements visible.")
 
     @staticmethod
     def _handle_error(e):
@@ -107,7 +114,7 @@ class FocusStackService:
         A placeholder method for dealing with errors raised during runtime - these need to be reported in JSON mode.
         :param e: Exception being raised
         """
-        logging.error(e)
+        #logger.error(e)
 
 
 if __name__ == '__main__':

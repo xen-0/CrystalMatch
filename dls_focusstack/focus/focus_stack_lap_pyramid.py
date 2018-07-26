@@ -1,3 +1,4 @@
+import logging
 import time
 from multiprocessing import Process, Queue, current_process, Pool
 
@@ -29,7 +30,8 @@ class FocusStack:
         images = sd.images_to_stack()
 
         t2 = time.clock() - t1
-        print 'time fft:', t2
+        logger = logging.getLogger(__name__)
+        logger.debug("FFT calculation time, " + str(t2))
         images = np.array(images, dtype=images[0].dtype)
 
         #TODO:Implement alignment algo

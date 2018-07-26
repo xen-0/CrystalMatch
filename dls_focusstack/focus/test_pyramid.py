@@ -39,27 +39,26 @@ class TestPyramid(TestCase):
     def test_fused_laplacian_of_level0_has_size_of_input_array(self):
         laplacians_level0 = self._pyramid.get_pyramid_array()[0]
         q = Queue()
-        fused_laplacian(laplacians_level0, q)
+        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(),q)
         fused_level = q.get()
         self.assertEquals(fused_level.shape, self._array.shape)
 
     def test_fused_laplacian_picks_the_layer_with_high_region_energy_from_given_level(self):
         laplacians_level0 = self._pyramid.get_pyramid_array()[0]
         q = Queue()
-        fused_laplacian(laplacians_level0, q)
+        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), q)
         fused_level = q.get()
         #layer 0 has the highiest region energy as all the values are 10 times larger than layer1
         self.assertIn(laplacians_level0[0], fused_level)
 
-    #def test_entropy_deviation_calls_entropy_and_devietion_once_for_a_given_layer(self):
-        #laplacians_level0_layer0 = PyramidLayer(self._pyramid.get_pyramid_array()[0][0].astype(np.uint8),0)
-        #q = Queue()
-        #laplacians_level0_layer0.entropy = MagicMock()
-        #laplacians_level0_layer0.deviation = MagicMock()
-        #entropy_diviation(laplacians_level0_layer0, self._kernel_size, q)
-        #q.get()
-        #laplacians_level0_layer0.entropy.assert_called_once()
-     #   laplacians_level2_layer0.diviation.assert_called_once()
+    def test_entropy_deviation_calls_entropy_abd_deviation_once(self):
+        layer = MagicMock()
+        q = MagicMock()
+        entropy_diviation(layer, self._pyramid.get_region_kernel(),q)
+
+        layer.entropy.assert_called_once()
+        layer.deviation.assert_called_once()
+
 
 
 

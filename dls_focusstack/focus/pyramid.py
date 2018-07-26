@@ -16,14 +16,14 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
 
     q.put(gray_image)
 
-def fused_laplacian(laplacians, q):
+def fused_laplacian(laplacians, region_kernel, q):
     """On other levels of the pyramid one fusion operator: region energy is used"""
     layers = laplacians.shape[0]
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
     for layer in range(layers):
         gray_lap = PyramidLayer(laplacians[layer],layer)
-        region_energies[layer] = gray_lap.region_energy()
+        region_energies[layer] = gray_lap.region_energy(region_kernel)
 
     best_re = np.argmax(region_energies, axis=0)
     fused = np.zeros(laplacians.shape[1:], dtype=laplacians.dtype)
@@ -43,6 +43,11 @@ class Pyramid:
     def get_pyramid_array(self):
         return self.pyramid_array
 
+    def get_region_kernel(self):
+        a = 0.4
+        kernel = np.array([0.25 - a / 2.0, 0.25, a, 0.25, 0.25 - a / 2.0])
+        return np.outer(kernel, kernel)
+
     def fuse(self, kernel_size):
         """Function which fuses each level of the pyramid using appropriate fusion operators
         the output is a 3 dimensional array (level, image wight, image high)
@@ -50,10 +55,11 @@ class Pyramid:
         fused = [self.get_fused_base(kernel_size)]
         q = Queue()
         processes = []
+        region_kernel = self.get_region_kernel()
         for level in range(len(self.pyramid_array) - 2, -1, -1):
             laplacians = self.pyramid_array[level]
 
-            process = Process(target=fused_laplacian, args=(laplacians, q))
+            process = Process(target=fused_laplacian, args=(laplacians, region_kernel,q))
             process.start()
             processes.append(process)
 
@@ -82,7 +88,7 @@ class Pyramid:
             #should always do all threads as all the processes are the same and should take roughly the same time
             l = q.get() #picks the first one which is ready
             entropies[l.get_layer_number()] = l.get_entropies()
-            deviations[l.get_layer_number()] = l.get_diviations()
+            deviations[l.get_layer_number()] = l.get_deviations()
 
         for p in processes:
             p.join() #this one won't work if there is still something in the Queue
