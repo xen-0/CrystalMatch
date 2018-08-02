@@ -4,6 +4,9 @@ from multiprocessing import Queue, Process
 
 import numpy as np
 
+import logging
+import logconfig
+
 
 from pyramid_layer import PyramidLayer
 
@@ -52,6 +55,9 @@ class Pyramid:
         """Function which fuses each level of the pyramid using appropriate fusion operators
         the output is a 3 dimensional array (level, image wight, image high)
         - the input array is flattened along layers"""
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        log.info("t12")
         fused = [self.get_fused_base(kernel_size)]
         q = Queue()
         processes = []
@@ -62,14 +68,14 @@ class Pyramid:
             process = Process(target=fused_laplacian, args=(laplacians, region_kernel,q))
             process.start()
             processes.append(process)
-
+        log.info("t13")
         for level in range(len(self.pyramid_array) - 2, -1, -1):
             pyramid_level = q.get()
             fused.append(pyramid_level)
-
+        log.info("t14")
         for p in processes:
             p.join() #this one won't work if there is still something in the Queue
-
+        log.info("t15")
         fused.sort(key=len, reverse=True)  # highest resolution on level 0
         return fused
 

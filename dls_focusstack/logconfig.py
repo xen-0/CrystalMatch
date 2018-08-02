@@ -38,13 +38,12 @@ default_config = {
         "local_file_handler": {
             "class": "logging.handlers.RotatingFileHandler",
             #  "class": "logging.handlers.FileHandler",
-            "level": "INFO",
+            "level": "DEBUG",
             "formatter": "extended",
             "filename": "debug.log",
-            "maxBytes": 1048576,
-            "backupCount": 20,
-            "encoding": "utf8",
-            "delay": True
+            "maxBytes": 1048576, # one megabyte
+            "backupCount": 20, # goes up to 20mb and starts the rollover
+            "encoding": "utf8"
         },
 
         "graylog_gelf": {
@@ -59,16 +58,16 @@ default_config = {
             "include_extra_fields": True,
             "username": getpass.getuser(),
             "pid": os.getpid(),
-            "application": "Crystal Match Focusstack, " + version.VersionHandler.version(),
-            "facility": "VMXi"
+            "application": "Crystal Match Focusstack",
+            "facility": "VMXi",
+            "_version": version.VersionHandler.version()
         }
     },
 
 
     "root": {
         # Set the level here to be the default minimum level of log record to be produced
-        # If you set a handler to level DEBUG you will need to set either this level, or
-        # the level of one of the loggers above to DEBUG or you won't see any DEBUG messages
+        # If you set a handler to level DEBUG you will need to set either this level
         "level": "DEBUG",
         "handlers": ["console", "local_file_handler", "graylog_gelf"]
     }

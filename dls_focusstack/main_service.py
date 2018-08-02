@@ -41,16 +41,17 @@ class FocusStackService:
             t1 = time.clock()
             parser = self._get_argument_parser()
             args = parser.parse_args()
-           # self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
 
-            log.info("Crystal Match Focusstack, " + VersionHandler.version() + ". First image, " + args.image_stack[0].name)
+
             stacker = FocusStack(args.image_stack, args.config)
+
             focused_image = stacker.composite()
             focused_image.save(args.output)
             calculation_time = time.clock() - t1
 
-            log.info("Calculation time, " + str(calculation_time))
+            log.info("Crystal Match Focusstack, " + VersionHandler.version()+ ". First image, " + args.image_stack[0].name
+                     + ". Calculation time, " + str(calculation_time))
         except IOError as e:
             log.error(e)
 
@@ -90,28 +91,6 @@ class FocusStackService:
                 makedirs(output_dir)
         if exists(path) and isfile(path):
             remove(path)
-
-    def _set_up_logging(self, debug, verbose):
-        # Set up logging
-        root_logger = logging.getLogger()
-        root_logger.setLevel(DEBUG)
-
-        # Set up stream handler
-
-        if debug:
-            self._add_log_stream_handler(DEBUG, root_logger)
-        elif verbose:
-            self._add_log_stream_handler(INFO, root_logger)
-
-        return root_logger
-
-    @staticmethod
-    def _add_log_stream_handler(level, logger):
-        stream_handler = logging.StreamHandler(stdout)
-        stream_handler.setLevel(level)
-        formatter = logging.Formatter('%(asctime)s -  %(name)s - %(levelname)s - %(message)s')
-        stream_handler.setFormatter(formatter)
-        logger.addHandler(stream_handler)
 
 
 if __name__ == '__main__':

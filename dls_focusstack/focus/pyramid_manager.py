@@ -3,6 +3,8 @@
 
 import cv2
 import numpy as np
+import logging
+import logconfig
 
 from focus.pyramid import Pyramid
 
@@ -18,15 +20,20 @@ class PyramidManager:
         """This is the function which maintains the steps of pyramid processing.
         It creates the laplacian pyramid,
         starts the fusion process which flattens the pyramid along layers and finally collapses the pyramid."""
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         smallest_side = min(self.images[0].shape[:2])
         cfg = self.config
         min_size = cfg.pyramid_min_size.value()
         depth = int(np.log2(smallest_side / min_size))
         kernel_size = cfg.kernel_size.value()
+        log.info("t10")
         #create pyramid
         pyramid = self.laplacian_pyramid(depth)
+        log.info("t11")
         #fuse pyramid
         fusion = pyramid.fuse(kernel_size)
+        log.info("t16")
         #collaps pyramid
         return self.collapse(fusion)
 

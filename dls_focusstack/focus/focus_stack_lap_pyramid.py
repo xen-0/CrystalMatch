@@ -1,7 +1,6 @@
 import logging
 import logconfig
 import time
-from multiprocessing import Process, Queue, current_process, Pool
 
 import cv2
 import numpy as np
@@ -26,12 +25,16 @@ class FocusStack:
     def composite(self):
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        log.info("Starting fft calculation")
+        log.debug("Starting fft calculation")
+        log.info("t1")
 
         t1 = time.clock()
+        log.info("t2")
         man = ImageFFTManager(self._image_file_list)
+        log.info("t3")
         man.read_ftt_images()
-        sd = SharpnessDetector(man.get_fft_images())
+        log.info("t9")
+        sd = SharpnessDetector(man.get_fft_images(), self._config)
 
         images = sd.images_to_stack()
 
@@ -45,6 +48,7 @@ class FocusStack:
 
         #stacked_image = pyramid(aligned_images, self._config).get_pyramid_fusion()
         stacked_image = PyramidManager(images, self._config).get_pyramid_fusion()
+        log.info("t17")
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         return Image(stacked_image)
 
