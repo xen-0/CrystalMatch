@@ -1,6 +1,8 @@
 import logging
-
+import logconfig
 IMG_TO_STACK = 12 #how many images will be stacked
+
+#logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 class SharpnessDetector(object):
     """Class which applies the result of image FFT calculation to find images which will be stacked.
@@ -14,6 +16,8 @@ class SharpnessDetector(object):
         It uses the maximum value to pick a subset of images from an initial set.
         The subset is later used by the stacking algorithm (pyramid) to create the all-in-focus-image.
         The number of images to stack is defined by IMG_TO_STACK"""
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         level = 0
         max = None
         images = []
@@ -22,15 +26,16 @@ class SharpnessDetector(object):
             if fft > level:
                 level = fft
                 max = s.getImageNumber()
-        logger = logging.getLogger(__name__)
-        logger.debug("Image: " + str(max) + " has best value of FFT: " + str(level))
+
         range = self.find_range(max)
 
         for s in self.fft_img:
             if s.getImageNumber() in range:
                 images.append(s.getImage())
 
-        logger.debug("First image number : " + str(range[0])  + " last image number : " + str(len(range)) + " added to stack" )
+        log.info("Stacking "+ str(IMG_TO_STACK) +" images "+
+                 " Image: " + str(max) + " has best value of FFT: " + str(level) +
+                 " First img: " + str(range[0])  + " last img: " + str(len(range)))
 
         return images
 

@@ -1,13 +1,10 @@
-import logging
-import time
 
 import cv2
 import numpy as np
 
-
 class Image_FFT:
     """Image class which holds the image and number of the image in a sequence of images.
-    FFT is implemanted in the class. Mean value of the image FFT is held in the fft_level parameter."""
+    FFT is implemented in the class. Mean value of the image FFT is held in the fft_level parameter."""
 
     def __init__(self, input_img, number):
         self.img = input_img
@@ -43,8 +40,7 @@ class Image_FFT:
         # zero frequency is in the top left corner
         part1 = fft_abs1[int(0.05 * h1) : int(0.95 * h1)-1, int(0.05 * w1) : -1]
         output = np.mean(part1)
-        logger = logging.getLogger(__name__)
-        logger.debug("Mean fft value of image " + str(self.image_number) + " from the stuck is: "  + str(output))
+
         return output
 
 

@@ -1,4 +1,5 @@
 import logging
+import logconfig
 import time
 from multiprocessing import Process, Queue, current_process, Pool
 
@@ -21,7 +22,12 @@ class FocusStack:
         self._image_file_list = images
         self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
 
+
     def composite(self):
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        log.info("Starting fft calculation")
+
         t1 = time.clock()
         man = ImageFFTManager(self._image_file_list)
         man.read_ftt_images()
@@ -30,8 +36,8 @@ class FocusStack:
         images = sd.images_to_stack()
 
         t2 = time.clock() - t1
-        logger = logging.getLogger(__name__)
-        logger.debug("FFT calculation time, " + str(t2))
+
+        log.info("FFT calculation time, " + str(t2))
         images = np.array(images, dtype=images[0].dtype)
 
         #TODO:Implement alignment algo

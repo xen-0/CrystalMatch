@@ -1,7 +1,9 @@
 from pkg_resources import require
 
+import logconfig
 from version import VersionHandler
 
+require('pygelf==0.2.11')
 require("numpy==1.11.1")
 require("scipy")
 import argparse
@@ -33,21 +35,24 @@ class FocusStackService:
         pass
 
     def run(self):
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         try:
             t1 = time.clock()
             parser = self._get_argument_parser()
             args = parser.parse_args()
-            logger = self._set_up_logging(args.debug, args.verbose)
+           # self._set_up_logging(args.debug, args.verbose)
             self._process_output_file_path(args.output)
-            logger.info("Starting Extended Focus Service, " + VersionHandler.version())
-            logger.debug("Input directory "+ str(args.image_stack))
+
+            log.info("Crystal Match Focusstack, " + VersionHandler.version() + ". First image, " + args.image_stack[0].name)
             stacker = FocusStack(args.image_stack, args.config)
             focused_image = stacker.composite()
             focused_image.save(args.output)
             calculation_time = time.clock() - t1
-            logger.debug("Calculation time, " + str(calculation_time))
+
+            log.info("Calculation time, " + str(calculation_time))
         except IOError as e:
-            self._handle_error(e)
+            log.error(e)
 
     @staticmethod
     def _get_argument_parser():
@@ -108,15 +113,8 @@ class FocusStackService:
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
 
-    @staticmethod
-    def _handle_error(e):
-        """
-        A placeholder method for dealing with errors raised during runtime - these need to be reported in JSON mode.
-        :param e: Exception being raised
-        """
-        #logger.error(e)
-
 
 if __name__ == '__main__':
     service = FocusStackService()
+    logconfig.setup_logging()
     service.run()

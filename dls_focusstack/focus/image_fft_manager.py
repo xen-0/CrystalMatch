@@ -1,12 +1,10 @@
-import logging
-import os
-import time
 from multiprocessing import Process, Queue
 
 import cv2
 import numpy as np
 
 from focus.image_fft import Image_FFT
+
 
 def fft(file_obj,q,count):
     "Function that reads an image of a given name and  starts fft calculation."
@@ -29,27 +27,20 @@ class ImageFFTManager:
         """Function which starts fft calculation for each input image name.
         Multiprocessing is used to speed up the calculation.
         One process for one input image name."""
-        logger = logging.getLogger(__name__)
-        logger.info("Starting fft calculation")
+
         q = Queue()
         processes=[]
         count = 1
         for file_obj in self._image_file_list:
-            #while not os.path.isfile(file_obj.name):
-                #pass
             process = Process(target=fft, args=(file_obj,q,count))
+            process.start()
             processes.append(process)
             count = count+1
-
-        for p in processes:
-            p.start()
 
         self.fft_images = [q.get() for p in processes]
 
         for p in processes:
             p.join()
-
-        logger.info("Finished fft calculation")
 
 
     def get_fft_images(self):

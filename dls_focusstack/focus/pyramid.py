@@ -66,6 +66,10 @@ class Pyramid:
         for level in range(len(self.pyramid_array) - 2, -1, -1):
             pyramid_level = q.get()
             fused.append(pyramid_level)
+
+        for p in processes:
+            p.join() #this one won't work if there is still something in the Queue
+
         fused.sort(key=len, reverse=True)  # highest resolution on level 0
         return fused
 
