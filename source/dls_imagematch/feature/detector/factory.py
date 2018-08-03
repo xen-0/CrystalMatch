@@ -37,11 +37,11 @@ class DetectorFactory:
             detector.set_from_config(detector_options)
 
         if detector.is_non_free():
-            if options is not None:
-                licensing = options.get_licensing_options()
-                use_non_free = licensing.use_non_free.value()
-                if not use_non_free:
-                    detector.set_enabled(False)
+#            if options is not None:
+            licensing = options.get_licensing_options()
+            use_non_free = licensing.use_non_free.value()
+            if not use_non_free:
+                detector.set_enabled(False)
 
         return detector
 
