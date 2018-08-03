@@ -1,4 +1,6 @@
 import logging
+import math
+
 import logconfig
 
 #logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -42,12 +44,19 @@ class SharpnessDetector(object):
     def find_range(self, max):
         """Function which defines the range of images to stack."""
         n = len(self.fft_img)
-        num_to_stuck = self.config.number_to_stack.value()
-        if num_to_stuck >= n:
-            return range(1, num_to_stuck)
-        elif max -(num_to_stuck / 2) < 1:
-            return range(1, num_to_stuck)
-        elif max + (num_to_stuck / 2) > n:
-            return range(-num_to_stuck, n)
+        half_to_stack_ceil = self.ceil_when_uneven_number_of_image_passed()
+        to_stack_ceil = 2 * half_to_stack_ceil
+        if to_stack_ceil >= n: #take all images
+            return range(0, n)
+        elif max -(half_to_stack_ceil) < 0:
+            return range(0, to_stack_ceil)
+        elif max + (half_to_stack_ceil) > n:
+            return range(n-to_stack_ceil+1, n+1) #last is n
         else:
-            return range(max - num_to_stuck / 2, max + num_to_stuck / 2)
+            return range(max - half_to_stack_ceil, max + half_to_stack_ceil)
+
+    def ceil_when_uneven_number_of_image_passed(self):
+        num_to_stuck = self.config.number_to_stack.value()
+        half_to_stack_ceil = int(math.ceil(float(num_to_stuck) / 2))  # take one more for uneven
+
+        return  half_to_stack_ceil
