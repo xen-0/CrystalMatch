@@ -2,3 +2,5 @@ mock==2.0.0
 numpy==1.11.1
 opencv~=2.4.13
 PyQt4==4.9.4
+pygelf==0.2.11
+scipy

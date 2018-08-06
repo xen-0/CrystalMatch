@@ -1,1 +1,1 @@
-from focus_stack import *
+from focus_stack_lap_pyramid import *

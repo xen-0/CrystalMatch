@@ -69,12 +69,6 @@ class FocusStackService:
                             help="Specify output file - default is to create a file called 'output.png' in the working "
                                  "directory. This will overwrite existing files, if the path does not exist the app "
                                  "will attempt to make it.")
-        parser.add_argument('-v', '--verbose',
-                            action="store_true",
-                            help="Increase output verbosity.")
-        parser.add_argument('-d', '--debug',
-                            action="store_true",
-                            help="Output debug information to the console.")
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
