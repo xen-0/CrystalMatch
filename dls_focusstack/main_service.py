@@ -42,7 +42,7 @@ class FocusStackService:
             parser = self._get_argument_parser()
             args = parser.parse_args()
             self._process_output_file_path(args.output)
-
+            log.info("Focusstack started, first image, " + args.image_stack[0].name)
 
             stacker = FocusStack(args.image_stack, args.config)
 
@@ -50,8 +50,10 @@ class FocusStackService:
             focused_image.save(args.output)
             calculation_time = time.clock() - t1
 
-            log.info("Crystal Match Focusstack, " + VersionHandler.version()+ ". First image, " + args.image_stack[0].name
-                     + ". Calculation time, " + str(calculation_time))
+            extra = {'stack_time': calculation_time}
+            log = logging.LoggerAdapter(log, extra)
+            log.info("Crystal Match Focusstack finished")
+
         except IOError as e:
             log.error(e)
 

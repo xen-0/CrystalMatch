@@ -21,18 +21,20 @@ class SharpnessDetector(object):
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         level = 0
-        max = None
+        best_fft_img = None
         images = []
         for s in self.fft_img:
             fft = s.getFFT()
             if fft > level:
                 level = fft
-                max = s.getImageNumber()
+                best_fft_img = s
 
+        max = best_fft_img.getImageNumber()
         range = self.find_range(max)
 
+        extra = {'best_fft_val': round(level, 4), 'best_fft_img_num': max}
+        log = logging.LoggerAdapter(log, extra)
         log.info("Stacking " + str(self.config.number_to_stack.value()) + " images " +
-                 " Image: " + str(max) + " has best value of FFT: " + str(level) +
                  " First img: " + str(range[0]) + " last img: " + str(len(range)))
 
         for s in self.fft_img:

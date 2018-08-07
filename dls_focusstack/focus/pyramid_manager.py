@@ -27,13 +27,13 @@ class PyramidManager:
         min_size = cfg.pyramid_min_size.value()
         depth = int(np.log2(smallest_side / min_size))
         kernel_size = cfg.kernel_size.value()
-        log.info("t10")
+        #log.info("t10")
         #create pyramid
         pyramid = self.laplacian_pyramid(depth)
-        log.info("t11")
+        #log.info("t11")
         #fuse pyramid
         fusion = pyramid.fuse(kernel_size)
-        log.info("t16")
+        #log.info("t16")
         #collaps pyramid
         return self.collapse(fusion)
 

@@ -31,23 +31,23 @@ class ImageFFTManager:
         One process for one input image name."""
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        log.info("t4")
+        #log.info("t4")
 
         q = Queue()
-        log.info("t5")
+        #log.info("t5")
         processes=[]
-        count = 1
-        log.info("t6")
+        count = 0
+        #log.info("t6")
         for file_obj in self._image_file_list:
             process = Process(target=fft, args=(file_obj,q,count))
             process.start()
             processes.append(process)
             count = count+1
-        log.info("t7")
+        #log.info("t7")
         self.fft_images = [q.get() for p in processes]
         for p in processes:
             p.join()
-        log.info("t8")
+        #log.info("t8")
 
 
     def get_fft_images(self):

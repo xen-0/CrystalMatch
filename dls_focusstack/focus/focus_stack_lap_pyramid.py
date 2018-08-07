@@ -26,21 +26,24 @@ class FocusStack:
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         log.debug("Starting fft calculation")
-        log.info("t1")
+        #log.info("t1")
 
         t1 = time.clock()
-        log.info("t2")
+        #log.info("t2")
         man = ImageFFTManager(self._image_file_list)
-        log.info("t3")
+        #log.info("t3")
         man.read_ftt_images()
-        log.info("t9")
+        #log.info("t9")
         sd = SharpnessDetector(man.get_fft_images(), self._config)
 
         images = sd.images_to_stack()
 
         t2 = time.clock() - t1
 
-        log.info("FFT calculation time, " + str(t2))
+        #add extra field to the log
+        extra = {'FTT_time': t2}
+        log = logging.LoggerAdapter(log, extra)
+        log.info("FFT calculation finished")
         images = np.array(images, dtype=images[0].dtype)
 
         #TODO:Implement alignment algo
@@ -48,7 +51,7 @@ class FocusStack:
 
         #stacked_image = pyramid(aligned_images, self._config).get_pyramid_fusion()
         stacked_image = PyramidManager(images, self._config).get_pyramid_fusion()
-        log.info("t17")
+        #log.info("t17")
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         return Image(stacked_image)
 

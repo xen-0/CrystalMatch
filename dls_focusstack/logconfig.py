@@ -69,7 +69,7 @@ default_config = {
         # Set the level here to be the default minimum level of log record to be produced
         # If you set a handler to level DEBUG you will need to set either this level
         "level": "DEBUG",
-        "handlers": ["console", "local_file_handler", "graylog_gelf"]
+        "handlers": ["console", "graylog_gelf","local_file_handler"]
     }
 }
 
