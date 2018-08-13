@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 import logging
-import logconfig
+from dls_focusstack import logconfig
 
 from dls_focusstack.focus.pyramid import Pyramid
 

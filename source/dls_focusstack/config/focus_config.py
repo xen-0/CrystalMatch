@@ -13,6 +13,4 @@ class FocusConfig(Config):
         self.pyramid_min_size = add(IntConfigItem, "Pyramid Minimum Size", default=32, extra_arg='px') #defalt =32
         self.number_to_stack = add(IntConfigItem, "Number of images to stack", default=12)
 
-        #self.input_dir = add(DirectoryConfigItem, "In Directory",)
-
         self.initialize_from_file()

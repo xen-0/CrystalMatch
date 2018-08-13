@@ -1,5 +1,5 @@
 import logging
-import logconfig
+from dls_focusstack import logconfig
 import time
 
 import cv2

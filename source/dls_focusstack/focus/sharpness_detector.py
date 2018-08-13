@@ -1,7 +1,8 @@
 import logging
 import math
 
-import logconfig
+from dls_focusstack import logconfig
+
 
 #logging.getLogger(__name__).addHandler(logging.NullHandler())
 
