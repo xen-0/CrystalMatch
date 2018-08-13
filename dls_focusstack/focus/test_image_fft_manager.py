@@ -40,7 +40,7 @@ class TestImageFFTManager(TestCase):
 
     def test_the_created_fft_images_contain_image_array(self):
         for fft_img in self._imgFFTman.get_fft_images():
-            self.assertIsNotNone(fft_img.getImage())
+            self.assertIsNotNone(fft_img.get_image())
 
     def test_the_created_fft_images_are_numbered_according_to_the_sequence_of_the_input_list(self):
         file_list = [self._file1, self._file2]
@@ -48,8 +48,8 @@ class TestImageFFTManager(TestCase):
         manager.read_ftt_images()
         for idx, name in enumerate(file_list):
             for fft_img in manager.get_fft_images():
-                if(fft_img.getName() == name): #assuming the names are unique, which is not required
-                    self.failUnlessEqual(fft_img.getImageNumber, idx)
+                if(fft_img.get_name() == name): #assuming the names are unique, which is not required
+                    self.failUnlessEqual(fft_img.get_image_number, idx)
 
     def test_the_created_fft_images_contain_fft(self):
         for fft_img in self._imgFFTman.get_fft_images():

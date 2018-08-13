@@ -2,7 +2,7 @@
 import cv2
 import numpy as np
 
-class Image_FFT:
+class ImageFFT:
     """Image class which holds the image and number of the image in a sequence of images.
     FFT is implemented in the class. Mean value of the image FFT is held in the fft_level parameter."""
 
@@ -13,23 +13,23 @@ class Image_FFT:
         self.name = name
 
     def runFFT(self):
-        self.fft_level = self.fourier2()
+        self.fft_level = self.fourier()
 
     def getFFT(self):
         return self.fft_level
 
-    def getImage(self):
+    def get_image(self):
         return self.img
 
-    def getImageNumber(self):
+    def get_image_number(self):
         return self.image_number
 
-    def getName(self):
+    def get_name(self):
         return self.name
 
     # algorithm provided by Charles - a slight modification of the optimal sizes
     # has been added to speed up the procedure
-    def fourier2(self):
+    def fourier(self):
         """Function used to calculate FFT of the image - created by Charles."""
         rows, cols = self.img.shape
         nrows = cv2.getOptimalDFTSize(rows)

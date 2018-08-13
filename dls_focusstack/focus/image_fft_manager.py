@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 import logconfig
-from focus.image_fft import Image_FFT
+from focus.imagefft import ImageFFT
 
 
 def fft(file_obj,q,count):
@@ -14,7 +14,7 @@ def fft(file_obj,q,count):
     name = file_obj.name
     img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
-    image_fft = Image_FFT(img, count, name)
+    image_fft = ImageFFT(img, count, name)
     image_fft.runFFT()
     q.put(image_fft)
 

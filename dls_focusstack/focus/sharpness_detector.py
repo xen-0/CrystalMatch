@@ -29,7 +29,7 @@ class SharpnessDetector(object):
                 level = fft
                 best_fft_img = s
 
-        max = best_fft_img.getImageNumber()
+        max = best_fft_img.get_image_number()
         range = self.find_range(max)
 
         extra = {'best_fft_val': round(level, 4), 'best_fft_img_num': max}
@@ -38,8 +38,8 @@ class SharpnessDetector(object):
                  " First img: " + str(range[0]) + " last img: " + str(len(range)))
 
         for s in self.fft_img:
-            if s.getImageNumber() in range:
-                images.append(s.getImage())
+            if s.get_image_number() in range:
+                images.append(s.get_image())
 
         return images
 

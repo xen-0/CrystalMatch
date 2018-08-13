@@ -15,8 +15,8 @@ class TestSharpnessDetector(TestCase):
     def test_image_stack_method_returns_list_of_images_within_a_range(self):
         fft_image = MagicMock()
         fft_image.getFFT.return_value = 10
-        fft_image.getImageNumber.return_value = 0
-        fft_image.getImage.return_value = 100
+        fft_image.get_image_number.return_value = 0
+        fft_image.get_image.return_value = 100
         self._config.number_to_stack.value.return_value = 1
         self._fft_images = [fft_image]
 
