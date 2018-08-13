@@ -6,10 +6,11 @@ class Image_FFT:
     """Image class which holds the image and number of the image in a sequence of images.
     FFT is implemented in the class. Mean value of the image FFT is held in the fft_level parameter."""
 
-    def __init__(self, input_img, number):
+    def __init__(self, input_img, number, name):
         self.img = input_img
         self.image_number = number
         self.fft_level = None
+        self.name = name
 
     def runFFT(self):
         self.fft_level = self.fourier2()
@@ -22,6 +23,9 @@ class Image_FFT:
 
     def getImageNumber(self):
         return self.image_number
+
+    def getName(self):
+        return self.name
 
     # algorithm provided by Charles - a slight modification of the optimal sizes
     # has been added to speed up the procedure

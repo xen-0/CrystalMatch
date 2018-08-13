@@ -11,9 +11,10 @@ from focus.image_fft import Image_FFT
 def fft(file_obj,q,count):
     "Function that reads an image of a given name and  starts fft calculation."
     #read as soon as it appears
-    img_color = cv2.imread(file_obj.name)
+    name = file_obj.name
+    img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
-    image_fft = Image_FFT(img, count)
+    image_fft = Image_FFT(img, count, name)
     image_fft.runFFT()
     q.put(image_fft)
 
@@ -36,20 +37,17 @@ class ImageFFTManager:
         q = Queue()
         #log.info("t5")
         processes=[]
-        count = 0
         #log.info("t6")
-        for file_obj in self._image_file_list:
-            process = Process(target=fft, args=(file_obj,q,count))
+
+        for idx, file_obj in enumerate(self._image_file_list):
+            process = Process(target=fft, args=(file_obj,q,idx))
             process.start()
             processes.append(process)
-            count = count+1
         #log.info("t7")
         self.fft_images = [q.get() for p in processes]
         for p in processes:
             p.join()
         #log.info("t8")
 
-
     def get_fft_images(self):
         return self.fft_images
-

@@ -1,3 +1,7 @@
+from pkg_resources import require
+require("numpy==1.11.1")
+require("scipy")
+
 import cv2
 import numpy as np
 from scipy import ndimage

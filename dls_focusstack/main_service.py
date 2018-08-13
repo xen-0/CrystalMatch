@@ -8,7 +8,6 @@ require("numpy==1.11.1")
 require("scipy")
 import argparse
 import logging
-from logging import DEBUG, INFO
 
 from os.path import split, exists, isdir, isfile
 

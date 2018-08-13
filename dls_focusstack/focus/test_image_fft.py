@@ -18,27 +18,27 @@ class TestImageFFT(TestCase):
                         (1, 0, 2, 5)])
 
     def test_runFFT_calls_furrier2(self):
-        sh = Image_FFT(self._img, 1)
+        sh = Image_FFT(self._img, 1, 'test')
         sh.fourier2 = MagicMock()
 
         sh.runFFT()
         sh.fourier2.assert_called_once()
 
     def test_getFFT_returns_none_before_furrier_is_run(self):
-        sh = Image_FFT(self._img, 1)
+        sh = Image_FFT(self._img, 1, 'test')
         self.assertIsNone(sh.getFFT())
 
     def test_getFFT_returns_not_none_furrier_is_run(self):
-        sh = Image_FFT(self._img, 1)
+        sh = Image_FFT(self._img, 1, 'test')
         sh.runFFT()
         self.assertIsNotNone(sh.getFFT())
 
     def test_get_image_number_returns_correct_value(self):
-        sh = Image_FFT(self._img, 1)
+        sh = Image_FFT(self._img, 1, 'test')
         self.assertEqual(sh.getImageNumber(),1)
 
     def test_get_image_returns_correct_value(self):
-        sh = Image_FFT(self._img, 1)
+        sh = Image_FFT(self._img, 1, 'test')
         self.assertIn(sh.getImage(), self._img)
 
 

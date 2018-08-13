@@ -1,12 +1,8 @@
+from pkg_resources import require
+require("numpy==1.11.1")
 from unittest import TestCase
 
-from pkg_resources import require
-
 from focus.sharpness_detector import SharpnessDetector
-
-require("numpy==1.11.1")
-
-
 from mock import MagicMock
 
 class TestSharpnessDetector(TestCase):
