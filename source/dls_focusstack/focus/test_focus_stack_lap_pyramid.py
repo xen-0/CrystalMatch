@@ -1,10 +1,14 @@
+from pkg_resources import require
+require('pygelf==0.2.11')
+require("numpy==1.11.1")
+require("scipy")
 
 import cv2
 import os
 from unittest import TestCase
 
-from mock import MagicMock, Mock
-from focus import FocusStack
+from mock import MagicMock
+from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
 
 
 class TestFocusStackLapPyramid(TestCase):

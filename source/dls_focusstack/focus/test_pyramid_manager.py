@@ -1,11 +1,13 @@
 from pkg_resources import require
+require('pygelf==0.2.11')
 require("numpy==1.11.1")
 require("scipy")
+
 from unittest import TestCase
 
-from focus.pyramid_manager import PyramidManager
-
 import numpy as np
+
+from dls_focusstack.focus.pyramid_manager import PyramidManager
 
 from mock import MagicMock
 

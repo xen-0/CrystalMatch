@@ -6,7 +6,7 @@ import numpy as np
 import logging
 import logconfig
 
-from focus.pyramid import Pyramid
+from dls_focusstack.focus.pyramid import Pyramid
 
 
 class PyramidManager:

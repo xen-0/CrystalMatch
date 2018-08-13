@@ -6,7 +6,7 @@ from unittest import TestCase
 
 
 
-from focus.pyramid_layer import PyramidLayer
+from dls_focusstack.focus.pyramid_layer import PyramidLayer
 
 import numpy as np
 

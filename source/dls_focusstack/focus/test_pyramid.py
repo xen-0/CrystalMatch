@@ -4,8 +4,8 @@ require("numpy==1.11.1")
 require("scipy")
 from unittest import TestCase
 
-from focus.pyramid_manager import PyramidManager
-from focus.pyramid import fused_laplacian, entropy_diviation
+from dls_focusstack.focus.pyramid_manager import PyramidManager
+from dls_focusstack.focus.pyramid import fused_laplacian, entropy_diviation
 
 import numpy as np
 from multiprocessing import Queue

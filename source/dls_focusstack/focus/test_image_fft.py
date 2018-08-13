@@ -1,12 +1,13 @@
-from unittest import TestCase
-
 from pkg_resources import require
-
+require('pygelf==0.2.11')
 require("numpy==1.11.1")
+require("scipy")
+
+from unittest import TestCase
 
 import numpy as np
 
-from focus.imagefft import ImageFFT
+from dls_focusstack.focus.imagefft import ImageFFT
 from mock import MagicMock
 
 

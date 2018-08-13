@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 import logconfig
-from focus.imagefft import ImageFFT
+from dls_focusstack.focus.imagefft import ImageFFT
 
 
 def fft(file_obj,q,count):

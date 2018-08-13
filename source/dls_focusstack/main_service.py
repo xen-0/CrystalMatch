@@ -1,7 +1,6 @@
 from pkg_resources import require
 
 import logconfig
-from version import VersionHandler
 
 require('pygelf==0.2.11')
 require("numpy==1.11.1")
@@ -9,10 +8,9 @@ require("scipy")
 import argparse
 import logging
 
-from os.path import split, exists, isdir, isfile
+from os.path import split, exists, isdir, isfile, join
 
 from os import makedirs, remove
-from sys import stdout
 
 import sys
 import time
@@ -23,9 +21,9 @@ from focus.focus_stack_lap_pyramid import FocusStack
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
 if IS_BUNDLED:
-    CONFIG_DIR = "./" + ReadableConfigDir.CONFIG_DIR_NAME + "/"
+    CONFIG_DIR = join(".", "dls_focusstack", ReadableConfigDir.CONFIG_DIR_NAME)
 else:
-    CONFIG_DIR = "../" + ReadableConfigDir.CONFIG_DIR_NAME + "/"
+    CONFIG_DIR = join("..", "dls_focusstack", ReadableConfigDir.CONFIG_DIR_NAME)
 
 
 class FocusStackService:
@@ -73,7 +71,7 @@ class FocusStackService:
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
-                            default="./config",
+                            default=join(".", "dls_focusstack", "config"),
                             help="Path to the config directory. If it does not exist one will be created with "
                                  "default settings.")
         return parser

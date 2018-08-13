@@ -1,14 +1,15 @@
 from pkg_resources import require
-
-from focus import image_fft_manager
-
+require('pygelf==0.2.11')
+require("numpy==1.11.1")
 require("scipy")
+
+from dls_focusstack.focus import image_fft_manager
 
 from unittest import TestCase
 
 from mock import MagicMock
 
-from focus.image_fft_manager import ImageFFTManager
+from dls_focusstack.focus.image_fft_manager import ImageFFTManager
 import os
 
 class TestImageFFTManager(TestCase):

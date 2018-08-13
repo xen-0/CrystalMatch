@@ -5,13 +5,13 @@ import time
 import cv2
 import numpy as np
 
-from config.focus_config import FocusConfig
+from dls_focusstack.config.focus_config import FocusConfig
 from dls_util.imaging import Image
-from focus.image_fft_manager import ImageFFTManager
+from dls_focusstack.focus.image_fft_manager import ImageFFTManager
 from os.path import join
 
-from focus.pyramid_manager import PyramidManager
-from focus.sharpness_detector import SharpnessDetector
+from dls_focusstack.focus.pyramid_manager import PyramidManager
+from dls_focusstack.focus.sharpness_detector import SharpnessDetector
 
 
 class FocusStack:

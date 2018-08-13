@@ -2,7 +2,7 @@ from pkg_resources import require
 require("numpy==1.11.1")
 from unittest import TestCase
 
-from focus.sharpness_detector import SharpnessDetector
+from dls_focusstack.focus.sharpness_detector import SharpnessDetector
 from mock import MagicMock
 
 class TestSharpnessDetector(TestCase):
