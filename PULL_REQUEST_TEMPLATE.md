@@ -16,4 +16,4 @@ To test
 
 Final steps
 -----------
-- [ ] Added work to development release notes](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/release-notes/release-notes-dev.md)
+- [ ] Added work to development [release notes](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/release-notes/release-notes-dev.md)
