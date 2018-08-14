@@ -1,4 +1,4 @@
-from dls_imagematch.service import CrystalMatchService
+from dls_imagematch.service import CrystalMatch
 from test_suite import CrystalTestSuite
 
 config_dir = "../config/"
@@ -8,7 +8,7 @@ img_dir = "../test-images/Formulatrix/"
 suite = CrystalTestSuite(case_file, img_dir)
 cases = suite.testable_cases()
 
-match_service = CrystalMatchService(config_dir)
+match_service = CrystalMatch(config_dir)
 
 print("Number of testable cases: {}".format(len(cases)))
 

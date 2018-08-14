@@ -16,8 +16,8 @@ from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
 
 
-class CrystalMatchService:
-    def __init__(self, config_directory, log_dir=None, verbose=False, debug=False, scale_override=None, job_id=None):
+class CrystalMatch:
+    def __init__(self, config_directory, log_dir=None, scale_override=None):
         """
         Create a Crystal Matching Service object using the configuration parameters provided.
         :param config_directory: Path to the configuration directory.
@@ -29,55 +29,11 @@ class CrystalMatchService:
         :param job_id: Optional parameter for command line - returned in results to identify the run.
         """
         self._config_directory = config_directory
-        self._job_id = job_id
 
         self._config_settings = SettingsConfig(config_directory, log_dir=log_dir)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
-
-        self._set_up_logging(debug, verbose)
-
-    def _set_up_logging(self, debug, verbose):
-        # Set up logging
-        root_logger = logging.getLogger()
-        root_logger.setLevel(DEBUG)
-        # Set up stream handler
-        if debug:
-            self.add_log_stream_handler(DEBUG, root_logger)
-        elif verbose:
-            self.add_log_stream_handler(INFO, root_logger)
-        # Set up file handler
-        if self._config_settings.logging.value():
-            self.add_log_file_handler(root_logger)
-
-    def add_log_file_handler(self, logger):
-        log_file_path = self._config_settings.get_log_file_path()
-        try:
-            log_file_handler = TimedRotatingFileHandler(log_file_path,
-                                                        when=self._config_settings.log_rotation.value(),
-                                                        backupCount=self._config_settings.log_count_limit.value())
-            log_file_handler.setLevel(self._config_settings.get_log_level())
-            if self._job_id:
-                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - ' +
-                                              str(self._job_id) + ' - %(message)s')
-            else:
-                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            log_file_handler.setFormatter(formatter)
-            chmod(log_file_path, 0o666)
-            logger.addHandler(log_file_handler)
-        except IOError:
-            logging.error("ERROR: Could not access log file - please check permissions: " + log_file_path)
-
-    @staticmethod
-    def add_log_stream_handler(level, logger):
-        stream_handler = logging.StreamHandler(stdout)
-        stream_handler.setLevel(level)
-        logger.addHandler(stream_handler)
-        if level == DEBUG:
-            logging.debug("DEBUG statements visible.")
-        elif level == INFO:
-            logging.info("INFO statements visible.")
 
     def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, json_output=False):
         """
@@ -93,7 +49,7 @@ class CrystalMatchService:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(self._job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
+        service_result = ServiceResult(formulatrix_image_path, beamline_image_path, self._config_settings,
                                        json_output=json_output)
 
         # Perform alignment

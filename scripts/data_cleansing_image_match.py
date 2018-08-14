@@ -8,7 +8,7 @@ import csv
 from multiprocessing import Pool
 from os import listdir, makedirs, rename
 from os.path import join, exists, isdir, splitext
-from dls_imagematch.service.service import CrystalMatchService
+from dls_imagematch.service.service import CrystalMatch
 
 # CONFIGURATION
 ######################################################################
@@ -67,7 +67,7 @@ def move_matched_files(parent_dir_1, parent_dir_2, true_file_name, replaced_file
 # noinspection PyProtectedMember
 def run_match(bundle):
     candidate_name, target_image, candidate_image = bundle
-    service = CrystalMatchService(CONFIG_DIR)
+    service = CrystalMatch(CONFIG_DIR)
     result = service.perform_match(target_image, candidate_image, [])
     return candidate_name, result._alignment_status_code.code, result._alignment_error
 

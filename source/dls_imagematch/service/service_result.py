@@ -61,7 +61,7 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, job_id, formulatrix_image_path, beamline_image_path, config_settings, json_output=False):
+    def __init__(self, formulatrix_image_path, beamline_image_path, config_settings, json_output=False):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
@@ -72,7 +72,7 @@ class ServiceResult:
         :param json_output: Flag to output results to the console in JSOn format
         """
         self.SEPARATOR = " ; "
-        self._job_id = job_id
+        self._job_id = None
         self._image_path_formulatrix = abspath(formulatrix_image_path)
         self._image_path_beamline = abspath(beamline_image_path)
         self._alignment_transform_scale = 1.0
@@ -146,10 +146,10 @@ class ServiceResult:
         self._append_crystal_match_results(output)
 
         # Log file output
-        logging.info("\n*************************************\nRESULTS\n")
+        #logging.info("\n*************************************\nRESULTS\n")
         for log_msg in output:
             logging.info(log_msg)
-        logging.info("\n*************************************\n")
+        #logging.info("\n*************************************\n")
         if self._config_settings.logging.value() and self._config_settings.log_images.value():
             self._output_log_images()
 

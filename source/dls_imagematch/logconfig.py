@@ -11,6 +11,7 @@ import getpass
 import threading
 
 import dls_focusstack.version
+import version
 
 default_config = {
     "version": 1,
@@ -58,9 +59,10 @@ default_config = {
             "include_extra_fields": True,
             "username": getpass.getuser(),
             "pid": os.getpid(),
-            "application": "Crystal Match Focusstack",
+            "application": "Crystal Match",
             "facility": "VMXi",
-            "_version": dls_focusstack.version.VersionHandler.version()
+            "_stack_v": dls_focusstack.version.VersionHandler.version(),
+            "_match_v": version.VersionHandler.version()
         }
     },
 

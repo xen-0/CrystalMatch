@@ -1,5 +1,5 @@
 import logging
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 import time
 
 import cv2

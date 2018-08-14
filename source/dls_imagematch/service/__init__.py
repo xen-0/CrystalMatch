@@ -1,1 +1,1 @@
-from .service import CrystalMatchService
+from .service import CrystalMatch

@@ -5,7 +5,7 @@ from multiprocessing import Queue, Process
 import numpy as np
 
 import logging
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 
 from pyramid_layer import PyramidLayer
 

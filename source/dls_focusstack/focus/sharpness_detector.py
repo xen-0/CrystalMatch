@@ -1,7 +1,7 @@
 import logging
 import math
 
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 
 
 #logging.getLogger(__name__).addHandler(logging.NullHandler())

@@ -1,10 +1,10 @@
-#This is code take from https://github.com/sjawhar/focus-stacking
+#This is code based upon https://github.com/sjawhar/focus-stacking
 #which implements the methods described in http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf
 
 import cv2
 import numpy as np
 import logging
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 
 from dls_focusstack.focus.pyramid import Pyramid
 
@@ -20,8 +20,8 @@ class PyramidManager:
         """This is the function which maintains the steps of pyramid processing.
         It creates the laplacian pyramid,
         starts the fusion process which flattens the pyramid along layers and finally collapses the pyramid."""
-        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
-        log.addFilter(logconfig.ThreadContextFilter())
+        #log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        #log.addFilter(logconfig.ThreadContextFilter())
         smallest_side = min(self.images[0].shape[:2])
         cfg = self.config
         min_size = cfg.pyramid_min_size.value()

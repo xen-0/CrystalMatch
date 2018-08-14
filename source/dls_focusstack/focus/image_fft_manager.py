@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 import cv2
 import numpy as np
 
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
 
