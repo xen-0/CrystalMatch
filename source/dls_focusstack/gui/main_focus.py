@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import (QWidget, QMainWindow, QIcon, QHBoxLayout, QVBoxLayout, QAction)
 
 from config.focus_config import FocusConfig
-from dls_focusstack.focus import FocusStack
+from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
 from dls_focusstack.gui import *
 
 sys.path.append("..")
@@ -105,7 +105,8 @@ class FocusStackerMain(QMainWindow):
         included_extensions = ['jpg', 'bmp', 'png', 'gif', 'jpeg', 'tif']
         image_files = [fn for fn in files if any(fn.lower().endswith(ext) for ext in included_extensions)]
 
-        folder_path += "\\"
+        folder_path += "/"
+        #"\\" - TODO better way of doing this
         files = [folder_path + f for f in image_files]
 
         self._image_list.set_images(files)
