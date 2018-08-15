@@ -10,6 +10,7 @@ from json.encoder import JSONEncoder
 
 from os.path import abspath, join, exists, isdir
 
+from dls_imagematch import logconfig
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
 from dls_imagematch.crystal.match.match import CRYSTAL_MATCH_STATUS_DISABLED
 from dls_imagematch.feature.draw.matches import MatchPainter
@@ -32,7 +33,7 @@ class ServiceResultExitCode(StatusFlag):
         self.err_msg = err_msg
 
     def to_json_array(self):
-        json_array = StatusFlag.to_json_array(self)
+        json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
@@ -61,7 +62,7 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, formulatrix_image_path, beamline_image_path, config_settings, json_output=False):
+    def __init__(self, formulatrix_image_path, beamline_image_path, config_settings):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
@@ -69,10 +70,8 @@ class ServiceResult:
         :param formulatrix_image_path: Image path for the input image.
         :param beamline_image_path: Image path for the output image.
         :type config_settings: SettingsConfig
-        :param json_output: Flag to output results to the console in JSOn format
         """
         self.SEPARATOR = " ; "
-        self._job_id = None
         self._image_path_formulatrix = abspath(formulatrix_image_path)
         self._image_path_beamline = abspath(beamline_image_path)
         self._alignment_transform_scale = 1.0
@@ -80,7 +79,6 @@ class ServiceResult:
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET
         self._alignment_error = 0.0
         self._match_results = []
-        self._json = json_output
         self._exit_code = SERVICE_RESULT_STATUS_INCOMPLETE
         self._config_settings = config_settings
 
@@ -127,47 +125,11 @@ class ServiceResult:
                 line += str(crystal_match.feature_match_result().mean_transform_error())
             output_list.append(line)
 
-    def print_results(self):
-        """
-        Print the contents of this results object to the console.  Returns the printed object for testing purposes.
-        :return : The printed object - JSON mode will return the full json object.
-        """
-        output = []
-        if self._job_id and self._job_id != "":
-            output = ['job_id:"' + self._job_id + '"']
-        output += ['exit_code:' + str(self._exit_code),
-                   'input_image:"' + self._image_path_formulatrix + '"',
-                   'output_image:"' + self._image_path_beamline + '"',
-                   'align_transform:' + self._get_printable_alignment_transform(),
-                   'align_status:' + str(self._alignment_status_code),
-                   'align_error:' + str(self._alignment_error)
-                   ]
-
-        self._append_crystal_match_results(output)
-
-        # Log file output
-        #logging.info("\n*************************************\nRESULTS\n")
-        for log_msg in output:
-            logging.info(log_msg)
-        #logging.info("\n*************************************\n")
-        if self._config_settings.logging.value() and self._config_settings.log_images.value():
-            self._output_log_images()
-
-        # Console output
-        if self._json:
-            return self._print_json_object()
-        else:
-            # Print human readable
-            for line in output:
-                print(line)
-            return output
 
     def _print_json_object(self):
         output_obj = {'exit_code': self._exit_code.to_json_array()}
 
         # Global alignment transform
-        if self._job_id and self._job_id != "":
-            output_obj['job_id'] = self._job_id
         output_obj['input_image'] = self._image_path_formulatrix
         output_obj['output_image'] = self._image_path_beamline
         output_obj['alignment'] = {
@@ -200,23 +162,14 @@ class ServiceResult:
         print(json.dumps(output_obj, cls=DecimalEncoder))
         return output_obj
 
-    def _output_log_images(self):
-        for i in range(len(self._match_results)):
-            crystal_match = self._match_results[i]
-            if crystal_match.is_success():
-                feature_match = crystal_match.feature_match_result()
-                painter = MatchPainter(feature_match.image1(), feature_match.image2())
+    def log_final_result(self):
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        extra = self._exit_code.to_json_array()
+        extra.update({'input_image': self._image_path_formulatrix,
+                      'output_image': self._image_path_beamline})
 
-                image = painter.background_image()
-                image = painter.draw_matches(feature_match.good_matches(), [], image)
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Crystal Match Complete")
+        log.debug(extra)
 
-                # Construct file path for this image.
-                filename = strftime("%Y-%m-%d_%H-%M-%S_Match_" + str(i) + ".jpg")
-                if self._job_id is not None and self._job_id.strip():
-                    job_dir_path = join(self._config_settings.get_image_log_dir(), self._job_id)
-                    if not exists(job_dir_path) or not isdir(job_dir_path):
-                        makedirs(job_dir_path)
-                    image_path = join(job_dir_path, filename)
-                else:
-                    image_path = join(self._config_settings.get_image_log_dir(), filename)
-                image.save(abspath(image_path))

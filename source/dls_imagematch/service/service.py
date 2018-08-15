@@ -5,12 +5,14 @@ from sys import stdout
 
 from os import chmod
 
+from dls_imagematch import logconfig
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
 from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
+from dls_imagematch.crystal.match.match import CrystalMatchStatus
 from dls_imagematch.feature.detector import DetectorConfig
 from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
@@ -35,13 +37,12 @@ class CrystalMatch:
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, json_output=False):
+    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi):
         """
         Perform image alignment and crystal matching returning a results object.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
         :param beamline_image_path: File path to the 'after' image from the Beam line.
         :param input_poi: An array of points of interest to match between the images.
-        :param json_output: Option to output a json object to std_out instead.
         :return: ServiceResult object.
         """
         # Create the images
@@ -49,11 +50,13 @@ class CrystalMatch:
         image2 = Image.from_file(beamline_image_path)
 
         # Create results object
-        service_result = ServiceResult(formulatrix_image_path, beamline_image_path, self._config_settings,
-                                       json_output=json_output)
+        service_result = ServiceResult(formulatrix_image_path, beamline_image_path, self._config_settings)
 
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         # Perform alignment
         try:
+
             aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
             service_result.set_image_alignment_results(aligned_images)
 
@@ -61,8 +64,9 @@ class CrystalMatch:
             if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
                 match_results = self._perform_matching(aligned_images, scaled_poi)
                 service_result.append_crystal_matching_results(match_results)
+                service_result.log_final_result()
         except Exception as e:
-            logging.error("ERROR: " + e.message)
+            log.error("ERROR: " + e.message)
             service_result.set_err_state(e)
 
         return service_result
@@ -91,28 +95,50 @@ class CrystalMatch:
         return aligned_images, scaled_formulatrix_points
 
     def _perform_matching(self, aligned_images, selected_points):
+        #log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        #log.addFilter(logconfig.ThreadContextFilter())
         matcher = CrystalMatcher(aligned_images, self._config_detector)
         matcher.set_from_crystal_config(self._config_crystal)
 
         crystal_match_results = matcher.match(selected_points)
-        logging.info("Crystal Matching Complete")
+        #log.info("Crystal Matching Complete")
 
         return crystal_match_results
 
     @staticmethod
     def _log_alignment_status(aligned):
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         status = "Unknown"
 
         if aligned.is_alignment_good():
-            status = "Good Alignment"
+            status = CrystalMatchStatus(2, "Good Alignment")
         elif aligned.is_alignment_poor():
-            status = "Poor Alignment"
+            status = CrystalMatchStatus(1, "Poor Alignment")
         elif aligned.is_alignment_bad():
-            status = "Alignment failed!"
+            status = CrystalMatchStatus(0, "Alignment failed!")
 
-        logging.info("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
+        json_array = status.to_json_array_with_names('align_stat_num', 'align_stat')
+        json_array.update({'align_score': '{:.2f}'.format(aligned.overlap_metric())})
+
+        alignment_transform_scale, alignment_transform_offset = aligned.get_alignment_transform()
 
         match_result = aligned.feature_match_result
         if match_result is not None:
-            logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
-            logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
+            match_time = '{:.4f}'.format(match_result.time_match())
+            transform_time = '{:.4f}'.format(match_result.time_transform())
+            scale = '{:.4f}'.format(alignment_transform_scale)
+            transform_x = '{:.4f}'.format(alignment_transform_offset.x)
+            transform_y = '{:.4f}'.format(alignment_transform_offset.y)
+            json_array.update({'align_time': match_time,
+                               'align_transform_time:': transform_time,
+                               'align_scale': scale,
+                               'align_trnsf_x': transform_x,
+                               'align_trnsf_y': transform_y
+                               })# updates if exists, else adds
+        log = logging.LoggerAdapter(log, json_array)
+        log.info("Image Alignment Completed")
+        log.debug(json_array)
+
+
+

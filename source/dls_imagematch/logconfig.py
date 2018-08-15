@@ -14,7 +14,7 @@ import dls_focusstack.version
 import version
 
 default_config = {
-    "version": 1,
+    "version": 1.0,
     "disable_existing_loggers": False,
     "formatters": {
         "simple": {
@@ -31,7 +31,7 @@ default_config = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": "DEBUG",
+            "level": "INFO",
             "formatter": "simple",
             "stream": "ext://sys.stdout"
         },
@@ -40,7 +40,7 @@ default_config = {
             "class": "logging.handlers.RotatingFileHandler",
             #  "class": "logging.handlers.FileHandler",
             "level": "DEBUG",
-            "formatter": "extended",
+            "formatter": "json",
             "filename": "debug.log",
             "maxBytes": 1048576, # one megabyte
             "backupCount": 20, # goes up to 20mb and starts the rollover
@@ -48,11 +48,11 @@ default_config = {
         },
 
         "graylog_gelf": {
-            "class": "pygelf.GelfTcpHandler",
+            "class": "pygelf.GelfUdpHandler",
             "level": "INFO",
             # Obviously a DLS-specific configuration: the graylog server address and port
             # Use the input "Load Balanced GELF TCP" on graylog2.
-            "host": "graylog2",
+            "host": "graylog2",#"localhost", - use locaklhost for tests
             "port": 12201,
             "debug": True,
             #  The following custom fields will be disabled if setting this False
@@ -71,7 +71,7 @@ default_config = {
         # Set the level here to be the default minimum level of log record to be produced
         # If you set a handler to level DEBUG you will need to set either this level
         "level": "DEBUG",
-        "handlers": ["console", "graylog_gelf"]
+        "handlers": ["console", "local_file_handler", "graylog_gelf"]#,"local_file_handler"]# "graylog_gelf"]
     }
 }
 

@@ -4,6 +4,7 @@ from dls_focusstack.main_service import FocusStackService
 from dls_imagematch import logconfig
 
 require("numpy==1.11.1")
+require('pygelf==0.2.11')
 
 import argparse
 import logging
@@ -26,12 +27,10 @@ else:
 class CrystalMatchService:
 
     def __init__(self):
-        pass
+       pass
+
 
     def run(self):
-        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
-        log.addFilter(logconfig.ThreadContextFilter())
-
         parser = self._get_argument_parser()
         args = parser.parse_args()
 
@@ -39,19 +38,21 @@ class CrystalMatchService:
         config_directory = args.config
         if config_directory is None:
             config_directory = CONFIG_DIR
-        scale_override = self._get_scale_override(args, log)
+        scale_override = self._get_scale_override(args)
 
         # Run service
         service = CrystalMatch(config_directory, log_dir=args.log, scale_override=scale_override)
-        selected_points = self._parse_selected_points_from_args(args, log)
+        selected_points = self._parse_selected_points_from_args(args)
         service_results = service.perform_match(args.image_input.name,
                                                 args.image_output.name,
-                                                selected_points,
-                                                json_output=args.to_json)
-        service_results.print_results()
+                                                selected_points)
+
+
 
     @staticmethod
-    def _get_scale_override(args, log):
+    def _get_scale_override(args):
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
 
         if args.scale is not None:
             try:
@@ -72,12 +73,14 @@ class CrystalMatchService:
         return None
 
     @staticmethod
-    def _parse_selected_points_from_args(args, log):
+    def _parse_selected_points_from_args(args):
         """
         Parse the selected points list provided by the command line for validity and returns a list of Point objects.
         :param args: Command line arguments provided by argument parser - must contain 'selected_points'
         :return: List of Selected Points.
         """
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         selected_points = []
         if args.selected_points:
             point_expected_format = re.compile("[0-9]+,[0-9]+")

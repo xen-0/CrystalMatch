@@ -1,5 +1,6 @@
 import logging
 
+from dls_imagematch import logconfig
 from dls_imagematch.crystal.align.sized_image import SizedImage
 from dls_imagematch.feature import FeatureMatcher
 from dls_util.shape import Point
@@ -19,6 +20,8 @@ class ImageAligner:
         :param align_config: Configuration object for this process.
         :param detector_config: Configuration object for the feature detector.
         """
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         assert(align_config is not None)
         # Create images with associated real sizes
         px_size_1 = align_config.pixel_size_1.value()
@@ -26,9 +29,12 @@ class ImageAligner:
         self._resolution = px_size_2  # The resolution of the second image will be the working resolution
         self._scale_factor = px_size_1 / px_size_2
 
-        logging.info("Image 1 original size: %d x %d (%f um/pixel)", image1.width(), image1.height(), px_size_1)
-        logging.info("Image 2 original size: %d x %d (%f um/pixel)", image2.width(), image2.height(), px_size_2)
-        logging.info("Scale Factor calculated as " + str(self._scale_factor))
+
+        log.info("Image 1 original size: %d x %d (%f um/pixel)", image1.width(), image1.height(), px_size_1)
+        log.info("Image 2 original size: %d x %d (%f um/pixel)", image2.width(), image2.height(), px_size_2)
+        extra = {'scale_factor': str(self._scale_factor)}
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Scale Factor calculated as " + str(self._scale_factor))
 
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
