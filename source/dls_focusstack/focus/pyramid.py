@@ -87,9 +87,9 @@ class Pyramid:
         q = Queue()
         processes = []
         for layer in range(layers):
-            gray_image = PyramidLayer(images[layer], layer)
+            layer = PyramidLayer(images[layer], layer)
 
-            process = Process(target=entropy_diviation, args=(gray_image, kernel_size, q))
+            process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
             process.start()
             processes.append(process)
 
@@ -102,7 +102,7 @@ class Pyramid:
         for p in processes:
             p.join() #this one won't work if there is still something in the Queue
 
-        best_e = np.argmax(entropies, axis=0)
+        best_e = np.argmax(entropies, axis=0) #keeps the layer numbers
         best_d = np.argmax(deviations, axis=0)
         fused = np.zeros(images.shape[1:], dtype=np.float64)
 
