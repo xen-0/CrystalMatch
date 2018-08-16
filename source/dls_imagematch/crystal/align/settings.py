@@ -38,7 +38,7 @@ class SettingsConfig(Config):
     """
     Configuration class that holds application level settings such as logging options etc.
     """
-    def __init__(self, config_dir, log_dir=None):
+    def __init__(self, config_dir):
         Config.__init__(self, join(config_dir, 'settings.ini'))
 
         add = self.add
@@ -49,15 +49,6 @@ class SettingsConfig(Config):
 
         self.logging = add(BoolConfigItem, "Activate Logging", True)
         self.logging.set_comment("Turns file logging on and off.")
-
-        self._set_default_log_file_path(config_dir)
-        self.log_path = add(DirectoryConfigItem, "Log directory", "")
-        self.log_path.set_comment("Sets the directory in which log files are stored. Leaving this blank will set the "
-                                  "default path - log files will be stored in a directory called 'logs' next to the "
-                                  "current config directory.")
-
-        if log_dir is not None:
-            self.log_path.set_override(log_dir)
 
         self.log_level = add(EnumConfigItem, "Log Level", default=self.LOG_LEVEL_INFO, extra_arg=self.LOG_LEVEL_LIST)
         self.log_level.set_comment("Sets the log level for the log files being generated.")

@@ -32,12 +32,11 @@ class CrystalMatch:
         """
         self._config_directory = config_directory
 
-        self._config_settings = SettingsConfig(config_directory, log_dir=log_dir)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi):
+    def perform_match(self, formulatrix_image_path, beamline_image, input_poi):
         """
         Perform image alignment and crystal matching returning a results object.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
@@ -47,10 +46,10 @@ class CrystalMatch:
         """
         # Create the images
         image1 = Image.from_file(formulatrix_image_path)
-        image2 = Image.from_file(beamline_image_path)
+        image2 = beamline_image
 
         # Create results object
-        service_result = ServiceResult(formulatrix_image_path, beamline_image_path, self._config_settings)
+        service_result = ServiceResult(formulatrix_image_path)
 
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
@@ -70,12 +69,6 @@ class CrystalMatch:
             service_result.set_err_state(e)
 
         return service_result
-
-    def _get_image_output_dir(self):
-        image_output_dir = None
-        if self._config_settings.log_images.value():
-            image_output_dir = self._config_settings.get_image_log_dir()
-        return image_output_dir
 
     def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):
         """

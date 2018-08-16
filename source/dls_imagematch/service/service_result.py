@@ -62,7 +62,7 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, formulatrix_image_path, beamline_image_path, config_settings):
+    def __init__(self, formulatrix_image_path):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
@@ -73,14 +73,13 @@ class ServiceResult:
         """
         self.SEPARATOR = " ; "
         self._image_path_formulatrix = abspath(formulatrix_image_path)
-        self._image_path_beamline = abspath(beamline_image_path)
+        #self._image_path_beamline = abspath(beamline_image)
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET
         self._alignment_error = 0.0
         self._match_results = []
         self._exit_code = SERVICE_RESULT_STATUS_INCOMPLETE
-        self._config_settings = config_settings
 
     def set_image_alignment_results(self, aligned_images):
         """
@@ -126,48 +125,11 @@ class ServiceResult:
             output_list.append(line)
 
 
-    def _print_json_object(self):
-        output_obj = {'exit_code': self._exit_code.to_json_array()}
-
-        # Global alignment transform
-        output_obj['input_image'] = self._image_path_formulatrix
-        output_obj['output_image'] = self._image_path_beamline
-        output_obj['alignment'] = {
-            'status': self._alignment_status_code.to_json_array(),
-            'mean_error': self._alignment_error,
-            'scale': self._alignment_transform_scale,
-            'translation': {
-                'x': self._alignment_transform_offset.x,
-                'y': self._alignment_transform_offset.y,
-            }
-        }
-
-        # POI description
-        poi_array = []
-        for poi in self._match_results:
-            mean_error = poi.feature_match_result().mean_transform_error() if poi.is_success() else 0
-            poi_array.append({
-                'location': {
-                    'x': poi.get_transformed_poi().x,
-                    'y': poi.get_transformed_poi().y,
-                },
-                'translation': {
-                    'x': poi.get_delta().x,
-                    'y': poi.get_delta().y,
-                },
-                'status': poi.get_status().to_json_array(),
-                'mean_error': mean_error
-            })
-        output_obj['poi'] = poi_array
-        print(json.dumps(output_obj, cls=DecimalEncoder))
-        return output_obj
-
     def log_final_result(self):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         extra = self._exit_code.to_json_array()
-        extra.update({'input_image': self._image_path_formulatrix,
-                      'output_image': self._image_path_beamline})
+        extra.update({'input_image': self._image_path_formulatrix})
 
         log = logging.LoggerAdapter(log, extra)
         log.info("Crystal Match Complete")
