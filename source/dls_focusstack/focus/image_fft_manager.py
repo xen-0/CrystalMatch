@@ -16,6 +16,9 @@ def fft(file_obj,q,count):
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)
     image_fft.runFFT()
+    log = logging.getLogger(".".join([__name__]))
+    log.addFilter(logconfig.ThreadContextFilter())
+    log.info("Finished calculating fft for:" + name)
     q.put(image_fft)
 
 

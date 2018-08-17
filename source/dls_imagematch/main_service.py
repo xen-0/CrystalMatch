@@ -16,10 +16,9 @@ import time
 from dls_imagematch.service import CrystalMatch
 from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
 from dls_util.shape import Point
-from os.path import split, exists, isdir, isfile, join, abspath
+from os.path import split, exists, isdir, isfile, join, abspath, getmtime
 
-from os import makedirs, remove
-
+from os import makedirs, remove, walk, listdir
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
@@ -48,11 +47,17 @@ class CrystalMatchService:
             scale_override = self._get_scale_override(args)
 
 
+            focusing_path = args.image_stack
+            files = []
+            for file_name in listdir(focusing_path):
+                name = join(focusing_path, file_name)
+                files.append(file(name))
+            files.sort(key=lambda x: getmtime(x.name))
             selected_points = self._parse_selected_points_from_args(args)
             # Run focusstack
-            log.info("Focusstack started, first image, " + args.image_stack[0].name)
+            log.info("Focusstack started, first image, " + files[0].name)
             start_t = time.time()
-            stacker = FocusStack(args.image_stack,config_directory)
+            stacker = FocusStack(files,config_directory)
             focused_image = stacker.composite()
             calculation_time = time.time() - start_t
             extra = {'stack_time': calculation_time}
@@ -145,8 +150,6 @@ class CrystalMatchService:
                                  'this image.')
         parser.add_argument('image_stack',
                             metavar="beamline_stack_path",
-                            type=file,
-                            nargs="+",
                             help="A list of image files - each image represents a level of the z-stack.")
         parser.add_argument('-p','--selected_points',
                             metavar="x,y",
