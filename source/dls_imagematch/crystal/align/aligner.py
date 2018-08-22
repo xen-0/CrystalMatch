@@ -35,6 +35,7 @@ class ImageAligner:
         extra = {'scale_factor': str(self._scale_factor)}
         log = logging.LoggerAdapter(log, extra)
         log.info("Scale Factor calculated as " + str(self._scale_factor))
+        log.debug(extra)
 
         self._image1 = SizedImage.from_image(image1, px_size_1)
         self._image2 = SizedImage.from_image(image2, px_size_2)
@@ -55,7 +56,9 @@ class ImageAligner:
         # Resize image A so it has the same size per pixel as image B
         if self._scale_factor != 1:
             self._image1 = self._image1.rescale(self._scale_factor)
-            logging.info("Rescaling image 1 by scale factor " + str(self._scale_factor) +
+            log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.info("Rescaling image 1 by scale factor " + str(self._scale_factor) +
                          ", new size: %d x %d", self._image1.width(), self._image1.height())
 
     # -------- FUNCTIONALITY -------------------
@@ -91,10 +94,14 @@ class ImageAligner:
                              translation, self._align_config, description)
 
     def _check_config(self):
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         """ Raises an exception if configuration has not been properly set. """
         if self._align_config is None:
+            log.error(ImageAlignmentError("Must set Alignment config before performing alignment"))
             raise ImageAlignmentError("Must set Alignment config before performing alignment")
         elif self._detector_config is None:
+            log.error("Must set Detector config before performing alignment")
             raise ImageAlignmentError("Must set Detector config before performing alignment")
 
     def _get_detector(self):
@@ -102,6 +109,9 @@ class ImageAligner:
         detector = self._align_config.align_detector.value()
         enabled = self._detector_config.is_detector_enabled(detector)
         if not enabled:
+            log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.error("Cannot perform image alignment as detector '{}' is disabled.".format(detector))
             raise ImageAlignmentError("Cannot perform image alignment as detector '{}' is disabled.".format(detector))
 
         return detector

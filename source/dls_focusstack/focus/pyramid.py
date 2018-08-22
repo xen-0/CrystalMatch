@@ -16,9 +16,13 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
     gray_image.entropy(kernel_size)
     gray_image.deviation(kernel_size)
 
+    log = logging.getLogger(".".join([__name__]))
+    log.addFilter(logconfig.ThreadContextFilter())
+    log.debug("Calculated entropy/div for top level of layer: " + str(gray_image.get_layer_number()))
+
     q.put(gray_image)
 
-def fused_laplacian(laplacians, region_kernel, q):
+def fused_laplacian(laplacians, region_kernel, level, q):
     """On other levels of the pyramid one fusion operator: region energy is used"""
     layers = laplacians.shape[0]
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
@@ -32,6 +36,10 @@ def fused_laplacian(laplacians, region_kernel, q):
 
     for layer in range(layers):
         fused += np.where(best_re[:, :] == layer, laplacians[layer], 0)
+
+    log = logging.getLogger(".".join([__name__]))
+    log.addFilter(logconfig.ThreadContextFilter())
+    log.debug("Level: " + str(level) + " fused!")
 
     q.put(fused)
 
@@ -64,7 +72,7 @@ class Pyramid:
         for level in range(len(self.pyramid_array) - 2, -1, -1):
             laplacians = self.pyramid_array[level]
 
-            process = Process(target=fused_laplacian, args=(laplacians, region_kernel,q))
+            process = Process(target=fused_laplacian, args=(laplacians, region_kernel, level, q))
             process.start()
             processes.append(process)
         #log.info("t13")

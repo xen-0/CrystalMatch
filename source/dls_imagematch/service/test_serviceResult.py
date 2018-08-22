@@ -7,7 +7,6 @@ from os.path import abspath
 
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK, ALIGNED_IMAGE_STATUS_FAIL, \
     AlignedImages
-from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL
 from dls_imagematch.crystal.match.results import CrystalMatcherResults
 from dls_imagematch.feature.match.result import FeatureMatcherResult
@@ -45,13 +44,7 @@ class TestServiceResult(TestCase):
         mock_match_results.get_matches = MagicMock(return_value=match_array)
         return mock_match_results
 
-    @staticmethod
-    def mock_settings():
-        mock_logging = MagicMock()
-        mock_logging.value = MagicMock(return_value=False)
-        mock_settings = create_autospec(SettingsConfig)
-        mock_settings.logging = mock_logging
-        return mock_settings
+
 
     @staticmethod
     def mock_aligned_images(confidence, status, transform):
@@ -63,8 +56,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_and_image_paths_printed_correctly(self, mock_print):
-        result = ServiceResult("test-job-id", "test/file/path/fomulatrix", "test/file/path/beamline",
-                               self.mock_settings())
+        result = ServiceResult("test/file/path/fomulatrix")
         result.print_results()
 
         mock_print.assert_any_call('job_id:"test-job-id"')
@@ -73,7 +65,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_does_not_print_if_blank(self, mock_print):
-        result = ServiceResult("", "test/file/path/fomulatrix", "test-file/path/beamline", self.mock_settings())
+        result = ServiceResult("test/file/path/fomulatrix")
         result.print_results()
 
         output = self.get_output(mock_print)
@@ -81,7 +73,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_job_id_does_not_print_and_does_not_cause_exception_if_none(self, mock_print):
-        result = ServiceResult(None, "test/file/path/fomulatrix", "test-file/path/beamline", self.mock_settings())
+        result = ServiceResult("test/file/path/fomulatrix", "test-file/path/beamline",)
         result.print_results()
 
         output = self.get_output(mock_print)
@@ -91,13 +83,13 @@ class TestServiceResult(TestCase):
         mock_aligned_image = Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset",
                                             "get_alignment_transform"])
         mock_aligned_image.get_alignment_transform = MagicMock(return_value=(1.0, Point(0, 0)))
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_print_without_alignment_results_shows_default_values(self, mock_print):
         Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset", "get_alignment_transform"])
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.print_results()
 
         # Test output
@@ -115,7 +107,7 @@ class TestServiceResult(TestCase):
         transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
 
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
         result.print_results()
 
@@ -133,7 +125,7 @@ class TestServiceResult(TestCase):
         transform = (1.0, Point(0, 0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
 
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
         result.print_results()
 
@@ -145,7 +137,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_output_prints_correctly_with_no_crystal_match_results(self, mock_print):
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         result.print_results()
 
         # Test for presence of poi: objects in output
@@ -162,7 +154,7 @@ class TestServiceResult(TestCase):
         mock_match_results = self.mock_crystal_matcher_results(deltas, mean_errors, new_positions, status_codes)
 
         # Run
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         result.append_crystal_matching_results(mock_match_results)
         result.print_results()
 
@@ -175,7 +167,7 @@ class TestServiceResult(TestCase):
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_failed_crystal_match_result_prints_correctly(self, mock_print):
         # Setup - create mock result
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         new_positions = [Point(654, 321)]
         deltas = [Point(7, 8)]
         mean_errors = ["65.4"]
@@ -193,7 +185,7 @@ class TestServiceResult(TestCase):
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_append_multiple_crystal_match_results(self, mock_print):
         # Setup - create mock result
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
 
         # Set 1
         new_positions = [Point(100, 100)]
@@ -222,7 +214,7 @@ class TestServiceResult(TestCase):
 
     @patch('dls_imagematch.service.service_result.print', create=True)
     def test_exit_code_starting_state_is_negative_1(self, mock_print):
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         result.print_results()
 
         mock_print.assert_has_calls([call('exit_code:-1')])
@@ -235,7 +227,7 @@ class TestServiceResult(TestCase):
         transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
 
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         result.set_image_alignment_results(mock_aligned_image)
         result.print_results()
 
@@ -249,7 +241,7 @@ class TestServiceResult(TestCase):
         confidence = 9.8
         transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings())
+        result = ServiceResult("fomulatrix")
         result.set_image_alignment_results(mock_aligned_image)
 
         # Throw an exception and print results
@@ -266,7 +258,7 @@ class TestServiceResult(TestCase):
         confidence = 9.8
         transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings(), json_output=True)
+        result = ServiceResult("fomulatrix")
         result.set_image_alignment_results(mock_aligned_image)
         json_obj = result.print_results()
 
@@ -280,7 +272,7 @@ class TestServiceResult(TestCase):
         confidence = 9.8
         transform = (1.0, Point(3.0, 4.0))
         mock_aligned_image = self.mock_aligned_images(confidence, status, transform)
-        result = ServiceResult("job-id", "fomulatrix", "beamline", self.mock_settings(), json_output=True)
+        result = ServiceResult("fomulatrix")
         result.set_image_alignment_results(mock_aligned_image)
 
         # Throw an exception and print results

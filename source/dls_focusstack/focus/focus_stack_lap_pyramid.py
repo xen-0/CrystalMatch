@@ -25,15 +25,16 @@ class FocusStack:
     def composite(self):
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        log.debug("Starting fft calculation")
-        #log.info("t1")
+        extra = self._config.all_to_json()
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Focusstack Started, first image, " + self._image_file_list[0].name)
+        log.debug(extra)
+
+        start_t = time.clock()
 
         t1 = time.clock()
-        #log.info("t2")
         man = ImageFFTManager(self._image_file_list)
-        #log.info("t3")
         man.read_ftt_images()
-        #log.info("t9")
         sd = SharpnessDetector(man.get_fft_images(), self._config)
 
         images = sd.images_to_stack()
@@ -44,6 +45,7 @@ class FocusStack:
         extra = {'FTT_time': t2}
         log = logging.LoggerAdapter(log, extra)
         log.info("FFT calculation finished")
+        log.debug(extra)
         images = np.array(images, dtype=images[0].dtype)
 
         #TODO:Implement alignment algo
@@ -54,6 +56,13 @@ class FocusStack:
         #log.info("t17")
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         backtorgb = cv2.cvtColor(stacked_image, cv2.COLOR_GRAY2RGB)
+
+        calculation_time = time.clock() - start_t
+        extra = {'stack_time': calculation_time}
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Stacking Finished")
+        log.debug(extra)
+
         return Image(backtorgb)
 
 

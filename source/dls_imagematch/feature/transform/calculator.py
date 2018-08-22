@@ -1,8 +1,11 @@
 from __future__ import division
 
+import logging
+
 import cv2
 import numpy as np
 
+from dls_imagematch import logconfig
 from dls_util.shape import Point
 from .exception import TransformCalculationError
 from .trs_affine import AffineTransformation
@@ -85,6 +88,9 @@ class TransformCalculator:
         elif method in self.AFFINE_METHODS:
             transform, mask = self._calculate_affine_transform(matches)
         else:
+            log = logging.getLogger(".".join([__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.error(TransformCalculationError("Unrecognised transform method type"))
             raise TransformCalculationError("Unrecognised transform method type")
 
         if transform is None:

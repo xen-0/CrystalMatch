@@ -18,7 +18,7 @@ def fft(file_obj,q,count):
     image_fft.runFFT()
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
-    log.info("Finished calculating fft for:" + name)
+    log.debug("Finished calculating fft for:" + name)
     q.put(image_fft)
 
 

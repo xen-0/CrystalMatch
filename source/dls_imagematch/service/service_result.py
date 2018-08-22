@@ -1,7 +1,6 @@
 from __future__ import print_function
 
-from os import makedirs
-from time import strftime
+import os
 
 import numpy as np
 import logging
@@ -13,7 +12,6 @@ from os.path import abspath, join, exists, isdir
 from dls_imagematch import logconfig
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
 from dls_imagematch.crystal.match.match import CRYSTAL_MATCH_STATUS_DISABLED
-from dls_imagematch.feature.draw.matches import MatchPainter
 from dls_imagematch.util.status import StatusFlag
 from dls_util.shape.point import Point
 
@@ -56,6 +54,7 @@ class DecimalEncoder(JSONEncoder):
 class ServiceResult:
     """
     NOTE: This should be the only class allowed to print() to the console - elsewhere use logging.
+    GDA relays on this feature - reads the jason console output.
     Results class which determines the format and structure of output reported to the console. This is also intended to
     standardise the handling of errors for the wrapper service.
     """
@@ -66,14 +65,13 @@ class ServiceResult:
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
-        :param job_id: The assigned job id for this run (specific by the user)
         :param formulatrix_image_path: Image path for the input image.
         :param beamline_image_path: Image path for the output image.
-        :type config_settings: SettingsConfig
         """
+        self._job_id = os.getpid()
         self.SEPARATOR = " ; "
         self._image_path_formulatrix = abspath(formulatrix_image_path)
-        #self._image_path_beamline = abspath(beamline_image)
+        self._image_path_beamline = None
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET
@@ -98,6 +96,10 @@ class ServiceResult:
         """
         self._exit_code = SERVICE_RESULT_STATUS_ERROR
         self._exit_code.set_err_msg(e.message)
+
+    def set_beamline_image_path(self, abs_path):
+        self._image_path_beamline = abs_path
+
 
     def append_crystal_matching_results(self, crystal_matcher_results):
         """
@@ -124,12 +126,55 @@ class ServiceResult:
                 line += str(crystal_match.feature_match_result().mean_transform_error())
             output_list.append(line)
 
+    def print_results(self):
+        return self._print_json_object()
 
-    def log_final_result(self):
+    def _print_json_object(self):
+        output_obj = {'exit_code': self._exit_code.to_json_array()}
+
+        # Global alignment transform
+        if self._job_id and self._job_id != "":
+            output_obj['job_id'] = self._job_id
+        output_obj['input_image'] = self._image_path_formulatrix
+        output_obj['output_image'] = self._image_path_beamline
+        output_obj['alignment'] = {
+            'status': self._alignment_status_code.to_json_array(),
+            'mean_error': self._alignment_error,
+            'scale': self._alignment_transform_scale,
+            'translation': {
+                'x': self._alignment_transform_offset.x,
+                'y': self._alignment_transform_offset.y,
+            }
+        }
+
+        # POI description
+        poi_array = []
+        for poi in self._match_results:
+            mean_error = poi.feature_match_result().mean_transform_error() if poi.is_success() else 0
+            poi_array.append({
+                'location': {
+                    'x': poi.get_transformed_poi().x,
+                    'y': poi.get_transformed_poi().y,
+                },
+                'translation': {
+                    'x': poi.get_delta().x,
+                    'y': poi.get_delta().y,
+                },
+                'status': poi.get_status().to_json_array(),
+                'mean_error': mean_error
+            })
+        output_obj['poi'] = poi_array
+        print(json.dumps(output_obj, cls=DecimalEncoder))
+        return output_obj
+
+
+    def log_final_result(self, total_time):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         extra = self._exit_code.to_json_array()
-        extra.update({'input_image': self._image_path_formulatrix})
+        extra.update({'input_image': self._image_path_formulatrix,
+                      'output_image': self._image_path_beamline,
+                      'total_time': total_time})
 
         log = logging.LoggerAdapter(log, extra)
         log.info("Crystal Match Complete")

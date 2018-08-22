@@ -110,18 +110,20 @@ class CrystalMatch:
         log.addFilter(logconfig.ThreadContextFilter())
         extra = self._status.to_json_array_with_names('match_stat_num', 'match_stat')
 
-        extra.update({'input_x_px': '{:.2f}'.format(self.get_poi_image_1().x),
-                      'input_y_px': '{:.2f}'.format(self.get_poi_image_1().y)})
+        user_pos_x_px = "{:.2f}".format(self.get_poi_image_1().x)
+        user_pos_y_px = "{:.2f}".format(self.get_poi_image_1().y)
+        user_pos_x_um = "{:.6f}".format(self.get_poi_image_1_real().x)
+        user_pos_y_um = "{:.6f}".format(self.get_poi_image_1_real().y)
+
+        extra.update({'user_pos_x_px': user_pos_x_px,
+                     'user_pos_y_px': user_pos_y_px,
+                     'user_pos_x_um': user_pos_x_um,
+                     'user_pos_y_um': user_pos_y_um})
 
         if self.is_success():
             match_mean_error = "{:.4f}".format(self._feature_match_result.mean_transform_error())
             match_time = "{:.4f}".format(self._feature_match_result.time_match())
             match_transform = "{:.4f}".format(self._feature_match_result.time_transform())
-
-            user_pos_x_px = "{:.2f}".format(self.get_poi_image_1().x)
-            user_pos_y_px = "{:.2f}".format(self.get_poi_image_1().y)
-            user_pos_x_um = "{:.6f}".format(self.get_poi_image_1_real().x)
-            user_pos_y_um = "{:.6f}".format(self.get_poi_image_1_real().y)
 
             beam_pos_x_px = "{:.2f}".format(self.get_poi_image_2_matched().x)
             beam_pos_y_px = "{:.2f}".format(self.get_poi_image_2_matched().y)
@@ -136,10 +138,6 @@ class CrystalMatch:
             extra.update({'match_mean_error' : match_mean_error,
                           'match_time': match_time,
                           'match_transform': match_transform,
-                          'user_pos_x_px': user_pos_x_px,
-                          'user_pos_y_px': user_pos_y_px,
-                          'user_pos_x_um': user_pos_x_um,
-                          'user_pos_y_um': user_pos_y_um,
                           'beam_pos_x_px': beam_pos_x_px,
                           'beam_pos_y_px': beam_pos_y_px,
                           'beam_pos_x_um': beam_pos_x_um,

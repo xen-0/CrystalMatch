@@ -1,4 +1,6 @@
 from pkg_resources import require
+
+
 require('pygelf==0.2.11')
 require("numpy==1.11.1")
 require("scipy")
@@ -12,6 +14,9 @@ import logging
 import re
 import sys
 import time
+import cv2
+
+from dls_util.imaging import Image
 
 from dls_imagematch.service import CrystalMatch
 from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
@@ -36,6 +41,7 @@ class CrystalMatchService:
     def run(self):
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
+        total_start = time.clock()
         try:
             parser = self._get_argument_parser()
             args = parser.parse_args()
@@ -46,34 +52,35 @@ class CrystalMatchService:
                 config_directory = CONFIG_DIR
             scale_override = self._get_scale_override(args)
 
-
             focusing_path = args.image_stack
-            files = []
-            for file_name in listdir(focusing_path):
-                name = join(focusing_path, file_name)
-                files.append(file(name))
-            files.sort(key=lambda x: getmtime(x.name))
-            selected_points = self._parse_selected_points_from_args(args)
-            # Run focusstack
-            log.info("Focusstack started, first image, " + files[0].name)
-            start_t = time.time()
-            stacker = FocusStack(files,config_directory)
-            focused_image = stacker.composite()
-            calculation_time = time.time() - start_t
-            extra = {'stack_time': calculation_time}
-            log = logging.LoggerAdapter(log, extra)
-            log.info("Crystal Match Focusstack finished")
 
+            selected_points = self._parse_selected_points_from_args(args)
+            if "." not in focusing_path:
+                files = []
+                # Sort names according to creation time
+                for file_name in listdir(focusing_path):
+                    name = join(focusing_path, file_name)
+                    files.append(file(name))
+                files.sort(key=lambda x: getmtime(x.name))
+                # Run focusstack
+                stacker = FocusStack(files,config_directory)
+                focused_image = stacker.composite()
+            else:
+                focused_image = Image(cv2.imread(focusing_path))#args.output)
             # Run match
             service = CrystalMatch(config_directory, scale_override=scale_override)
-            service.perform_match(args.Formulatrix_image.name,focused_image,selected_points)
-            #Save stacked image
+            service_results = service.perform_match(args.Formulatrix_image.name,focused_image,selected_points)
+
+            # print for GDA
             self._process_output_file_path(args.output)
+            beamline_image = abspath(args.output)
+            service_results.set_beamline_image_path(beamline_image)
+            service_results.print_results()
+            total_time = time.clock() - total_start
+            service_results.log_final_result(total_time)
+            # Save stacked image
             focused_image.save(args.output)
-            log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
-            log = logging.LoggerAdapter(log, {'output_image': abspath(args.output)})
-            log.info("Stacked mage saved")
-            log.debug( {'output_image': abspath(args.output)})
+
         except IOError as e:
             log.error(e)
 
@@ -85,7 +92,6 @@ class CrystalMatchService:
                 makedirs(output_dir)
         if exists(path) and isfile(path):
             remove(path)
-
 
     @staticmethod
     def _get_scale_override(args):
@@ -151,7 +157,7 @@ class CrystalMatchService:
         parser.add_argument('image_stack',
                             metavar="beamline_stack_path",
                             help="A list of image files - each image represents a level of the z-stack.")
-        parser.add_argument('-p','--selected_points',
+        parser.add_argument('selected_points',
                             metavar="x,y",
                             nargs='*',
                             help="Comma-separated co-ordinates of selected points to be translated from the marked image "

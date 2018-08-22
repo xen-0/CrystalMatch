@@ -9,8 +9,6 @@ import json
 import logging.config
 import getpass
 import threading
-
-import dls_focusstack.version
 import version
 
 default_config = {
@@ -61,8 +59,7 @@ default_config = {
             "pid": os.getpid(),
             "application": "Crystal Match",
             "facility": "VMXi",
-            "_stack_v": dls_focusstack.version.VersionHandler.version(),
-            "_match_v": version.VersionHandler.version()
+            "_version": version.VersionHandler.version()
         }
     },
 
@@ -71,7 +68,7 @@ default_config = {
         # Set the level here to be the default minimum level of log record to be produced
         # If you set a handler to level DEBUG you will need to set either this level
         "level": "DEBUG",
-        "handlers": ["console", "local_file_handler", "graylog_gelf"]#,"local_file_handler"]# "graylog_gelf"]
+        "handlers": ["local_file_handler", "graylog_gelf"]#,"local_file_handler"]# "graylog_gelf"]
     }
 }
 

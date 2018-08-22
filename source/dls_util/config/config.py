@@ -131,6 +131,12 @@ class Config:
                 item.from_file_string(value)
                 break
 
+    def all_to_json(self):
+        all = dict()
+        for item in self._items:
+            all.update(item.to_json())
+        return all
+
     @staticmethod
     def create_comment_lines(string):
         """ Convert string into lines of comments to be displayed in a file. Wraps the string to an
