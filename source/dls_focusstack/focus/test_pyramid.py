@@ -39,14 +39,14 @@ class TestPyramid(TestCase):
     def test_fused_laplacian_of_level0_has_size_of_input_array(self):
         laplacians_level0 = self._pyramid.get_pyramid_array()[0]
         q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(),q)
+        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
         fused_level = q.get()
         self.assertEquals(fused_level.shape, self._array.shape)
 
     def test_fused_laplacian_picks_the_layer_with_high_region_energy_from_given_level(self):
         laplacians_level0 = self._pyramid.get_pyramid_array()[0]
         q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), q)
+        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
         fused_level = q.get()
         #layer 0 has the highiest region energy as all the values are 10 times larger than layer1
         self.assertIn(laplacians_level0[0], fused_level)

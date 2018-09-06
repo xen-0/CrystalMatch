@@ -69,13 +69,13 @@ class CrystalMatchService:
                 focused_image = Image(cv2.imread(focusing_path))#args.output)
             # Run match
             service = CrystalMatch(config_directory, scale_override=scale_override)
-            service_results = service.perform_match(args.Formulatrix_image.name,focused_image,selected_points)
+            service_results = service.perform_match(args.Formulatrix_image.name, focused_image, selected_points)
 
             # print for GDA
             self._process_output_file_path(args.output)
             beamline_image = abspath(args.output)
             service_results.set_beamline_image_path(beamline_image)
-            service_results.print_results()
+            service_results.print_results(json_output=args.to_json)
             total_time = time.clock() - total_start
             service_results.log_final_result(total_time)
             # Save stacked image
@@ -178,6 +178,9 @@ class CrystalMatchService:
                                  "image separated by a colon. Note this is relative (1:2 is the same as 2:4) and a value "
                                  "must be specified for each image using the format "
                                  "'[Formulatrix_image_resolution]:[beamline_image_resolution]'.")
+        parser.add_argument('--to_json',
+                            action='store_true',
+                            help="Output a JSON object.")
         return parser
 
 

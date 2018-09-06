@@ -13,7 +13,7 @@ from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
 
 class TestFocusStackLapPyramid(TestCase):
 
-    def test_focus_stack_results_in_one_mono_image_of_input_image_size(self):
+    def test_focus_stack_results_in_one_rgb_image_of_input_image_size(self):
         self._file1 = MagicMock()
         self._file2 = MagicMock()
         CONFIG_DIR = os.path.join(os.sep, "home", "rqq82173", "PycharmProjects", "CrystalMatch","dls_focus","config")
@@ -27,6 +27,6 @@ class TestFocusStackLapPyramid(TestCase):
 
         self.assertIsNotNone(result_img)
         img = cv2.imread(self._file1.name)
-        self.assertEqual(result_img.channels(), 1) #mono
+        self.assertEqual(result_img.channels(), 3) #rgb
         self.assertEqual(result_img.size(), (img.shape[1],img.shape[0]))
 

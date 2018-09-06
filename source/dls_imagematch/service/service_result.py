@@ -31,7 +31,7 @@ class ServiceResultExitCode(StatusFlag):
         self.err_msg = err_msg
 
     def to_json_array(self):
-        json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
+        json_array = StatusFlag.to_json_array(self)
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
@@ -98,7 +98,7 @@ class ServiceResult:
         self._exit_code.set_err_msg(e.message)
 
     def set_beamline_image_path(self, abs_path):
-        self._image_path_beamline = abs_path
+        self._image_path_beamline = abspath(abs_path)
 
 
     def append_crystal_matching_results(self, crystal_matcher_results):
@@ -126,8 +126,35 @@ class ServiceResult:
                 line += str(crystal_match.feature_match_result().mean_transform_error())
             output_list.append(line)
 
-    def print_results(self):
-        return self._print_json_object()
+    def print_results(self, jason_output = False):
+        """
+        Print the contents of this results object to the console.  Returns the printed object for testing purposes.
+        :return : The printed object - JSON mode will return the full json object.
+        """
+        if jason_output:
+            return self._print_json_object()
+        return self._print_human_readable()
+
+    def _print_human_readable(self):
+
+        output = []
+        if self._job_id and self._job_id != "":
+            output = ['job_id:"' + str(self._job_id) + '"']
+        output += ['exit_code:' + str(self._exit_code),
+                   'input_image:"' + self._image_path_formulatrix + '"',
+                   'output_image:"' + self._image_path_beamline + '"',
+                   'align_transform:' + self._get_printable_alignment_transform(),
+                   'align_status:' + str(self._alignment_status_code),
+                   'align_error:' + str(self._alignment_error)
+                   ]
+
+        self._append_crystal_match_results(output)
+
+        # Print human readable
+        for line in output:
+            print(line)
+        return output
+
 
     def _print_json_object(self):
         output_obj = {'exit_code': self._exit_code.to_json_array()}
