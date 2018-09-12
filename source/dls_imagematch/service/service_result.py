@@ -61,7 +61,7 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, formulatrix_image_path):
+    def __init__(self, formulatrix_image_path, focused_image_path):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
@@ -72,7 +72,7 @@ class ServiceResult:
         self.SEPARATOR = " ; "
         self._image_path_formulatrix = abspath(formulatrix_image_path)
         self._image_path_formulatrix = abspath(formulatrix_image_path)
-        self._image_path_beamline = None
+        self._image_path_beamline = focused_image_path
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET
@@ -98,30 +98,7 @@ class ServiceResult:
         self._exit_code = SERVICE_RESULT_STATUS_ERROR
         self._exit_code.set_err_msg(e.message)
 
-    def set_beamline_image_path(self, path):
-        start, extension = splitext(abspath(path))
-        if extension is not "":
-            new_path = path
-        else:
-            default_name = "processed.tif"
-            new_path = join(path, default_name)
 
-        self._process_dir_path(new_path)
-
-        #if exists(new_path):
-         #   os.remove(new_path) # keep this, important
-
-        self._image_path_beamline = abspath(new_path)
-
-
-    def get_beamline_image_path(self):
-        return self._image_path_beamline
-
-    def _process_dir_path(self, path):
-        output_dir, output_file = split(path)
-        if output_dir is not "":
-            if not (exists(output_dir) and isdir(output_dir)):
-                os.makedirs(output_dir)
 
     def append_crystal_matching_results(self, crystal_matcher_results):
         """

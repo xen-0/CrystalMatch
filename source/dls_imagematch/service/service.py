@@ -30,7 +30,7 @@ class CrystalMatch:
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-    def perform_match(self, formulatrix_image_path, beamline_image, input_poi):
+    def perform_match(self, formulatrix_image_path, beamline_image, input_poi, focused_image_path):
         """
         Perform image alignment and crystal matching returning a results object.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
@@ -51,7 +51,7 @@ class CrystalMatch:
         image2 = beamline_image
 
         # Create results object
-        service_result = ServiceResult(formulatrix_image_path)
+        service_result = ServiceResult(formulatrix_image_path, focused_image_path)
 
         # Perform alignment
         try:
