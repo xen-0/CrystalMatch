@@ -111,7 +111,7 @@ class ServiceResult:
         #if exists(new_path):
          #   os.remove(new_path) # keep this, important
 
-        self._image_path_beamline = new_path
+        self._image_path_beamline = abspath(new_path)
 
 
     def get_beamline_image_path(self):

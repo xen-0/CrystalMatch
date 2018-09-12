@@ -46,7 +46,6 @@ class TestServiceResult(TestCase):
         return mock_match_results
 
 
-
     @staticmethod
     def mock_aligned_images(confidence, status, transform):
         mock_aligned_image = create_autospec(AlignedImages, spec_set=True)
@@ -56,14 +55,25 @@ class TestServiceResult(TestCase):
         return mock_aligned_image
 
     @patch('dls_imagematch.service.service_result.print', create=True)
-    def test_job_id_and_image_paths_printed_correctly(self, mock_print):
+    def test_job_id_and_image_paths_printed_correctly_for_dictionary(self, mock_print):
         result = ServiceResult("test/file/path/fomulatrix")
         result.set_beamline_image_path("test/file/path/beamline")
         result.print_results(False)
 
         mock_print.assert_any_call('job_id:"' + str(os.getpid()) + '"')
         mock_print.assert_any_call('input_image:"' + abspath('test/file/path/fomulatrix') + '"')
-        mock_print.assert_any_call('output_image:"' + abspath('test/file/path/beamline') + '"')
+        mock_print.assert_any_call('output_image:"' + abspath('test/file/path/beamline/processed.tif') + '"')
+
+
+    @patch('dls_imagematch.service.service_result.print', create=True)
+    def test_job_id_and_image_paths_printed_correctly_for_file(self, mock_print):
+        result = ServiceResult("test/file/path/fomulatrix")
+        result.set_beamline_image_path("test/file/path/beamline/test.tif")
+        result.print_results(False)
+
+        mock_print.assert_any_call('job_id:"' + str(os.getpid()) + '"')
+        mock_print.assert_any_call('input_image:"' + abspath('test/file/path/fomulatrix') + '"')
+        mock_print.assert_any_call('output_image:"' + abspath('test/file/path/beamline/test.tif') + '"')
 
 
     def test_add_image_alignment_results(self):
