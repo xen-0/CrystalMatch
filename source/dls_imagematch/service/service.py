@@ -1,26 +1,22 @@
 import logging
-from logging import DEBUG, INFO
-from logging.handlers import TimedRotatingFileHandler
-from sys import stdout
+import time
 
-from os import chmod
-
+from dls_imagematch import logconfig
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
-from dls_imagematch.crystal.align.settings import SettingsConfig
 from dls_imagematch.crystal.match import CrystalMatchConfig
 from dls_imagematch.crystal.match import CrystalMatcher
+from dls_imagematch.crystal.match.match import CrystalMatchStatus
 from dls_imagematch.feature.detector import DetectorConfig
 from dls_imagematch.service.service_result import ServiceResult
 from dls_util.imaging import Image
 
 
-class CrystalMatchService:
-    def __init__(self, config_directory, log_dir=None, verbose=False, debug=False, scale_override=None, job_id=None):
+class CrystalMatch:
+    def __init__(self, config_directory, scale_override=None):
         """
         Create a Crystal Matching Service object using the configuration parameters provided.
-        :param config_directory: Path to the configuration directory.
         :param log_dir: Path override for the log directory.
         :param verbose: Activates verbose logging to std_out.
         :param debug: Activates debugging logging to std_out - overrides verbose mode.
@@ -29,75 +25,37 @@ class CrystalMatchService:
         :param job_id: Optional parameter for command line - returned in results to identify the run.
         """
         self._config_directory = config_directory
-        self._job_id = job_id
 
-        self._config_settings = SettingsConfig(config_directory, log_dir=log_dir)
         self._config_detector = DetectorConfig(config_directory)
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-        self._set_up_logging(debug, verbose)
-
-    def _set_up_logging(self, debug, verbose):
-        # Set up logging
-        root_logger = logging.getLogger()
-        root_logger.setLevel(DEBUG)
-        # Set up stream handler
-        if debug:
-            self.add_log_stream_handler(DEBUG, root_logger)
-        elif verbose:
-            self.add_log_stream_handler(INFO, root_logger)
-        # Set up file handler
-        if self._config_settings.logging.value():
-            self.add_log_file_handler(root_logger)
-
-    def add_log_file_handler(self, logger):
-        log_file_path = self._config_settings.get_log_file_path()
-        try:
-            log_file_handler = TimedRotatingFileHandler(log_file_path,
-                                                        when=self._config_settings.log_rotation.value(),
-                                                        backupCount=self._config_settings.log_count_limit.value())
-            log_file_handler.setLevel(self._config_settings.get_log_level())
-            if self._job_id:
-                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - ' +
-                                              str(self._job_id) + ' - %(message)s')
-            else:
-                formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            log_file_handler.setFormatter(formatter)
-            chmod(log_file_path, 0o666)
-            logger.addHandler(log_file_handler)
-        except IOError:
-            logging.error("ERROR: Could not access log file - please check permissions: " + log_file_path)
-
-    @staticmethod
-    def add_log_stream_handler(level, logger):
-        stream_handler = logging.StreamHandler(stdout)
-        stream_handler.setLevel(level)
-        logger.addHandler(stream_handler)
-        if level == DEBUG:
-            logging.debug("DEBUG statements visible.")
-        elif level == INFO:
-            logging.info("INFO statements visible.")
-
-    def perform_match(self, formulatrix_image_path, beamline_image_path, input_poi, json_output=False):
+    def perform_match(self, formulatrix_image_path, beamline_image, input_poi):
         """
         Perform image alignment and crystal matching returning a results object.
         :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
         :param beamline_image_path: File path to the 'after' image from the Beam line.
         :param input_poi: An array of points of interest to match between the images.
-        :param json_output: Option to output a json object to std_out instead.
         :return: ServiceResult object.
         """
+        log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        extra = self._config_align.all_to_json()
+        extra.update(self._config_crystal.all_to_json())
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Matching Started")
+        log.debug(extra)
+
         # Create the images
         image1 = Image.from_file(formulatrix_image_path)
-        image2 = Image.from_file(beamline_image_path)
+        image2 = beamline_image
 
         # Create results object
-        service_result = ServiceResult(self._job_id, formulatrix_image_path, beamline_image_path, self._config_settings,
-                                       json_output=json_output)
+        service_result = ServiceResult(formulatrix_image_path)
 
         # Perform alignment
         try:
+
             aligned_images, scaled_poi = self._perform_alignment(image1, image2, input_poi)
             service_result.set_image_alignment_results(aligned_images)
 
@@ -106,16 +64,10 @@ class CrystalMatchService:
                 match_results = self._perform_matching(aligned_images, scaled_poi)
                 service_result.append_crystal_matching_results(match_results)
         except Exception as e:
-            logging.error("ERROR: " + e.message)
+            log.error("ERROR: " + e.message)
             service_result.set_err_state(e)
 
         return service_result
-
-    def _get_image_output_dir(self):
-        image_output_dir = None
-        if self._config_settings.log_images.value():
-            image_output_dir = self._config_settings.get_image_log_dir()
-        return image_output_dir
 
     def _perform_alignment(self, formulatrix_image, beamline_image, formulatrix_points):
         """
@@ -135,28 +87,52 @@ class CrystalMatchService:
         return aligned_images, scaled_formulatrix_points
 
     def _perform_matching(self, aligned_images, selected_points):
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        time_start = time.clock()
         matcher = CrystalMatcher(aligned_images, self._config_detector)
         matcher.set_from_crystal_config(self._config_crystal)
 
         crystal_match_results = matcher.match(selected_points)
-        logging.info("Crystal Matching Complete")
+        time_end = time.clock() - time_start
+        extra = {'matching_time': time_end}
+        log = logging.LoggerAdapter(log, extra)
+        log.info("Matching Complete")
+        log.debug(extra)
 
         return crystal_match_results
 
     @staticmethod
     def _log_alignment_status(aligned):
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
         status = "Unknown"
 
         if aligned.is_alignment_good():
-            status = "Good Alignment"
+            status = CrystalMatchStatus(2, "Good Alignment")
         elif aligned.is_alignment_poor():
-            status = "Poor Alignment"
+            status = CrystalMatchStatus(1, "Poor Alignment")
         elif aligned.is_alignment_bad():
-            status = "Alignment failed!"
+            status = CrystalMatchStatus(0, "Alignment failed!")
 
-        logging.info("Image Alignment Completed - Status: '{}' (Score={:.2f})".format(status, aligned.overlap_metric()))
+        json_array = status.to_json_array_with_names('align_stat_num', 'align_stat')
+        json_array.update({'align_score': aligned.overlap_metric()})
+
+        alignment_transform_scale, alignment_transform_offset = aligned.get_alignment_transform()
 
         match_result = aligned.feature_match_result
         if match_result is not None:
-            logging.debug("- Matching Time: {:.4f}".format(match_result.time_match()))
-            logging.debug("- Transform Time: {:.4f}".format(match_result.time_transform()))
+            match_time = '{:.4f}'.format(match_result.time_match())
+            transform_time = '{:.4f}'.format(match_result.time_transform())
+            scale = '{:.4f}'.format(alignment_transform_scale)
+            transform_x = '{:.4f}'.format(alignment_transform_offset.x)
+            transform_y = '{:.4f}'.format(alignment_transform_offset.y)
+            json_array.update({'align_time': match_time,
+                               'align_trnsf_time:': transform_time,
+                               'align_scale': scale,
+                               'align_trnsf_x': transform_x,
+                               'align_trnsf_y': transform_y
+                               })# updates if exists, else adds
+        log = logging.LoggerAdapter(log, json_array)
+        log.info("Alignment Complete, status: " + status.__str__())
+        log.debug(json_array)

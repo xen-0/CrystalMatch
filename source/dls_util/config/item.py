@@ -72,12 +72,21 @@ class ConfigItem:
 
         return file_string
 
+    def to_json(self):
+        lower_underscore = self._tag.lower().replace(" ", "_").replace("(", "").replace(")", "")
+        new_tag ='c_'+ lower_underscore
+        return {new_tag: self.graylog_format(self._value)}
+
     def from_file_string(self, value_string):
         """ Read the value from its string representation. """
         pass
 
     def _clean(self, value):
         """ Perform any additional cleanup/processing on the value. Implement in subclass if needed. """
+        return value
+
+    def graylog_format(self, value):
+        """Graylog expect string or int as an input. This function can be used to convert a value to one of the two."""
         return value
 
 
@@ -243,6 +252,8 @@ class BoolConfigItem(ConfigItem):
         else:
             self._value = self._default
 
+    def graylog_format(self, value):
+        return str(value).strip()
 
 class EnumConfigItem(ConfigItem):
     """ Config item that stores an enum value. """

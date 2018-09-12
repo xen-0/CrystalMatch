@@ -1,7 +1,7 @@
 import logging
 import math
 
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 
 
 #logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -33,10 +33,12 @@ class SharpnessDetector(object):
         max = best_fft_img.get_image_number()
         range = self.find_range(max)
 
-        extra = {'best_fft_val': round(level, 4), 'best_fft_img_num': max}
+        extra = {'best_fft_val': round(level, 4),
+                 'best_fft_img_num': max,
+                 'stack_num': self.config.number_to_stack.value()}
         log = logging.LoggerAdapter(log, extra)
         log.info("Stacking " + str(self.config.number_to_stack.value()) + " images " +
-                 " First img: " + str(range[0]) + " last img: " + str(len(range)))
+                 " First img: " + str(range[0]) + " last img: " + str(range[-1]))
 
         for s in self.fft_img:
             if s.get_image_number() in range:

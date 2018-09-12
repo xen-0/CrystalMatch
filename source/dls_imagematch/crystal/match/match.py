@@ -1,5 +1,6 @@
 import logging
 
+from dls_imagematch import logconfig
 from dls_imagematch.util.status import StatusFlag
 
 
@@ -105,26 +106,52 @@ class CrystalMatch:
         INFO with detailed info using DEBUG flag.
         :param crystal_id: Optionally print the id for the crystal - can be string or number
         """
-        if crystal_id is not None:
-            logging.info("*** Crystal Match " + str(crystal_id) + " ***",)
-        else:
-            logging.info("*** Crystal Match ***")
+        log = logging.getLogger(".".join([__name__]))
+        log.addFilter(logconfig.ThreadContextFilter())
+        extra = self._status.to_json_array_with_names('match_stat_num', 'match_stat')
 
-        logging.info("- Input POI: ({} px, {} px)".format(self.get_poi_image_1().x, self.get_poi_image_1().y))
+        user_pos_x_px = "{:.2f}".format(self.get_poi_image_1().x)
+        user_pos_y_px = "{:.2f}".format(self.get_poi_image_1().y)
+        user_pos_x_um = "{:.6f}".format(self.get_poi_image_1_real().x)
+        user_pos_y_um = "{:.6f}".format(self.get_poi_image_1_real().y)
+
+        extra.update({'user_pos_x_px': user_pos_x_px,
+                     'user_pos_y_px': user_pos_y_px,
+                     'user_pos_x_um': user_pos_x_um,
+                     'user_pos_y_um': user_pos_y_um})
+
         if self.is_success():
-            logging.debug("- Matching Time: {:.4f}".format(self._feature_match_result.time_match()))
-            logging.debug("- Transform Time: {:.4f}".format(self._feature_match_result.time_transform()))
+            match_mean_error = "{:.4f}".format(self._feature_match_result.mean_transform_error())
+            match_time = "{:.4f}".format(self._feature_match_result.time_match())
+            match_transform = "{:.4f}".format(self._feature_match_result.time_transform())
 
-            beam_position = "- Beam Position: x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
-            delta = "- Crystal Movement(delta): x={0:.2f} um, y={1:.2f} um ({2} px, {3} px)"
+            beam_pos_x_px = "{:.2f}".format(self.get_poi_image_2_matched().x)
+            beam_pos_y_px = "{:.2f}".format(self.get_poi_image_2_matched().y)
+            beam_pos_x_um = "{:.6f}".format(self.get_poi_image_2_matched_real().x)
+            beam_pos_y_um = "{:.6f}".format(self.get_poi_image_2_matched_real().y)
 
-            poi_real = self.get_poi_image_2_matched_real()
-            poi_pixel = self.get_poi_image_2_matched()
-            logging.info(beam_position.format(poi_real.x, poi_real.y, poi_pixel.x, poi_pixel.y))
-            offset_real = self.get_delta_real()
-            offset_pixel = self.get_delta()
-            logging.info(delta.format(offset_real.x, offset_real.y, offset_pixel.x, offset_pixel.y))
-        elif self._status == CRYSTAL_MATCH_STATUS_DISABLED:
-            logging.info("-- Matching Disabled")
+            crystal_movement_x_px = "{:.2f}".format(self.get_delta().x)
+            crystal_movement_y_px = "{:.2f}".format(self.get_delta().y)
+            crystal_movement_x_um = "{:.6f}".format(self.get_delta_real().x)
+            crystal_movement_y_um = "{:.6f}".format(self.get_delta_real().y)
+
+            extra.update({'match_mean_error' : match_mean_error,
+                          'match_time': match_time,
+                          'match_transform': match_transform,
+                          'beam_pos_x_px': beam_pos_x_px,
+                          'beam_pos_y_px': beam_pos_y_px,
+                          'beam_pos_x_um': beam_pos_x_um,
+                          'beam_pos_y_um': beam_pos_y_um,
+                          'crystal_movement_x_px': crystal_movement_x_px,
+                          'crystal_movement_y_px': crystal_movement_y_px,
+                          'crystal_movement_x_um': crystal_movement_x_um,
+                          'crystal_movement_y_um': crystal_movement_y_um})
+        log = logging.LoggerAdapter(log, extra)
+
+        if crystal_id is not None:
+            log.info("*** Crystal Match " + str(crystal_id) + " ***")
+            log.debug(extra)
         else:
-            logging.info("-- Match Failed")
+            log.info("*** Crystal Match ***")
+            log.debug(extra)
+

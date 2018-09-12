@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/source/dls_imagematch/main_service.py" />
-    <option name="PARAMETERS" value="--verbose ../test-images/Formulatrix/46412/449/A02.jpg ../test-images/Formulatrix/46412/584/A02.jpg 1068,442 1068,442 1191,1415" />
+    <option name="PARAMETERS" value="../test-images/Formulatrix/46412/449/A02.jpg ../test-images/Formulatrix/46412/584/A02.jpg 1068,442 1068,442 1191,1415" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

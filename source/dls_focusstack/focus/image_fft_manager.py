@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 import cv2
 import numpy as np
 
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
 
@@ -16,6 +16,9 @@ def fft(file_obj,q,count):
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)
     image_fft.runFFT()
+    log = logging.getLogger(".".join([__name__]))
+    log.addFilter(logconfig.ThreadContextFilter())
+    log.debug("Finished calculating fft for:" + name)
     q.put(image_fft)
 
 

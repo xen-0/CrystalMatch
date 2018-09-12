@@ -2,6 +2,7 @@ import logging
 
 import cv2
 
+from dls_imagematch import logconfig
 from .types import DetectorType, AdaptationType, ExtractorType
 from .feature import Feature
 from .exception import OpenCvVersionError, FeatureDetectorError
@@ -139,6 +140,9 @@ class Detector:
         try:
             detector = cv2.FeatureDetector_create(name)
         except AttributeError:
+            log = logging.getLogger(".".join([__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.error(OpenCvVersionError(_OPENCV_VERSION_ERROR))
             raise OpenCvVersionError(_OPENCV_VERSION_ERROR)
         return detector
 
@@ -150,5 +154,8 @@ class Detector:
         try:
             extractor = cv2.DescriptorExtractor_create(extractor)
         except AttributeError:
+            log = logging.getLogger(".".join([__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.error(OpenCvVersionError(_OPENCV_VERSION_ERROR))
             raise OpenCvVersionError(_OPENCV_VERSION_ERROR)
         return extractor

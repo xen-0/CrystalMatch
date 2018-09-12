@@ -1,6 +1,6 @@
 from pkg_resources import require
 
-from dls_focusstack import logconfig
+from dls_imagematch import logconfig
 
 require('pygelf==0.2.11')
 require("numpy==1.11.1")
@@ -21,9 +21,9 @@ from focus.focus_stack_lap_pyramid import FocusStack
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
 if IS_BUNDLED:
-    CONFIG_DIR = join("..", ReadableConfigDir.CONFIG_DIR_NAME)
+    CONFIG_DIR = join(".", ReadableConfigDir.CONFIG_DIR_NAME)
 else:
-    CONFIG_DIR = join("...", ReadableConfigDir.CONFIG_DIR_NAME)
+    CONFIG_DIR = join("..", ReadableConfigDir.CONFIG_DIR_NAME)
 
 
 class FocusStackService:
