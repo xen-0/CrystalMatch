@@ -1,5 +1,6 @@
 from pkg_resources import require
 
+from version import VersionHandler
 
 require('pygelf==0.2.11')
 require("numpy==1.11.1")
@@ -23,10 +24,11 @@ from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
 from dls_util.shape import Point
 from os.path import split, exists, isdir, isfile, join, abspath, getmtime
 
-from os import makedirs, remove, walk, listdir
+from os import makedirs, remove, walk, listdir, access, R_OK
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
+CONFIG_DIR_NAME = "config"
 if IS_BUNDLED:
     CONFIG_DIR = join(".", ReadableConfigDir.CONFIG_DIR_NAME)
 else:
@@ -52,7 +54,7 @@ class CrystalMatchService:
                 config_directory = CONFIG_DIR
             scale_override = self._get_scale_override(args)
 
-            focusing_path = args.image_stack
+            focusing_path = args.beamline_stack_path
 
             selected_points = self._parse_selected_points_from_args(args)
             if "." not in focusing_path:
@@ -66,32 +68,23 @@ class CrystalMatchService:
                 stacker = FocusStack(files,config_directory)
                 focused_image = stacker.composite()
             else:
-                focused_image = Image(cv2.imread(focusing_path))#args.output)
+                #works when only one image is passed
+                focused_image = Image(cv2.imread(focusing_path))
             # Run match
             service = CrystalMatch(config_directory, scale_override=scale_override)
             service_results = service.perform_match(args.Formulatrix_image.name, focused_image, selected_points)
 
-            # print for GDA
-            self._process_output_file_path(args.output)
-            beamline_image = abspath(args.output)
-            service_results.set_beamline_image_path(beamline_image)
-            service_results.print_results(json_output=args.to_json)
+            service_results.set_beamline_image_path(args.beamline_stack_path)
+
             total_time = time.clock() - total_start
             service_results.log_final_result(total_time)
+            service_results.print_results(args.to_json)
             # Save stacked image
-            focused_image.save(args.output)
+            if "." not in focusing_path:
+                focused_image.save(service_results.get_beamline_image_path())
 
         except IOError as e:
             log.error(e)
-
-    @staticmethod
-    def _process_output_file_path(path):
-        output_dir, output_file = split(path)
-        if output_dir is not "":
-            if not (exists(output_dir) and isdir(output_dir)):
-                makedirs(output_dir)
-        if exists(path) and isfile(path):
-            remove(path)
 
     @staticmethod
     def _get_scale_override(args):
@@ -154,19 +147,19 @@ class CrystalMatchService:
                             type=file,
                             help='Image file from the Formulatrix - selected_point should correspond to co-ordinates on '
                                  'this image.')
-        parser.add_argument('image_stack',
+        parser.add_argument('beamline_stack_path',
                             metavar="beamline_stack_path",
-                            help="A list of image files - each image represents a level of the z-stack.")
+                            help="A path pointing at a directory which stores images to be stacked or a path to a stacked image.")
         parser.add_argument('selected_points',
                             metavar="x,y",
                             nargs='*',
                             help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                                  "to the target image.")
-        parser.add_argument('-o','--output',
-                            metavar="stacked_image_path",
-                            help="Specify stacked output file - default is to create a file called 'output.png' in the working "
-                                 "directory. This will overwrite existing files, if the path does not exist the app "
-                                 "will attempt to make it.")
+        #parser.add_argument('-o','--output',
+         #                   metavar="beamline_image_path",
+         #                   help="Specify stacked output file - default is to create a file called 'output.tif' in the working "
+         #                        "directory. This will overwrite existing files, if the path does not exist the app "
+         #                        "will attempt to make it.")
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
@@ -181,8 +174,47 @@ class CrystalMatchService:
         parser.add_argument('--to_json',
                             action='store_true',
                             help="Output a JSON object.")
+        parser.add_argument('--version',
+                            action='version',
+                            version=VersionHandler.version_string())
+
         return parser
 
+    class ReadableConfigDir(argparse.Action):
+        """
+        Argument parser action which verifies that the config directory specified is a valid, readable directory.
+        """
+        def __call__(self, parser, namespace, values, option_string=None):
+            prospective_dir = self.parse_config_path(values)
+            if not sys.path.isdir(prospective_dir):
+                logging.warning("Configuration directory not found, directory will be created: '" + prospective_dir + "'")
+                setattr(namespace, self.dest, prospective_dir)
+            elif access(prospective_dir, R_OK):
+                setattr(namespace, self.dest, prospective_dir)
+            else:
+                logging.error("Configuration directory is not readable: '" + prospective_dir + "'")
+                exit(1)
+
+        def parse_config_path(self, proposed_path):
+            """
+            Parse a string to return a path for the config directory.
+            :param proposed_path: String of the path to the configuration directory.
+            :return: Path of config directory.
+            """
+            prospective_dir = proposed_path
+            if isdir(proposed_path) and self._is_config_dir(proposed_path):
+                return proposed_path
+            config_path, config_dir = split(prospective_dir)
+            if not config_dir == CONFIG_DIR_NAME:
+                prospective_dir = join(prospective_dir, CONFIG_DIR_NAME)
+            return prospective_dir
+
+        @staticmethod
+        def _is_config_dir(dir_path):
+            for file_path in listdir(dir_path):
+                if re.match(".*[.]ini", file_path):
+                    return True
+            return False
 
 if __name__ == '__main__':
     logconfig.setup_logging()

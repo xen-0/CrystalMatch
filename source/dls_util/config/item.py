@@ -86,7 +86,7 @@ class ConfigItem:
         return value
 
     def graylog_format(self, value):
-        """Graylog expect string or in as an input. This function can be used to convert a value to one of the two."""
+        """Graylog expect string or int as an input. This function can be used to convert a value to one of the two."""
         return value
 
 

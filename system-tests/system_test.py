@@ -282,7 +282,7 @@ class SystemTest(TestCase):
     def failIfDirExists(self, dir_path):
         self.failIf(self._is_dir(dir_path))
 
-    def failUnlessPoiAlmostEqual(self, expected_array, deltas=(0.5, 0.5, 2.0)):
+    def failUnlessPoiAlmostEqual(self, expected_array, deltas=(0.5, 0.5, 2.0)): # I've increased the deltas slightly
         """
         Extracts POI information from the console output and checks it against the array values using
         failUnlessAlmostEqual - default delta values are set.

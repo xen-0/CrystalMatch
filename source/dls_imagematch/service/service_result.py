@@ -7,7 +7,7 @@ import logging
 import json
 from json.encoder import JSONEncoder
 
-from os.path import abspath, join, exists, isdir
+from os.path import abspath, join, exists, isdir, splitext, split
 
 from dls_imagematch import logconfig
 from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
@@ -31,7 +31,7 @@ class ServiceResultExitCode(StatusFlag):
         self.err_msg = err_msg
 
     def to_json_array(self):
-        json_array = StatusFlag.to_json_array(self)
+        json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
@@ -71,6 +71,7 @@ class ServiceResult:
         self._job_id = os.getpid()
         self.SEPARATOR = " ; "
         self._image_path_formulatrix = abspath(formulatrix_image_path)
+        self._image_path_formulatrix = abspath(formulatrix_image_path)
         self._image_path_beamline = None
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
@@ -97,9 +98,30 @@ class ServiceResult:
         self._exit_code = SERVICE_RESULT_STATUS_ERROR
         self._exit_code.set_err_msg(e.message)
 
-    def set_beamline_image_path(self, abs_path):
-        self._image_path_beamline = abspath(abs_path)
+    def set_beamline_image_path(self, path):
+        start, extension = splitext(abspath(path))
+        if extension is not "":
+            new_path = path
+        else:
+            default_name = "processed.tif"
+            new_path = join(path, default_name)
 
+        self._process_dir_path(new_path)
+
+        #if exists(new_path):
+         #   os.remove(new_path) # keep this, important
+
+        self._image_path_beamline = new_path
+
+
+    def get_beamline_image_path(self):
+        return self._image_path_beamline
+
+    def _process_dir_path(self, path):
+        output_dir, output_file = split(path)
+        if output_dir is not "":
+            if not (exists(output_dir) and isdir(output_dir)):
+                os.makedirs(output_dir)
 
     def append_crystal_matching_results(self, crystal_matcher_results):
         """
@@ -126,7 +148,7 @@ class ServiceResult:
                 line += str(crystal_match.feature_match_result().mean_transform_error())
             output_list.append(line)
 
-    def print_results(self, jason_output = False):
+    def print_results(self, jason_output):
         """
         Print the contents of this results object to the console.  Returns the printed object for testing purposes.
         :return : The printed object - JSON mode will return the full json object.
@@ -161,7 +183,7 @@ class ServiceResult:
 
         # Global alignment transform
         if self._job_id and self._job_id != "":
-            output_obj['job_id'] = self._job_id
+            output_obj['job_id'] = str(self._job_id)
         output_obj['input_image'] = self._image_path_formulatrix
         output_obj['output_image'] = self._image_path_beamline
         output_obj['alignment'] = {

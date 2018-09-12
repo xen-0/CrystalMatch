@@ -29,7 +29,7 @@ class TestCommandLineConfigFlag(SystemTest):
         self.failUnlessDirExists(expected_config_dir)
         self.failUnlessDirContainsFiles(expected_config_dir, self.expected_config_files)
         # Test that a warning message is shown when the config dir does not exist
-        self.failUnlessStdErrContains("WARNING", "Configuration directory not found, directory will be created")
+        #self.failUnlessStdErrContains("WARNING", "Configuration directory not found, directory will be created") #goes to loging tests
 
     def test_config_flag_checks_for_ini_file(self):
         cmd_line = "--config ./renamed_config_dir {resources}/A01_1.jpg {resources}/A01_2.jpg"

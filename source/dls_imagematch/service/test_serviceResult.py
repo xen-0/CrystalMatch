@@ -59,7 +59,7 @@ class TestServiceResult(TestCase):
     def test_job_id_and_image_paths_printed_correctly(self, mock_print):
         result = ServiceResult("test/file/path/fomulatrix")
         result.set_beamline_image_path("test/file/path/beamline")
-        result.print_results()
+        result.print_results(False)
 
         mock_print.assert_any_call('job_id:"' + str(os.getpid()) + '"')
         mock_print.assert_any_call('input_image:"' + abspath('test/file/path/fomulatrix') + '"')
@@ -78,7 +78,7 @@ class TestServiceResult(TestCase):
         Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset", "get_alignment_transform"])
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
-        result.print_results()
+        result.print_results(False)
 
         # Test output
         mock_print.assert_has_calls([
@@ -98,7 +98,7 @@ class TestServiceResult(TestCase):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
         result.set_image_alignment_results(mock_aligned_image)
-        result.print_results()
+        result.print_results(False)
 
         # Test output
         mock_print.assert_has_calls([
@@ -117,7 +117,7 @@ class TestServiceResult(TestCase):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
         result.set_image_alignment_results(mock_aligned_image)
-        result.print_results()
+        result.print_results(False)
 
         # Test output
         mock_print.assert_has_calls([
@@ -129,7 +129,7 @@ class TestServiceResult(TestCase):
     def test_output_prints_correctly_with_no_crystal_match_results(self, mock_print):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
-        result.print_results()
+        result.print_results(False)
 
         # Test for presence of poi: objects in output
         output = self.get_output(mock_print)
@@ -148,7 +148,7 @@ class TestServiceResult(TestCase):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
         result.append_crystal_matching_results(mock_match_results)
-        result.print_results()
+        result.print_results(False)
 
         # Test
         mock_print.assert_has_calls([
@@ -167,7 +167,7 @@ class TestServiceResult(TestCase):
         status_codes = [CRYSTAL_MATCH_STATUS_FAIL]
         mock_match_results = self.mock_crystal_matcher_results(deltas, mean_errors, new_positions, status_codes)
         result.append_crystal_matching_results(mock_match_results)
-        result.print_results()
+        result.print_results(False)
 
         # Test
         mock_print.assert_has_calls([
@@ -196,7 +196,7 @@ class TestServiceResult(TestCase):
         status_codes = [CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL]
         mock_match_results = self.mock_crystal_matcher_results(deltas, mean_errors, new_positions, status_codes)
         result.append_crystal_matching_results(mock_match_results)
-        result.print_results()
+        result.print_results(False)
 
         # Test
         mock_print.assert_has_calls([
@@ -210,7 +210,7 @@ class TestServiceResult(TestCase):
     def test_exit_code_starting_state_is_negative_1(self, mock_print):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
-        result.print_results()
+        result.print_results(False)
 
         mock_print.assert_has_calls([call('exit_code:-1')])
 
@@ -225,7 +225,7 @@ class TestServiceResult(TestCase):
         result = ServiceResult("fomulatrix")
         result.set_beamline_image_path("beamline")
         result.set_image_alignment_results(mock_aligned_image)
-        result.print_results()
+        result.print_results(False)
 
         # Test for exit status present in output
         mock_print.assert_has_calls([call('exit_code:0')])
@@ -244,7 +244,7 @@ class TestServiceResult(TestCase):
         # Throw an exception and print results
         e = Exception("test exception")
         result.set_err_state(e)
-        result.print_results()
+        result.print_results(False)
 
         # Test for exit status of -1 with err message
         mock_print.assert_has_calls([call('exit_code:-1, test exception')])
@@ -261,7 +261,7 @@ class TestServiceResult(TestCase):
         json_obj = result.print_results(jason_output = True)
 
         # Test for exit status of -1 in JSON object
-        self.failUnlessEqual(0, json_obj['exit_code']['code'])
+        self.failUnlessEqual(0, json_obj['exit_code']['exit_code_num'])
         self.failIf('err_msg' in json_obj['exit_code'].keys())
 
     def test_exit_code_in_json_output_with_error(self):
@@ -280,5 +280,5 @@ class TestServiceResult(TestCase):
         json_obj = result.print_results(jason_output = True)
 
         # Test for exit status of -1 in JSON object
-        self.failUnlessEqual(-1, json_obj['exit_code']['code'])
+        self.failUnlessEqual(-1, json_obj['exit_code']['exit_code_num'])
         self.failUnlessEqual('test exception', json_obj['exit_code']['err_msg'])

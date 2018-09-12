@@ -23,4 +23,4 @@ Once the script has run the distribution should be located at `./distribution/di
 ## Deployment and Running the application
 
 The entire distribution directory `CrystalMatch` should be deployed to the server (any previous versions should be removed). It should contain an executable with the same name as the directory which can be run from the command line - `CrystalMatch/CrystalMatch`
-
+Location of 'CrystalMatch': /dls_sw/dasc/CrystalMatch.
