@@ -3,9 +3,9 @@ import logging
 import sys
 import re
 
-from os import access, R_OK
+from os import access, R_OK, listdir
 
-from os.path import join, split, listdir, isdir
+from os.path import join, split, isdir
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)
