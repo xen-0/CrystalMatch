@@ -57,13 +57,15 @@ class ParserManager:
                                  "image separated by a colon. Note this is relative (1:2 is the same as 2:4) and a value "
                                  "must be specified for each image using the format "
                                  "'[Formulatrix_image_resolution]:[beamline_image_resolution]'.")
+        parser.add_argument('-j', '--job',
+                            metavar="job_id",
+                            help="Specify a job_id - this will be reported in the output to help identify this run.")
         parser.add_argument('--to_json',
                             action='store_true',
                             help="Output a JSON object.")
         parser.add_argument('--version',
                             action='version',
                             version=VersionHandler.version_string())
-
         self.parser = parser
 
 
@@ -105,13 +107,12 @@ class ParserManager:
         :param args: Command line arguments provided by argument parser - must contain 'selected_points'
         :return: List of Selected Points.
          """
-        selected_points = self._get_args().selected_points
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         selected_points = []
-        if selected_points:
+        if self._get_args().selected_points:
             point_expected_format = re.compile("[0-9]+,[0-9]+")
-            for point_string in selected_points:
+            for point_string in self._get_args().selected_points:
                 point_string = point_string.strip('()')
                 match_results = point_expected_format.match(point_string)
                 # Check the regex matches the entire string
@@ -123,6 +124,7 @@ class ParserManager:
                     log.warning("Selected point with invalid format will be ignored - '" + point_string + "'")
         return selected_points
 
+    # TODO: this function is doing too much - split it!
     def get_focused_image(self):
         focusing_path = self._get_args().beamline_stack_path
         if "." not in focusing_path:
@@ -135,10 +137,9 @@ class ParserManager:
             # Run focusstack
             stacker = FocusStack(files, self._get_args().config)
             focused_image = stacker.composite()
-            focused_image.save()
+            focused_image.save(self._get_output_path())
         else:
             focused_image = Image(cv2.imread(focusing_path))
-            focused_image.save(self.get_focused_image_path())
 
         return focused_image
 
@@ -146,15 +147,24 @@ class ParserManager:
         return self._get_args().Formulatrix_image.name
 
     def get_focused_image_path(self):
-        focused_image_path = abspath(self._get_args().output)
-        self._process_dir_path(focused_image_path)
-        return focused_image_path
+        focusing_path = self._get_args().beamline_stack_path
+        if "." not in focusing_path:
+            focusing_path =  self._get_output_path()
+        return abspath(focusing_path)
+
+    def _get_output_path(self):
+        output_path = abspath(self._get_args().output)
+        self._process_dir_path(output_path)
+        return output_path
 
     def get_to_json(self):
         return self._get_args().to_json
+
+    def get_job_id(self):
+        return self._get_args().job
 
     def _process_dir_path(self, path):
         output_dir, output_file = split(path)
         if output_dir is not "":
             if not (exists(output_dir) and isdir(output_dir)):
-                os.makedirs(output_dir)
+                makedirs(output_dir)

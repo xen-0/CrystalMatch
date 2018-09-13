@@ -30,12 +30,10 @@ class CrystalMatch:
         self._config_align = AlignConfig(config_directory, scale_override=scale_override)
         self._config_crystal = CrystalMatchConfig(config_directory)
 
-    def perform_match(self, formulatrix_image_path, beamline_image, input_poi, focused_image_path):
+    def perform_match(self, parser_manager):
         """
         Perform image alignment and crystal matching returning a results object.
-        :param formulatrix_image_path: File path to the 'before' image from the Formulatrix.
-        :param beamline_image_path: File path to the 'after' image from the Beam line.
-        :param input_poi: An array of points of interest to match between the images.
+        :param .
         :return: ServiceResult object.
         """
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
@@ -46,12 +44,18 @@ class CrystalMatch:
         log.info("Matching Started")
         log.debug(extra)
 
+        input_poi = parser_manager.parse_selected_points_from_args()
+        beamline_image = parser_manager.get_focused_image()
+        focused_image_path = parser_manager.get_focused_image_path()
+        formulatrix_image_path = parser_manager.get_formulatrix_image_path()
+        job_id = parser_manager.get_job_id()
+
         # Create the images
         image1 = Image.from_file(formulatrix_image_path)
         image2 = beamline_image
 
         # Create results object
-        service_result = ServiceResult(formulatrix_image_path, focused_image_path)
+        service_result = ServiceResult(job_id, formulatrix_image_path, focused_image_path)
 
         # Perform alignment
         try:

@@ -31,6 +31,13 @@ class ServiceResultExitCode(StatusFlag):
         self.err_msg = err_msg
 
     def to_json_array(self):
+        json_array = StatusFlag.to_json_array(self)
+        #_with_names(self, 'exit_code_num', 'exit_code')
+        if self.err_msg is not None:
+            json_array['err_msg'] = self.err_msg
+        return json_array
+
+    def to_json_array_with_names(self):
         json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
@@ -61,18 +68,17 @@ class ServiceResult:
 
     POI_RESULTS_HEADER = "\nlocation ; transform ; status ; mean error"
 
-    def __init__(self, formulatrix_image_path, focused_image_path):
+    def __init__(self, job_id, formulatrix_image_path, focused_image_path):
         """
         Create a ServiceResult object used to report CrystalMatch results to the console, log file and (optionally)
         image directory.
         :param formulatrix_image_path: Image path for the input image.
         :param beamline_image_path: Image path for the output image.
         """
-        self._job_id = os.getpid()
+        self._job_id = job_id
         self.SEPARATOR = " ; "
         self._image_path_formulatrix = abspath(formulatrix_image_path)
-        self._image_path_formulatrix = abspath(formulatrix_image_path)
-        self._image_path_beamline = focused_image_path
+        self._image_path_beamline = abspath(focused_image_path)
         self._alignment_transform_scale = 1.0
         self._alignment_transform_offset = Point(0, 0)
         self._alignment_status_code = ALIGNED_IMAGE_STATUS_NOT_SET
@@ -197,7 +203,7 @@ class ServiceResult:
     def log_final_result(self, total_time):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        extra = self._exit_code.to_json_array()
+        extra = self._exit_code.to_json_array_with_names()
         extra.update({'input_image': self._image_path_formulatrix,
                       'output_image': self._image_path_beamline,
                       'total_time': total_time})

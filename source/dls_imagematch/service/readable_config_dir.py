@@ -23,7 +23,7 @@ class ReadableConfigDir(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         prospective_dir = self.parse_config_path(values)
-        if not sys.path.isdir(prospective_dir):
+        if not isdir(prospective_dir):
             logging.warning("Configuration directory not found, directory will be created: '" + prospective_dir + "'")
             setattr(namespace, self.dest, prospective_dir)
         elif access(prospective_dir, R_OK):

@@ -83,6 +83,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 
 **JSON schema**
 
+* `job_id` - Absolute path to Formulatrix Image.
 * `input_image` - Absolute path to Formulatrix Image.
 * `output_image` - Absolute path to Beamline Image.
 * `exit_code` - Describes the exit status of the application, used to flag abnormal runs while returning some results if possible.
@@ -94,13 +95,19 @@ CrystalMatch outputs results in a human-readable format by default - when being 
         * `msg` - Human readable error message.
     * `scale` - Scale between Formulatrix and Beamline images - this is this is calculated from the input scale ratio.
     * `translation` (x and y values) - The translation required to map a point from the Formulatrix image to the Beamline image.
+        *'x'
+        *'y'
     * `mean-error` - Mean error value after image alignment.
 * `poi` (optional, array) - An array of Crystal Matching phase results - will not be present if input points were not specified or Alignment phase failed.
     * `status` - Results status
         * `code` - `0` for failure, `1` for success or `2` if the option if POI analysis is disabled in the configuration file (`crystal.ini`).
         * `msg` - Human readable error message.
     * `location` (x and y values) - Calculated location of the POI in the co-ordinate space of the Beamline image. Note that if the match fails this will be the original point with the Alignment transform applied.
+        *'x'
+        *'y'
     * `translation` (x and y values) - The translation required to account for Crystal movement (excludes Alignment transform).
+        *'x'
+        *'y'
     * `mean_error` - Mean error value for this POI match.
 
 ## Command Line Options
@@ -112,4 +119,3 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 | `--version`       | Shows the program's version number. |
 | `-j job_id, --job job_id` | Specify a job_id - this will be reported in the output to help identify this run. |
 | `--to_json`       | Output results as a JSON object. |
-| `--log path`      | Write log files to the directory specified by path. |
