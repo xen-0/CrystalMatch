@@ -207,6 +207,10 @@ class ServiceResult:
         extra.update({'input_image': self._image_path_formulatrix,
                       'output_image': self._image_path_beamline,
                       'total_time': total_time})
+        if self._job_id and self._job_id != "":
+            extra.update({'job_id': self._job_id})
+
+
 
         log = logging.LoggerAdapter(log, extra)
         log.info("Crystal Match Complete")

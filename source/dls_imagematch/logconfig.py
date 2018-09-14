@@ -109,8 +109,17 @@ def setup_logging(
     Returns: None
     """
     dict_config = None
+    ts = default_config.get("handlers")
+    ts1 = ts.get('local_file_handler')
+    ts2 = ts1.get('filename')
+
+
     logconfig_filename = default_log_config
     env_var_value = os.getenv(env_key, None)
+    #check if exists
+
+    #check if you have access
+
 
     if env_var_value is not None:
         logconfig_filename = env_var_value
@@ -128,3 +137,4 @@ def setup_logging(
         logging.config.dictConfig(dict_config)
     else:
         logging.basicConfig(level=default_level)
+

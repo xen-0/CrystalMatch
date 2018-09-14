@@ -2,7 +2,7 @@ import argparse
 import logging
 import re
 import cv2
-from os.path import split, exists, isdir, isfile, join, abspath, getmtime
+from os.path import split, exists, isdir, isfile, join, abspath, getmtime, dirname
 
 from os import listdir, makedirs
 
@@ -41,11 +41,9 @@ class ParserManager:
                             help="Comma-separated co-ordinates of selected points to be translated from the marked image "
                                  "to the target image.")
         parser.add_argument('-o','--output',
-                           metavar="stacked_image_path",
-                           default="processed.tif",
-                           help="Specify stacked output file - default is to create a file called 'processed.tif' in the working "
-                                "directory. This will overwrite existing files, if the path does not exist the app "
-                                "will attempt to make it.")
+                           metavar="focused_image_path",
+                           help="Specify output path for the focused file. "
+                                "Default is to create a file called 'processed.tif' in the current well folder")
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
@@ -153,8 +151,17 @@ class ParserManager:
         return abspath(focusing_path)
 
     def _get_output_path(self):
-        output_path = abspath(self._get_args().output)
+        out = self._get_args().output
+        if out and out != "":
+            output_path = abspath(self._get_args().output)
+        else:
+            #default path
+            dir = dirname(self._get_args().beamline_stack_path)
+            output_path = join(dir, 'porcessed.tif')
+
+        #add path checks
         self._process_dir_path(output_path)
+        #chmod(log_file_path, 0o666)
         return output_path
 
     def get_to_json(self):
