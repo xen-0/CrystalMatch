@@ -47,3 +47,12 @@ class FilePathManager:
     def _validate_output_path_extension(self):
         file_path, ext = splitext(self._path())
         return ext in self.ALLOWED_OUTPUT_EXTENSIONS
+
+    #chmod(output_path, 0o666)
+    def _process_output_file_path(path):
+        output_dir, output_file = split(path)
+        if output_dir is not "":
+            if not (exists(output_dir) and isdir(output_dir)):
+                makedirs(output_dir)
+        if exists(path) and isfile(path):
+            remove(path)
