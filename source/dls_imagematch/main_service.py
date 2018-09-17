@@ -4,6 +4,7 @@ require("numpy==1.11.1")
 require("scipy")
 
 import logging
+import logging.handlers
 import time
 
 from dls_imagematch.service.parser_manager import ParserManager
@@ -18,10 +19,13 @@ class CrystalMatchService:
     def run(self):
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        total_start = time.clock()
         try:
+            total_start = time.clock()
             parser_manager = ParserManager()
             parser_manager.build_parser()
+
+            logconfig.set_additional_handler(parser_manager.get_log_file_path())
+
             config_directory = parser_manager.get_config_dir()
             scale_override = parser_manager.get_scale_override()
             to_json_flag = parser_manager.get_to_json()
@@ -34,6 +38,7 @@ class CrystalMatchService:
             service_results.print_results(to_json_flag)
 
         except IOError as e:
+
             log.error(e)
 
 if __name__ == '__main__':

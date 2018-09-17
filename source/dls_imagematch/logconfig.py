@@ -7,9 +7,15 @@ the project or site requirements.
 import os
 import json
 import logging.config
+import logging.handlers
 import getpass
 import threading
 import version
+
+MAXBYTES = 1048576
+BACKUPCOUNT = 20
+ENCODING = "utf8"
+
 
 default_config = {
     "version": 1.0,
@@ -40,9 +46,9 @@ default_config = {
             "level": "DEBUG",
             "formatter": "json",
             "filename": "debug.log",
-            "maxBytes": 1048576, # one megabyte
-            "backupCount": 20, # goes up to 20mb and starts the rollover
-            "encoding": "utf8"
+            "maxBytes": MAXBYTES, # one megabyte
+            "backupCount": BACKUPCOUNT, # goes up to 20mb and starts the rollover
+            "encoding": ENCODING
         },
 
         "graylog_gelf": {
@@ -71,7 +77,6 @@ default_config = {
         "handlers": ["local_file_handler", "graylog_gelf"]#,"local_file_handler"]# "graylog_gelf"]
     }
 }
-
 
 class ThreadContextFilter(logging.Filter):
     """A logging context filter to add thread name and ID."""
@@ -109,17 +114,9 @@ def setup_logging(
     Returns: None
     """
     dict_config = None
-    ts = default_config.get("handlers")
-    ts1 = ts.get('local_file_handler')
-    ts2 = ts1.get('filename')
-
 
     logconfig_filename = default_log_config
     env_var_value = os.getenv(env_key, None)
-    #check if exists
-
-    #check if you have access
-
 
     if env_var_value is not None:
         logconfig_filename = env_var_value
@@ -138,3 +135,9 @@ def setup_logging(
     else:
         logging.basicConfig(level=default_level)
 
+def set_additional_handler(file_name):
+    logger = logging.getLogger()
+    handler = logging.handlers.RotatingFileHandler(file_name, maxBytes=MAXBYTES, backupCount=BACKUPCOUNT, encoding=ENCODING)
+    json_format = default_config.get("formatters",{}).get("json",{}).get("format",{})
+    handler.setFormatter(logging.Formatter(json_format))
+    logger.addHandler(handler)
