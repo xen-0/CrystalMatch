@@ -1,4 +1,4 @@
-from os.path import realpath
+from os.path import realpath, join
 
 from system_test import SystemTest
 
@@ -40,3 +40,15 @@ class TestCommandLineFlags(SystemTest):
 
         # Check for job_id in output
         self.failUnlessStdOutContains('job_id:"test_case"')
+
+    def test_processed_file_is_stored_in_directory_specified_by_output_flag(self):
+        cmd_line = "--output pro -j test_case {resources}/stacking/ideal.tif {resources}/stacking/levels"
+        self.run_crystal_matching_test(
+            self.test_processed_file_is_stored_in_directory_specified_by_output_flag.__name__, cmd_line)
+        self.failUnlessDirContainsFile(join(self.get_active_test_dir(), 'pro'), 'processed.tif')
+
+    def test_processed_file_is_stored_in_directory_specified_by_shortcut_output_flag(self):
+        cmd_line = "-o pro -j test_case {resources}/stacking/ideal.tif {resources}/stacking/levels"
+        self.run_crystal_matching_test(
+            self.test_processed_file_is_stored_in_directory_specified_by_shortcut_output_flag.__name__, cmd_line)
+        self.failUnlessDirContainsFile(join(self.get_active_test_dir(), 'pro'), 'processed.tif')
