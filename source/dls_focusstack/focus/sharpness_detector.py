@@ -4,8 +4,6 @@ import math
 from dls_imagematch import logconfig
 
 
-#logging.getLogger(__name__).addHandler(logging.NullHandler())
-
 class SharpnessDetector(object):
     """Class which applies the result of image FFT calculation to find images which will be stacked.
     This is an initial filtering step used currently in the process."""
@@ -21,25 +19,24 @@ class SharpnessDetector(object):
         The number of images to stack is defined by IMG_TO_STACK"""
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        level = 0
-        best_fft_img = None
-        images = []
+
+        ffts = []
         for s in self.fft_img:
-            fft = s.getFFT()
-            if fft > level:
-                level = fft
-                best_fft_img = s
+            ffts.append(s.getFFT())
+        max_fft_value = max(ffts)
+        max_fft_value_index = ffts.index(max_fft_value)
+        best_fft_img = self.fft_img[max_fft_value_index] # the sequence of images is the same as the sequence of ffts
+        best_fft_img_num = best_fft_img.get_image_number()
+        range = self.find_range(best_fft_img_num)
 
-        max = best_fft_img.get_image_number()
-        range = self.find_range(max)
-
-        extra = {'best_fft_val': round(level, 4),
-                 'best_fft_img_num': max,
+        extra = {'best_fft_val': round(max_fft_value, 4),
+                 'best_fft_img_num': best_fft_img_num,
                  'stack_num': self.config.number_to_stack.value()}
         log = logging.LoggerAdapter(log, extra)
         log.info("Stacking " + str(self.config.number_to_stack.value()) + " images " +
                  " First img: " + str(range[0]) + " last img: " + str(range[-1]))
 
+        images = []
         for s in self.fft_img:
             if s.get_image_number() in range:
                 images.append(s.get_image())
