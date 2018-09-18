@@ -49,8 +49,9 @@ class ParserManager:
                                  "to the target image.")
         parser.add_argument('-o','--output',
                            metavar="focused_image_path",
-                           help="Specify directory for the focused file. "
-                                "A file called 'processed.tif' will be created in the folder.")
+                           help="Specify directory for the stacked image. "
+                                "A file called 'processed.tif' will be created in the directory."
+                                "'processed.tif' will be created in log directory if this is not set.")
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
@@ -182,20 +183,18 @@ class ParserManager:
         out = self._get_args().output
         if out is None:
             #default - log file directory
-            #parent_dir = abspath(join(self.get_config_dir(), ".."))
-            #default_output_path = join(parent_dir, self.FOCUSED_IMAGE_DIR_NAME)
             default_output_path = self._get_log_file_dir()
             return default_output_path
         return abspath(self._get_args().output)
 
     def _get_log_file_dir(self):
         l = self._get_args().log
-        if l is None: #vale?
+        if l is None:
             # DEV NOTE: join and abspath used over split due to uncertainty over config path ending in a slash
             parent_dir = abspath(join(self.get_config_dir(), ".."))
             default_log_path = join(parent_dir, self.LOG_DIR_NAME)
             return default_log_path
-        return abspath(self._get_args().log) #value?
+        return abspath(self._get_args().log)
 
     def _check_make_dirs(self, directory):
         if not exists(directory) or not isdir(directory):

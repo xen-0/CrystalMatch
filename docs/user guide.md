@@ -119,3 +119,5 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 | `--version`       | Shows the program's version number. |
 | `-j job_id, --job job_id` | Specify a job_id - this will be reported in the output to help identify this run. |
 | `--to_json`       | Output results as a JSON object. |
+| `--log path`      | Write log files to the directory specified by path. |
+| `-o path --out path`|Sets the directory to store the stacked image called 'processed.tif'. Log directory is used by default.|
