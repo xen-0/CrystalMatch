@@ -77,18 +77,17 @@ class ParserManager:
                             help="Write log files to the directory specified by path.")
         self.parser = parser
 
-
-    def _get_args(self):
+    def get_args(self):
         return self.parser.parse_args()
 
     def get_config_dir(self):
-        config_directory = self._get_args().config
+        config_directory = self.get_args().config
         if config_directory is None:
             config_directory = readable_config_dir.CONFIG_DIR
         return config_directory
 
     def get_scale_override(self):
-        scale =  self._get_args().scale
+        scale =  self.get_args().scale
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
 
@@ -119,9 +118,10 @@ class ParserManager:
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         selected_points = []
-        if self._get_args().selected_points:
+        if self.get_args().selected_points:
             point_expected_format = re.compile("[0-9]+,[0-9]+")
-            for point_string in self._get_args().selected_points:
+            sel_points = self.get_args().selected_points
+            for point_string in self.get_args().selected_points:
                 point_string = point_string.strip('()')
                 match_results = point_expected_format.match(point_string)
                 # Check the regex matches the entire string
@@ -135,28 +135,32 @@ class ParserManager:
 
     # TODO: this function is doing too much - split it!
     def get_focused_image(self):
-        focusing_path = self._get_args().beamline_stack_path
+        focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
-            files = []
-            # Sort names according to creation time
-            for file_name in listdir(focusing_path):
-                name = join(focusing_path, file_name)
-                files.append(file(name))
-            files.sort(key=lambda x: getmtime(x.name))
+            files = self._sort_files_according_to_creation_time(focusing_path)
             # Run focusstack
-            stacker = FocusStack(files, self._get_args().config)
+            stacker = FocusStack(files, self.get_args().config)
             focused_image = stacker.composite()
-            focused_image.save(self._get_out_file_path())
+            #focused_image.save(self._get_out_file_path())
         else:
             focused_image = Image(cv2.imread(focusing_path))
-
         return focused_image
 
+    @staticmethod
+    def _sort_files_according_to_creation_time(focusing_path):
+        files = []
+        # Sort names according to creation time
+        for file_name in listdir(focusing_path):
+            name = join(focusing_path, file_name)
+            files.append(file(name))
+        files.sort(key=lambda x: getmtime(x.name))
+        return files
+
     def get_formulatrix_image_path(self):
-        return self._get_args().Formulatrix_image.name
+        return self.get_args().Formulatrix_image.name
 
     def get_focused_image_path(self):
-        focusing_path = self._get_args().beamline_stack_path
+        focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
             focusing_path =  self._get_out_file_path()
         return abspath(focusing_path)
@@ -166,7 +170,7 @@ class ParserManager:
          Get the path to the output file based on the contents of the config file and the location of the configuration dir.
          :return: A string representing the file path of the log file.
          """
-        dir_path = self._get_output_dir()
+        dir_path = self.get_output_dir()
         self._check_make_dirs(dir_path)
         return join(dir_path, self.FOCUSED_IMAGE_NAME)
 
@@ -179,22 +183,22 @@ class ParserManager:
         self._check_make_dirs(dir_path)
         return join(dir_path, self.LOG_FILE_NAME)
 
-    def _get_output_dir(self):
-        out = self._get_args().output
+    def get_output_dir(self):
+        out = self.get_args().output
         if out is None:
             #default - log file directory
             default_output_path = self._get_log_file_dir()
             return default_output_path
-        return abspath(self._get_args().output)
+        return abspath(self.get_args().output)
 
     def _get_log_file_dir(self):
-        l = self._get_args().log
+        l = self.get_args().log
         if l is None:
             # DEV NOTE: join and abspath used over split due to uncertainty over config path ending in a slash
             parent_dir = abspath(join(self.get_config_dir(), ".."))
             default_log_path = join(parent_dir, self.LOG_DIR_NAME)
             return default_log_path
-        return abspath(self._get_args().log)
+        return abspath(self.get_args().log)
 
     def _check_make_dirs(self, directory):
         if not exists(directory) or not isdir(directory):
@@ -208,7 +212,7 @@ class ParserManager:
                 exit(1)
 
     def get_to_json(self):
-        return self._get_args().to_json
+        return self.get_args().to_json
 
     def get_job_id(self):
-        return self._get_args().job
+        return self.get_args().job
