@@ -187,14 +187,6 @@ class TestParserManager(unittest.TestCase):
         rmdir('new')
         self.assertFalse(exists('new'))
 
-    def test(self):
-        dir = Mock()
-        dir.__exists__ = Mock(return_value = False)
-        dir.__makedirs__ = Mock(side_effect=Exception('ts'))
-        with (self.assertRaises(SystemExit)):
-            self.pm._check_make_dirs(dir)
-
-
 
 
 
