@@ -1,9 +1,12 @@
 import unittest
-from os.path import join
+from os import remove, rmdir
 
-from mock import MagicMock, Mock, patch
+import numpy as np
+from os.path import join, isfile, split, abspath, exists
 
-from dls_imagematch.service import readable_config_dir, parser_manager
+from mock import Mock
+
+from dls_imagematch.service import readable_config_dir
 from dls_imagematch.service.parser_manager import ParserManager
 from dls_util.imaging import Image
 
@@ -11,21 +14,28 @@ from dls_util.imaging import Image
 class TestParserManager(unittest.TestCase):
 
     def setUp(self):
+        #make sure the default destination does not contain processed file
         self.pm = ParserManager()
-        self.pm.build_parser()
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        default_path = self.pm.get_out_file_path()
+        try:
+            remove(default_path)
+        except: pass
 
     def test_build_parer_creates_parser_object(self):
+        self.assertIsNone(self.pm.parser)
+        self.pm.build_parser()
         self.assertIsNotNone(self.pm.parser)
 
     def test_get_config_returns_default_config_directory_when_config_directory_is_not_specified(self):
         self.pm.get_args = Mock(return_value=Mock(config=None)) #!! return value has to be a mock with particular parameters
-        self.assertEquals(self.pm.get_config_dir(), readable_config_dir.CONFIG_DIR)
+        self.assertEquals(self.pm.get_config_dir(), abspath(readable_config_dir.CONFIG_DIR))
 
     # is it really a useful test?
     def test_get_config_returns_whatever_is_specified_as_config(self):
         test_string = 'ble'
         self.pm.get_args = Mock(return_value=Mock(config=test_string))
-        self.assertEquals(self.pm.get_config_dir(), test_string)
+        self.assertIn(test_string, self.pm.get_config_dir())
 
     def test_get_scale_override_returns_None_if_not_set(self):
         self.pm.get_args = Mock(return_value=Mock(scale=None))
@@ -66,14 +76,14 @@ class TestParserManager(unittest.TestCase):
         self.assertEquals(len(points), 1)
 
     def test_get_focused_image_returns_an_instance_of_image_when_single_image_path_is_passed(self):
-        path = '../../../system-tests/resources/stacking/ideal.tif'
+        path = 'source/dls_imagematch/service/test_resources/stacking/ideal.tif'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
         im = self.pm.get_focused_image()
         self.assertIsInstance(im, Image)
         self.assertGreater(im.size(), 0)
 
     def test_get_focused_image_returns_an_instance_of_image_when_directory_path_is_passed(self):
-        path = '../../../system-tests/resources/stacking/levels'
+        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
         pm = ParserManager()
         pm.build_parser()
         pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, config=readable_config_dir.CONFIG_DIR))
@@ -82,23 +92,125 @@ class TestParserManager(unittest.TestCase):
         self.assertGreater(im.size(), 0)
 
     def test_sorting_files_puts_the_oldest_first_in_the_list(self):
-        path = '../../../system-tests/resources/stacking/levels'
+        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
         files = ParserManager._sort_files_according_to_creation_time(path)
         self.assertIn('FL9', files[0].name) # FL9 created first (used to be FL4)
 
-
-    def test_get_focused_image_path_when_beamline_image_path_point_to_dictionary(self):
-        path = '../../../system-tests/resources/stacking/levels'
+    def test_get_focused_image_path_when_beamline_image_path_points_to_dictionary_and_file_saved(self):
+        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        self.pm._check_is_file = Mock() # mute check_is_file
         result_path = self.pm.get_focused_image_path()
-        self.assertIn('processed.tif', result_path)#defoult as output and log are none
+        self.assertIn('processed.tif', result_path)#def when output and log are none
+
+    def test_get_focused_image_path_throws_exp_when_beamline_image_path_points_to_dictionary_and_file_not_saved(self):
+        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
+        self.pm.get_args = Mock(
+            return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        with (self.assertRaises(SystemExit)):
+            self.pm.get_focused_image_path()
 
     def test_get_focused_image_path_when_beamline_image_path_points_to_file(self):
-        path = '../../../system-tests/resources/stacking/ideal.tif'
+        path = 'source/dls_imagematch/service/test_resources/stacking/ideal.tif'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
         result_path = self.pm.get_focused_image_path()
         self.assertIn('ideal.tif', result_path)
-#!!!!!SAVE IMAGE
+
+    def test_get_focused_image_path_beamline_image_path_points_to_nonexisting_file(self):
+        path = 'source/dls_imagematch/service/test_resources/stacking/ideal_gost.tif'
+        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
+        with (self.assertRaises(SystemExit)):
+           self.pm.get_focused_image_path()
+
+    def test_save_function_saves_image_in_a_default_destination(self):
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        default_path = self.pm.get_out_file_path()
+        self.assertFalse(isfile(default_path))
+        self.pm.save_focused_image(Image(np.zeros((3, 3),dtype=np.uint8)))
+        self.assertTrue(isfile(default_path))
+
+    def test_get_out_file_path_returns_path_to_output_file_called_processed(self):
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        path = self.pm.get_out_file_path()
+        head, tail = split(path)
+        self.assertEquals(tail, self.pm.FOCUSED_IMAGE_NAME)
+
+    def test_log_file_path_returns_path_to_log_file_called_log(self):
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        path = self.pm.get_log_file_path()
+        head, tail = split(path)
+        self.assertEquals(tail, self.pm.LOG_FILE_NAME)
+
+    def test_get_log_file_dir_uses_location_of_config_dir_when_log_parameter_not_set(self):
+        self.pm.get_args = Mock(return_value=Mock(log=None, config=None))
+        log_dir = self.pm._get_log_file_dir()
+        config_dir = self.pm.get_config_dir()
+        head, tail = split(log_dir)
+        config_head, config_tail = split(config_dir)
+        self.assertEquals(tail, self.pm.LOG_DIR_NAME)
+        self.assertEquals(config_head, head)
+        self.assertNotEquals(config_tail, tail)
+
+    def test_get_log_file_dir_uses_location_sepcified_by_parameter_log(self):
+        self.pm.get_args = Mock(return_value=Mock(log='test_dir', config=None))
+        log_dir = self.pm._get_log_file_dir()
+        head, tail = split(log_dir)
+        self.assertEquals(tail, 'test_dir')
+        self.assertEquals(abspath('.'), head )
+
+    def test_get_output_dir_uses_location_specified_by_parameter_output(self):
+        self.pm.get_args = Mock(return_value=Mock(output='out_dir'))
+        out_dir = self.pm._get_output_dir()
+        head, tail = split(out_dir)
+        self.assertEquals(tail, 'out_dir')
+        self.assertEquals(abspath('.'), head)
+
+    def test_get_output_dir_is_log_file_dir_if_parameter_out_not_specified(self):
+        self.pm.get_args = Mock(return_value=Mock(output=None, log='hoho'))
+        out_dir = self.pm._get_output_dir()
+        log_file_dir = self.pm._get_log_file_dir()
+        head, tail = split(out_dir)
+        self.assertEquals(tail, 'hoho')
+        self.assertEquals(out_dir, log_file_dir)
+
+    def test_check_is_file_raises_system_exit_when_no_file(self):
+        with (self.assertRaises(SystemExit)):
+            self.pm._check_is_file('nofile.tif')
+
+    def test_check_make_dirs_creates_new_directory_if_does_not_exist(self):
+        self.pm.get_args = Mock()
+        try:
+            rmdir('new')
+        except: pass
+        self.pm._check_make_dirs('new')
+        self.assertTrue(exists('new'))
+        rmdir('new')
+        self.assertFalse(exists('new'))
+
+    def test(self):
+        dir = Mock()
+        dir.__exists__ = Mock(return_value = False)
+        dir.__makedirs__ = Mock(side_effect=Exception('ts'))
+        with (self.assertRaises(SystemExit)):
+            self.pm._check_make_dirs(dir)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

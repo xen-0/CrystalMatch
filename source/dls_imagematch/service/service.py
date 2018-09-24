@@ -46,6 +46,7 @@ class CrystalMatch:
 
         input_poi = parser_manager.parse_selected_points_from_args()
         beamline_image = parser_manager.get_focused_image()
+        parser_manager.save_focused_image()
         focused_image_path = parser_manager.get_focused_image_path()
         formulatrix_image_path = parser_manager.get_formulatrix_image_path()
         job_id = parser_manager.get_job_id()

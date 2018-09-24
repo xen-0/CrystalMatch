@@ -84,7 +84,7 @@ class ParserManager:
         config_directory = self.get_args().config
         if config_directory is None:
             config_directory = readable_config_dir.CONFIG_DIR
-        return config_directory
+        return abspath(config_directory)
 
     def get_scale_override(self):
         scale =  self.get_args().scale
@@ -146,31 +146,35 @@ class ParserManager:
             focused_image = Image(cv2.imread(focusing_path))
         return focused_image
 
-    @staticmethod
-    def _sort_files_according_to_creation_time(focusing_path):
-        files = []
-        # Sort names according to creation time
-        for file_name in listdir(focusing_path):
-            name = join(focusing_path, file_name)
-            files.append(file(name))
-        files.sort(key=lambda x: getmtime(x.name))
-        return files
-
     def get_formulatrix_image_path(self):
-        return self.get_args().Formulatrix_image.name
+        path = self.get_args().Formulatrix_image.name
+        self._check_is_file(path)
+        return path
 
+    def get_to_json(self):
+        return self.get_args().to_json
+
+    def get_job_id(self):
+        return self.get_args().job
+
+    # returns an error if the focused image is not saved
+    # may want to change this for saving done later
     def get_focused_image_path(self):
         focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
-            focusing_path =  self._get_out_file_path()
+            focusing_path =  self.get_out_file_path()
+        self._check_is_file(focusing_path)
         return abspath(focusing_path)
 
-    def _get_out_file_path(self):
+    def save_focused_image(self, image):
+        image.save(self.get_out_file_path())
+
+    def get_out_file_path(self):
         """
          Get the path to the output file based on the contents of the config file and the location of the configuration dir.
          :return: A string representing the file path of the log file.
          """
-        dir_path = self.get_output_dir()
+        dir_path = self._get_output_dir()
         self._check_make_dirs(dir_path)
         return join(dir_path, self.FOCUSED_IMAGE_NAME)
 
@@ -183,7 +187,7 @@ class ParserManager:
         self._check_make_dirs(dir_path)
         return join(dir_path, self.LOG_FILE_NAME)
 
-    def get_output_dir(self):
+    def _get_output_dir(self):
         out = self.get_args().output
         if out is None:
             #default - log file directory
@@ -211,8 +215,21 @@ class ParserManager:
                 log.error("Could not create find/create directory, path may be invalid: " + directory)
                 exit(1)
 
-    def get_to_json(self):
-        return self.get_args().to_json
+    @staticmethod
+    def _check_is_file(path):
+        if not isfile(path):
+            log = logging.getLogger(".".join([__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
+            log.error("Could not find the file, file may not been saved: " + path)
+            exit(1)
 
-    def get_job_id(self):
-        return self.get_args().job
+    @staticmethod
+    def _sort_files_according_to_creation_time(focusing_path):
+        files = []
+        # Sort names according to creation time
+        for file_name in listdir(focusing_path):
+            name = join(focusing_path, file_name)
+            files.append(file(name))
+        files.sort(key=lambda x: getmtime(x.name))
+        return files
+
