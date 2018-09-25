@@ -8,7 +8,7 @@ from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
 
-def fft(file_obj,q,count):
+def fft(file_obj, q, count):
     "Function that reads an image of a given name and  starts fft calculation."
     #read as soon as it appears
     name = file_obj.name
@@ -43,7 +43,7 @@ class ImageFFTManager:
         #log.info("t6")
 
         for idx, file_obj in enumerate(self._image_file_list):
-            process = Process(target=fft, args=(file_obj,q,idx))
+            process = Process(target=fft, args=(file_obj, q, idx))
             process.start()
             processes.append(process)
         #log.info("t7")

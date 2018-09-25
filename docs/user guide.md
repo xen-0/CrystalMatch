@@ -71,7 +71,6 @@ A `log` directory will also be created at the same file level as the configurati
 
 The configuration files are designed to allow limited changes to be made to the app and algorithm parameters without needing to recompile from source. To this end they are self-documented and can be edited using any text editor. A summary of the settings file contents is as follows:
 
-* `settings.ini` - App level settings - primarily log file options.
 * `align.ini` - Settings for the Alignment phase including acceptance metrics, Feature Matcher used and default scaling options.
 * `crystal.ini` - Settings for the Crystal Matching phase such as the size of ROI and the transform method - the Crystal Matching phase can also be disabled in this file.  POI will be calculated based on the global alignment only and the results returned with a status flag of `2, DISABLED`.
 * `gui.ini` - The GUI is currently for testing purposes only and cannot be accessed in the compiled app - this file should be ignored.
@@ -84,6 +83,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 
 **JSON schema**
 
+* `job_id` - job id.
 * `input_image` - Absolute path to Formulatrix Image.
 * `output_image` - Absolute path to Beamline Image.
 * `exit_code` - Describes the exit status of the application, used to flag abnormal runs while returning some results if possible.
@@ -95,13 +95,19 @@ CrystalMatch outputs results in a human-readable format by default - when being 
         * `msg` - Human readable error message.
     * `scale` - Scale between Formulatrix and Beamline images - this is this is calculated from the input scale ratio.
     * `translation` (x and y values) - The translation required to map a point from the Formulatrix image to the Beamline image.
+        *'x'
+        *'y'
     * `mean-error` - Mean error value after image alignment.
 * `poi` (optional, array) - An array of Crystal Matching phase results - will not be present if input points were not specified or Alignment phase failed.
     * `status` - Results status
         * `code` - `0` for failure, `1` for success or `2` if the option if POI analysis is disabled in the configuration file (`crystal.ini`).
         * `msg` - Human readable error message.
     * `location` (x and y values) - Calculated location of the POI in the co-ordinate space of the Beamline image. Note that if the match fails this will be the original point with the Alignment transform applied.
+        *'x'
+        *'y'
     * `translation` (x and y values) - The translation required to account for Crystal movement (excludes Alignment transform).
+        *'x'
+        *'y'
     * `mean_error` - Mean error value for this POI match.
 
 ## Command Line Options
@@ -111,8 +117,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 | `--config path`   | Sets the configuration directory. |
 | `--scale scale`   | Sets the scale between the Formulatrix and Beamline images given as two floats separated by a colon. Note this is relative (1:2 is the same as 2:4) and a value must be specified for each image using the format '[input_image_resolution]:[output_image_resolution]'. |
 | `--version`       | Shows the program's version number. |
-| `-v, --verbose`   | Increase output verbosity on the console. |
-| `-d, --debug`     | Output debug information to the console. |
 | `-j job_id, --job job_id` | Specify a job_id - this will be reported in the output to help identify this run. |
 | `--to_json`       | Output results as a JSON object. |
 | `--log path`      | Write log files to the directory specified by path. |
+| `-o path --output path`|Sets the directory to store the stacked image called 'processed.tif'. Log directory is used by default.|

@@ -25,12 +25,13 @@ class TestServiceOutput(SystemTest):
         self.set_directory_paths(realpath(__file__))
 
     def test_output_format_for_valid_run(self):
-        cmd_line = "{resources}/A10_1.jpg {resources}/A10_2.jpg 902,435 963,1310"
+        cmd_line = "-j 01234 {resources}/A10_1.jpg {resources}/A10_2.jpg 902,435 963,1310"
         self.run_crystal_matching_test(self.test_output_format_for_valid_run.__name__, cmd_line)
 
         # Test format of alignment output
         self.failUnlessStdOutContains(
             'exit_code:0',
+            'job_id:"01234"',
             'input_image:"' + abspath(self.substitute_tokens("{resources}/A10_1.jpg")) + '"',
             'output_image:"' + abspath(self.substitute_tokens("{resources}/A10_2.jpg")) + '"',
         )
