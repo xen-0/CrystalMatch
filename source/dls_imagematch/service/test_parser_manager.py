@@ -108,10 +108,11 @@ class TestParserManager(unittest.TestCase):
         self.assertGreater(im.size(), 0)
 
     #ten
-    def test_sorting_files_puts_the_oldest_first_in_the_list(self):
+    def test_sort_files_according_to_names(self):
         path = 'system-tests/resources/stacking/levels'
-        files = ParserManager._sort_files_according_to_creation_time(path)
-        self.assertIn('FL9', files[0].name) # FL9 created first (used to be FL4)
+        files = ParserManager._sort_files_according_to_names(path)
+        self.assertIn('FL0', files[0].name)
+        self.assertIn('FL10', files[-1].name)
 
     #ten
     def test_get_focused_image_path_when_beamline_image_path_points_to_file(self):

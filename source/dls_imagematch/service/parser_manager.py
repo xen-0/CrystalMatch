@@ -134,7 +134,7 @@ class ParserManager:
     def get_focused_image(self):
         focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
-            files = self._sort_files_according_to_creation_time(focusing_path)
+            files = self._sort_files_according_to_names(focusing_path)
             # Run focusstack
             stacker = FocusStack(files, self.get_args().config)
             focused_image = stacker.composite()
@@ -220,11 +220,11 @@ class ParserManager:
             exit(1)
 
     @staticmethod
-    def _sort_files_according_to_creation_time(focusing_path):
+    def _sort_files_according_to_names(focusing_path):
         files = []
-        # Sort names according to creation time
-        for file_name in listdir(focusing_path):
+        file_names = listdir(focusing_path)
+        file_names.sort(key=lambda f: int(filter(str.isdigit, f)))
+        for file_name in file_names:
             name = join(focusing_path, file_name)
             files.append(file(name))
-        files.sort(key=lambda x: getmtime(x.name))
         return files
