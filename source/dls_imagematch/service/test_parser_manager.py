@@ -75,15 +75,17 @@ class TestParserManager(unittest.TestCase):
         points = self.pm.parse_selected_points_from_args()
         self.assertEquals(len(points), 1)
 
+    #ten
     def test_get_focused_image_returns_an_instance_of_image_when_single_image_path_is_passed(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/ideal.tif'
+        path = 'system-tests/resources/stacking/ideal.tif'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
         im = self.pm.get_focused_image()
         self.assertIsInstance(im, Image)
         self.assertGreater(im.size(), 0)
 
+    #ten
     def test_get_focused_image_returns_an_instance_of_image_when_directory_path_is_passed(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
+        path = 'system-tests/resources/stacking/levels'
         pm = ParserManager()
         pm.build_parser()
         pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, config=readable_config_dir.CONFIG_DIR))
@@ -91,33 +93,36 @@ class TestParserManager(unittest.TestCase):
         self.assertIsInstance(im, Image)
         self.assertGreater(im.size(), 0)
 
+    #ten
     def test_sorting_files_puts_the_oldest_first_in_the_list(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
+        path = 'system-tests/resources/stacking/levels'
         files = ParserManager._sort_files_according_to_creation_time(path)
         self.assertIn('FL9', files[0].name) # FL9 created first (used to be FL4)
 
+    #ten
+    def test_get_focused_image_path_when_beamline_image_path_points_to_file(self):
+        path = 'system-tests/resources/stacking/ideal.tif'
+        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
+        result_path = self.pm.get_focused_image_path()
+        self.assertIn('ideal.tif', result_path)
+
     def test_get_focused_image_path_when_beamline_image_path_points_to_dictionary_and_file_saved(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
+        path = 'levels'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
         self.pm._check_is_file = Mock() # mute check_is_file
         result_path = self.pm.get_focused_image_path()
         self.assertIn('processed.tif', result_path)#def when output and log are none
 
     def test_get_focused_image_path_throws_exp_when_beamline_image_path_points_to_dictionary_and_file_not_saved(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/levels'
+        path = 'levels'
         self.pm.get_args = Mock(
             return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
         with (self.assertRaises(SystemExit)):
             self.pm.get_focused_image_path()
 
-    def test_get_focused_image_path_when_beamline_image_path_points_to_file(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/ideal.tif'
-        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
-        result_path = self.pm.get_focused_image_path()
-        self.assertIn('ideal.tif', result_path)
 
     def test_get_focused_image_path_beamline_image_path_points_to_nonexisting_file(self):
-        path = 'source/dls_imagematch/service/test_resources/stacking/ideal_gost.tif'
+        path = 'ideal_gost.tif'
         self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path))
         with (self.assertRaises(SystemExit)):
            self.pm.get_focused_image_path()
