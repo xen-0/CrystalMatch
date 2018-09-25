@@ -7,6 +7,7 @@ Changes merged into master
 |-----------|------|-------------|
 |VMXi-378   |Major |Replace Helicon Focus with OpenCV script|
 |VMXI-381   |Minor |Log File Analysis|
+|VMXI-467   |Minor |Clean up CrystalMatch mian and run options|
 
 Change Types:
 * Major - Backward incompatible change

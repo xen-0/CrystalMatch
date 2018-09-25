@@ -19,9 +19,7 @@ class ParserManager:
     LOG_DIR_PERMISSION = 0o777
     LOG_DIR_NAME = 'logs'
     LOG_FILE_NAME = 'log'
-
     FOCUSED_IMAGE_NAME = 'processed.tif'
-    #FOCUSED_IMAGE_DIR_NAME = 'output'
 
     def __init__(self):
         self.parser = None
@@ -133,7 +131,6 @@ class ParserManager:
                     log.warning("Selected point with invalid format will be ignored - '" + point_string + "'")
         return selected_points
 
-    # TODO: this function is doing too much - split it!
     def get_focused_image(self):
         focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
@@ -141,7 +138,6 @@ class ParserManager:
             # Run focusstack
             stacker = FocusStack(files, self.get_args().config)
             focused_image = stacker.composite()
-            #focused_image.save(self._get_out_file_path())
         else:
             focused_image = Image(cv2.imread(focusing_path))
         return focused_image
@@ -190,7 +186,7 @@ class ParserManager:
     def _get_output_dir(self):
         out = self.get_args().output
         if out is None:
-            #default - log file directory
+            # default - log file directory
             default_output_path = self._get_log_file_dir()
             return default_output_path
         return abspath(self.get_args().output)
@@ -232,4 +228,3 @@ class ParserManager:
             files.append(file(name))
         files.sort(key=lambda x: getmtime(x.name))
         return files
-

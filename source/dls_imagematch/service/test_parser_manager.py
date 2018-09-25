@@ -3,6 +3,7 @@ from os import remove, rmdir
 
 import numpy as np
 from os.path import join, isfile, split, abspath, exists
+import shutil
 
 from mock import Mock
 
@@ -14,13 +15,28 @@ from dls_util.imaging import Image
 class TestParserManager(unittest.TestCase):
 
     def setUp(self):
-        #make sure the default destination does not contain processed file
         self.pm = ParserManager()
-        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+
+    def tearDown(self):
+        # make sure the default destination does not contain processed file
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         default_path = self.pm.get_out_file_path()
         try:
             remove(default_path)
-        except: pass
+        except:
+            pass
+
+    @classmethod
+    def tearDownClass(self):
+        pm = ParserManager()
+        pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
+        default_log_path = pm._get_log_file_dir()
+        config = pm.get_config_dir()
+        try:
+            shutil.rmtree(default_log_path)
+            shutil.rmtree(config)
+        except:
+            pass
 
     def test_build_parer_creates_parser_object(self):
         self.assertIsNone(self.pm.parser)
@@ -86,10 +102,8 @@ class TestParserManager(unittest.TestCase):
     #ten
     def test_get_focused_image_returns_an_instance_of_image_when_directory_path_is_passed(self):
         path = 'system-tests/resources/stacking/levels'
-        pm = ParserManager()
-        pm.build_parser()
-        pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, config=readable_config_dir.CONFIG_DIR))
-        im = pm.get_focused_image()
+        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, config="test_config"))
+        im = self.pm.get_focused_image()
         self.assertIsInstance(im, Image)
         self.assertGreater(im.size(), 0)
 
@@ -108,7 +122,7 @@ class TestParserManager(unittest.TestCase):
 
     def test_get_focused_image_path_when_beamline_image_path_points_to_dictionary_and_file_saved(self):
         path = 'levels'
-        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        self.pm.get_args = Mock(return_value=Mock(beamline_stack_path=path, output=None, log=None, config="test_config"))
         self.pm._check_is_file = Mock() # mute check_is_file
         result_path = self.pm.get_focused_image_path()
         self.assertIn('processed.tif', result_path)#def when output and log are none
@@ -116,7 +130,7 @@ class TestParserManager(unittest.TestCase):
     def test_get_focused_image_path_throws_exp_when_beamline_image_path_points_to_dictionary_and_file_not_saved(self):
         path = 'levels'
         self.pm.get_args = Mock(
-            return_value=Mock(beamline_stack_path=path, output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+            return_value=Mock(beamline_stack_path=path, output=None, log=None, config="test_config"))
         with (self.assertRaises(SystemExit)):
             self.pm.get_focused_image_path()
 
@@ -128,26 +142,26 @@ class TestParserManager(unittest.TestCase):
            self.pm.get_focused_image_path()
 
     def test_save_function_saves_image_in_a_default_destination(self):
-        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         default_path = self.pm.get_out_file_path()
         self.assertFalse(isfile(default_path))
         self.pm.save_focused_image(Image(np.zeros((3, 3),dtype=np.uint8)))
         self.assertTrue(isfile(default_path))
 
     def test_get_out_file_path_returns_path_to_output_file_called_processed(self):
-        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         path = self.pm.get_out_file_path()
         head, tail = split(path)
         self.assertEquals(tail, self.pm.FOCUSED_IMAGE_NAME)
 
     def test_log_file_path_returns_path_to_log_file_called_log(self):
-        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config=readable_config_dir.CONFIG_DIR))
+        self.pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         path = self.pm.get_log_file_path()
         head, tail = split(path)
         self.assertEquals(tail, self.pm.LOG_FILE_NAME)
 
     def test_get_log_file_dir_uses_location_of_config_dir_when_log_parameter_not_set(self):
-        self.pm.get_args = Mock(return_value=Mock(log=None, config=None))
+        self.pm.get_args = Mock(return_value=Mock(log=None, config="test_config"))
         log_dir = self.pm._get_log_file_dir()
         config_dir = self.pm.get_config_dir()
         head, tail = split(log_dir)
@@ -157,7 +171,7 @@ class TestParserManager(unittest.TestCase):
         self.assertNotEquals(config_tail, tail)
 
     def test_get_log_file_dir_uses_location_sepcified_by_parameter_log(self):
-        self.pm.get_args = Mock(return_value=Mock(log='test_dir', config=None))
+        self.pm.get_args = Mock(return_value=Mock(log='test_dir', config="test_config"))
         log_dir = self.pm._get_log_file_dir()
         head, tail = split(log_dir)
         self.assertEquals(tail, 'test_dir')
