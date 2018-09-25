@@ -83,7 +83,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 
 **JSON schema**
 
-* `job_id` - Absolute path to Formulatrix Image.
+* `job_id` - job id.
 * `input_image` - Absolute path to Formulatrix Image.
 * `output_image` - Absolute path to Beamline Image.
 * `exit_code` - Describes the exit status of the application, used to flag abnormal runs while returning some results if possible.
