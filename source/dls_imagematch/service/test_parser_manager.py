@@ -170,7 +170,7 @@ class TestParserManager(unittest.TestCase):
         self.assertEquals(config_head, head)
         self.assertNotEquals(config_tail, tail)
 
-    def test_get_log_file_dir_uses_location_sepcified_by_parameter_log(self):
+    def test_get_log_file_dir_uses_location_specified_by_parameter_log(self):
         self.pm.get_args = Mock(return_value=Mock(log='test_dir', config="test_config"))
         log_dir = self.pm._get_log_file_dir()
         head, tail = split(log_dir)
