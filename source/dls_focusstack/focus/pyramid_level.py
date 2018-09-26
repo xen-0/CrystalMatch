@@ -11,9 +11,9 @@ class PyramidLevel:
     Operators used in the laplacian pyramid fusion process(flattening pyramid along layers)
     are implemented in this class"""
 
-    def __init__(self, array, number, level_number):
+    def __init__(self, array, layer_number, level_number):
         self.array = array
-        self.layer_number = number
+        self.layer_number = layer_number
         self.level_number = level_number
         self.deviations = []
         self.entropies = []
@@ -23,6 +23,9 @@ class PyramidLevel:
 
     def get_level_number(self):
         return self.level_number
+
+    def get_array(self):
+        return self.array
 
     def region_energy(self,kernel):
         """Region energy operator used during laplacian pyramid fusion on all but the base level."""

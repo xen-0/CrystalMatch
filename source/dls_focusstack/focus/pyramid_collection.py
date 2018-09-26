@@ -47,11 +47,17 @@ class PyramidCollection:
     """Pyramid has is an array with 4 dimensions: level, layer, image wight and image height
     number of levels is defined by pyramid depth
     number of layers is the number of input images each one focused on a different z-level"""
-    def __init__(self, pyramid_array):
-        self.pyramid_array = pyramid_array
+    def __init__(self):
+        self.collection = []
 
-    def get_pyramid_array(self):
-        return self.pyramid_array
+    def add_pyramid(self, pyramid):
+        self.collection.append(pyramid)
+
+    def get_pyramid(self, layer_number):
+        for pyramid in self.collection:
+            if pyramid.get_layer_number == layer_number:
+                return pyramid
+
 
     def get_region_kernel(self):
         a = 0.4

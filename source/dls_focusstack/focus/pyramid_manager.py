@@ -3,8 +3,9 @@
 
 import cv2
 import numpy as np
-import logging
-from dls_imagematch import logconfig
+
+from dls_focusstack.focus.pyramid import Pyramid, collapse
+from dls_focusstack.focus.pyramid_level import PyramidLevel
 
 from dls_focusstack.focus.pyramid_collection import PyramidCollection
 
@@ -20,65 +21,49 @@ class PyramidManager:
         """This is the function which maintains the steps of pyramid processing.
         It creates the laplacian pyramid,
         starts the fusion process which flattens the pyramid along layers and finally collapses the pyramid."""
-        #log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
-        #log.addFilter(logconfig.ThreadContextFilter())
         smallest_side = min(self.images[0].shape[:2])
         cfg = self.config
         min_size = cfg.pyramid_min_size.value()
         depth = int(np.log2(smallest_side / min_size))
         kernel_size = cfg.kernel_size.value()
         #create pyramid
-        pyramid = self.laplacian_pyramid(depth)
+        pyramid_collection = self.laplacian_pyramid(depth)
         #fuse pyramid
-        fusion = pyramid.fuse(kernel_size)
+        fusion = pyramid_collection.fuse(kernel_size)
         #collaps pyramid
-        return self.collapse(fusion)
+        return collapse(fusion)
 
     #this is only used by the laplacian pyramid function
     def _gaussian_pyramid(self, depth):
         """Creates the gaussian pyramid of a certain depth"""
-        pyramid_array = [self.images.astype(np.float64)]
-        num_images = self.images.shape[0]
-
-        while depth > 0:
-            image_zero = pyramid_array[-1][0]
-            next_level = cv2.pyrDown(image_zero)  # image
-            next_level_size = [num_images] + list(next_level.shape)
-            pyramid_array.append(np.zeros(next_level_size, dtype=next_level.dtype))  # pyramid extended
-            pyramid_array[-1][0] = next_level
-            for layer in range(1, num_images):
-                next_image = cv2.pyrDown(pyramid_array[-2][layer])  # -2 due to the extension above
-                pyramid_array[-1][layer] = next_image  # downscaled image
-            depth = depth - 1
-
-        return PyramidCollection(pyramid_array)
+        pyramid_collection = PyramidCollection()
+        for layer_number, image in enumerate(self.images):
+            pyramid = Pyramid(layer_number)
+            level = PyramidLevel(image.astype(np.float64), layer_number, 0)
+            pyramid.add_lower_level(level)
+            for level_number in range(1, depth): #check the depth
+                image_reduced = cv2.pyrDown(image.astype(np.float64))
+                next_level = PyramidLevel(image_reduced, layer_number, level_number)
+                pyramid.add_lower_level(next_level)
+            pyramid_collection.add_pyramid(pyramid)
+        return pyramid_collection
 
     def laplacian_pyramid(self, depth):
         """Create laplacian pyramid of a certain depth."""
-        gaussian = self._gaussian_pyramid(depth)
-        gaussian_array = gaussian.get_pyramid_array()
+        laplacian_collection = PyramidCollection()
+        gaussian_collection = self._gaussian_pyramid(depth)
+        for layer_number, image in enumerate(self.images):
+            gaussian_pyramid = gaussian_collection.get_pyramid(layer_number)
+            gaussian_top_level = gaussian_pyramid.get_level(depth-1).get_array() # the lowest resolution
+            laplacian_pyramid = Pyramid(layer_number)
+            laplacian_pyramid.add_upper_level(gaussian_top_level)
+            for level_number in range(depth-2, 0, -1):
+                to_expand = gaussian_pyramid.get_level(level_number).get_array()
+                expanded = cv2.pyrUp(to_expand)
+                lower_level = gaussian_pyramid.get_level(level_number-1).get_array()
+                difference = lower_level - expanded
+                difference_level = PyramidLevel(difference, layer_number, level_number)
+                laplacian_pyramid.add_upper_level(difference_level)
+            laplacian_collection.add_pyramid(laplacian_pyramid)
+        return laplacian_collection
 
-        pyramid = [gaussian_array[-1]]
-
-        for level in range(len(gaussian_array) - 1, 0, -1):
-            gauss = gaussian_array[level - 1]
-            pyramid.append(np.zeros(gauss.shape, dtype=gauss.dtype))
-            for layer in range(self.images.shape[0]):
-                gauss_layer = gauss[layer]
-                expanded = cv2.pyrUp(gaussian_array[level][layer])
-                if expanded.shape != gauss_layer.shape:
-                    expanded = expanded[:gauss_layer.shape[0], :gauss_layer.shape[1]]
-                pyramid[-1][layer] = gauss_layer - expanded
-
-        return PyramidCollection(pyramid[::-1])  # revert the sequence
-
-    def collapse(self, pyramid_array):
-        """Collapse the pyramid - effectively flatten a fused pyramid along levels to get one all in focus image."""
-        image = pyramid_array[-1]
-        for layer in pyramid_array[-2::-1]:
-            expanded = cv2.pyrUp(image)
-            if expanded.shape != layer.shape:
-                expanded = expanded[:layer.shape[0], :layer.shape[1]]
-            image = expanded + layer
-
-        return image

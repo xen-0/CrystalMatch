@@ -1,4 +1,7 @@
 from pkg_resources import require
+
+from dls_focusstack.focus.pyramid import collapse
+
 require('pygelf==0.2.11')
 require("numpy==1.11.1")
 require("scipy")
@@ -79,7 +82,7 @@ class TestPyramidManager(TestCase):
         pyr_manager = PyramidManager(self._images, self._config)
         fused = [self._array]
         fused.append(np.array([[30, 40], [30, 40], [31, 41], [32, 42]], dtype=np.float64))
-        result = pyr_manager.collapse(fused)
+        result = collapse(fused)
         self.assertEquals(result.shape, self._array.shape)
 
     #the elements of upper level are all the same - pyrUp just extends the size the values stay the same
@@ -87,7 +90,7 @@ class TestPyramidManager(TestCase):
         pyr_manager = PyramidManager(self._images, self._config)
         fused = [np.array([[2, 1], [1, 1], [1, 1], [1, 0]], dtype=np.float64)]
         fused.append(np.array([[2, 2], [2, 2]], dtype=np.float64))
-        result = pyr_manager.collapse(fused)
+        result = collapse(fused)
         test = np.array([[4, 3], [3, 3], [3, 3], [3, 2]],  dtype=np.float64)
         self.assertIn(result, test)
         self.assertEquals(result[1][1], test[1][1])
@@ -99,5 +102,5 @@ class TestPyramidManager(TestCase):
         p.laplacian_pyramid = MagicMock(return_value = MagicMock())
         p.collapse = MagicMock()
         p.get_pyramid_fusion()
-        p.collapse.assert_called_once()
+        collapse.assert_called_once()
         p.laplacian_pyramid.assert_called_once()
