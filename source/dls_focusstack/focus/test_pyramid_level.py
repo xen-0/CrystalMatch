@@ -6,7 +6,7 @@ from unittest import TestCase
 
 
 
-from dls_focusstack.focus.pyramid_layer import PyramidLayer
+from dls_focusstack.focus.pyramid_level import PyramidLevel
 
 import numpy as np
 
@@ -19,27 +19,27 @@ class TestPyramidLayer(TestCase):
                                dtype=np.float64)
 
     def test_something(self):
-        lap_layer0 = PyramidLayer(self._array, 0)
+        lap_layer0 = PyramidLevel(self._array, 0)
         self.assertEquals(lap_layer0.get_layer_number(),0)
 
     def test_get_probabilities_has_always_size_of_256(self):
-        probablities = PyramidLayer(self._array, 0).get_probabilities()
+        probablities = PyramidLevel(self._array, 0).get_probabilities()
         self.assertEquals(len(probablities),256)
 
     def test_get_probablities_returns_correct_value_for_chosen_grey_levels(self):
-        probablities = PyramidLayer(self._array, 0).get_probabilities()
+        probablities = PyramidLevel(self._array, 0).get_probabilities()
         self.assertEquals(probablities[10], 0.125)  #two tens and 16 elements of an array 2/16
         self.assertEquals(probablities[20], 0.125)
         self.assertEquals(probablities[11], 0.0625) #1/16
 
     def test_get_entropies_dont_change_array_size(self):
-        layer = PyramidLayer(self._array, 0)
+        layer = PyramidLevel(self._array, 0)
         layer.entropy(5)
         entropies = layer.get_entropies()
         self.assertEquals(entropies.shape, self._array.shape)
 
     def test_entropies_calculated_locally_in_a_kernel_match_value_returned_by_get_entropies(self):
-        layer = PyramidLayer(self._array, 0)
+        layer = PyramidLevel(self._array, 0)
         pro = layer.get_probabilities()
         layer.entropy(3)
         entropies = layer.get_entropies()
@@ -61,13 +61,13 @@ class TestPyramidLayer(TestCase):
 
 
     def test_get_deviation_dont_change_array_size(self):
-        layer = PyramidLayer(self._array, 0)
+        layer = PyramidLevel(self._array, 0)
         layer.deviation(5)
         dev = layer.get_deviations()
         self.assertEquals(dev.shape, self._array.shape)
 
     def test_deviations_calculated_locally_in_a_kernel_match_value_returned_by_get_deviations(self):
-        layer = PyramidLayer(self._array, 0)
+        layer = PyramidLevel(self._array, 0)
         layer.deviation(3)
         dev = layer.get_deviations()
         deviation = dev[1][1] #
@@ -87,7 +87,7 @@ class TestPyramidLayer(TestCase):
         self.assertEquals(round(local_deviation1,3), 67.333)
 
     def test_padding_adds_padding_of_expected_size(self):
-        layer = PyramidLayer(self._array, 0)
+        layer = PyramidLevel(self._array, 0)
         kernel_size = 3
         pad_am, pad_img, offset = layer.padding(kernel_size)
         self.assertEquals(pad_img.shape[0], self._array.shape[0] + 2) # one pixel each side

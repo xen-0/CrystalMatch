@@ -6,13 +6,13 @@ import cv2
 import numpy as np
 from scipy import ndimage
 
-class PyramidLayer:
+class PyramidLevel:
     """Pyramid layer - part of a pyramid of a particular level and layer.
     Operators used in the laplacian pyramid fusion process(flattening pyramid along layers)
     are implemented in this class"""
 
     def __init__(self, array, number):
-        self.layer_array = array
+        self.array = array
         self.layer_number = number
         self.deviations = []
         self.entropies = []
@@ -22,12 +22,12 @@ class PyramidLayer:
 
     def region_energy(self,kernel):
         """Region energy operator used during laplacian pyramid fusion on all but the base level."""
-        conv = ndimage.convolve(np.square(self.layer_array).astype(np.float64), kernel, mode='mirror')
+        conv = ndimage.convolve(np.square(self.array).astype(np.float64), kernel, mode='mirror')
         return conv
 
     def get_probabilities(self):
         """Probabilities show how many points of a given color (grayscale level) there is in an input image/array."""
-        levels, counts = np.unique(self.layer_array.astype(np.uint8), return_counts=True)
+        levels, counts = np.unique(self.array.astype(np.uint8), return_counts=True)
         probabilities = np.zeros((256,), dtype=np.float64)
         probabilities[levels] = counts.astype(np.float64) / counts.sum()
         return probabilities
@@ -40,7 +40,7 @@ class PyramidLayer:
     def entropy(self, kernel_size):
         """Entropy operator used during laplacian pyramid fusion on the base level."""
         probabilities = self.get_probabilities()
-        entropies = np.zeros(self.layer_array.shape[:2], dtype=np.float64)
+        entropies = np.zeros(self.array.shape[:2], dtype=np.float64)
         pad_amount, padded_image, offset = self.padding(kernel_size)
         for row in range(entropies.shape[0]):
             for column in range(entropies.shape[1]):
@@ -59,7 +59,7 @@ class PyramidLayer:
 
     def deviation(self, kernel_size):
         """Deviation operator used during laplacian pyramid fusion on the base level."""
-        deviations = np.zeros(self.layer_array.shape[:2], dtype=np.float64)
+        deviations = np.zeros(self.array.shape[:2], dtype=np.float64)
         pad_amount, padded_image, offset = self.padding(kernel_size)
         for row in range(deviations.shape[0]):
             for column in range(deviations.shape[1]):
@@ -73,7 +73,7 @@ class PyramidLayer:
 
     def padding(self, kernel_size):
         pad_amount = int((kernel_size - 1) / 2)
-        padded_image = cv2.copyMakeBorder(self.layer_array, pad_amount, pad_amount, pad_amount, pad_amount,
-                                      cv2.BORDER_REFLECT101)
+        padded_image = cv2.copyMakeBorder(self.array, pad_amount, pad_amount, pad_amount, pad_amount,
+                                          cv2.BORDER_REFLECT101)
         offset = np.arange(-pad_amount, pad_amount + 1)
         return pad_amount, padded_image, offset

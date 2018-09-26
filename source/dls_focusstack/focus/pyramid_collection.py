@@ -7,7 +7,7 @@ import numpy as np
 import logging
 from dls_imagematch import logconfig
 
-from pyramid_layer import PyramidLayer
+from pyramid_level import PyramidLevel
 
 def entropy_diviation(pyramid_layer,kernel_size,q):
     """On the top level of the pyramid (the one with the lowest resolution) two fusion operators:
@@ -28,7 +28,7 @@ def fused_laplacian(laplacians, region_kernel, level, q):
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
     for layer in range(layers):
-        gray_lap = PyramidLayer(laplacians[layer],layer)
+        gray_lap = PyramidLevel(laplacians[layer], layer)
         region_energies[layer] = gray_lap.region_energy(region_kernel)
 
     best_re = np.argmax(region_energies, axis=0)
@@ -43,7 +43,7 @@ def fused_laplacian(laplacians, region_kernel, level, q):
 
     q.put(fused)
 
-class Pyramid:
+class PyramidCollection:
     """Pyramid has is an array with 4 dimensions: level, layer, image wight and image height
     number of levels is defined by pyramid depth
     number of layers is the number of input images each one focused on a different z-level"""
@@ -95,7 +95,7 @@ class Pyramid:
         q = Queue()
         processes = []
         for layer in range(layers):
-            layer = PyramidLayer(images[layer], layer)
+            layer = PyramidLevel(images[layer], layer)
 
             process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
             process.start()

@@ -6,7 +6,7 @@ import numpy as np
 import logging
 from dls_imagematch import logconfig
 
-from dls_focusstack.focus.pyramid import Pyramid
+from dls_focusstack.focus.pyramid_collection import PyramidCollection
 
 
 class PyramidManager:
@@ -54,7 +54,7 @@ class PyramidManager:
                 pyramid_array[-1][layer] = next_image  # downscaled image
             depth = depth - 1
 
-        return Pyramid(pyramid_array)
+        return PyramidCollection(pyramid_array)
 
     def laplacian_pyramid(self, depth):
         """Create laplacian pyramid of a certain depth."""
@@ -73,7 +73,7 @@ class PyramidManager:
                     expanded = expanded[:gauss_layer.shape[0], :gauss_layer.shape[1]]
                 pyramid[-1][layer] = gauss_layer - expanded
 
-        return Pyramid(pyramid[::-1])  # revert the sequence
+        return PyramidCollection(pyramid[::-1])  # revert the sequence
 
     def collapse(self, pyramid_array):
         """Collapse the pyramid - effectively flatten a fused pyramid along levels to get one all in focus image."""

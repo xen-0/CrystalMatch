@@ -5,7 +5,7 @@ require("scipy")
 from unittest import TestCase
 
 from dls_focusstack.focus.pyramid_manager import PyramidManager
-from dls_focusstack.focus.pyramid import fused_laplacian, entropy_diviation
+from dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation
 
 import numpy as np
 from multiprocessing import Queue
