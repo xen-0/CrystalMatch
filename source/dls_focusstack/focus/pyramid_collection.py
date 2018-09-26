@@ -28,7 +28,7 @@ def fused_laplacian(laplacians, region_kernel, level, q):
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
     for layer in range(layers):
-        gray_lap = PyramidLevel(laplacians[layer], layer)
+        gray_lap = PyramidLevel(laplacians[layer], layer, level)
         region_energies[layer] = gray_lap.region_energy(region_kernel)
 
     best_re = np.argmax(region_energies, axis=0)
@@ -89,13 +89,14 @@ class PyramidCollection:
     def get_fused_base(self, kernel_size):
         """Fuses the base of the pyramid - the one with the lowest resolution."""
         images = self.pyramid_array[-1]
+        level = len(self.pyramid_array)-1
         layers = images.shape[0]
         entropies = np.zeros(images.shape[:3], dtype=np.float64)
         deviations = np.copy(entropies)
         q = Queue()
         processes = []
         for layer in range(layers):
-            layer = PyramidLevel(images[layer], layer)
+            layer = PyramidLevel(images[layer], layer, level)
 
             process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
             process.start()
