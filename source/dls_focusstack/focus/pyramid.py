@@ -3,28 +3,34 @@ import cv2
 class Pyramid:
     "A data structure which consists of levels. Each level contains an image of a different resolution than other layers."
 
-    def __init__(self, layer):
+    def __init__(self, layer, depth):
         self.levels = []
         self.layer = layer
+        self.depth = depth
 
     def get_layer_number(self):
         return self.layer
 
-    def add_lower_level(self, level):
+    def get_depth(self):
+        return self.depth
+
+    def add_lower_resolution_level(self, level):
         self.levels.append(level)
 
-    def add_upper_level(self, level):
+    def add_highier_resolution_level(self, level):
         self.levels.insert(0, level)
 
     def get_level(self, level_number):
         "lowest level of the pyramid hes the highest resolution and number 0"
-        for level in self.levels:
-            if level.get_level_number() == level_number:
-                return level
+        return self.levels[level_number]
+
     def get_top_level(self):
-        for level in self.levels:
-            if level.get_level_number() == len(self.levels)-1:
-                return level
+        return self.levels[ len(self.levels)-1]
+
+    #test this
+    def sort_levels(self):
+        sorted(self.levels, key = lambda x :x.get_array_x_size, reverse=True) # bigger resolution lewer index
+
 
     def collapse(self):
         """Collapse the pyramid - effectively flatten a fused pyramid along levels to get one all in focus image."""
@@ -32,6 +38,8 @@ class Pyramid:
         for level_number in range(len(self.levels)-2, 0, -1):
             expanded = cv2.pyrUp(image)
             level = self.get_level(level_number).get_array()
+            if expanded.shape != level.shape:
+                expanded = expanded[:level.shape[0], :level.shape[1]]
             image = expanded + level
 
         return image

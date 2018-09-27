@@ -5,6 +5,8 @@ from multiprocessing import Queue, Process
 import numpy as np
 
 import logging
+
+from dls_focusstack.focus.pyramid import Pyramid
 from dls_imagematch import logconfig
 
 from pyramid_level import PyramidLevel
@@ -41,10 +43,11 @@ def fused_laplacian(laplacians, region_kernel, level, q):
     log.addFilter(logconfig.ThreadContextFilter())
     log.debug("Level: " + str(level) + " fused!")
 
-    q.put(fused)
+    fused_level = PyramidLevel(fused,0,level)
+    q.put(fused_level)
 
 class PyramidCollection:
-    """Pyramid has is an array with 4 dimensions: level, layer, image wight and image height
+    """Pyramid collection has is an array with 4 dimensions: level, layer, image wight and image height
     number of levels is defined by pyramid depth
     number of layers is the number of input images each one focused on a different z-level"""
     def __init__(self):
@@ -54,10 +57,7 @@ class PyramidCollection:
         self.collection.append(pyramid)
 
     def get_pyramid(self, layer_number):
-        for pyramid in self.collection:
-            if pyramid.get_layer_number == layer_number:
-                return pyramid
-
+        return self.collection[layer_number]
 
     def get_region_kernel(self):
         a = 0.4
@@ -70,39 +70,53 @@ class PyramidCollection:
         - the input array is flattened along layers"""
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        #log.info("t12")
-        fused = [self.get_fused_base(kernel_size)]
+
+        base_level_fused = self.get_fused_base(kernel_size)
+        depth = self.collection[0].get_depth()
+        fused = Pyramid(depth,0)
+        fused.add_lower_resolution_level(base_level_fused)
+        layers = len(self.collection)
+
         q = Queue()
         processes = []
         region_kernel = self.get_region_kernel()
-        for level in range(len(self.pyramid_array) - 2, -1, -1):
-            laplacians = self.pyramid_array[level]
+
+        for level in range(depth - 2, -1, -1):
+            sh = self.collection[0].get_level(level).get_array().shape
+            laplacians = np.zeros((layers, sh[0], sh [1]), dtype=np.float64)
+            for layer in range(0, layers):
+                new_level = self.collection[layer].get_level(level).get_array()
+                laplacians[layer] = new_level
 
             process = Process(target=fused_laplacian, args=(laplacians, region_kernel, level, q))
             process.start()
             processes.append(process)
-        #log.info("t13")
-        for level in range(len(self.pyramid_array) - 2, -1, -1):
+
+        for level in range(depth - 2, -1, -1):
             pyramid_level = q.get()
-            fused.append(pyramid_level)
-        #log.info("t14")
+            fused.add_highier_resolution_level(pyramid_level)
+
         for p in processes:
             p.join() #this one won't work if there is still something in the Queue
-        #log.info("t15")
-        fused.sort(key=len, reverse=True)  # highest resolution on level 0
+
+        fused.sort_levels()
         return fused
 
     def get_fused_base(self, kernel_size):
         """Fuses the base of the pyramid - the one with the lowest resolution."""
-        images = self.pyramid_array[-1]
-        level = len(self.pyramid_array)-1
-        layers = images.shape[0]
-        entropies = np.zeros(images.shape[:3], dtype=np.float64)
+
+        layers = len(self.collection)
+        sh = self.collection[0].get_top_level().get_array().shape
+        pyramid = self.collection[0]
+        top_level_number = pyramid.get_depth() - 1
+        entropies = np.zeros((layers, sh[0], sh [1]), dtype=np.float64)
         deviations = np.copy(entropies)
         q = Queue()
         processes = []
         for layer in range(layers):
-            layer = PyramidLevel(images[layer], layer, level)
+            pyramid = self.collection[layer]
+            top_pyramid_level = pyramid.get_top_level()
+            layer = PyramidLevel(top_pyramid_level.get_array(), layer, top_level_number)
 
             process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
             process.start()
@@ -119,11 +133,13 @@ class PyramidCollection:
 
         best_e = np.argmax(entropies, axis=0) #keeps the layer numbers
         best_d = np.argmax(deviations, axis=0)
-        fused = np.zeros(images.shape[1:], dtype=np.float64)
+        fused = np.zeros(best_d.shape, dtype=np.float64)
 
         for layer in range(layers):
-            fused += np.where(best_e[:, :] == layer, images[layer], 0)
-            fused += np.where(best_d[:, :] == layer, images[layer], 0)
+            array_tmp = self.collection[layer].get_top_level().get_array()
+            fused += np.where(best_e[:, :] == layer, array_tmp, 0)
+            fused += np.where(best_d[:, :] == layer, array_tmp, 0)
 
-        return (fused / 2).astype(images.dtype)
+        new_array = (fused / 2)
+        return PyramidLevel(new_array,0,top_level_number) # layer 0 ???
 

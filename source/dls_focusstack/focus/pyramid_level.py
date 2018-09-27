@@ -27,6 +27,9 @@ class PyramidLevel:
     def get_array(self):
         return self.array
 
+    def get_array_x_size(self):
+        return self.array.shape[0]
+
     def region_energy(self,kernel):
         """Region energy operator used during laplacian pyramid fusion on all but the base level."""
         conv = ndimage.convolve(np.square(self.array).astype(np.float64), kernel, mode='mirror')
