@@ -1,11 +1,16 @@
+from copy import deepcopy
+
 from pkg_resources import require
+
+from dls_focusstack.focus.pyramid import Pyramid
+from dls_focusstack.focus.pyramid_level import PyramidLevel
 
 require("numpy==1.11.1")
 require("scipy")
 from unittest import TestCase
 
-from dls_focusstack.focus.pyramid_manager import PyramidManager
-from dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation
+
+from dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation, PyramidCollection
 
 import numpy as np
 from multiprocessing import Queue
@@ -15,58 +20,39 @@ from mock import MagicMock
 class TestPyramid(TestCase):
 
     def setUp(self):
-        #case1
-        self._config = MagicMock()
-        self._array = np.array([[10, 20, 30, 40], [10, 20, 30, 40], [11, 21, 31, 41], [12, 22, 32, 42]],
-                               dtype=np.float64)
-        self._depth = 2
-        self._images = np.array([self._array, self._array / 10])
 
-        self._pyramid = PyramidManager(self._images, self._config).laplacian_pyramid(self._depth)
+        pyr = Pyramid(12, 3)
+        level_0 = PyramidLevel(np.array([[10, 10, 10, 10], [2, 2, 2, 2], [4, 4, 4, 4], [4, 4, 4, 4]], dtype=np.float64), 2, 2)
+        level_1 = PyramidLevel(np.array([[2, 2], [3, 3]], dtype=np.float64), 2, 1)
+        level_2 = PyramidLevel(np.array([[0]], dtype=np.float64), 2, 0)
+        pyr.add_lower_resolution_level(level_0)
+        pyr.add_lower_resolution_level(level_1)
+        pyr.add_lower_resolution_level(level_2)
+
+        pyr1 = deepcopy(pyr)
         self._kernel_size = 5
+        self._pyramid_collection = PyramidCollection()
+        self._pyramid_collection.add_pyramid(pyr)
+        self._pyramid_collection.add_pyramid(pyr1)
 
     def test_fuse_does_not_change_the_depth_of_the_pyramid(self):
-        fused = self._pyramid.fuse(self._kernel_size)
-        self.assertEquals(len(fused), self._depth+1)
+        collection_layer_0 = self._pyramid_collection.get_pyramid(0)
+        fused = self._pyramid_collection.fuse(self._kernel_size)
+        self.assertEquals(collection_layer_0.get_depth(), fused.get_depth())
 
-    def test_fuse_flattens_the_pyramid_along_images(self):
-        #original size level zero
-        self.assertEqual(self._pyramid.get_pyramid_array()[0].shape, (2,4,4))
-        fused = self._pyramid.fuse(self._kernel_size)
-        #size after fusion level zero
-        self.assertEqual(fused[0].shape, self._array.shape)
-
-    def test_fused_laplacian_of_level0_has_size_of_input_array(self):
-        laplacians_level0 = self._pyramid.get_pyramid_array()[0]
+    def test_fused_laplacian_of_level0_has_size_of_input_level0(self):
+        laplacians_level0 = np.zeros((2, 4, 4), dtype=np.float64)
+        laplacians_level0[0] = self._pyramid_collection.get_pyramid(0).get_level(0).get_array()
+        laplacians_level0[1] = self._pyramid_collection.get_pyramid(1).get_level(0).get_array()
         q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
+        fused_laplacian(laplacians_level0, self._pyramid_collection.get_region_kernel(), 2, q)
         fused_level = q.get()
-        self.assertEquals(fused_level.shape, self._array.shape)
+        self.assertEquals(fused_level.get_array().shape, laplacians_level0[0].shape)
 
-    def test_fused_laplacian_picks_the_layer_with_high_region_energy_from_given_level(self):
-        laplacians_level0 = self._pyramid.get_pyramid_array()[0]
-        q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
-        fused_level = q.get()
-        #layer 0 has the highiest region energy as all the values are 10 times larger than layer1
-        self.assertIn(laplacians_level0[0], fused_level)
-
-    def test_entropy_deviation_calls_entropy_abd_deviation_once(self):
+    def test_entropy_deviation_calls_entropy_and_deviation_once(self):
         layer = MagicMock()
         q = MagicMock()
-        entropy_diviation(layer, self._pyramid.get_region_kernel(),q)
+        entropy_diviation(layer, self._pyramid_collection.get_region_kernel(),q)
 
         layer.entropy.assert_called_once()
         layer.deviation.assert_called_once()
-
-
-
-
-
-
-
-
-
-
-
-

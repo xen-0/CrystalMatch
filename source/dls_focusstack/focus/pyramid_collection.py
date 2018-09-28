@@ -47,11 +47,12 @@ def fused_laplacian(laplacians, region_kernel, level, q):
     q.put(fused_level)
 
 class PyramidCollection:
-    """Pyramid collection has is an array with 4 dimensions: level, layer, image wight and image height
-    number of levels is defined by pyramid depth
-    number of layers is the number of input images each one focused on a different z-level"""
+    """Pyramid collection: collection of pyramids."""
     def __init__(self):
         self.collection = []
+
+    def get_number_of_layers(self):
+        return len(self.collection)
 
     def add_pyramid(self, pyramid):
         self.collection.append(pyramid)
@@ -66,14 +67,13 @@ class PyramidCollection:
 
     def fuse(self, kernel_size):
         """Function which fuses each level of the pyramid using appropriate fusion operators
-        the output is a 3 dimensional array (level, image wight, image high)
-        - the input array is flattened along layers"""
+        the output is one pyramid containing fused levels"""
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
 
         base_level_fused = self.get_fused_base(kernel_size)
         depth = self.collection[0].get_depth()
-        fused = Pyramid(depth,0)
+        fused = Pyramid(0,depth)
         fused.add_lower_resolution_level(base_level_fused)
         layers = len(self.collection)
 
@@ -94,7 +94,7 @@ class PyramidCollection:
 
         for level in range(depth - 2, -1, -1):
             pyramid_level = q.get()
-            fused.add_highier_resolution_level(pyramid_level)
+            fused.add_higher_resolution_level(pyramid_level)
 
         for p in processes:
             p.join() #this one won't work if there is still something in the Queue
@@ -109,7 +109,7 @@ class PyramidCollection:
         sh = self.collection[0].get_top_level().get_array().shape
         pyramid = self.collection[0]
         top_level_number = pyramid.get_depth() - 1
-        entropies = np.zeros((layers, sh[0], sh [1]), dtype=np.float64)
+        entropies = np.zeros((layers, sh[0], sh[1]), dtype=np.float64)
         deviations = np.copy(entropies)
         q = Queue()
         processes = []

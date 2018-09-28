@@ -24,7 +24,7 @@ class PyramidManager:
         smallest_side = min(self.images[0].shape[:2])
         cfg = self.config
         min_size = cfg.pyramid_min_size.value()
-        depth = int(np.log2(smallest_side / min_size))
+        depth = int(np.log2(smallest_side / min_size))+1
         kernel_size = cfg.kernel_size.value()
         #create pyramid
         pyramid_collection = self.laplacian_pyramid(depth)
@@ -56,7 +56,7 @@ class PyramidManager:
             gaussian_pyramid = gaussian_collection.get_pyramid(layer_number)
             gaussian_top_level = gaussian_pyramid.get_top_level() # the lowest resolution
             laplacian_pyramid = Pyramid(layer_number, depth)
-            laplacian_pyramid.add_highier_resolution_level(gaussian_top_level)
+            laplacian_pyramid.add_higher_resolution_level(gaussian_top_level)
             for level_number in range(depth-1, 0, -1):
                 to_expand = gaussian_pyramid.get_level(level_number).get_array()
                 expanded = cv2.pyrUp(to_expand)
@@ -65,7 +65,7 @@ class PyramidManager:
                     expanded = expanded[:lower_level.shape[0], :lower_level.shape[1]]
                 difference = lower_level - expanded
                 difference_level = PyramidLevel(difference, layer_number, level_number)
-                laplacian_pyramid.add_highier_resolution_level(difference_level)
+                laplacian_pyramid.add_higher_resolution_level(difference_level)
             laplacian_collection.add_pyramid(laplacian_pyramid)
         return laplacian_collection
 
