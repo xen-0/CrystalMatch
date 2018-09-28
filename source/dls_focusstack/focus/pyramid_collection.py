@@ -11,9 +11,12 @@ from dls_imagematch import logconfig
 
 from pyramid_level import PyramidLevel
 
-def entropy_diviation(pyramid_layer,kernel_size,q):
+def entropy_diviation(parameters):
     """On the top level of the pyramid (the one with the lowest resolution) two fusion operators:
     entropy and deviation are used"""
+    pyramid_layer = parameters[0]
+    kernel_size = parameters[1]
+
     gray_image = pyramid_layer
     gray_image.entropy(kernel_size)
     gray_image.deviation(kernel_size)
@@ -21,8 +24,7 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
     log.debug("Calculated entropy/div for top level of layer: " + str(gray_image.get_layer_number()))
-
-    q.put(gray_image)
+    return gray_image
 
 def fused_laplacian(parameters):
     """On other levels of the pyramid one fusion operator: region energy is used"""
@@ -110,25 +112,33 @@ class PyramidCollection:
         top_level_number = pyramid.get_depth() - 1
         entropies = np.zeros((layers, sh[0], sh[1]), dtype=np.float64)
         deviations = np.copy(entropies)
-        q = Queue()
-        processes = []
+        #q = Queue()
+        #processes = []
+        parameters = []
         for layer in range(layers):
             pyramid = self.collection[layer]
             top_pyramid_level = pyramid.get_top_level()
             layer = PyramidLevel(top_pyramid_level.get_array(), layer, top_level_number)
+            param = (layer, kernel_size)
+            parameters.append(param)
+        pool = Pool()
+        results = pool.map_async(entropy_diviation, parameters)
+        test = results.get()
+        pool.close()
+        pool.join()
 
-            process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
-            process.start()
-            processes.append(process)
+            #process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
+            #process.start()
+            #processes.append(process)
 
-        for layer in range(layers):
+        for l in test:
             #should always do all threads as all the processes are the same and should take roughly the same time
-            l = q.get() #picks the first one which is ready
+            #l = q.get() #picks the first one which is ready
             entropies[l.get_layer_number()] = l.get_entropies()
             deviations[l.get_layer_number()] = l.get_deviations()
 
-        for p in processes:
-            p.join() #this one won't work if there is still something in the Queue
+        #for p in processes:
+         #   p.join() #this one won't work if there is still something in the Queue
 
         best_e = np.argmax(entropies, axis=0) #keeps the layer numbers
         best_d = np.argmax(deviations, axis=0)
