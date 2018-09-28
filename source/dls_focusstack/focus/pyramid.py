@@ -43,3 +43,7 @@ class Pyramid:
             image = expanded + level
 
         return image
+
+    def add_bunch_of_levels(self, bunch):
+        for level in bunch:
+            self.levels.append(level)

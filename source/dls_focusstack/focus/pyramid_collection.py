@@ -1,6 +1,6 @@
 """This is code taken from https://github.com/sjawhar/focus-stacking
 which implements the methods described in http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf"""
-from multiprocessing import Queue, Process
+from multiprocessing import Queue, Process, Pool
 
 import numpy as np
 
@@ -24,8 +24,12 @@ def entropy_diviation(pyramid_layer,kernel_size,q):
 
     q.put(gray_image)
 
-def fused_laplacian(laplacians, region_kernel, level, q):
+def fused_laplacian(parameters):
     """On other levels of the pyramid one fusion operator: region energy is used"""
+    laplacians = parameters[0]
+    region_kernel = parameters[1]
+    level = parameters[2]
+
     layers = laplacians.shape[0]
     region_energies = np.zeros(laplacians.shape[:3], dtype=np.float64)
 
@@ -44,7 +48,7 @@ def fused_laplacian(laplacians, region_kernel, level, q):
     log.debug("Level: " + str(level) + " fused!")
 
     fused_level = PyramidLevel(fused,0,level)
-    q.put(fused_level)
+    return fused_level
 
 class PyramidCollection:
     """Pyramid collection: collection of pyramids."""
@@ -76,28 +80,23 @@ class PyramidCollection:
         fused = Pyramid(0,depth)
         fused.add_lower_resolution_level(base_level_fused)
         layers = len(self.collection)
-
-        q = Queue()
-        processes = []
         region_kernel = self.get_region_kernel()
-
+        parameters = []
         for level in range(depth - 2, -1, -1):
             sh = self.collection[0].get_level(level).get_array().shape
             laplacians = np.zeros((layers, sh[0], sh [1]), dtype=np.float64)
             for layer in range(0, layers):
                 new_level = self.collection[layer].get_level(level).get_array()
                 laplacians[layer] = new_level
+            param = (laplacians, region_kernel,level)
+            parameters.append(param)
+        pool = Pool()
+        results = pool.map_async(fused_laplacian, parameters)
+        test = results.get()
+        pool.close()
+        pool.join()
 
-            process = Process(target=fused_laplacian, args=(laplacians, region_kernel, level, q))
-            process.start()
-            processes.append(process)
-
-        for level in range(depth - 2, -1, -1):
-            pyramid_level = q.get()
-            fused.add_higher_resolution_level(pyramid_level)
-
-        for p in processes:
-            p.join() #this one won't work if there is still something in the Queue
+        fused.add_bunch_of_levels(test)
 
         fused.sort_levels()
         return fused
