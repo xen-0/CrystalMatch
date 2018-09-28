@@ -94,11 +94,11 @@ class PyramidCollection:
             parameters.append(param)
         pool = Pool()
         results = pool.map_async(fused_laplacian, parameters)
-        test = results.get()
+        bunch = results.get()
         pool.close()
         pool.join()
 
-        fused.add_bunch_of_levels(test)
+        fused.add_bunch_of_levels(bunch)
 
         fused.sort_levels()
         return fused
@@ -112,8 +112,6 @@ class PyramidCollection:
         top_level_number = pyramid.get_depth() - 1
         entropies = np.zeros((layers, sh[0], sh[1]), dtype=np.float64)
         deviations = np.copy(entropies)
-        #q = Queue()
-        #processes = []
         parameters = []
         for layer in range(layers):
             pyramid = self.collection[layer]
@@ -123,22 +121,12 @@ class PyramidCollection:
             parameters.append(param)
         pool = Pool()
         results = pool.map_async(entropy_diviation, parameters)
-        test = results.get()
+        result_layers = results.get()
         pool.close()
         pool.join()
-
-            #process = Process(target=entropy_diviation, args=(layer, kernel_size, q))
-            #process.start()
-            #processes.append(process)
-
-        for l in test:
-            #should always do all threads as all the processes are the same and should take roughly the same time
-            #l = q.get() #picks the first one which is ready
+        for l in result_layers:
             entropies[l.get_layer_number()] = l.get_entropies()
             deviations[l.get_layer_number()] = l.get_deviations()
-
-        #for p in processes:
-         #   p.join() #this one won't work if there is still something in the Queue
 
         best_e = np.argmax(entropies, axis=0) #keeps the layer numbers
         best_d = np.argmax(deviations, axis=0)
