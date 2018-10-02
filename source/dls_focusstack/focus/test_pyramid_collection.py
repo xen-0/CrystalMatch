@@ -44,15 +44,13 @@ class TestPyramid(TestCase):
         laplacians_level0 = np.zeros((2, 4, 4), dtype=np.float64)
         laplacians_level0[0] = self._pyramid_collection.get_pyramid(0).get_level(0).get_array()
         laplacians_level0[1] = self._pyramid_collection.get_pyramid(1).get_level(0).get_array()
-        q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid_collection.get_region_kernel(), 2, q)
-        fused_level = q.get()
+        param = (laplacians_level0, self._pyramid_collection.get_region_kernel(), 2)
+        fused_level = fused_laplacian(param)
         self.assertEquals(fused_level.get_array().shape, laplacians_level0[0].shape)
 
     def test_entropy_deviation_calls_entropy_and_deviation_once(self):
         layer = MagicMock()
-        q = MagicMock()
-        entropy_diviation(layer, self._pyramid_collection.get_region_kernel(),q)
-
+        param = (layer, self._pyramid_collection.get_region_kernel())
+        entropy_diviation(param)
         layer.entropy.assert_called_once()
         layer.deviation.assert_called_once()

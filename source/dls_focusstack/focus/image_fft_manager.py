@@ -13,7 +13,6 @@ def fft(param):
     #read as soon as it appears
     name = param[0]
     count = param[1]
-    #name = file_obj.name
     img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)

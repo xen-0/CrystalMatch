@@ -56,9 +56,8 @@ class TestImageFFTManager(TestCase):
         for fft_img in self._imgFFTman.get_fft_images():
             self.assertIsNotNone(fft_img.getFFT())
 
-    def test_q_put_called_once_by_fft_method(self):
-        q =MagicMock()
-        image_fft_manager.fft(self._file1, q, 10)
-        q.put.assert_called_once()
-
-
+    def test_fft_method_creates_fft_value_and_set_the_image_number_correctly(self):
+        param = (self._file1.name, 10)
+        image_fft = image_fft_manager.fft(param)
+        self.assertIsNotNone(image_fft.getFFT())
+        self.assertEquals(image_fft.get_image_number(), 10)
