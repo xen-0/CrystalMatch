@@ -55,7 +55,7 @@ class FocusStack:
 
         #stacked_image = pyramid(aligned_images, self._config).get_pyramid_fusion()
         stacked_image = PyramidManager(images, self._config).get_pyramid_fusion()
-        #log.info("t17")
+
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         backtorgb = cv2.cvtColor(stacked_image, cv2.COLOR_GRAY2RGB)
 

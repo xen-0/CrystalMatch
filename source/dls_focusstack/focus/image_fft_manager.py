@@ -40,6 +40,7 @@ class ImageFFTManager:
         log.addFilter(logconfig.ThreadContextFilter())
         parameters = []
         for idx, file_obj in enumerate(self._image_file_list):
+            #first image has index 0 
             param = (file_obj.name, idx)
             parameters.append(param)
 

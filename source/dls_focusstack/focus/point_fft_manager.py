@@ -10,38 +10,29 @@ from dls_focusstack.focus.imagefft import ImageFFT
 
 
 def max_fft_point(param):
-
     fftimages = param[0]
     point = param[1]
-    fftpoints =[]
+    fftlevels =[]
 
     for image in fftimages:
         pointfft = PointFFT(point, image)
         pointfft.runFFT()
-        fftpoints.append(pointfft)
-
-    max_fft_point = max(fftpoints, key=lambda fftpoint : fftpoint.getFFT)
+        fftlevels.append(pointfft)
+    max_fft_point = max(fftlevels, key=lambda fftpoint : fftpoint.getFFT())
 
     return max_fft_point
 
-
 class PointFFTManager:
     """"""
-    def __init__(self, images, match_result):
+    def __init__(self, images, match_results):
         self.images = images
-        self.match_result = match_result
-
-    def _get_list_of_translformed_points(self):
-        points = []
-        for poi in self.match_result:
-            points.append(poi.get_transformed_poi())
-        return points
+        self.match_results = match_results
 
     def read_ftt_points(self):
-        points = self._get_list_of_translformed_points()
+        matches = self.match_results.get_matches()
         params = []
-        for point in points:
-            param = (self.images, point)
+        for match in matches:
+            param = (self.images, match.get_transformed_poi())
             params.append(param)
 
         pool = Pool()
@@ -49,10 +40,14 @@ class PointFFTManager:
 
         pool.close()
         pool.join()
-        fftpoints = result.get()
 
-        return fftpoints
+        max_fft_points = result.get()
 
-
+        # tired to pass the whole match object to max_fft_point but got a pickling error
+        # tried this mapping instead
+        for match in matches:
+            #distnce 0 means same points
+            fft_point = filter(lambda x : x.get_point().distance_to(match.get_transformed_poi()) == 0, max_fft_points)
+            match.set_poi_z_level(fft_point[0].get_level())
 
 
