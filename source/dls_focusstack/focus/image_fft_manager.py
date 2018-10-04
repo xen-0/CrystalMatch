@@ -19,7 +19,10 @@ def fft(param):
     image_fft.runFFT()
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
-    log.debug("Finished calculating fft for:" + name)
+    extra = ({'fft': image_fft.getFFT()})
+    log = logging.LoggerAdapter(log, extra)
+    log.info("Finished calculating fft for:" + name)
+    log.debug(extra)
     return image_fft
 
 
@@ -28,7 +31,6 @@ class ImageFFTManager:
     def __init__(self, name_list):
         self._image_file_list = name_list
         self.fft_images = []
-
 
     def read_ftt_images(self):
         """Function which starts fft calculation for each input image name.
@@ -46,19 +48,6 @@ class ImageFFTManager:
         self.fft_images = results.get()
         pool.close()
         pool.join()
-
-
-        #q = Queue()
-        #processes=[]
-
-
-        #for idx, file_obj in enumerate(self._image_file_list):
-            #process = Process(target=fft, args=(file_obj, q, idx))
-            #process.start()
-            #processes.append(process)
-        #self.fft_images = [q.get() for p in processes]
-        #for p in processes:
-           # p.join()
 
     def get_fft_images(self):
         return self.fft_images

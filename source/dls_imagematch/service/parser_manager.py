@@ -23,6 +23,7 @@ class ParserManager:
 
     def __init__(self):
         self.parser = None
+        self.images_to_stack = None
 
     def build_parser(self):
         """Return an argument parser for the Crystal Matching service.
@@ -138,9 +139,14 @@ class ParserManager:
             # Run focusstack
             stacker = FocusStack(files, self.get_args().config)
             focused_image = stacker.composite()
+
+            self.images_to_stack = stacker.get_fft_images_to_stack()
         else:
             focused_image = Image(cv2.imread(focusing_path))
         return focused_image
+
+    def get_fft_images_to_stack(self):
+        return self.images_to_stack
 
     def get_formulatrix_image_path(self):
         path = self.get_args().Formulatrix_image.name

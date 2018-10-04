@@ -11,6 +11,7 @@ class SharpnessDetector(object):
     def __init__(self, img_fft, config):
         self.fft_img = img_fft
         self.config = config
+        self.fft_images_to_stack = []
 
     def images_to_stack(self):
         """Function which finds the maximum of mean FFT values provided.
@@ -39,9 +40,12 @@ class SharpnessDetector(object):
         images = []
         for s in self.fft_img:
             if s.get_image_number() in range:
+                self.fft_images_to_stack.append(s)
                 images.append(s.get_image())
-
         return images
+
+    def get_fft_images_to_stack(self):
+        return self.fft_images_to_stack
 
     def find_range(self, max):
         """Function which defines the range of images to stack."""

@@ -32,13 +32,12 @@ class ServiceResultExitCode(StatusFlag):
 
     def to_json_array(self):
         json_array = StatusFlag.to_json_array(self)
-        #_with_names(self, 'exit_code_num', 'exit_code')
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
 
-    def to_json_array_with_names(self):
-        json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
+    def to_json_array_with_names(self, code_num, code):
+        json_array = StatusFlag.to_json_array_with_names(self, code_num, code)
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
@@ -121,8 +120,9 @@ class ServiceResult:
         if len(self._match_results) > 0:
             output_list.append(self.POI_RESULTS_HEADER)
         for crystal_match in self._match_results:
-            line = "poi:"
-            line += str(crystal_match.get_transformed_poi()) + self.SEPARATOR
+            line = "poi: "
+            line += "x: {0} y: {1} z: {2}{3}".format(str(crystal_match.get_transformed_poi().x),
+                                                   str(crystal_match.get_transformed_poi().y), str(0), self.SEPARATOR)
             line += str(crystal_match.get_delta()) + self.SEPARATOR
             line += str(crystal_match.get_status()) + self.SEPARATOR
             if crystal_match.get_status() == CRYSTAL_MATCH_STATUS_DISABLED:
@@ -187,6 +187,7 @@ class ServiceResult:
                 'location': {
                     'x': poi.get_transformed_poi().x,
                     'y': poi.get_transformed_poi().y,
+                    'z': 0
                 },
                 'translation': {
                     'x': poi.get_delta().x,
@@ -199,17 +200,18 @@ class ServiceResult:
         print(json.dumps(output_obj, cls=DecimalEncoder))
         return output_obj
 
+    def get_match_results(self):
+        return self._match_results
 
     def log_final_result(self, total_time):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        extra = self._exit_code.to_json_array_with_names()
+        extra = self._exit_code.to_json_array_with_names('exit_code_num', 'exit_code')
         extra.update({'input_image': self._image_path_formulatrix,
                       'output_image': self._image_path_beamline,
                       'total_time': total_time})
         if self._job_id and self._job_id != "":
             extra.update({'job_id': self._job_id})
-
 
 
         log = logging.LoggerAdapter(log, extra)

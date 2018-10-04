@@ -1,6 +1,7 @@
 import logging
 import time
 
+from dls_focusstack.focus.point_fft_manager import PointFFTManager
 from dls_imagematch import logconfig
 from dls_imagematch.crystal.align import AlignConfig
 from dls_imagematch.crystal.align import ImageAligner
@@ -68,6 +69,10 @@ class CrystalMatch:
             if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
                 match_results = self._perform_matching(aligned_images, scaled_poi)
                 service_result.append_crystal_matching_results(match_results)
+                # Calculate z for each point
+                pointman = PointFFTManager(parser_manager.get_fft_images_to_stack(), service_result.get_match_results())
+                points = pointman.read_ftt_points()
+
         except Exception as e:
             log.error("ERROR: " + e.message)
             service_result.set_err_state(e)

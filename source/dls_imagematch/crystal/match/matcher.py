@@ -72,6 +72,7 @@ class CrystalMatcher:
     def _match_single_point(self, point):
         crystal_match = CrystalMatch(point, self._aligned_images, perform_poi=self._perform_poi_analysis)
 
+
         if self._perform_poi_analysis:
             image1_rect = self.make_target_region(crystal_match.get_poi_image_1())
             image2_rect = self.make_search_region(crystal_match.get_poi_image_2_pre_match())
