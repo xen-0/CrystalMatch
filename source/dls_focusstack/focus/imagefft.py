@@ -1,6 +1,4 @@
 
-import cv2
-import numpy as np
 
 from dls_focusstack.focus.fourier import Fourier
 

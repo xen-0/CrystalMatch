@@ -123,9 +123,8 @@ class ServiceResult:
         if len(self._match_results) > 0:
             output_list.append(self.POI_RESULTS_HEADER)
         for crystal_match in self._match_results:
-            line = "poi: "
-            line += "x: {0} y: {1} z: {2}{3}".format(str(crystal_match.get_transformed_poi().x),
-                                                   str(crystal_match.get_transformed_poi().y), crystal_match.get_poi_z_level(), self.SEPARATOR)
+            line = "poi:"
+            line += str(crystal_match.get_transformed_poi()) + " z: " +  str(crystal_match.get_poi_z_level()) + self.SEPARATOR
             line += str(crystal_match.get_delta()) + self.SEPARATOR
             line += str(crystal_match.get_status()) + self.SEPARATOR
             if crystal_match.get_status() == CRYSTAL_MATCH_STATUS_DISABLED:

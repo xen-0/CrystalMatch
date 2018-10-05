@@ -36,6 +36,7 @@ class TestServiceResult(TestCase):
             # Mock Crystal Match
             mock_crystal_match = create_autospec(CrystalMatch, spec_set=True)
             mock_crystal_match.get_transformed_poi = MagicMock(return_value=new_positions[i])
+            mock_crystal_match.get_poi_z_level = MagicMock(return_value = 0)
             mock_crystal_match.get_delta = MagicMock(return_value=deltas[i])
             mock_crystal_match.feature_match_result = MagicMock(return_value=mock_feature_match)
             mock_crystal_match.get_status = MagicMock(return_value=status_codes[i])
@@ -148,7 +149,7 @@ class TestServiceResult(TestCase):
         # Test
         mock_print.assert_has_calls([
             call("\nlocation ; transform ; status ; mean error"),
-            call("poi:(100.00, 100.00) ; (3.00, 4.00) ; 1, OK ; 0.45")
+            call("poi:(100.00, 100.00) z: 0 ; (3.00, 4.00) ; 1, OK ; 0.45")
         ])
 
     @patch('dls_imagematch.service.service_result.print', create=True)
@@ -166,7 +167,7 @@ class TestServiceResult(TestCase):
         # Test
         mock_print.assert_has_calls([
             call("\nlocation ; transform ; status ; mean error"),
-            call("poi:(654.00, 321.00) ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
+            call("poi:(654.00, 321.00) z: 0 ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
 
     @patch('dls_imagematch.service.service_result.print', create=True)
@@ -194,9 +195,9 @@ class TestServiceResult(TestCase):
         # Test
         mock_print.assert_has_calls([
             call("\nlocation ; transform ; status ; mean error"),
-            call("poi:(100.00, 100.00) ; (3.00, 4.00) ; 1, OK ; 0.45"),
-            call("poi:(123.00, 456.00) ; (1.00, 2.00) ; 1, OK ; 4.56"),
-            call("poi:(654.00, 321.00) ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
+            call("poi:(100.00, 100.00) z: 0 ; (3.00, 4.00) ; 1, OK ; 0.45"),
+            call("poi:(123.00, 456.00) z: 0 ; (1.00, 2.00) ; 1, OK ; 4.56"),
+            call("poi:(654.00, 321.00) z: 0 ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
 
     @patch('dls_imagematch.service.service_result.print', create=True)

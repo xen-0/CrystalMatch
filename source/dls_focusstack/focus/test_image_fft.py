@@ -18,12 +18,10 @@ class TestImageFFT(TestCase):
                         (1, 3, 4, 5),
                         (1, 0, 2, 5)])
 
-    def test_runFFT_calls_furrier2(self):
+    def test_runFFT_calculates_a_fourier_value_of_an_image(self):
         sh = ImageFFT(self._img, 1, 'test')
-        sh.fourier = MagicMock()
-
         sh.runFFT()
-        sh.fourier.assert_called_once()
+        self.assertIsNotNone(sh.getFFT())
 
     def test_getFFT_returns_none_before_furrier_is_run(self):
         sh = ImageFFT(self._img, 1, 'test')

@@ -27,6 +27,7 @@ class CrystalMatchConfig(Config):
         def_width = CrystalMatcher.DEFAULT_WIDTH
         def_height = CrystalMatcher.DEFAULT_HEIGHT
         def_shift = CrystalMatcher.DEFAULT_VERTICAL_SHIFT
+        def_z_level_region_size = CrystalMatcher.DEFAULT_Z_LEVEL_REGION_SIZE
 
         self.active_status = add(BoolConfigItem, "Perform POI Analysis", default=True)
         self.active_status.set_comment("If this option is disabled the program shall skip the image matching for "
@@ -36,6 +37,10 @@ class CrystalMatchConfig(Config):
         self.region_size = add(RangeIntConfigItem, "Region Size (um)", default=def_size, extra_arg=[10, None])
         self.region_size.set_comment("Size of the region around the user selected point in the first image to be "
                                      "considered in the feature matching process.")
+
+        self.z_level_region_size = add(RangeIntConfigItem, "Z Level Region Size (um)", default=def_z_level_region_size, extra_arg=[10, None])
+        self.z_level_region_size.set_comment("Size of the region around the user selected point in the first image to be "
+                                     "considered in finding z-level for the point.")
 
         self.search_width = add(RangeIntConfigItem, "Search Width (um)", default=def_width, extra_arg=[50, None])
         self.search_width.set_comment("Width of the region in the second image in which to search in the feature "

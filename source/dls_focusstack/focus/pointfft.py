@@ -12,11 +12,11 @@ class PointFFT:
 
     """
 
-    def __init__(self, point, fftimg):
+    def __init__(self, point, fftimg, region_size):
         self.point = point
         self.fft_level = None
-        self.img = fftimg.get_image()
-        self.level = fftimg.get_image_number()
+        self.fftimg = fftimg
+        self.region_size = region_size
 
     def runFFT(self):
         self.fft_level = Fourier(self.crop_region_from_image()).runFFT()
@@ -28,12 +28,15 @@ class PointFFT:
         return self.point
 
     def crop_region_from_image(self):
-        img = Image(self.img).crop(self._getRegion(100))
+        img = Image(self.fftimg.get_image()).crop(self._getRegion())
         return img.raw()
 
-    def _getRegion(self, size):
-        return Rectangle.from_center(self.point, size, size)
+    def _getRegion(self):
+        return Rectangle.from_center(self.point, self.region_size, self.region_size)
 
     def get_level(self):
-        return self.level
+        return self.fftimg.get_image_number()
+
+    def get_image_name(self):
+        return self.fftimg.get_name()
 

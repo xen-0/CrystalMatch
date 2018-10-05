@@ -67,14 +67,9 @@ class CrystalMatch:
 
             # Perform Crystal Matching - only proceed if we have a valid alignment
             if aligned_images.alignment_status_code() == ALIGNED_IMAGE_STATUS_OK:
-                match_results = self._perform_matching(aligned_images, scaled_poi)
-
-                # Calculate z for each point
-                pointman = PointFFTManager(parser_manager.get_fft_images_to_stack(), match_results)
-                pointman.read_ftt_points()
+                match_results = self._perform_matching(aligned_images, scaled_poi, parser_manager)
 
                 service_result.append_crystal_matching_results(match_results)
-
 
         except Exception as e:
             log.error("ERROR: " + e.message)
@@ -99,11 +94,12 @@ class CrystalMatch:
 
         return aligned_images, scaled_formulatrix_points
 
-    def _perform_matching(self, aligned_images, selected_points):
+    def _perform_matching(self, aligned_images, selected_points, parser_manager):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         time_start = time.time()
         matcher = CrystalMatcher(aligned_images, self._config_detector)
+        matcher.set_fft_images_to_stack(parser_manager.get_fft_images_to_stack())
         matcher.set_from_crystal_config(self._config_crystal)
 
         crystal_match_results = matcher.match(selected_points)
