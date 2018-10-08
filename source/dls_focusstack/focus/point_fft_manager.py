@@ -2,7 +2,12 @@
 from dls_focusstack.focus.pointfft import PointFFT
 
 class PointFFTManager:
-    """"""
+    """
+    Initialise z new PointFFTManager object.
+    :param fftimages: list of fftimages
+    :param match: single point match result
+    :param z_level_region_size: size of region used in pointfft
+    """
     def __init__(self, fftimages, match, z_level_region_size):
         self.images = fftimages
         self.match = match

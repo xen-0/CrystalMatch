@@ -1,7 +1,4 @@
 
-import cv2
-import numpy as np
-
 from dls_focusstack.focus.fourier import Fourier
 from dls_util.imaging import Image
 from dls_util.shape import Rectangle
@@ -9,7 +6,10 @@ from dls_util.shape import Rectangle
 
 class PointFFT:
     """
-
+    Initialise a new pointfft object which links an a point and allows to calculate fft within an ragion of a given size.
+    :param point: point for which the fft can be calculated
+    :param fftimage: fftimage from which a region of interes is cropped
+    :param region size: size of region taken to calculate fft - it is a square (size x size)
     """
 
     def __init__(self, point, fftimg, region_size):

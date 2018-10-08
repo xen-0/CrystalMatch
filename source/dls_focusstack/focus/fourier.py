@@ -4,9 +4,9 @@ import numpy as np
 
 class Fourier:
     """
-
+    Initialise a new fourier object.
+    :param input_array: input for the fourier transform calculation
     """
-
     def __init__(self, input_array):
         self.array = input_array
 
