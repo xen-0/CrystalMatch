@@ -9,6 +9,8 @@ Changes merged into master
 |VMXi-378_improvements   |Major |Replace Helicon Focus with OpenCV script - additional changes after peer review|
 |VMXI-381   |Minor |Log File Analysis|
 |VMXI-467   |Minor |Clean up CrystalMatch mian and run options|
+|VMXI-473   |Minor |New CrystalMatch should return z level for each point passed|
+
 
 Change Types:
 * Major - Backward incompatible change
