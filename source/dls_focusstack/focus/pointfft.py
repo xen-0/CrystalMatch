@@ -1,42 +1,43 @@
 
-from dls_focusstack.focus.fourier import Fourier
 from dls_util.imaging import Image
 from dls_util.shape import Rectangle
 
 
 class PointFFT:
     """
-    Initialise a new pointfft object which links an a point and allows to calculate fft within an ragion of a given size.
+    Initialise a new pointfft object which allows to calculate fft within an region of a given size.
     :param point: point for which the fft can be calculated
-    :param fftimage: fftimage from which a region of interes is cropped
+    :param fftimage: image (array) from which a region of interest is cropped
     :param region size: size of region taken to calculate fft - it is a square (size x size)
     """
 
-    def __init__(self, point, fftimg, region_size):
+    def __init__(self, point, img, region_size):
         self.point = point
         self.fft_level = None
-        self.fftimg = fftimg
+        self.image_number = None
+        self.image_name = None
+        self.img = img
         self.region_size = region_size
-
-    def runFFT(self):
-        self.fft_level = Fourier(self.crop_region_from_image()).runFFT()
 
     def getFFT(self):
         return self.fft_level
 
-    def get_point(self):
-        return self.point
+    def setFFT(self, level):
+        self.fft_level = level
 
     def crop_region_from_image(self):
-        img = Image(self.fftimg.get_image()).crop(self._getRegion())
+        region = Rectangle.from_center(self.point, self.region_size, self.region_size)
+        img = Image(self.img).crop(region)
         return img.raw()
 
-    def _getRegion(self):
-        return Rectangle.from_center(self.point, self.region_size, self.region_size)
+    def set_image_number(self, num):
+        self.image_number = num
 
-    def get_level(self):
-        return self.fftimg.get_image_number()
+    def set_image_name(self, name):
+        self.image_name = name
+
+    def get_image_number(self):
+        return self.image_number
 
     def get_image_name(self):
-        return self.fftimg.get_name()
-
+        return self.image_name

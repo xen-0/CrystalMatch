@@ -16,8 +16,8 @@ class ImageFFT:
         self.fft_level = None
         self.name = name
 
-    def runFFT(self):
-        self.fft_level = Fourier(self.img).runFFT()
+    def setFFT(self, fft_level):
+        self.fft_level = fft_level
 
     def getFFT(self):
         return self.fft_level
@@ -29,7 +29,7 @@ class ImageFFT:
         #first image has index 0
         return self.image_number
 
-    def get_name(self):
+    def get_image_name(self):
         return self.name
 
 

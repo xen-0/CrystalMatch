@@ -8,7 +8,6 @@ from unittest import TestCase
 import numpy as np
 
 from dls_focusstack.focus.imagefft import ImageFFT
-from mock import MagicMock
 
 
 class TestImageFFT(TestCase):
@@ -18,27 +17,31 @@ class TestImageFFT(TestCase):
                         (1, 3, 4, 5),
                         (1, 0, 2, 5)])
 
-    def test_runFFT_calculates_a_fourier_value_of_an_image(self):
-        sh = ImageFFT(self._img, 1, 'test')
-        sh.runFFT()
-        self.assertIsNotNone(sh.getFFT())
 
     def test_getFFT_returns_none_before_furrier_is_run(self):
         sh = ImageFFT(self._img, 1, 'test')
         self.assertIsNone(sh.getFFT())
 
-    def test_getFFT_returns_not_none_furrier_is_run(self):
+    def test_getFFT_returns_furrier_when_its_set(self):
         sh = ImageFFT(self._img, 1, 'test')
-        sh.runFFT()
-        self.assertIsNotNone(sh.getFFT())
+        fft = 10
+        sh.setFFT(fft)
+        self.assertEquals(sh.getFFT(), fft)
 
     def test_get_image_number_returns_correct_value(self):
-        sh = ImageFFT(self._img, 1, 'test')
-        self.assertEqual(sh.get_image_number(), 1)
+        img_num = 3
+        sh = ImageFFT(self._img, img_num, 'test')
+        self.assertEqual(sh.get_image_number(), img_num)
 
     def test_get_image_returns_correct_value(self):
         sh = ImageFFT(self._img, 1, 'test')
         self.assertIn(sh.get_image(), self._img)
+
+    def test_get_image_name_returns_name_correctly(self):
+        img_name = 'test'
+        sh = ImageFFT(self._img, 1, img_name)
+        self.assertEquals(sh.get_image_name(), img_name)
+
 
 
 

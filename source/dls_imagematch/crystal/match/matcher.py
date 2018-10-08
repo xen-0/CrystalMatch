@@ -74,11 +74,12 @@ class CrystalMatcher:
         crystal_id = 1
         for point in image1_points:
             result = self._match_single_point(point)
+            #find z-level
+            z_level = PointFFTManager(self._fft_images, result.get_transformed_poi(), self._z_level_region_size_real).find_z_level_for_point()
+            result.set_poi_z_level(z_level)
             result.print_to_log(crystal_id=crystal_id)
             match_results.append_match(result)
             crystal_id += 1
-            #find z-level
-            PointFFTManager(self._fft_images, result, self._z_level_region_size_real).find_z_level_for_point()
 
         return match_results
 

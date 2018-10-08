@@ -4,6 +4,7 @@ from multiprocessing import Process, Queue, Pool
 import cv2
 import numpy as np
 
+from dls_focusstack.focus.fourier import Fourier
 from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
@@ -16,7 +17,8 @@ def fft(param):
     img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)
-    image_fft.runFFT()
+    level= Fourier(img).runFFT()
+    image_fft.setFFT(level)
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
     extra = ({'fft': image_fft.getFFT()})

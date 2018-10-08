@@ -137,6 +137,8 @@ class CrystalMatch:
             beam_pos_x_um = "{:.6f}".format(self.get_poi_image_2_matched_real().x)
             beam_pos_y_um = "{:.6f}".format(self.get_poi_image_2_matched_real().y)
 
+            beam_pos_z = str(self.get_poi_z_level())
+
             crystal_movement_x_px = "{:.2f}".format(self.get_delta().x)
             crystal_movement_y_px = "{:.2f}".format(self.get_delta().y)
             crystal_movement_x_um = "{:.6f}".format(self.get_delta_real().x)
@@ -149,6 +151,7 @@ class CrystalMatch:
                           'beam_pos_y_px': beam_pos_y_px,
                           'beam_pos_x_um': beam_pos_x_um,
                           'beam_pos_y_um': beam_pos_y_um,
+                          'beam_pos_z': beam_pos_z,
                           'crystal_movement_x_px': crystal_movement_x_px,
                           'crystal_movement_y_px': crystal_movement_y_px,
                           'crystal_movement_x_um': crystal_movement_x_um,
