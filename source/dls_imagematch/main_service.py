@@ -20,7 +20,7 @@ class CrystalMatchService:
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         try:
-            total_start = time.clock()
+            total_start = time.time()
             parser_manager = ParserManager()
             parser_manager.build_parser()
 
@@ -33,7 +33,7 @@ class CrystalMatchService:
             service = CrystalMatch(config_directory, scale_override=scale_override)
             service_results = service.perform_match(parser_manager)
 
-            total_time = time.clock() - total_start
+            total_time = time.time() - total_start
             service_results.log_final_result(total_time)
             service_results.print_results(to_json_flag)
 

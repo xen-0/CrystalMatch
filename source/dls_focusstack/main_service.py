@@ -35,7 +35,7 @@ class FocusStackService:
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
         try:
-            t1 = time.clock()
+            t1 = time.time()
             parser = self._get_argument_parser()
             args = parser.parse_args()
             self._process_output_file_path(args.output)
@@ -45,7 +45,7 @@ class FocusStackService:
 
             focused_image = stacker.composite()
             focused_image.save(args.output)
-            calculation_time = time.clock() - t1
+            calculation_time = time.time() - t1
 
             extra = {'stack_time': calculation_time}
             log = logging.LoggerAdapter(log, extra)

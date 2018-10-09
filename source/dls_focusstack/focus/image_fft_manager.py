@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Pool
 
 import cv2
 import numpy as np
@@ -8,10 +8,11 @@ from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
 
-def fft(file_obj, q, count):
+def fft(param):
     "Function that reads an image of a given name and  starts fft calculation."
     #read as soon as it appears
-    name = file_obj.name
+    name = param[0]
+    count = param[1]
     img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)
@@ -19,7 +20,7 @@ def fft(file_obj, q, count):
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
     log.debug("Finished calculating fft for:" + name)
-    q.put(image_fft)
+    return image_fft
 
 
 class ImageFFTManager:
@@ -35,22 +36,29 @@ class ImageFFTManager:
         One process for one input image name."""
         log = logging.getLogger(".".join([__name__, self.__class__.__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        #log.info("t4")
-
-        q = Queue()
-        #log.info("t5")
-        processes=[]
-        #log.info("t6")
-
+        parameters = []
         for idx, file_obj in enumerate(self._image_file_list):
-            process = Process(target=fft, args=(file_obj, q, idx))
-            process.start()
-            processes.append(process)
-        #log.info("t7")
-        self.fft_images = [q.get() for p in processes]
-        for p in processes:
-            p.join()
-        #log.info("t8")
+            param = (file_obj.name, idx)
+            parameters.append(param)
+
+        pool = Pool()
+        results = pool.map_async(fft, parameters)
+        self.fft_images = results.get()
+        pool.close()
+        pool.join()
+
+
+        #q = Queue()
+        #processes=[]
+
+
+        #for idx, file_obj in enumerate(self._image_file_list):
+            #process = Process(target=fft, args=(file_obj, q, idx))
+            #process.start()
+            #processes.append(process)
+        #self.fft_images = [q.get() for p in processes]
+        #for p in processes:
+           # p.join()
 
     def get_fft_images(self):
         return self.fft_images

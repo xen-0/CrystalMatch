@@ -30,16 +30,16 @@ class FocusStack:
         log.info("Focusstack Started, first image, " + self._image_file_list[0].name)
         log.debug(extra)
 
-        start_t = time.clock()
+        start_t = time.time()
 
-        t1 = time.clock()
+        t1 = time.time()
         man = ImageFFTManager(self._image_file_list)
         man.read_ftt_images()
         sd = SharpnessDetector(man.get_fft_images(), self._config)
 
         images = sd.images_to_stack()
 
-        t2 = time.clock() - t1
+        t2 = time.time() - t1
 
         #add extra field to the log
         extra = {'FTT_time': t2}
@@ -57,7 +57,7 @@ class FocusStack:
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         backtorgb = cv2.cvtColor(stacked_image, cv2.COLOR_GRAY2RGB)
 
-        calculation_time = time.clock() - start_t
+        calculation_time = time.time() - start_t
         extra = {'stack_time': calculation_time}
         log = logging.LoggerAdapter(log, extra)
         log.info("Stacking Finished")

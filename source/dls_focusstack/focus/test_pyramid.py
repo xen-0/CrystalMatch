@@ -1,63 +1,106 @@
 from pkg_resources import require
 
+from dls_focusstack.focus.pyramid import Pyramid
+
 require("numpy==1.11.1")
 require("scipy")
 from unittest import TestCase
 
-from dls_focusstack.focus.pyramid_manager import PyramidManager
-from dls_focusstack.focus.pyramid import fused_laplacian, entropy_diviation
+from dls_focusstack.focus.pyramid_level import PyramidLevel
 
 import numpy as np
-from multiprocessing import Queue
-from mock import MagicMock
+
+class TestPyramidLayer(TestCase):
+
+    def test_get_layer_number_returns_correct_value(self):
+        layer_number = 10
+        pyr = Pyramid(layer_number,10)
+        self.assertEquals(pyr.get_layer_number(), layer_number)
+
+    def test_get_depth_returns_correct_value(self):
+        depth = 12
+        pyr = Pyramid(10, depth)
+        self.assertEquals(pyr.get_depth(),depth)
+
+    def test_add_lower_resolution_level_adds_new_element_on_the_end_of_level_list(self):
+        pyr = Pyramid(10, 2)
+        pyr.add_lower_resolution_level(10)
+        self.assertEquals(len(pyr.levels), 1)
+        pyr.add_lower_resolution_level(12)
+        self.assertEquals(len(pyr.levels),2)
+        self.assertEquals(pyr.levels[0], 10)
+        self.assertEquals(pyr.levels[1], 12)
+
+    def test_add_higher_resolution_level_adds_new_element_in_front_of_the_level_list(self):
+        pyr = Pyramid(10, 2)
+        pyr.add_higher_resolution_level(10)
+        self.assertEquals(len(pyr.levels), 1)
+        pyr.add_higher_resolution_level(12)
+        self.assertEquals(len(pyr.levels),2)
+        self.assertEquals(pyr.levels[1], 10)
+        self.assertEquals(pyr.levels[0], 12)
+
+    def test_get_level_returns_the_correct_list_element(self):
+        pyr = Pyramid(10,3)
+        pyr.levels = [12,13,14]
+        self.assertEquals(pyr.get_level(1), 13)
+        self.assertEquals(pyr.get_level(0), 12)
+
+    def test_get_top_level_returns_the_last_element_form_the_level_list(self):
+        pyr = Pyramid(10, 3)
+        pyr.levels = [12, 13, 14]
+        self.assertEquals(pyr.get_top_level(), 14)
+
+    def test_sort_levels_sorts_levels_according_to_size_larger_first(self):
+        pyr = Pyramid(12,3)
+        level_0 = PyramidLevel(np.array([[10, 10, 10], [2, 2, 2], [4, 4, 4] ],dtype=np.float64),2,2)
+        level_1 = PyramidLevel(np.array([[2, 2], [3, 3]], dtype=np.float64),2,2)
+        level_2 = PyramidLevel(np.array([0],dtype=np.float64 ),1,1)
+        pyr.add_lower_resolution_level(level_1)
+        pyr.add_lower_resolution_level(level_0)
+        pyr.add_lower_resolution_level(level_2)
+        self.assertEquals(pyr.get_level(0).get_array().shape, level_1.get_array().shape)
+        pyr.sort_levels()
+        self.assertEquals(pyr.get_level(0).get_array().shape, level_0.get_array().shape)
+
+    def test_collapse_returns_an_array_of_the_same_size_as_the_bottom_level(self):
+        pyr = Pyramid(12, 3)
+        level_0 = PyramidLevel(np.array([[10, 10, 10], [2, 2, 2], [4, 4, 4]], dtype=np.float64), 2, 2)
+        level_1 = PyramidLevel(np.array([[2, 2], [3, 3]], dtype=np.float64), 2, 2)
+        level_2 = PyramidLevel(np.array([0], dtype=np.float64), 1, 1)
+        pyr.add_lower_resolution_level(level_1)
+        pyr.add_lower_resolution_level(level_0)
+        pyr.add_lower_resolution_level(level_2)
+        pyr.sort_levels()
+        result = pyr.collapse()
+        self.assertEquals(result.shape, level_0.get_array().shape)
+
+    def test_collapse_returns_sum_of_a_level_and_extended_upper_level(self):
+        pyr = Pyramid(12, 3)
+        level_0 = PyramidLevel(np.array([[2, 2], [3, 3]], dtype=np.float64), 2, 2)
+        level_1 = PyramidLevel(np.array([[0]], dtype=np.float64), 1, 1)
+        pyr.add_lower_resolution_level(level_0)
+        pyr.add_lower_resolution_level(level_1)
+        result = pyr.collapse()
+        self.assertIn(result, level_0.get_array())
 
 
-class TestPyramid(TestCase):
 
-    def setUp(self):
-        #case1
-        self._config = MagicMock()
-        self._array = np.array([[10, 20, 30, 40], [10, 20, 30, 40], [11, 21, 31, 41], [12, 22, 32, 42]],
-                               dtype=np.float64)
-        self._depth = 2
-        self._images = np.array([self._array, self._array / 10])
 
-        self._pyramid = PyramidManager(self._images, self._config).laplacian_pyramid(self._depth)
-        self._kernel_size = 5
 
-    def test_fuse_does_not_change_the_depth_of_the_pyramid(self):
-        fused = self._pyramid.fuse(self._kernel_size)
-        self.assertEquals(len(fused), self._depth+1)
 
-    def test_fuse_flattens_the_pyramid_along_images(self):
-        #original size level zero
-        self.assertEqual(self._pyramid.get_pyramid_array()[0].shape, (2,4,4))
-        fused = self._pyramid.fuse(self._kernel_size)
-        #size after fusion level zero
-        self.assertEqual(fused[0].shape, self._array.shape)
 
-    def test_fused_laplacian_of_level0_has_size_of_input_array(self):
-        laplacians_level0 = self._pyramid.get_pyramid_array()[0]
-        q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
-        fused_level = q.get()
-        self.assertEquals(fused_level.shape, self._array.shape)
 
-    def test_fused_laplacian_picks_the_layer_with_high_region_energy_from_given_level(self):
-        laplacians_level0 = self._pyramid.get_pyramid_array()[0]
-        q = Queue()
-        fused_laplacian(laplacians_level0, self._pyramid.get_region_kernel(), 2, q)
-        fused_level = q.get()
-        #layer 0 has the highiest region energy as all the values are 10 times larger than layer1
-        self.assertIn(laplacians_level0[0], fused_level)
 
-    def test_entropy_deviation_calls_entropy_abd_deviation_once(self):
-        layer = MagicMock()
-        q = MagicMock()
-        entropy_diviation(layer, self._pyramid.get_region_kernel(),q)
 
-        layer.entropy.assert_called_once()
-        layer.deviation.assert_called_once()
+
+
+
+
+
+
+
+
 
 
 
