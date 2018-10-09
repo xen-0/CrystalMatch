@@ -159,6 +159,7 @@ class CrystalMatchPane(QWidget):
         detector_config = DetectorConfig(detector_config_dir)
 
         matcher = CrystalMatcher(self._aligned_images, detector_config)
+        # TODO add z-level real region size to the gui
         matcher.set_real_region_size(region_size)
         matcher.set_real_search_size(search_width, search_height)
         matcher.set_search_shift(search_shift)

@@ -4,6 +4,7 @@ from multiprocessing import Process, Queue, Pool
 import cv2
 import numpy as np
 
+from dls_focusstack.focus.fourier import Fourier
 from dls_imagematch import logconfig
 from dls_focusstack.focus.imagefft import ImageFFT
 
@@ -16,10 +17,14 @@ def fft(param):
     img_color = cv2.imread(name)
     img = cv2.cvtColor(img_color.astype(np.float32), cv2.COLOR_BGR2GRAY)
     image_fft = ImageFFT(img, count, name)
-    image_fft.runFFT()
+    level= Fourier(img).runFFT()
+    image_fft.setFFT(level)
     log = logging.getLogger(".".join([__name__]))
     log.addFilter(logconfig.ThreadContextFilter())
-    log.debug("Finished calculating fft for:" + name)
+    extra = ({'fft': image_fft.getFFT()})
+    log = logging.LoggerAdapter(log, extra)
+    log.info("Finished calculating fft for:" + name)
+    log.debug(extra)
     return image_fft
 
 
@@ -29,7 +34,6 @@ class ImageFFTManager:
         self._image_file_list = name_list
         self.fft_images = []
 
-
     def read_ftt_images(self):
         """Function which starts fft calculation for each input image name.
         Multiprocessing is used to speed up the calculation.
@@ -38,6 +42,7 @@ class ImageFFTManager:
         log.addFilter(logconfig.ThreadContextFilter())
         parameters = []
         for idx, file_obj in enumerate(self._image_file_list):
+            #first image has index 0 
             param = (file_obj.name, idx)
             parameters.append(param)
 
@@ -46,19 +51,6 @@ class ImageFFTManager:
         self.fft_images = results.get()
         pool.close()
         pool.join()
-
-
-        #q = Queue()
-        #processes=[]
-
-
-        #for idx, file_obj in enumerate(self._image_file_list):
-            #process = Process(target=fft, args=(file_obj, q, idx))
-            #process.start()
-            #processes.append(process)
-        #self.fft_images = [q.get() for p in processes]
-        #for p in processes:
-           # p.join()
 
     def get_fft_images(self):
         return self.fft_images

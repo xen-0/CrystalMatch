@@ -49,7 +49,7 @@ class TestImageFFTManager(TestCase):
         manager.read_ftt_images()
         for idx, name in enumerate(file_list):
             for fft_img in manager.get_fft_images():
-                if(fft_img.get_name() == name): #assuming the names are unique, which is not required
+                if(fft_img.get_image_name() == name): #assuming the names are unique
                     self.failUnlessEqual(fft_img.get_image_number, idx)
 
     def test_the_created_fft_images_contain_fft(self):

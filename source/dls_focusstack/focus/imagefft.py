@@ -1,10 +1,14 @@
 
-import cv2
-import numpy as np
+
+from dls_focusstack.focus.fourier import Fourier
+
 
 class ImageFFT:
-    """Image class which holds the image and number of the image in a sequence of images.
-    FFT is implemented in the class. Mean value of the image FFT is held in the fft_level parameter."""
+    """Class which holds the image, mean_fft_value and image index in a sequence of images.
+     Mean value of the image FFT is held in the fft_level parameter.
+     :param input_img: an image array
+     :param number: index of th image in the list of images passed
+     :param name: names of the file - an absolute path"""
 
     def __init__(self, input_img, number, name):
         self.img = input_img
@@ -12,8 +16,8 @@ class ImageFFT:
         self.fft_level = None
         self.name = name
 
-    def runFFT(self):
-        self.fft_level = self.fourier()
+    def setFFT(self, fft_level):
+        self.fft_level = fft_level
 
     def getFFT(self):
         return self.fft_level
@@ -22,30 +26,10 @@ class ImageFFT:
         return self.img
 
     def get_image_number(self):
+        #first image has index 0
         return self.image_number
 
-    def get_name(self):
+    def get_image_name(self):
         return self.name
-
-    # algorithm provided by Charles - a slight modification of the optimal sizes
-    # has been added to speed up the procedure
-    def fourier(self):
-        """Function used to calculate FFT of the image - created by Charles."""
-        rows, cols = self.img.shape
-        nrows = cv2.getOptimalDFTSize(rows)
-        ncols = cv2.getOptimalDFTSize(cols)
-        nimg = np.zeros((nrows, ncols))
-        nimg[:rows, :cols] = self.img
-
-        data_fft1 = np.fft.rfft2(nimg) #the opcv version uses fft2 not rfft2
-        fft_abs1 = np.abs(data_fft1).copy()
-        h1, w1 = fft_abs1.shape
-        # -1 is the last element, last excluded
-        # zero frequency is in the top left corner
-        part1 = fft_abs1[int(0.05 * h1) : int(0.95 * h1)-1, int(0.05 * w1) : -1]
-        output = np.mean(part1)
-
-        return output
-
 
 

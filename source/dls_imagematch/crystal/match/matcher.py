@@ -1,5 +1,6 @@
 from __future__ import division
 
+from dls_focusstack.focus.point_fft_manager import PointFFTManager
 from dls_util.shape import Rectangle, Point
 from dls_imagematch.feature import BoundedFeatureMatcher
 from .match import CrystalMatch
@@ -11,6 +12,7 @@ class CrystalMatcher:
     DEFAULT_WIDTH = 200
     DEFAULT_HEIGHT = 400
     DEFAULT_VERTICAL_SHIFT = 0.75
+    DEFAULT_Z_LEVEL_REGION_SIZE = 30
 
     def __init__(self, aligned_images, detector_config, crystal_config=None):
         self._perform_poi_analysis = True
@@ -19,8 +21,10 @@ class CrystalMatcher:
         self._search_width_real = self.DEFAULT_WIDTH
         self._search_height_real = self.DEFAULT_HEIGHT
         self._search_vertical_shift = self.DEFAULT_VERTICAL_SHIFT
+        self._z_level_region_size_real = self.DEFAULT_Z_LEVEL_REGION_SIZE
         self._transform_method = None
         self._transform_filter = None
+        self._fft_images = None
 
         self._detector_config = detector_config
         if crystal_config is not None:
@@ -35,12 +39,16 @@ class CrystalMatcher:
         self._search_vertical_shift = config.vertical_shift.value()
         self._transform_method = config.transform_method.value()
         self._transform_filter = config.transform_filter.value()
+        self._z_level_region_size_real = config.z_level_region_size.value()
 
     def set_detector_config(self, config):
         self._detector_config = config
 
     def set_real_region_size(self, size):
         self._region_size_real = size
+
+    def set_real_z_level_region_size(self, size):
+        self._z_level_region_size_real = size
 
     def set_real_search_size(self, width, height):
         self._search_width_real = width
@@ -55,6 +63,9 @@ class CrystalMatcher:
     def set_transform_filter(self, filter_obj):
         self._transform_filter = filter_obj
 
+    def set_fft_images_to_stack(self, fft_images):
+        self._fft_images = fft_images
+
     # -------- FUNCTIONALITY -------------------
     def match(self, image1_points):
         images = self._aligned_images
@@ -63,6 +74,9 @@ class CrystalMatcher:
         crystal_id = 1
         for point in image1_points:
             result = self._match_single_point(point)
+            #find z-level
+            z_level = PointFFTManager(self._fft_images, result.get_transformed_poi(), self._z_level_region_size_real).find_z_level_for_point()
+            result.set_poi_z_level(z_level)
             result.print_to_log(crystal_id=crystal_id)
             match_results.append_match(result)
             crystal_id += 1
@@ -71,6 +85,7 @@ class CrystalMatcher:
 
     def _match_single_point(self, point):
         crystal_match = CrystalMatch(point, self._aligned_images, perform_poi=self._perform_poi_analysis)
+
 
         if self._perform_poi_analysis:
             image1_rect = self.make_target_region(crystal_match.get_poi_image_1())

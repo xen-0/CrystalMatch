@@ -29,6 +29,7 @@ class CrystalMatch:
         self._poi_image_2_matched = None
         self._feature_match_result = None
         self._status = CRYSTAL_MATCH_STATUS_STATUS_NOT_SET if perform_poi else CRYSTAL_MATCH_STATUS_DISABLED
+        self._poi_z_level = None
 
     def is_success(self):
         return self._status == CRYSTAL_MATCH_STATUS_OK
@@ -88,6 +89,12 @@ class CrystalMatch:
     def get_status(self):
         return self._status
 
+    def set_poi_z_level(self, level):
+        self._poi_z_level = level
+
+    def get_poi_z_level(self):
+        return self._poi_z_level
+
     def set_feature_match_result(self, feature_result):
         """ Set the transformation which maps the crystal location from Image 1 onto the
         same crystal location on Image 2. """
@@ -130,6 +137,8 @@ class CrystalMatch:
             beam_pos_x_um = "{:.6f}".format(self.get_poi_image_2_matched_real().x)
             beam_pos_y_um = "{:.6f}".format(self.get_poi_image_2_matched_real().y)
 
+            beam_pos_z = str(self.get_poi_z_level())
+
             crystal_movement_x_px = "{:.2f}".format(self.get_delta().x)
             crystal_movement_y_px = "{:.2f}".format(self.get_delta().y)
             crystal_movement_x_um = "{:.6f}".format(self.get_delta_real().x)
@@ -142,6 +151,7 @@ class CrystalMatch:
                           'beam_pos_y_px': beam_pos_y_px,
                           'beam_pos_x_um': beam_pos_x_um,
                           'beam_pos_y_um': beam_pos_y_um,
+                          'beam_pos_z': beam_pos_z,
                           'crystal_movement_x_px': crystal_movement_x_px,
                           'crystal_movement_y_px': crystal_movement_y_px,
                           'crystal_movement_x_um': crystal_movement_x_um,

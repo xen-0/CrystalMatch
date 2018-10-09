@@ -15,9 +15,9 @@ class TestServiceOutput(SystemTest):
     NOTE: This Test Case does not test accuracy - these tests should not break due to changes in the algorithm.
     """
 
-    POI_LINE_REGEX_OK = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) ; \(-?[0-9]+\.[0-9]{2}, ' \
+    POI_LINE_REGEX_OK = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) z: None ; \(-?[0-9]+\.[0-9]{2}, ' \
                         '-?[0-9]+\.[0-9]{2}\) ; 1, OK ; [0-9]+\.[0-9]+\n'
-    POI_LINE_REGEX_FAIL = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) ; \(-?[0-9]+\.[0-9]{2},' \
+    POI_LINE_REGEX_FAIL = 'poi:\(-?[0-9]+\.[0-9]{2}, -?[0-9]+\.[0-9]{2}\) z: None ; \(-?[0-9]+\.[0-9]{2},' \
                           ' -?[0-9]+\.[0-9]{2}\) ; 0, FAIL ; 0\n'
     ALIGN_TRANSFORM_REGEX = "align_transform:[0-9]+.[0-9]+, \(-?[0-9]+\.[0-9]+, -?[0-9]+\.[0-9]+\)"
 

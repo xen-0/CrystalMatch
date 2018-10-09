@@ -85,7 +85,7 @@ CrystalMatch outputs results in a human-readable format by default - when being 
 
 * `job_id` - job id.
 * `input_image` - Absolute path to Formulatrix Image.
-* `output_image` - Absolute path to Beamline Image.
+* `output_image` - Absolute path to Beamline Image or list of images to be stacked.
 * `exit_code` - Describes the exit status of the application, used to flag abnormal runs while returning some results if possible.
     * `code` - Exit status - `0` for success or `1` for failure - **note:** not to be confused with status code (see later).
     * `msg` - Human-readable error message.
@@ -102,9 +102,13 @@ CrystalMatch outputs results in a human-readable format by default - when being 
     * `status` - Results status
         * `code` - `0` for failure, `1` for success or `2` if the option if POI analysis is disabled in the configuration file (`crystal.ini`).
         * `msg` - Human readable error message.
-    * `location` (x and y values) - Calculated location of the POI in the co-ordinate space of the Beamline image. Note that if the match fails this will be the original point with the Alignment transform applied.
+    * `location` (x and y values) - Calculated location of the POI in the co-ordinate space of the Beamline image and z-level for the POI.
+    Note that if the match fails this will be the original point with the Alignment transform applied.
+    Z-level is the index of the image in a list of images used in stacking for which POI has the highest local fft value (is the sharpest).
+    Z-level is None when one output image passed.
         *'x'
         *'y'
+        *'z'
     * `translation` (x and y values) - The translation required to account for Crystal movement (excludes Alignment transform).
         *'x'
         *'y'

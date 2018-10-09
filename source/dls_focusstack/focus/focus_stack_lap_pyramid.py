@@ -20,6 +20,7 @@ class FocusStack:
     def __init__(self, images, config_dir):
         self._image_file_list = images
         self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
+        self.fft_images = None
 
 
     def composite(self):
@@ -38,6 +39,7 @@ class FocusStack:
         sd = SharpnessDetector(man.get_fft_images(), self._config)
 
         images = sd.images_to_stack()
+        self.fft_images = sd.get_fft_images_to_stack()
 
         t2 = time.time() - t1
 
@@ -53,7 +55,7 @@ class FocusStack:
 
         #stacked_image = pyramid(aligned_images, self._config).get_pyramid_fusion()
         stacked_image = PyramidManager(images, self._config).get_pyramid_fusion()
-        #log.info("t17")
+
         stacked_image  = cv2.convertScaleAbs(stacked_image)
         backtorgb = cv2.cvtColor(stacked_image, cv2.COLOR_GRAY2RGB)
 
@@ -64,6 +66,9 @@ class FocusStack:
         log.debug(extra)
 
         return Image(backtorgb)
+
+    def get_fft_images_to_stack(self):
+        return self.fft_images
 
 
 

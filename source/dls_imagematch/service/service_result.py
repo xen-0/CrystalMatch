@@ -32,13 +32,12 @@ class ServiceResultExitCode(StatusFlag):
 
     def to_json_array(self):
         json_array = StatusFlag.to_json_array(self)
-        #_with_names(self, 'exit_code_num', 'exit_code')
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
 
-    def to_json_array_with_names(self):
-        json_array = StatusFlag.to_json_array_with_names(self, 'exit_code_num', 'exit_code')
+    def to_json_array_with_names(self, code_num, code):
+        json_array = StatusFlag.to_json_array_with_names(self, code_num, code)
         if self.err_msg is not None:
             json_array['err_msg'] = self.err_msg
         return json_array
@@ -104,12 +103,15 @@ class ServiceResult:
         self._exit_code = SERVICE_RESULT_STATUS_ERROR
         self._exit_code.set_err_msg(e.message)
 
+    def set_crystal_matching_results(self, list_of_fft_points):
+        self._match_results = list_of_fft_points
+
 
 
     def append_crystal_matching_results(self, crystal_matcher_results):
         """
         Append any CrystalMatch objects from a CrystalMatcherResults object into an internal array - necessary when
-        performing multiple passes of the algorithm or when farming points out to multiple processes.
+        #performing multiple passes of the algorithm or when farming points out to multiple processes.
         :param crystal_matcher_results: CrystalMatcherResults object.
         """
         self._match_results = self._match_results + crystal_matcher_results.get_matches()
@@ -122,7 +124,7 @@ class ServiceResult:
             output_list.append(self.POI_RESULTS_HEADER)
         for crystal_match in self._match_results:
             line = "poi:"
-            line += str(crystal_match.get_transformed_poi()) + self.SEPARATOR
+            line += str(crystal_match.get_transformed_poi()) + " z: " +  str(crystal_match.get_poi_z_level()) + self.SEPARATOR
             line += str(crystal_match.get_delta()) + self.SEPARATOR
             line += str(crystal_match.get_status()) + self.SEPARATOR
             if crystal_match.get_status() == CRYSTAL_MATCH_STATUS_DISABLED:
@@ -187,6 +189,7 @@ class ServiceResult:
                 'location': {
                     'x': poi.get_transformed_poi().x,
                     'y': poi.get_transformed_poi().y,
+                    'z': poi.get_poi_z_level()
                 },
                 'translation': {
                     'x': poi.get_delta().x,
@@ -203,13 +206,12 @@ class ServiceResult:
     def log_final_result(self, total_time):
         log = logging.getLogger(".".join([__name__]))
         log.addFilter(logconfig.ThreadContextFilter())
-        extra = self._exit_code.to_json_array_with_names()
+        extra = self._exit_code.to_json_array_with_names('exit_code_num', 'exit_code')
         extra.update({'input_image': self._image_path_formulatrix,
                       'output_image': self._image_path_beamline,
                       'total_time': total_time})
         if self._job_id and self._job_id != "":
             extra.update({'job_id': self._job_id})
-
 
 
         log = logging.LoggerAdapter(log, extra)
