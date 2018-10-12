@@ -1,8 +1,4 @@
 
-
-from dls_focusstack.focus.fourier import Fourier
-
-
 class ImageFFT:
     """Class which holds the image, mean_fft_value and image index in a sequence of images.
      Mean value of the image FFT is held in the fft_level parameter.
