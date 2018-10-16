@@ -47,7 +47,6 @@ class TestParserManager(unittest.TestCase):
         self.pm.get_args = Mock(return_value=Mock(config=None)) #!! return value has to be a mock with particular parameters
         self.assertEquals(self.pm.get_config_dir(), abspath(readable_config_dir.CONFIG_DIR))
 
-    # is it really a useful test?
     def test_get_config_returns_whatever_is_specified_as_config(self):
         test_string = 'ble'
         self.pm.get_args = Mock(return_value=Mock(config=test_string))
