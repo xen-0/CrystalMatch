@@ -1,3 +1,3 @@
-from .types import DetectorType, ExtractorType
-from .detector import Detector
-from .config import DetectorConfig
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType, ExtractorType
+from CrystalMatch.dls_imagematch.feature.detector.detector import Detector
+from CrystalMatch.dls_imagematch.feature.detector.config import DetectorConfig

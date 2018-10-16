@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import os
 from unittest import TestCase
 
 from mock.mock import patch, Mock, MagicMock, call, create_autospec

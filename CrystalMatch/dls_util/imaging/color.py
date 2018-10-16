@@ -1,7 +1,5 @@
 from random import randint
 
-from PyQt4.QtGui import QColor
-
 
 class Color:
     """ Represents a color stored as an RGB or RGBA value.
@@ -52,10 +50,6 @@ class Color:
         ref: https://en.wikipedia.org/wiki/Grayscale#Luma_coding_in_video_systems """
         return int(round(0.299*self.r + 0.587*self.g + 0.114*self.b))
 
-    def to_qt(self):
-        """ Return the equivalent PyQt Color. """
-        return QColor(self.r, self.g, self.b, self.a)  # pragma: no cover
-
     def to_hex(self):
         """ Return a hexadecimal representation of the color. """
         hex_str = '#'
@@ -63,11 +57,6 @@ class Color:
             hex_str += '{:02x}'.format(val)
 
         return hex_str
-
-    @staticmethod
-    def from_qt(qt_color):
-        """ Create a new Color object from an equivalent PyQt Color. """
-        return Color(qt_color.red(), qt_color.green(), qt_color.blue(), qt_color.alpha())  # pragma: no cover
 
     @staticmethod
     def from_string(string, sep=SEP):

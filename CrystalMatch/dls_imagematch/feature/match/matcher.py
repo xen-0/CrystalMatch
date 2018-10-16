@@ -4,10 +4,10 @@ import time
 import cv2
 import numpy as np
 
-from ..transform.calculator import TransformCalculator, TransformCalculationError
-from ..detector.factory import DetectorFactory
-from .match import FeatureMatch
-from .result import FeatureMatcherResult
+from CrystalMatch.dls_imagematch.feature.transform.calculator import TransformCalculator, TransformCalculationError
+from CrystalMatch.dls_imagematch.feature.detector.factory import DetectorFactory
+from CrystalMatch.dls_imagematch.feature.match.match import FeatureMatch
+from CrystalMatch.dls_imagematch.feature.match.result import FeatureMatcherResult
 
 
 class FeatureMatcher:

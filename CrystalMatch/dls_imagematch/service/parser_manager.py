@@ -6,13 +6,13 @@ from os.path import split, exists, isdir, isfile, join, abspath, getmtime, dirna
 
 from os import listdir, makedirs, chmod
 
-from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
-from dls_imagematch import logconfig
-from dls_imagematch.service import readable_config_dir
-from dls_imagematch.version import VersionHandler
-from dls_imagematch.service.readable_config_dir import ReadableConfigDir
-from dls_util.shape import Point
-from dls_util.imaging import Image
+from CrystalMatch.dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.service import readable_config_dir
+from CrystalMatch.dls_imagematch.version import VersionHandler
+from CrystalMatch.dls_imagematch.service.readable_config_dir import ReadableConfigDir
+from CrystalMatch.dls_util.shape import Point
+from CrystalMatch.dls_util.imaging import Image
 
 class ParserManager:
 

@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-from dls_util.shape import Point
-from .transformation import Transformation
+from CrystalMatch.dls_util.shape import Point
+from CrystalMatch.dls_imagematch.feature.transform.transformation import Transformation
 
 
 class AffineTransformation(Transformation):

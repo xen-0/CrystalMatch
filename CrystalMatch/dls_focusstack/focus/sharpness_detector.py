@@ -1,7 +1,7 @@
 import logging
 import math
 
-from dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch import logconfig
 
 
 class SharpnessDetector(object):

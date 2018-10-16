@@ -1,4 +1,4 @@
-from dls_util.shape import Polygon
+from CrystalMatch.dls_util.shape import Polygon
 
 
 class Transformation:

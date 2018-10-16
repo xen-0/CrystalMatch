@@ -1,4 +1,4 @@
-from .config import Config
+from CrystalMatch.dls_util.config.config import Config
 
 
 class ConfigItem:

@@ -2,10 +2,10 @@ import logging
 
 import cv2
 
-from dls_imagematch import logconfig
-from .types import DetectorType, AdaptationType, ExtractorType
-from .feature import Feature
-from .exception import OpenCvVersionError, FeatureDetectorError
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType, AdaptationType, ExtractorType
+from CrystalMatch.dls_imagematch.feature.detector.feature import Feature
+from CrystalMatch.dls_imagematch.feature.detector.exception import OpenCvVersionError, FeatureDetectorError
 
 OPENCV_MAJOR = cv2.__version__[0]
 

@@ -4,10 +4,10 @@
 import cv2
 import numpy as np
 
-from dls_focusstack.focus.pyramid import Pyramid
-from dls_focusstack.focus.pyramid_level import PyramidLevel
+from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
+from CrystalMatch.dls_focusstack.focus.pyramid_level import PyramidLevel
 
-from dls_focusstack.focus.pyramid_collection import PyramidCollection
+from CrystalMatch.dls_focusstack.focus.pyramid_collection import PyramidCollection
 
 
 class PyramidManager:

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class Rectangle:

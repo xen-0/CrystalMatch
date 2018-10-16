@@ -1,1 +1,1 @@
-from .service import CrystalMatch
+from CrystalMatch.dls_imagematch.service.service import CrystalMatch

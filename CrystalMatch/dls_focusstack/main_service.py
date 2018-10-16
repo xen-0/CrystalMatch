@@ -1,8 +1,8 @@
 from pkg_resources import require
 
-from dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch import logconfig
 
-require('pygelf==0.2.11')
+require('pygelf')
 require("numpy==1.11.1")
 require("scipy")
 import argparse
@@ -15,8 +15,8 @@ from os import makedirs, remove
 import sys
 import time
 
-from dls_util.config.argparse_readable_config_dir import ReadableConfigDir
-from focus.focus_stack_lap_pyramid import FocusStack
+from CrystalMatch.dls_util.config.argparse_readable_config_dir import ReadableConfigDir
+from CrystalMatch.focus.focus_stack_lap_pyramid import FocusStack
 
 # Detect if the program is running from source or has been bundled
 IS_BUNDLED = getattr(sys, 'frozen', False)

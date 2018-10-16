@@ -1,5 +1,5 @@
-from dls_util.imaging import Image
-from .transformation import Transformation
+from CrystalMatch.dls_util.imaging import Image
+from CrystalMatch.dls_imagematch.feature.transform.transformation import Transformation
 
 
 class Translation(Transformation):

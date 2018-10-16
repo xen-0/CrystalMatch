@@ -5,12 +5,12 @@ import logging
 import cv2
 import numpy as np
 
-from dls_imagematch import logconfig
-from dls_util.shape import Point
-from .exception import TransformCalculationError
-from .trs_affine import AffineTransformation
-from .trs_homography import HomographyTransformation
-from .trs_translation import Translation
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_util.shape import Point
+from CrystalMatch.dls_imagematch.feature.transform.exception import TransformCalculationError
+from CrystalMatch.dls_imagematch.feature.transform.trs_affine import AffineTransformation
+from CrystalMatch.dls_imagematch.feature.transform.trs_homography import HomographyTransformation
+from CrystalMatch.dls_imagematch.feature.transform.trs_translation import Translation
 
 
 class TransformCalculator:

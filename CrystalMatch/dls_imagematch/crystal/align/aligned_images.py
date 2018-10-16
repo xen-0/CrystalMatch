@@ -1,8 +1,8 @@
-from dls_imagematch.util.status import StatusFlag
-from dls_util.imaging import Color
-from dls_util.shape import Point
-from .metric_overlap import OverlapMetric
-from .overlay import Overlayer
+from CrystalMatch.dls_imagematch.util.status import StatusFlag
+from CrystalMatch.dls_util.imaging import Color
+from CrystalMatch.dls_util.shape import Point
+from CrystalMatch.dls_imagematch.crystal.align.metric_overlap import OverlapMetric
+from CrystalMatch.dls_imagematch.crystal.align.overlay import Overlayer
 
 
 class AlignedImagesStatus(StatusFlag):

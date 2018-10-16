@@ -1,4 +1,4 @@
-from dls_util.shape import Point
+from CrystalMatch.dls_util.shape import Point
 
 
 class Feature:

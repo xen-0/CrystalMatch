@@ -1,9 +1,9 @@
 from os.path import join
 
-from dls_imagematch.feature import TransformCalculator
-from dls_util.config.config import Config
-from dls_util.config.item import BoolConfigItem, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
-from .matcher import CrystalMatcher
+from CrystalMatch.dls_imagematch.feature import TransformCalculator
+from CrystalMatch.dls_util.config.config import Config
+from CrystalMatch.dls_util.config.item import BoolConfigItem, EnumConfigItem, RangeIntConfigItem, RangeFloatConfigItem
+from CrystalMatch.dls_imagematch.crystal.match.matcher import CrystalMatcher
 
 
 class CrystalMatchConfig(Config):

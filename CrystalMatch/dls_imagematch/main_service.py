@@ -1,5 +1,5 @@
 from pkg_resources import require
-require('pygelf==0.2.11')
+require('pygelf')
 require("numpy==1.11.1")
 require("scipy")
 
@@ -7,9 +7,9 @@ import logging
 import logging.handlers
 import time
 
-from dls_imagematch.service.parser_manager import ParserManager
-from dls_imagematch.service import CrystalMatch
-from dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.service.parser_manager import ParserManager
+from CrystalMatch.dls_imagematch.service.service import CrystalMatch
+from CrystalMatch.dls_imagematch import logconfig
 
 class CrystalMatchService:
 
@@ -41,7 +41,10 @@ class CrystalMatchService:
 
             log.error(e)
 
-if __name__ == '__main__':
+def main():
     logconfig.setup_logging()
     service = CrystalMatchService()
     service.run()
+
+if __name__ == '__main__':
+    main()

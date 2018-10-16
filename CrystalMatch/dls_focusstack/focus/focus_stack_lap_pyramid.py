@@ -1,17 +1,17 @@
 import logging
-from dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch import logconfig
 import time
 
 import cv2
 import numpy as np
 
-from dls_focusstack.config.focus_config import FocusConfig
-from dls_util.imaging import Image
-from dls_focusstack.focus.image_fft_manager import ImageFFTManager
+from CrystalMatch.dls_focusstack.config.focus_config import FocusConfig
+from CrystalMatch.dls_util.imaging import Image
+from CrystalMatch.dls_focusstack.focus.image_fft_manager import ImageFFTManager
 from os.path import join
 
-from dls_focusstack.focus.pyramid_manager import PyramidManager
-from dls_focusstack.focus.sharpness_detector import SharpnessDetector
+from CrystalMatch.dls_focusstack.focus.pyramid_manager import PyramidManager
+from CrystalMatch.dls_focusstack.focus.sharpness_detector import SharpnessDetector
 
 
 class FocusStack:

@@ -1,9 +1,9 @@
 from __future__ import division
 
-from dls_focusstack.focus.point_fft_manager import PointFFTManager
-from dls_util.shape import Rectangle, Point
-from dls_imagematch.feature import BoundedFeatureMatcher
-from .match import CrystalMatch
+from CrystalMatch.dls_focusstack.focus.point_fft_manager import PointFFTManager
+from CrystalMatch.dls_util.shape import Rectangle, Point
+from CrystalMatch.dls_imagematch.feature import BoundedFeatureMatcher
+from CrystalMatch.dls_imagematch.crystal.match.match import CrystalMatch
 from .results import CrystalMatcherResults
 
 

@@ -1,5 +1,5 @@
-from dls_util.config.config import Config
-from dls_util.config.item import IntConfigItem
+from CrystalMatch.dls_util.config.config import Config
+from CrystalMatch.dls_util.config.item import IntConfigItem
 
 
 class FocusConfig(Config):

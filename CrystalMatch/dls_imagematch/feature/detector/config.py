@@ -1,14 +1,14 @@
 from os.path import join
 
-from dls_util.config.config import Config
-from dls_util.config.item import IntConfigItem, RangeIntConfigItem, FloatConfigItem, RangeFloatConfigItem, \
+from CrystalMatch.dls_util.config.config import Config
+from CrystalMatch.dls_util.config.item import IntConfigItem, RangeIntConfigItem, FloatConfigItem, RangeFloatConfigItem, \
     EnumConfigItem, BoolConfigItem
-from .detector import Detector
-from .detector_brisk import BriskDetector
-from .detector_orb import OrbDetector
-from .detector_sift import SiftDetector
-from .detector_surf import SurfDetector
-from .types import DetectorType, ExtractorType
+from CrystalMatch.dls_imagematch.feature.detector.detector import Detector
+from CrystalMatch.dls_imagematch.feature.detector.detector_brisk import BriskDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_orb import OrbDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_sift import SiftDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_surf import SurfDetector
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType, ExtractorType
 
 
 class DetectorConfig:

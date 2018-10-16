@@ -1,11 +1,11 @@
 import logging
 
-from dls_imagematch import logconfig
-from dls_imagematch.crystal.align.sized_image import SizedImage
-from dls_imagematch.feature import FeatureMatcher
-from dls_util.shape import Point
-from .aligned_images import AlignedImages
-from .exception import ImageAlignmentError
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.crystal.align.sized_image import SizedImage
+from CrystalMatch.dls_imagematch.feature import FeatureMatcher
+from CrystalMatch.dls_util.shape import Point
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import AlignedImages
+from CrystalMatch.dls_imagematch.crystal.align.exception import ImageAlignmentError
 
 
 class ImageAligner:

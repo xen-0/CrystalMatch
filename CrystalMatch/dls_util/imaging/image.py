@@ -4,11 +4,9 @@ import math
 
 import cv2
 import numpy as np
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QImage, QPixmap
 
-from dls_util.shape import Rectangle, Point
-from .color import Color
+from CrystalMatch.dls_util.shape import Rectangle, Point
+from CrystalMatch.dls_util.imaging.color import Color
 
 
 class Image:
@@ -273,16 +271,4 @@ class Image:
 
         return Image(grain_extract)
 
-    def to_qt_pixmap(self, scale=None):
-        """ Convert the image into a PyQt pixmap which can be displayed in QT GUI components. """
-        width, height = self.size()
-        bytes_per_line = 3 * width
-        rgb = cv2.cvtColor(self._img, cv2.COLOR_BGR2RGB)
-        q_img = QImage(rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(q_img)
-
-        if scale is not None:
-            pixmap = pixmap.scaled(scale, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
-        return pixmap
 

@@ -1,2 +1,2 @@
-from .transform import TransformCalculator
-from .match import BoundedFeatureMatcher, FeatureMatcher
+from CrystalMatch.dls_imagematch.feature.transform import TransformCalculator
+from CrystalMatch.dls_imagematch.feature.match import BoundedFeatureMatcher, FeatureMatcher

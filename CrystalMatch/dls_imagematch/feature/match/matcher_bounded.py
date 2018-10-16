@@ -1,7 +1,7 @@
 from __future__ import division
 
-from .matcher import FeatureMatcher
-from .match import FeatureMatch
+from CrystalMatch.dls_imagematch.feature.match.matcher import FeatureMatcher
+from CrystalMatch.dls_imagematch.feature.match.match import FeatureMatch
 
 
 class BoundedFeatureMatcher(FeatureMatcher):

@@ -1,3 +1,3 @@
-from .align import ImageAligner, AlignedImages, AlignConfig
-from .match import CrystalMatcher, CrystalMatcherResults, CrystalMatchConfig
+from CrystalMatch.dls_imagematch.crystal.align import ImageAligner, AlignedImages, AlignConfig
+from CrystalMatch.dls_imagematch.crystal.match import CrystalMatcher, CrystalMatcherResults, CrystalMatchConfig
 

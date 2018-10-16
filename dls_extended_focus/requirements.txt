@@ -1,2 +1,0 @@
-stomp.py==4.1.17
-subprocess32==3.2.7

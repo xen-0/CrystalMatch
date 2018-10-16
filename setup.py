@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
 
     name = 'CrystalMatch',
-    version = '0.0.9',
+    version = '0.0.11',
     description = 'Python Toolkit for Matching Points on Formulatrix Images to Points on Beamline Images',
     long_description=long_description,
     url='https://github.com/DiamondLightSource/CrystalMatch',
@@ -33,7 +33,7 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    entry_points={'console_scripts': ['CrystalMatch = CrystalMatch.CrystalMatch.dls_imagematch:main_service']},  # this makes a script
+    entry_points={'console_scripts': ['CrystalMatch = CrystalMatch.dls_imagematch.main_service:main']},  # this makes a script
 
     install_requires=['numpy==1.11.1', 'pygelf', 'scipy'],
 

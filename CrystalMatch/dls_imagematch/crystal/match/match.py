@@ -1,7 +1,7 @@
 import logging
 
-from dls_imagematch import logconfig
-from dls_imagematch.util.status import StatusFlag
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.util.status import StatusFlag
 
 
 class CrystalMatchStatus(StatusFlag):

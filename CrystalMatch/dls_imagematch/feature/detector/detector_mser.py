@@ -1,8 +1,8 @@
 import cv2
 
-from .types import DetectorType
-from .exception import FeatureDetectorError
-from .detector import Detector
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType
+from CrystalMatch.dls_imagematch.feature.detector.exception import FeatureDetectorError
+from CrystalMatch.dls_imagematch.feature.detector.detector import Detector
 
 
 # TODO: The OpenCV MSER function returns regions, not keypoints => convert regions to keypoints

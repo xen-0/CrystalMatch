@@ -1,5 +1,5 @@
-from dls_util.config.item import ConfigItem
-from dls_util.imaging.color import Color
+from CrystalMatch.dls_util.config.item import ConfigItem
+from CrystalMatch.dls_util.imaging.color import Color
 
 
 class ColorConfigItem(ConfigItem):

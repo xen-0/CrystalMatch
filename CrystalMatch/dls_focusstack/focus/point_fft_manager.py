@@ -1,5 +1,5 @@
-from dls_focusstack.focus.fourier import Fourier
-from dls_focusstack.focus.pointfft import PointFFT
+from CrystalMatch.dls_focusstack.focus.fourier import Fourier
+from CrystalMatch.dls_focusstack.focus.pointfft import PointFFT
 
 class PointFFTManager:
     """

@@ -1,8 +1,8 @@
 import cv2
 
-from .types import DetectorType, ExtractorType
-from .exception import FeatureDetectorError
-from .detector import Detector
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType, ExtractorType
+from CrystalMatch.dls_imagematch.feature.detector.exception import FeatureDetectorError
+from CrystalMatch.dls_imagematch.feature.detector.detector import Detector
 
 
 class SurfDetector(Detector):

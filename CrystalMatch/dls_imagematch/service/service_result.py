@@ -1,7 +1,5 @@
 from __future__ import print_function
 
-import os
-
 import numpy as np
 import logging
 import json
@@ -9,11 +7,11 @@ from json.encoder import JSONEncoder
 
 from os.path import abspath, join, exists, isdir, splitext, split
 
-from dls_imagematch import logconfig
-from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
-from dls_imagematch.crystal.match.match import CRYSTAL_MATCH_STATUS_DISABLED
-from dls_imagematch.util.status import StatusFlag
-from dls_util.shape.point import Point
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_NOT_SET
+from CrystalMatch.dls_imagematch.crystal.match.match import CRYSTAL_MATCH_STATUS_DISABLED
+from CrystalMatch.dls_imagematch.util.status import StatusFlag
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class ServiceResultExitCode(StatusFlag):

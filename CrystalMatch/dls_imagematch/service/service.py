@@ -1,17 +1,16 @@
 import logging
 import time
 
-from dls_focusstack.focus.point_fft_manager import PointFFTManager
-from dls_imagematch import logconfig
-from dls_imagematch.crystal.align import AlignConfig
-from dls_imagematch.crystal.align import ImageAligner
-from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
-from dls_imagematch.crystal.match import CrystalMatchConfig
-from dls_imagematch.crystal.match import CrystalMatcher
-from dls_imagematch.crystal.match.match import CrystalMatchStatus
-from dls_imagematch.feature.detector import DetectorConfig
-from dls_imagematch.service.service_result import ServiceResult
-from dls_util.imaging import Image
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_imagematch.crystal.align import AlignConfig
+from CrystalMatch.dls_imagematch.crystal.align import ImageAligner
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK
+from CrystalMatch.dls_imagematch.crystal.match import CrystalMatchConfig
+from CrystalMatch.dls_imagematch.crystal.match import CrystalMatcher
+from CrystalMatch.dls_imagematch.crystal.match.match import CrystalMatchStatus
+from CrystalMatch.dls_imagematch.feature.detector import DetectorConfig
+from CrystalMatch.dls_imagematch.service.service_result import ServiceResult
+from CrystalMatch.dls_util.imaging import Image
 
 
 class CrystalMatch:

@@ -5,11 +5,9 @@
 test-images
 test-output
 sys_test_output
-/distribution
-/build
 /dist
 
-/dls_extended_focus/logs
+/CrystalMatch/logs
 
 venv*
 /config

@@ -6,8 +6,8 @@ import numpy as np
 
 import logging
 
-from dls_focusstack.focus.pyramid import Pyramid
-from dls_imagematch import logconfig
+from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
+from CrystalMatch.dls_imagematch import logconfig
 
 from pyramid_level import PyramidLevel
 

@@ -1,6 +1,6 @@
 
-from dls_util.imaging import Image
-from dls_util.shape import Rectangle
+from CrystalMatch.dls_util.imaging import Image
+from CrystalMatch.dls_util.shape import Rectangle
 
 
 class PointFFT:

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from dls_util.imaging import Image
+from CrystalMatch.dls_util.imaging import Image
 
 
 class SizedImage(Image):

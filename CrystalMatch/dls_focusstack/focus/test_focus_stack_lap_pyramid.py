@@ -1,5 +1,5 @@
 from pkg_resources import require
-require('pygelf==0.2.11')
+require('pygelf')
 require("numpy==1.11.1")
 require("scipy")
 

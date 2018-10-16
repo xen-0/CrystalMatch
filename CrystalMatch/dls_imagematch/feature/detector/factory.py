@@ -1,12 +1,11 @@
-from .exception import FeatureDetectorError
+from CrystalMatch.dls_imagematch.feature.detector.exception import FeatureDetectorError
 
-from .types import DetectorType
-from .detector import Detector
-from .detector_orb import OrbDetector
-from .detector_sift import SiftDetector
-from .detector_surf import SurfDetector
-# from .detector_mser import MserDetector
-from .detector_brisk import BriskDetector
+from CrystalMatch.dls_imagematch.feature.detector.types import DetectorType
+from CrystalMatch.dls_imagematch.feature.detector.detector import Detector
+from CrystalMatch.dls_imagematch.feature.detector.detector_orb import OrbDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_sift import SiftDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_surf import SurfDetector
+from CrystalMatch.dls_imagematch.feature.detector.detector_brisk import BriskDetector
 
 
 class DetectorFactory:

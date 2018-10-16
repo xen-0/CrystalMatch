@@ -1,12 +1,12 @@
 import logging
-from multiprocessing import Process, Queue, Pool
+from multiprocessing import Pool
 
 import cv2
 import numpy as np
 
-from dls_focusstack.focus.fourier import Fourier
-from dls_imagematch import logconfig
-from dls_focusstack.focus.imagefft import ImageFFT
+from CrystalMatch.dls_focusstack.focus.fourier import Fourier
+from CrystalMatch.dls_imagematch import logconfig
+from CrystalMatch.dls_focusstack.focus.imagefft import ImageFFT
 
 
 def fft(param):
