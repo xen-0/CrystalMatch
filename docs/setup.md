@@ -34,7 +34,7 @@ This project is designed to be run at the Diamond Light Source using the Red Hat
     ```
     > source venv/bin/activate
     > pip install mock --upgrade
-    > pip install nose_parameterized
+    > pip install parameterized
     ```
     
 * Set interpreter - Open `File -> Settings -> Project -> Project Interpreter -> [cog icon] -> New Local...`. Add the virtual environment from the previous step as an existing virtual.

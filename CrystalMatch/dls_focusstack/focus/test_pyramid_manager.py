@@ -9,7 +9,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from dls_focusstack.focus.pyramid_manager import PyramidManager
+from CrystalMatch.dls_focusstack.focus.pyramid_manager import PyramidManager
 
 from mock import MagicMock
 

@@ -1,0 +1,12 @@
+
+sudo: false
+language: python
+python:
+  - "2.7"
+
+install:
+  - pip install pipenv
+  - pipenv install --dev
+
+script:
+- pipenv run python -m unittest discover -p test*.py

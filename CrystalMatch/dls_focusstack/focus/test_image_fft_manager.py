@@ -3,13 +3,13 @@ require('pygelf')
 require("numpy==1.11.1")
 require("scipy")
 
-from dls_focusstack.focus import image_fft_manager
+from CrystalMatch.dls_focusstack.focus import image_fft_manager
 
 from unittest import TestCase
 
 from mock import MagicMock
 
-from dls_focusstack.focus.image_fft_manager import ImageFFTManager
+from CrystalMatch.dls_focusstack.focus.image_fft_manager import ImageFFTManager
 import os
 
 class TestImageFFTManager(TestCase):

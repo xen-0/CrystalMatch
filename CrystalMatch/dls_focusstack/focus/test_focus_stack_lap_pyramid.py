@@ -8,7 +8,7 @@ import os
 from unittest import TestCase
 
 from mock import MagicMock, Mock
-from dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
+from CrystalMatch.dls_focusstack.focus.focus_stack_lap_pyramid import FocusStack
 
 
 class TestFocusStackLapPyramid(TestCase):

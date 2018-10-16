@@ -1,17 +1,14 @@
-from pkg_resources import require
-require("numpy==1.11.1")
-
 from unittest import TestCase
 
 from mock.mock import create_autospec, MagicMock, patch
 
-from dls_imagematch.crystal.align.aligned_images import AlignedImages
-from dls_imagematch.crystal.align.aligner import ImageAligner
-from dls_imagematch.crystal.align.exception import ImageAlignmentError
-from dls_imagematch.crystal.align.sized_image import SizedImage
-from dls_imagematch.feature.detector.config import DetectorConfig
-from dls_imagematch.feature.detector.exception import FeatureDetectorError
-from dls_util.shape.point import Point
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import AlignedImages
+from CrystalMatch.dls_imagematch.crystal.align.aligner import ImageAligner
+from CrystalMatch.dls_imagematch.crystal.align.exception import ImageAlignmentError
+from CrystalMatch.dls_imagematch.crystal.align.sized_image import SizedImage
+from CrystalMatch.dls_imagematch.feature.detector.config import DetectorConfig
+from CrystalMatch.dls_imagematch.feature.detector.exception import FeatureDetectorError
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class TestImageAligner(TestCase):
@@ -111,8 +108,8 @@ class TestImageAligner(TestCase):
         self.failUnlessRaises(FeatureDetectorError, aligner.align)
 
     # noinspection PyUnusedLocal
-    @patch("dls_imagematch.feature.FeatureMatcher.set_detector")
-    @patch("dls_imagematch.feature.FeatureMatcher.match_translation_only")
+    @patch("CrystalMatch.dls_imagematch.feature.FeatureMatcher.set_detector")
+    @patch("CrystalMatch.dls_imagematch.feature.FeatureMatcher.match_translation_only")
     def test_smoke_test_align_images(self, mock_set_detector, mock_match_translation_only):
         """ Dev Note: the logic here is not easy to unit test - system tests will cover this more accurately. """
         # FeatureMatcher.set_detector = MagicMock()

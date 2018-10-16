@@ -4,8 +4,8 @@ import numpy as np
 
 from mock import Mock
 
-from dls_focusstack.focus.pointfft import PointFFT
-from dls_util.shape import Point
+from CrystalMatch.dls_focusstack.focus.pointfft import PointFFT
+from CrystalMatch.dls_util.shape import Point
 
 
 class TestPointFFT(TestCase):

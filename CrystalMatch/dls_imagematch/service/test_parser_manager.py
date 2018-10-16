@@ -7,9 +7,9 @@ import shutil
 
 from mock import Mock
 
-from dls_imagematch.service import readable_config_dir
-from dls_imagematch.service.parser_manager import ParserManager
-from dls_util.imaging import Image
+from CrystalMatch.dls_imagematch.service import readable_config_dir
+from CrystalMatch.dls_imagematch.service.parser_manager import ParserManager
+from CrystalMatch.dls_util.imaging import Image
 
 
 class TestParserManager(unittest.TestCase):

@@ -5,13 +5,13 @@ from unittest import TestCase
 from mock.mock import patch, Mock, MagicMock, call, create_autospec
 from os.path import abspath
 
-from dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK, ALIGNED_IMAGE_STATUS_FAIL, \
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK, ALIGNED_IMAGE_STATUS_FAIL, \
     AlignedImages
-from dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL
-from dls_imagematch.crystal.match.results import CrystalMatcherResults
-from dls_imagematch.feature.match.result import FeatureMatcherResult
-from dls_imagematch.service.service_result import ServiceResult
-from dls_util.shape.point import Point
+from CrystalMatch.dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL
+from CrystalMatch.dls_imagematch.crystal.match.results import CrystalMatcherResults
+from CrystalMatch.dls_imagematch.feature.match.result import FeatureMatcherResult
+from CrystalMatch.dls_imagematch.service.service_result import ServiceResult
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class TestServiceResult(TestCase):
@@ -55,7 +55,7 @@ class TestServiceResult(TestCase):
         return mock_aligned_image
 
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_job_id_and_image_paths_printed_correctly_for_file(self, mock_print):
         result = ServiceResult("", "test/file/path/fomulatrix", "test/file/path/beamline/test.tif")
         result.print_results(False)
@@ -73,7 +73,7 @@ class TestServiceResult(TestCase):
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.set_image_alignment_results(mock_aligned_image)
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_print_without_alignment_results_shows_default_values(self, mock_print):
         Mock(spec_set=["alignment_status_code", "overlap_metric", "pixel_offset", "get_alignment_transform"])
         result = ServiceResult("job-id","fomulatrix","beamline")
@@ -86,7 +86,7 @@ class TestServiceResult(TestCase):
             call('align_error:0.0')
         ])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_image_alignment_results_print_for_success_case(self, mock_print):
         # Set up mock for successful image match
         status = ALIGNED_IMAGE_STATUS_OK
@@ -104,7 +104,7 @@ class TestServiceResult(TestCase):
             call("align_status:1, OK"),
             call("align_error:9.8")])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_image_alignment_results_print_for_failure_case(self, mock_print):
         # Set up mock for successful image match
         status = ALIGNED_IMAGE_STATUS_FAIL
@@ -122,7 +122,7 @@ class TestServiceResult(TestCase):
             call("align_status:0, FAIL"),
             call("align_error:0.0")])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_output_prints_correctly_with_no_crystal_match_results(self, mock_print):
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.print_results(False)
@@ -131,7 +131,7 @@ class TestServiceResult(TestCase):
         output = self.get_output(mock_print)
         self.failIf("poi:" in output)
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_append_single_crystal_match_result(self, mock_print):
         # Setup - create mock result
         new_positions = [Point(100, 100)]
@@ -151,7 +151,7 @@ class TestServiceResult(TestCase):
             call("poi:(100.00, 100.00) z: 0 ; (3.00, 4.00) ; 1, OK ; 0.45")
         ])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_failed_crystal_match_result_prints_correctly(self, mock_print):
         # Setup - create mock result
         result = ServiceResult("job-id", "fomulatrix", "beamline")
@@ -169,7 +169,7 @@ class TestServiceResult(TestCase):
             call("poi:(654.00, 321.00) z: 0 ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_append_multiple_crystal_match_results(self, mock_print):
         # Setup - create mock result
         result = ServiceResult("job-id", "fomulatrix", "beamline")
@@ -199,14 +199,14 @@ class TestServiceResult(TestCase):
             call("poi:(654.00, 321.00) z: 0 ; (7.00, 8.00) ; 0, FAIL ; 65.4"),
         ])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_exit_code_starting_state_is_negative_1(self, mock_print):
         result = ServiceResult("job-id", "fomulatrix", "beamline")
         result.print_results(False)
 
         mock_print.assert_has_calls([call('exit_code:-1')])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_exit_code_in_std_out_success(self, mock_print):
         # Set up mock for successful image match
         status = ALIGNED_IMAGE_STATUS_OK
@@ -221,7 +221,7 @@ class TestServiceResult(TestCase):
         # Test for exit status present in output
         mock_print.assert_has_calls([call('exit_code:0')])
 
-    @patch('dls_imagematch.service.service_result.print', create=True)
+    @patch('CrystalMatch.dls_imagematch.service.service_result.print', create=True)
     def test_exit_code_in_std_out_with_error(self, mock_print):
         # Set up mock for successful image alignment
         status = ALIGNED_IMAGE_STATUS_OK

@@ -3,8 +3,8 @@ from unittest import TestCase
 import numpy as np
 from mock import Mock, MagicMock
 
-from dls_focusstack.focus.point_fft_manager import PointFFTManager
-from dls_util.shape import Point
+from CrystalMatch.dls_focusstack.focus.point_fft_manager import PointFFTManager
+from CrystalMatch.dls_util.shape import Point
 
 
 class TestPointFFTManager(TestCase):

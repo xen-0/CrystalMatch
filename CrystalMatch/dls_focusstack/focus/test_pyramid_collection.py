@@ -2,18 +2,17 @@ from copy import deepcopy
 
 from pkg_resources import require
 
-from dls_focusstack.focus.pyramid import Pyramid
-from dls_focusstack.focus.pyramid_level import PyramidLevel
+from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
+from CrystalMatch.dls_focusstack.focus.pyramid_level import PyramidLevel
 
 require("numpy==1.11.1")
 require("scipy")
 from unittest import TestCase
 
 
-from dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation, PyramidCollection
+from CrystalMatch.dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation, PyramidCollection
 
 import numpy as np
-from multiprocessing import Queue
 from mock import MagicMock
 
 

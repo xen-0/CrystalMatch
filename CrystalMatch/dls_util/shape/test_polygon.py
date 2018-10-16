@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from dls_util.shape.point import Point
-from dls_util.shape.polygon import Polygon
-from dls_util.shape.rectangle import Rectangle
+from CrystalMatch.dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.polygon import Polygon
+from CrystalMatch.dls_util.shape.rectangle import Rectangle
 
 
 class TestPolygon(TestCase):

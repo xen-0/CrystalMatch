@@ -2,12 +2,12 @@ from unittest import TestCase
 
 from mock.mock import create_autospec
 
-from dls_imagematch.crystal.align.aligned_images import AlignedImages
-from dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, \
+from CrystalMatch.dls_imagematch.crystal.align.aligned_images import AlignedImages
+from CrystalMatch.dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, \
     CRYSTAL_MATCH_STATUS_OK, CRYSTAL_MATCH_STATUS_FAIL, CrystalMatchStatus, CRYSTAL_MATCH_STATUS_DISABLED
-from dls_imagematch.feature.match.result import FeatureMatcherResult
-from dls_imagematch.feature.transform.trs_affine import AffineTransformation
-from dls_util.shape.point import Point
+from CrystalMatch.dls_imagematch.feature.match.result import FeatureMatcherResult
+from CrystalMatch.dls_imagematch.feature.transform.trs_affine import AffineTransformation
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class TestCrystalMatch(TestCase):

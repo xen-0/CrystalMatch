@@ -7,7 +7,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from dls_focusstack.focus.imagefft import ImageFFT
+from CrystalMatch.dls_focusstack.focus.imagefft import ImageFFT
 
 
 class TestImageFFT(TestCase):

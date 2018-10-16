@@ -1,12 +1,12 @@
 from pkg_resources import require
 
-from dls_focusstack.focus.pyramid import Pyramid
+from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
 
 require("numpy==1.11.1")
 require("scipy")
 from unittest import TestCase
 
-from dls_focusstack.focus.pyramid_level import PyramidLevel
+from CrystalMatch.dls_focusstack.focus.pyramid_level import PyramidLevel
 
 import numpy as np
 

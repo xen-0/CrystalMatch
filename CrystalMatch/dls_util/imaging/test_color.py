@@ -7,7 +7,7 @@ try:
 except ImportError:
     from mock import patch, mock
 
-from dls_util.imaging.color import Color
+from CrystalMatch.dls_util.imaging.color import Color
 
 
 class TestColor(TestCase):
@@ -109,7 +109,7 @@ class TestColor(TestCase):
         self.failUnlessRaises(TypeError, color.__eq__, 4.6)
 
     # noinspection PyUnusedLocal
-    @mock.patch('dls_util.imaging.color.randint', return_value=100)
+    @mock.patch('CrystalMatch.dls_util.imaging.color.randint', return_value=100)
     def test_random_generation_of_colour(self, mock_randint):
         expected = Color(100, 100, 100, 255)
         generated = Color.random()
