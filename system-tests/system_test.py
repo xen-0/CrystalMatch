@@ -8,7 +8,7 @@ from string import replace
 from subprocess import call
 from unittest import TestCase
 
-from dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.point import Point
 
 
 class SystemTest(TestCase):

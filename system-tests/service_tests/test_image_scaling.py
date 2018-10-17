@@ -2,7 +2,7 @@ from os.path import realpath
 
 from nose_parameterized import parameterized
 
-from dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.point import Point
 from system_test import SystemTest
 
 

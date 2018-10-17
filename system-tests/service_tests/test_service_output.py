@@ -3,7 +3,7 @@ require("numpy==1.11.1")
 
 from os.path import realpath, abspath
 
-from dls_imagematch.service.service_result import ServiceResult
+from CrystalMatch.dls_imagematch.service.service_result import ServiceResult
 from system_test import SystemTest
 
 
