@@ -10,4 +10,4 @@ install:
 
 script:
   - pipenv run python -m unittest discover -p test*.py
-  - cd system-tests && PYTHONPATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/system-tests:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" PATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/system-tests:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" python -m unittest discover -s . -t /home/rqq82173/PycharmProjects/CrystalMatch/system-tests -v
+  - cd system-tests && PYTHONPATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/system-tests:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" PATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/system-tests:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" pipenv run python -m unittest discover -s . -t /home/rqq82173/PycharmProjects/CrystalMatch/system-tests -v

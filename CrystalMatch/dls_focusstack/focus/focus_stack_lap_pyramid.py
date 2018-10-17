@@ -8,7 +8,7 @@ import numpy as np
 from CrystalMatch.dls_focusstack.config.focus_config import FocusConfig
 from CrystalMatch.dls_util.imaging import Image
 from CrystalMatch.dls_focusstack.focus.image_fft_manager import ImageFFTManager
-from os.path import join
+from os.path import join, abspath
 
 from CrystalMatch.dls_focusstack.focus.pyramid_manager import PyramidManager
 from CrystalMatch.dls_focusstack.focus.sharpness_detector import SharpnessDetector
@@ -19,7 +19,7 @@ class FocusStack:
 
     def __init__(self, images, config_dir):
         self._image_file_list = images
-        self._config = FocusConfig(join(config_dir, self.CONFIG_FILE_NAME))
+        self._config = FocusConfig(abspath(join(abspath(config_dir), self.CONFIG_FILE_NAME)))
         self.fft_images = None
 
 

@@ -1,20 +1,14 @@
 import argparse
 import logging
-import sys
+
 import re
 
 from os import access, R_OK, listdir
 
-from os.path import join, split, isdir
+from os.path import join, split, isdir, dirname,abspath
 
-# Detect if the program is running from source or has been bundled
-IS_BUNDLED = getattr(sys, 'frozen', False)
+
 CONFIG_DIR_NAME = "config"
-if IS_BUNDLED:
-    CONFIG_DIR = join(".", CONFIG_DIR_NAME)
-else:
-    CONFIG_DIR = join("..", CONFIG_DIR_NAME)
-
 
 class ReadableConfigDir(argparse.Action):
     """
@@ -31,6 +25,7 @@ class ReadableConfigDir(argparse.Action):
         else:
             logging.error("Configuration directory is not readable: '" + prospective_dir + "'")
             exit(1)
+
 
     def parse_config_path(self, proposed_path):
         """

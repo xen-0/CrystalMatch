@@ -28,6 +28,7 @@ class ParserManager:
     def __init__(self):
         self.parser = None
         self.images_to_stack = None
+        self._script_path = None
 
     def build_parser(self):
         """Return an argument parser for the Crystal Matching service.
@@ -58,7 +59,7 @@ class ParserManager:
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
-                            default=join("..", "config"),
+                            default=join(self.get_script_path(), '..', readable_config_dir.CONFIG_DIR_NAME),
                             help="Sets the configuration directory.")
         parser.add_argument('--scale',
                             metavar="scale",
@@ -86,7 +87,7 @@ class ParserManager:
     def get_config_dir(self):
         config_directory = self.get_args().config
         if config_directory is None:
-            config_directory = readable_config_dir.CONFIG_DIR
+            config_directory = abspath(join(self.get_script_path(), '..', readable_config_dir.CONFIG_DIR_NAME))
         return abspath(config_directory)
 
     def get_scale_override(self):
@@ -205,8 +206,8 @@ class ParserManager:
         l = self.get_args().log
         if l is None:
             # DEV NOTE: join and abspath used over split due to uncertainty over config path ending in a slash
-            parent_dir = abspath(join(self.get_config_dir(), ".."))
-            default_log_path = join(parent_dir, self.LOG_DIR_NAME)
+            #parent_dir = abspath(join(self.get_config_dir(), ".."))
+            default_log_path = abspath(join(self.get_script_path(), '..', self.LOG_DIR_NAME))
             return default_log_path
         return abspath(self.get_args().log)
 
@@ -238,3 +239,9 @@ class ParserManager:
             name = join(focusing_path, file_name)
             files.append(file(name))
         return files
+
+    def set_script_path(self, path):
+        self._script_path = path
+
+    def get_script_path(self):
+        return self._script_path

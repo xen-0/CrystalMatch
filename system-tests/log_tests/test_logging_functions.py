@@ -8,7 +8,7 @@ class TestLoggingFunctions(SystemTest):
         self.set_directory_paths(realpath(__file__))
 
     def test_log_file_is_created(self):
-        cmd_line = "{resources}/A01_1.jpg {resources}/A01_2.jpg"
+        cmd_line = "--log logs {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_log_file_is_created.__name__, cmd_line)
 
         # Check default log directory exists.
@@ -26,7 +26,7 @@ class TestLoggingFunctions(SystemTest):
         #self._verify_logged_image_files(log_image_dir, self.get_poi_from_std_out())
 
     def test_log_file_contains_job_id_if_set(self):
-        cmd_line = "-j test_job_123 {resources}/A01_1.jpg {resources}/A01_2.jpg"
+        cmd_line = "--log logs -j test_job_123 {resources}/A01_1.jpg {resources}/A01_2.jpg"
         self.run_crystal_matching_test(self.test_log_file_contains_job_id_if_set.__name__, cmd_line)
 
         # Verify that the log file contains the job ID
@@ -48,7 +48,7 @@ class TestLoggingFunctions(SystemTest):
             self.failUnlessDirContainsFile(join(self.get_active_test_dir(), "test", "log:ging", "flag"), "log")
 
     def test_processed_file_is_stored_in_log_when_running_with_stucking(self):
-        cmd_line = "-j test_case {resources}/stacking/ideal.tif {resources}/stacking/levels"
+        cmd_line = "--log logs -j test_case {resources}/stacking/ideal.tif {resources}/stacking/levels"
         self.run_crystal_matching_test(self.test_processed_file_is_stored_in_log_when_running_with_stucking.__name__, cmd_line)
         dir = self._active_log_dir()
         self.failUnlessDirContainsFile(dir,'processed.tif')

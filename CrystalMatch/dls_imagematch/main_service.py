@@ -6,6 +6,7 @@ require("scipy")
 import logging
 import logging.handlers
 import time
+import os
 
 from CrystalMatch.dls_imagematch.service.parser_manager import ParserManager
 from CrystalMatch.dls_imagematch.service.service import CrystalMatch
@@ -22,11 +23,16 @@ class CrystalMatchService:
         try:
             total_start = time.time()
             parser_manager = ParserManager()
+            script_path = os.path.dirname(os.path.abspath(__file__))
+            parser_manager.set_script_path(script_path)
             parser_manager.build_parser()
 
             logconfig.set_additional_handler(parser_manager.get_log_file_path())
 
             config_directory = parser_manager.get_config_dir()
+
+            log.info('used config directory: '+ config_directory +', path to script: '+ script_path)
+
             scale_override = parser_manager.get_scale_override()
             to_json_flag = parser_manager.get_to_json()
 

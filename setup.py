@@ -1,4 +1,5 @@
 import setuptools
+from CrystalMatch.dls_imagematch.version import VersionHandler
 
 
 # these lines allow the version to be specified in Makefile.private
@@ -12,7 +13,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
 
     name = 'CrystalMatch',
-    version = '0.0.11',
+    version = VersionHandler.version(),
     description = 'Python Toolkit for Matching Points on Formulatrix Images to Points on Beamline Images',
     long_description=long_description,
     url='https://github.com/DiamondLightSource/CrystalMatch',

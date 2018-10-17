@@ -2,12 +2,11 @@ import unittest
 from os import remove, rmdir
 
 import numpy as np
-from os.path import join, isfile, split, abspath, exists
+from os.path import join, isfile, split, abspath, exists, dirname
 import shutil
 
 from mock import Mock
 
-from CrystalMatch.dls_imagematch.service import readable_config_dir
 from CrystalMatch.dls_imagematch.service.parser_manager import ParserManager
 from CrystalMatch.dls_util.imaging import Image
 
@@ -16,6 +15,8 @@ class TestParserManager(unittest.TestCase):
 
     def setUp(self):
         self.pm = ParserManager()
+        path = join(dirname(abspath(__file__)), '..')
+        self.pm.set_script_path(path)
 
     def tearDown(self):
         # make sure the default destination does not contain processed file
@@ -29,6 +30,7 @@ class TestParserManager(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         pm = ParserManager()
+        pm.set_script_path('test')
         pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         default_log_path = pm._get_log_file_dir()
         config = pm.get_config_dir()
@@ -45,7 +47,9 @@ class TestParserManager(unittest.TestCase):
 
     def test_get_config_returns_default_config_directory_when_config_directory_is_not_specified(self):
         self.pm.get_args = Mock(return_value=Mock(config=None)) #!! return value has to be a mock with particular parameters
-        self.assertEquals(self.pm.get_config_dir(), abspath(readable_config_dir.CONFIG_DIR))
+        config_dir = self.pm.get_config_dir()
+        default_config_dir = abspath(join(self.pm.get_script_path(), '..', 'config'))
+        self.assertEquals(config_dir, default_config_dir)
 
     def test_get_config_returns_whatever_is_specified_as_config(self):
         test_string = 'ble'
@@ -160,15 +164,13 @@ class TestParserManager(unittest.TestCase):
         head, tail = split(path)
         self.assertEquals(tail, self.pm.LOG_FILE_NAME)
 
-    def test_get_log_file_dir_uses_location_of_config_dir_when_log_parameter_not_set(self):
+    def test_get_log_file_dir_returnes_defualt_when_log_parameter_not_set(self):
         self.pm.get_args = Mock(return_value=Mock(log=None, config="test_config"))
         log_dir = self.pm._get_log_file_dir()
-        config_dir = self.pm.get_config_dir()
-        head, tail = split(log_dir)
-        config_head, config_tail = split(config_dir)
-        self.assertEquals(tail, self.pm.LOG_DIR_NAME)
-        self.assertEquals(config_head, head)
-        self.assertNotEquals(config_tail, tail)
+        default_log_dir = abspath(join(self.pm.get_script_path(), '..', 'logs'))
+
+        self.assertEquals(log_dir, default_log_dir)
+
 
     def test_get_log_file_dir_uses_location_specified_by_parameter_log(self):
         self.pm.get_args = Mock(return_value=Mock(log='test_dir', config="test_config"))
