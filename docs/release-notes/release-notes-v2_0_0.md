@@ -10,6 +10,7 @@ Changes merged into master
 |VMXI-381   |Minor |Log File Analysis|
 |VMXI-467   |Minor |Clean up CrystalMatch mian and run options|
 |VMXI-473   |Minor |New CrystalMatch should return z level for each point passed|
+|VMXI-503   |Major | Release new version of CrystalMatch|
 
 
 Change Types:
