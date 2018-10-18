@@ -11,4 +11,3 @@ install:
 script:
   - pipenv run python -m unittest discover -s CrystalMatch -t CrystalMatch
   - x=$(pwd) PYTHONPATH="$PATH:$x/CrystalMatch:$x" PATH="$PATH:$x/CrystalMatch"pipenv run  python -m unittest discover -s system-tests -t system-tests -v
-  - PYTHONPATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" PATH="$PATH:/home/rqq82173/PycharmProjects/CrystalMatch/CrystalMatch:/home/rqq82173/PycharmProjects/CrystalMatch" pipenv run python -m unittest discover -s system-tests -t system-tests -v

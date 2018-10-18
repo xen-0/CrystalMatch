@@ -1,11 +1,9 @@
+from pkg_resources import require
+require("mock==1.0.1")
 from unittest import TestCase
 
-from mock.mock import call
+from mock import Mock, patch, call
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch, mock
 
 from CrystalMatch.dls_util.imaging.color import Color
 
@@ -109,7 +107,7 @@ class TestColor(TestCase):
         self.failUnlessRaises(TypeError, color.__eq__, 4.6)
 
     # noinspection PyUnusedLocal
-    @mock.patch('CrystalMatch.dls_util.imaging.color.randint', return_value=100)
+    @patch('CrystalMatch.dls_util.imaging.color.randint', return_value=100)
     def test_random_generation_of_colour(self, mock_randint):
         expected = Color(100, 100, 100, 255)
         generated = Color.random()

@@ -1,8 +1,10 @@
 from __future__ import print_function
+from pkg_resources import require
+require("mock==1.0.1")
 
 from unittest import TestCase
 
-from mock.mock import patch, Mock, MagicMock, call, create_autospec
+from mock import patch, Mock, MagicMock, call, create_autospec
 from os.path import abspath
 
 from CrystalMatch.dls_imagematch.crystal.align.aligned_images import ALIGNED_IMAGE_STATUS_OK, ALIGNED_IMAGE_STATUS_FAIL, \

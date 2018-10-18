@@ -1,16 +1,16 @@
 from copy import deepcopy
 
 from pkg_resources import require
+require("numpy==1.11.1")
+require("scipy==0.19.1")
+require("mock==1.0.1")
+
+from unittest import TestCase
+
+from CrystalMatch.dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation, PyramidCollection
 
 from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
 from CrystalMatch.dls_focusstack.focus.pyramid_level import PyramidLevel
-
-require("numpy==1.11.1")
-require("scipy==0.19.1")
-from unittest import TestCase
-
-
-from CrystalMatch.dls_focusstack.focus.pyramid_collection import fused_laplacian, entropy_diviation, PyramidCollection
 
 import numpy as np
 from mock import MagicMock

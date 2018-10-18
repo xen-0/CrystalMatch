@@ -1,6 +1,8 @@
+from pkg_resources import require
+require("mock==1.0.1")
 from unittest import TestCase
 
-from mock.mock import create_autospec
+from mock import create_autospec
 
 from CrystalMatch.dls_imagematch.crystal.align.aligned_images import AlignedImages
 from CrystalMatch.dls_imagematch.crystal.match.match import CrystalMatch, CRYSTAL_MATCH_STATUS_STATUS_NOT_SET, \

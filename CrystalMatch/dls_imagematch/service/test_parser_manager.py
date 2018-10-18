@@ -1,3 +1,5 @@
+from pkg_resources import require
+require("mock==1.0.1")
 import unittest
 from os import remove, rmdir
 
