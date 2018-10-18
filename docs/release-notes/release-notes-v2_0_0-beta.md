@@ -1,4 +1,4 @@
-Release Notes (v2.0.0)
+Release Notes (v2.0.0-beta)
 ===========================
 
 Changes merged into master
