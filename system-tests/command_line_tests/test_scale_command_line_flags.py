@@ -1,6 +1,6 @@
 from os.path import realpath
 
-from nose_parameterized import parameterized
+from parameterized import parameterized
 
 from system_test import SystemTest
 
