@@ -1,7 +1,7 @@
 from pkg_resources import require
-require('pygelf')
+require("pygelf==0.3.1")
 require("numpy==1.11.1")
-require("scipy")
+require("scipy==0.19.1")
 
 import cv2
 import os

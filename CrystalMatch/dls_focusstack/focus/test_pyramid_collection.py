@@ -6,7 +6,7 @@ from CrystalMatch.dls_focusstack.focus.pyramid import Pyramid
 from CrystalMatch.dls_focusstack.focus.pyramid_level import PyramidLevel
 
 require("numpy==1.11.1")
-require("scipy")
+require("scipy==0.19.1")
 from unittest import TestCase
 
 

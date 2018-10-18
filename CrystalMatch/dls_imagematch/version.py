@@ -1,5 +1,5 @@
 # Version information for CrystalMatch
-__version__ = "0.0.17"
+__version__ = "0.0.18"
 __date__ = "22/08/2018"
 
 

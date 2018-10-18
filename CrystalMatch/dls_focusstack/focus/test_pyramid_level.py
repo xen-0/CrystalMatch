@@ -1,7 +1,7 @@
 from pkg_resources import require
 
 require("numpy==1.11.1")
-require("scipy")
+require("scipy==0.19.1")
 from unittest import TestCase
 
 
