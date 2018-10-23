@@ -1,6 +1,6 @@
 from os.path import realpath, join
 
-from dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.point import Point
 from system_test import SystemTest
 
 

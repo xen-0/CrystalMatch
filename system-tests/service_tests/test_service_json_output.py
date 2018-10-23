@@ -1,7 +1,7 @@
 from numbers import Number
 from os.path import realpath, abspath
 
-from dls_util.shape.point import Point
+from CrystalMatch.dls_util.shape.point import Point
 from system_test import SystemTest
 
 

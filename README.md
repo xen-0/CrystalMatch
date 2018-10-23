@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/DiamondLightSource/CrystalMatch.svg?branch=master)](https://travis-ci.com/DiamondLightSource/CrystalMatch)
+[![Coverage Status](https://coveralls.io/repos/github/DiamondLightSource/CrystalMatch/badge.svg?branch=master)](https://coveralls.io/github/DiamondLightSource/CrystalMatch?branch=master)
+
 VMXi Crystal Image Matching Readme
 ==================================
 
