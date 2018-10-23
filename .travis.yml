@@ -7,7 +7,7 @@ python:
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt
-  - pip install opencv-python # installs opencv version 3
+  - pip install opencv-python
   - pip install coverage
   - pip install coveralls
 
@@ -20,5 +20,5 @@ after_success:
 
 
 
-# system test require  opencv version 2.7 which is not available on pip
+# opencv version 2.7 which is not available on pip
 #  - x=$(pwd) PYTHONPATH="$PATH:$x/CrystalMatch:$x" PATH="$PATH:$x/CrystalMatch" python -m unittest discover -s system-tests -t system-tests -v
