@@ -18,10 +18,9 @@ class TestImageFFTManager(TestCase):
     def setUp(self):
         self._file1= MagicMock()
         self._file2 = MagicMock()
-
-        dict = os.path.join(os.sep, "home", "rqq82173","PycharmProjects", "CrystalMatch","test-images", "Focus", "VMXI-AA0019-H01-1-R0DRP1", "levels")
-        self._file1.name = os.path.join(dict, "FL1.tif")
-        self._file2.name = os.path.join(dict, "FL2.tif")
+        dict = os.path.join(".", "system-tests", "resources")
+        self._file1.name = os.path.join(dict, "A02.jpg")
+        self._file2.name = os.path.join(dict, "A03.jpg")
         file_list = [self._file1, self._file2]
         self._imgFFTmanEmpty = ImageFFTManager(file_list)
         self._imgFFTman = ImageFFTManager(file_list)

@@ -5,9 +5,20 @@ python:
   - "2.7"
 
 install:
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+  - pip install opencv-python # installs opencv version 3
+  - pip install coverage
+  - pip install coveralls
 
 script:
-  - pipenv run python -m unittest discover -s CrystalMatch -t CrystalMatch
-  - x=$(pwd) PYTHONPATH="$PATH:$x/CrystalMatch:$x" PATH="$PATH:$x/CrystalMatch"pipenv run  python -m unittest discover -s system-tests -t system-tests -v
+  - coverage run --source=CrystalMatch -m unittest discover -s CrystalMatch -t CrystalMatch
+
+after_success:
+# needed to add the repo to https://coveralls.io/repos
+- coveralls
+
+
+
+# system test require  opencv version 2.7 which is not available on pip
+#  - x=$(pwd) PYTHONPATH="$PATH:$x/CrystalMatch:$x" PATH="$PATH:$x/CrystalMatch" python -m unittest discover -s system-tests -t system-tests -v

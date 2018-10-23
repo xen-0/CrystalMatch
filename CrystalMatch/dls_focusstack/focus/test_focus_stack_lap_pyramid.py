@@ -18,9 +18,9 @@ class TestFocusStackLapPyramid(TestCase):
         self._file1 = MagicMock()
         self._file2 = MagicMock()
         CONFIG_DIR = os.path.join("config")
-        dict = os.path.join("test-images", "Focus", "VMXI-AA0019-H01-1-R0DRP1", "levels")
-        self._file1.name = os.path.join(dict, "FL1.tif")
-        self._file2.name = os.path.join(dict, "FL2.tif")
+        dict = os.path.join(".", "system-tests", "resources")
+        self._file1.name = os.path.join(dict, "A02.jpg")
+        self._file2.name = os.path.join(dict, "A03.jpg")
         file_list = [self._file1, self._file2]
         fs = FocusStack(file_list, CONFIG_DIR)
         result_img = fs.composite()
