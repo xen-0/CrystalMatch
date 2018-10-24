@@ -22,4 +22,4 @@ clean:
 install: dist
 	$(PYTHON) setup.py easy_install -m \
 		--record=installed.files \
-        --prefix=$(PREFIX) dist/*.egg
+		--prefix=$(PREFIX) dist/*.egg
