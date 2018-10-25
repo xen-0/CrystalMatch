@@ -36,9 +36,11 @@ class TestParserManager(unittest.TestCase):
         pm.get_args = Mock(return_value=Mock(output=None, log=None, config="test_config"))
         default_log_path = pm._get_log_file_dir()
         config = pm.get_config_dir()
+        default_script_path = pm.DEFAULT_SCRIPT_PATH
         try:
             shutil.rmtree(default_log_path)
             shutil.rmtree(config)
+            shutil.rmtree(default_script_path)
         except:
             pass
 
@@ -50,7 +52,7 @@ class TestParserManager(unittest.TestCase):
     def test_get_config_returns_default_config_directory_when_config_directory_is_not_specified(self):
         self.pm.get_args = Mock(return_value=Mock(config=None)) #!! return value has to be a mock with particular parameters
         config_dir = self.pm.get_config_dir()
-        default_config_dir = abspath(join(self.pm.get_script_path(), '..', 'config'))
+        default_config_dir = abspath(join(self.pm.get_script_path(), 'config'))
         self.assertEquals(config_dir, default_config_dir)
 
     def test_get_config_returns_whatever_is_specified_as_config(self):
@@ -169,7 +171,7 @@ class TestParserManager(unittest.TestCase):
     def test_get_log_file_dir_returnes_defualt_when_log_parameter_not_set(self):
         self.pm.get_args = Mock(return_value=Mock(log=None, config="test_config"))
         log_dir = self.pm._get_log_file_dir()
-        default_log_dir = abspath(join(self.pm.get_script_path(), '..', 'logs'))
+        default_log_dir = abspath(join(self.pm.get_script_path(), 'logs'))
 
         self.assertEquals(log_dir, default_log_dir)
 
@@ -209,3 +211,29 @@ class TestParserManager(unittest.TestCase):
         self.assertTrue(exists('new'))
         rmdir('new')
         self.assertFalse(exists('new'))
+
+    def test_if_egg_use_home_creates_new_directory(self):
+        path = abspath("site-packages/CrystalMatch-v1.0.0-py2.7.egg/CrystalMatch/")
+        new_path = self.pm._if_egg_use_home(path)
+        self.assertTrue(exists(new_path))
+        self.assertTrue(".CrystalMatch" in new_path)
+
+    def test_get_log_file_dir_returns_CrystalMatch_when_log_parameter_not_set_and_running_form_egg(self):
+        pm = ParserManager()
+        path = "site-packages/CrystalMatch-v1.0.0-py2.7.egg/CrystalMatch/"
+        pm.set_script_path(path)
+        pm.get_args = Mock(return_value=Mock(log=None, config="test_config"))
+        log_dir = pm._get_log_file_dir()
+        self.assertTrue(".CrystalMatch" in log_dir)
+        default_log_dir = abspath(join(pm.get_script_path(), 'logs'))
+        self.assertEquals(log_dir, default_log_dir)
+
+    def test_get_config_returns_CrystalMatch_when_config_directory_is_not_specified_and_running_from_egg(self):
+        pm = ParserManager()
+        path = "site-packages/CrystalMatch-v1.0.0-py2.7.egg/CrystalMatch/"
+        pm.set_script_path(path)
+        pm.get_args = Mock(return_value=Mock(config=None))
+        config_dir = pm.get_config_dir()
+        self.assertTrue(".CrystalMatch" in config_dir)
+        default_config_dir = abspath(join(pm.get_script_path(), 'config'))
+        self.assertEquals(config_dir, default_config_dir)

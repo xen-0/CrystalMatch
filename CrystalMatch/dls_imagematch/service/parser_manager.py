@@ -6,7 +6,7 @@ import argparse
 import logging
 import re
 import cv2
-from os.path import split, exists, isdir, isfile, join, abspath, getmtime, dirname
+from os.path import split, exists, isdir, isfile, join, abspath, getmtime, dirname, expanduser
 
 from os import listdir, makedirs, chmod
 
@@ -24,6 +24,7 @@ class ParserManager:
     LOG_DIR_NAME = 'logs'
     LOG_FILE_NAME = 'log'
     FOCUSED_IMAGE_NAME = 'processed.tif'
+    DEFAULT_SCRIPT_PATH = '.CrystalMatch'
 
     def __init__(self):
         self.parser = None
@@ -59,7 +60,7 @@ class ParserManager:
         parser.add_argument('--config',
                             metavar="path",
                             action=ReadableConfigDir,
-                            default=join(self.get_script_path(), '..', readable_config_dir.CONFIG_DIR_NAME),
+                            default=join(self.get_script_path(), readable_config_dir.CONFIG_DIR_NAME),
                             help="Sets the configuration directory.")
         parser.add_argument('--scale',
                             metavar="scale",
@@ -87,7 +88,7 @@ class ParserManager:
     def get_config_dir(self):
         config_directory = self.get_args().config
         if config_directory is None:
-            config_directory = abspath(join(self.get_script_path(), '..', readable_config_dir.CONFIG_DIR_NAME))
+            config_directory = abspath(join(self.get_script_path(), readable_config_dir.CONFIG_DIR_NAME))
         return abspath(config_directory)
 
     def get_scale_override(self):
@@ -206,19 +207,19 @@ class ParserManager:
         l = self.get_args().log
         if l is None:
             # DEV NOTE: join and abspath used over split due to uncertainty over config path ending in a slash
-            #parent_dir = abspath(join(self.get_config_dir(), ".."))
-            default_log_path = abspath(join(self.get_script_path(), '..', self.LOG_DIR_NAME))
+            default_log_path =abspath(join(self.get_script_path(), self.LOG_DIR_NAME))
             return default_log_path
         return abspath(self.get_args().log)
 
     def _check_make_dirs(self, directory):
         if not exists(directory) or not isdir(directory):
+            log = logging.getLogger(".".join([__name__]))
+            log.addFilter(logconfig.ThreadContextFilter())
             try:
                 makedirs(directory)
                 chmod(directory, self.LOG_DIR_PERMISSION)
+                log.info("Directory created: " + directory)
             except OSError:
-                log = logging.getLogger(".".join([__name__]))
-                log.addFilter(logconfig.ThreadContextFilter())
                 log.error("Could not create find/create directory, path may be invalid: " + directory)
                 exit(1)
 
@@ -241,7 +242,18 @@ class ParserManager:
         return files
 
     def set_script_path(self, path):
-        self._script_path = path
+        new_path = self._if_egg_use_home(path)
+        self._script_path = new_path
 
     def get_script_path(self):
         return self._script_path
+
+    def _if_egg_use_home(self, path):
+        new_path = abspath(join(path, '..'))
+        if ".egg" in new_path:
+            home = expanduser("~")
+            new_path = abspath(join(home, self.DEFAULT_SCRIPT_PATH))
+            if not exists(new_path):
+                makedirs(new_path)
+
+        return new_path
