@@ -16,6 +16,8 @@ setuptools.setup(
     version = VersionHandler.version(),
     description = 'Python Toolkit for Matching Points on Formulatrix Images to Points on Beamline Images',
     long_description=long_description,
+    long_description_content_type="text/markdown",
+    # see: https://dustingram.com/articles/2018/03/16/markdown-descriptions-on-pypi
     url='https://github.com/DiamondLightSource/CrystalMatch',
     author = 'Urszula Neuman',
     author_email = 'urszula.neuman@dimaond.ac.uk',

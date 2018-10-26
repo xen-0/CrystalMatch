@@ -1,26 +1,65 @@
-#CrystalMatch - Deployment
+##CrystalMatch - Deployment
 
-This application is intended for deployment on a beam line control machine.  Due to dependency on a specific version of OpenCV it would be preferable to deploy it a stand-alone application without relying on the local Python environment.
+This application is intended for deployment on a beamline control machine.
 
-The recommended method of deployment is therefore to bundle the dependencies into a single executable file using 'pyinstaller' which must be run on a Linux distribution with the correct packages installed (see `setup.md` for requirements).
+It is now deployed as part of the local Python environment - dls-python.
 
-**NOTE:** At time of writing the Anaconda distribution of Python on the Diamond network (`module load python/ana`) has the correct requirements to build a distribution.
+It is installed as all other internal python packages in:
 
-## Creating a Distribution
+/dls_sw/prod/common/python/RHEL6-x86_64/CrystalMatch
 
-There is a build script `build_linux.sh` in the root directory of the repository which assumes that the local machine is a RedHat Linux distribution running on the Diamond network.
+In order to install a new version internally follow the steps in Release Procedure.
 
-From the root directory of the repository run the script ('sh build_linux.sh'). This will carry out the following steps:
+The module can also be released externally on pypi (see relevant steps in Release Procedure).
+The external release procedure is not required and does not affect the internal release in any way.
 
-1. Deleted the existing distribution directory (if applicable).
-1. Loads the correct version of Python from the network.
-2. Attempts to install `pyinstaller` to the user's local environment.
-3. Check that the Python dependency requirements are met (`./scripts/check_requirements.py`).
-4. Run `pyinstaller` with the relevant `PATH` and `PYTHONPATH` entries to build the application.
+## Release Procedure
 
-Once the script has run the distribution should be located at `./distribution/dist/`.
+1. Bump the version number
+2. Update release notes and dev notes
+3. Push the changes to gitolite and github origins
+4. Make sure that all unit tests pass on Travis and run system test locally and check that they pass
+5. External release on pypi:
+    1. activate your virtual environment (source venv/bin/activate):
+    ```
+    pip install --upgrade pip setuptools docutils wheel
+    python setup.py sdist
+    python setup.py bdist_wheel #this one worked for wheel==0.30.0 but not recent release
+    ```
+    2. exit your virtual environment (decativate) and do:
+    ```
+    module load python/ana
+    python -m pip install --user --upgrade twine
+    python -m twine upload dist/*
+    ```
+    3. To test the released script do:
+    ```
+    virtualenv -p /dls_sw/prod/tools/RHEL6-x86_64/Python/2-7-3/prefix/bin/dls-python venv_cmd --system-site-packages
+    source venv/bin/activate
+    pip install --upgrade pip setuptools
+    pip install CrystalMatch
+    CrystalMatch image.jpg focusing_dict 1800,1690 --scale 1.0:1.575
+    ```
+6. Create a new release on github and add the whl and tar.gz files - the release will be tagged
+7. Do internal release for dls-python:
+    1. Add a tag with - instead of . in the version and push ot to gitolite_origin, for example:
+    ```
+    git tag 1-0-0
+    git push gitolite_origin 1-0-0
+    ```
+    2. Run release script, wait for the build to finish and configure the path:
+    ```
+    dls-release.py -p -t CrystalMatch 1-0-0 (consider releasing a test version of the module first dls-release with -T)
+    dls-last-release.sh -w
+    configure-tool edit -p CrystalMatch 1-0-0
+    ```
+    3. Test the released script:
+    ```
+    CrystalMatch image.jpg focusing_dict 1800,1690 --scale 1.0:1.575
+    ```
 
-## Deployment and Running the application
+## Old Deployment
 
-The entire distribution directory `CrystalMatch` should be deployed to the server (any previous versions should be removed). It should contain an executable with the same name as the directory which can be run from the command line - `CrystalMatch/CrystalMatch`
-Location of 'CrystalMatch': /dls_sw/dasc/CrystalMatch.
+The deployment was before done by putting a script build using pyinstaller on a server.
+The old location of 'CrystalMatch' was /dls_sw/dasc/CrystalMatch.
+Although the location is not used to keep the code anymore it contains config files used by GDA.
