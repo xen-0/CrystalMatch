@@ -1,8 +1,7 @@
 [![Build Status](https://travis-ci.com/DiamondLightSource/CrystalMatch.svg?branch=master)](https://travis-ci.com/DiamondLightSource/CrystalMatch)
 [![Coverage Status](https://coveralls.io/repos/github/DiamondLightSource/CrystalMatch/badge.svg?branch=master)](https://coveralls.io/github/DiamondLightSource/CrystalMatch?branch=master)
-
 [![PyPI version](https://badge.fury.io/py/CrystalMatch.svg)](https://badge.fury.io/py/CrystalMatch)
-[![PyPI version](https://badge.fury.io/pypi/pyversions/CrystalMatch.svg)](https://badge.fury.io/py/CrystalMatch)
+
 VMXi Crystal Image Matching Readme
 ==================================
 
