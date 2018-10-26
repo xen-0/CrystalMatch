@@ -1,14 +1,5 @@
 # Crystal Match - System User Guide
 
-*Software version: V0.1.5*
-
-*Last Updated: 09/02/2017*
-
-*Contributions:*
-
-* Chris Martin - Contractor (Tessella) - Sept 2016 - Current
-* Kris Ward - Contractor (Tessella) - Jan 2016 - Sept 2016
-
 ## Overview
 
 CrystalMatch was developed for the VMXi beamline at the Diamond Light Source to map points on an image of a sample to their current location using Feature Matching techniques. This is a two phase process which accounts for both the movement of the plate (the Alignment phase) and the movement of crystals in the sample (the Crystal Matching phase).

@@ -1,4 +1,4 @@
-## CrystalMatch - Deployment
+# CrystalMatch - Deployment
 
 This application is intended for deployment on a beamline control machine.
 
@@ -17,14 +17,14 @@ The external release procedure is not required and does not affect the internal 
 
 1. Bump the version number
 2. Update release notes and dev notes
-3. Push the changes to gitolite and github origins
+3. Push the changes to gitolite (git push gitolite_origin master) and github origins
 4. Make sure that all unit tests pass on Travis and run system test locally and check that they pass
 5. External release on pypi:
     1. activate your virtual environment (source venv/bin/activate):
     ```
     pip install --upgrade pip setuptools docutils wheel
     python setup.py sdist
-    python setup.py bdist_wheel #this one worked for wheel==0.30.0 but not recent release
+    python setup.py bdist_wheel #this one worked for wheel==0.31.0 but not recent release
     ```
     2. exit your virtual environment (decativate) and do:
     ```
@@ -49,6 +49,7 @@ The external release procedure is not required and does not affect the internal 
     ```
     2. Run release script, wait for the build to finish and configure the path:
     ```
+    module load dls_ade
     dls-release.py -p -t CrystalMatch 1-0-0 (consider releasing a test version of the module first dls-release with -T)
     dls-last-release.sh -w
     configure-tool edit -p CrystalMatch 1-0-0
