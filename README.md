@@ -16,7 +16,7 @@ User Guide
 ----------
 This section is a guide for users of the application
 
-*[The User Guide](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/user_guide.md)
+* [The User Guide](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/user_guide.md)
 
 Developer Guide
 ---------------
