@@ -15,7 +15,7 @@ class TestCommandLineFlags(SystemTest):
         self.run_crystal_matching_test(self.test_version_flag_displays_version_number.__name__, cmd_line)
 
         # Check for version flag on stdout
-        self.failUnlessStdErrContainsRegex("v[0-9]+[.][0-9]+[.][0-9]+")
+        self.failUnlessStdErrContainsRegex("[0-9]+[.][0-9]+[.][0-9]+")
 
     def test_json_flag_prints_json_to_console(self):
         cmd_line = "--to_json {resources}/A01_1.jpg {resources}/A01_2.jpg"
