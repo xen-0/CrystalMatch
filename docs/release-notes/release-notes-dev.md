@@ -5,6 +5,7 @@ Changes merged into master
 --------------------------
 | Jira Task | Type | Description |
 |-----------|------|-------------|
+|VMXi-512   |Patch |Problem with default log and config file when running from egg|
 
 
 Change Types:
