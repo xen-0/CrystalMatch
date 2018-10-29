@@ -40,22 +40,18 @@ Images taken in the fridge use a Z-focusing mode where the well is imaged multip
 
 When the user selects a feature, the system will need to figure out which Z-slice has the feature in best focus. This feature will be important if the scan will include rotation of the sample, as we will need to know the Z-coordinate of the crystal within the sample bubble. For planar scanning, the Z-depth wont matter much as the plate will always be normal to the beam.
 
-It will be necessary to perform this same operation when images are being taken of the sample on the beamline. The program will need to implement this or we will need to call on an external utility to do it. 
-
-Idea: It may be possible that we can use the same Formulatrix software to do this, depending on how open the architecture is - we will need to get in touch with the company to figure this out.
-
+It is necessary to perform this same operation when images are being taken of the sample on the beamline.
+The app implements a pyramid based [focusing method](http://www.ece.drexel.edu/courses/ECE-C662/notes/LaplacianPyramid/laplacian2011.pdf) found on [github](https://github.com/sjawhar/focus-stacking).
+It creates one all-in-focus image from a set of Z-sliced images which is used in the further steps of the algorithm.
+The app also finds (for each feature selected by the user) the index of the Z-slice which has the best focus.
 
 Real Time Constraint
 --------------------
 The beamline is intended to be very high throughput. The whole scanning operation for a single well should take on the order of 1 second. For this reason, the image matching algorithm needs to run very quickly. The image matching program will run on a dedicated machine, and there is budget available to use a high performance server specifically to run it if needed.
-
+At the moment the image matching algorithm does quite good job in terms of speed but the focusing phase is slow and takes 80% of the calculation time.
 
 Further Details
 ---------------
-
-Some points of the process are not yet defined or may be subject to change. This is because none of the actual equipment is installed yet, so we are mostly working from guesses. At the moment, the fridge images are pictures of the whole well. The image from the beamline camera is a close-up of the bubble, at least for the sample images that we have.
-
-The real size that each image represents will be known (but isn't at the moment because we don't yet have the hardware), so will have a measure of microns per pixel. We will also know the exact position of the image so that we will know the exact real position of pixel (x,y) relative to the top-left corner of the imaged well.
 
 It is likely that the images from the wells will be close-ups of the bubbles, not pictures of the whole well. Each well is divided into two or three small sub-regions (differs depending on the brand/type of plate); so the bubbles wont be randomly distributed but will be in reasonably defined positions. Presumably images will be labelled by the sub-region, e.g., ' Plate X39241, Well B6, Bubble 2'. Obviously the positions of the bubble will vary slightly between the fridge and beam images, but as long as we know the camera offset, this shouldn't be  a problem.
 
@@ -67,4 +63,4 @@ The samples will be imaged repeatedly once they are in the fridge, however most 
 VMXi Workflow Diagram
 ---------------------
 
-![VMXi Workflow Diagram](img/workflow.jpg)
+![VMXi Workflow Diagram](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/img/workflow.jpg)
