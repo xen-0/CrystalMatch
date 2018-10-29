@@ -1,9 +1,21 @@
 [![Build Status](https://travis-ci.com/DiamondLightSource/CrystalMatch.svg?branch=master)](https://travis-ci.com/DiamondLightSource/CrystalMatch)
 [![Coverage Status](https://coveralls.io/repos/github/DiamondLightSource/CrystalMatch/badge.svg?branch=master)](https://coveralls.io/github/DiamondLightSource/CrystalMatch?branch=master)
 [![PyPI version](https://badge.fury.io/py/CrystalMatch.svg)](https://badge.fury.io/py/CrystalMatch)
+[![Downloads](https://pepy.tech/badge/crystalmatch)](https://pepy.tech/project/crystalmatch)
 
 VMXi Crystal Image Matching Readme
 ==================================
+
+Installation
+---------
+CrystalMatch requires openCV version 2.4.10 which can be downloaded from:
+* [OpenCV](https://opencv.org/releases.html)
+
+Once OpenCV is there CrystalMatch can be installed by running:
+
+```
+pip install CrystalMatch
+```
 
 Background
 ----------
@@ -16,7 +28,7 @@ User Guide
 ----------
 This section is a guide for users of the application
 
-*[The User Guide](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/user_guide.md)
+* [The User Guide](https://github.com/DiamondLightSource/CrystalMatch/blob/master/docs/user_guide.md)
 
 Developer Guide
 ---------------

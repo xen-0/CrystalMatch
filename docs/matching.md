@@ -3,7 +3,7 @@ Crystal Matching
 
 As discussed in the previous section, the main task that this program needs to be able to perform is to be able to locate a crystal that has been marked in one image in a second image that is taken at a later time.
 
-There are therefore 3 inputs: the 'before' image (Image 1), the location of the crystal in image 1 (x, y coordinates), and the after image (Image 2).
+There are therefore 3 inputs: the 'before' image (Image 1), the location of the crystal in image 1 (x, y coordinates), and the after image (or a set of images to be stacked into one all-in-focus) (Image 2).
 
 
 

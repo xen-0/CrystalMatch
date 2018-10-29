@@ -49,38 +49,35 @@ Using the Source Code - Windows
     * During installation, make sure you check ‘Add python.exe to system path’.
     
 * The following packages are required:
-    * enum
-    * numpy
-    * OpenCV
-    * PyQt5
-    * mock (Testing only - standard in Python v3.3+ but required for unit tests to run under v2.7)
-    * nose_parameterized (Testing only)
-    * workflows - written by Markus Gerstel (Diamond GDA group).  This is required for ActiveMQ integration in the Focus Stacking service.
+    * numpy==1.11.1
+    * OpenCV==2.4.10
+    * scipy==0.19.1
+    * pygelf==0.3.1
+    * mock==1.0.1 (Testing only - standard in Python v3.3+ but required for unit tests to run under v2.7)
+    * parameterized (Testing only)
     
-* Some of these packages can be installed using `pip`. To do this:
+* Most of these packages can be installed using `pip`. To do this:
     * Open cmd.exe (being sure to ‘Run as Administrator’)
     * Upgrade pip by typing `pip install –-upgrade pip`
-    * Install enum by typing `pip install enum`
+    * Install enum by typing `pip install parametrized`
     
-* The easiest way to install the other packages is to download the precompiled binaries from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>. To install each one, open cmd.exe and type `pip install filename`. Download the most recent version of each for your version of Python (2.7, 32bit). For OpenCV you should get version 2 rather than 3 if available, as some features may not work under version 3:
-    * NOTE: the packages below are outdated - see `requirements.txt`
-    * numpy-1.11.0+mkl-cp27-cp27m-win32.whl
-    * opencv_python-2.4.12-cp27-none-win32.whl
-    * PyQt4-4.11.4-cp27-none-win32.whl
+* The only package which cannot be installed using 'pip' is openCV. Download the right version of [OpenCV](https://opencv.org/releases.html) and install it after doing all the pip installations.
 
 
 Running from the Command Line
 -----------------------------
 
-To run the service from the command line the root directory of project (ie: the root of the git repository) must be added to the `PYTHONPATH` environment variable.
-
-The service can be run without this step but the `PYTHONPATH` variable must be defined in the command as follows:
+To run the service from the command line from a CrystalMatch script without the focusing phase:
 
 ```
-PYTHONPATH="[path-to-source-directory]" python [./path/to/script]main_service.py [marked-image] [target-image] [x,y ...]
+CrystalMatch[marked-image] [target-image] [x,y ...]
 ```
 
-NOTE: A `config` directory will be added to the current working directory unless an alternate path is specified using the flag `--config ./path/to/dir`.
+or with the focusing phase:
+
+```
+CrystalMatch[marked-image] [set-of-z-level-images] [x,y ...]
+```
 
 
 Unit Testing
@@ -88,11 +85,14 @@ Unit Testing
 
 Unit tests have been in-lined with the module structure - unit tests for a class will be located in a file named `test_[file name]`.
 
-In order to run unit tests in Pycharm right-click on a python module and select "Run unittests" - this will run all unit tests in the module and any sub-modules. If you are not using Pycharm the `nose` library can be used to similar effect.
+In order to run unit tests in Pycharm right-click on a python module and select "Run unittests" - this will run all unit tests in the module and any sub-modules.
+
+[Travis](https://travis-ci.org/) has been configured to run all unittests after every push to the github repository to provide an effective integration.
 
 The professional (paid licence) edition of Pycharm incorporates the `coverage` Python library which provides a rough indication of how much of the code is covered by unit tests.  The `coverage` tool can be run outside of Pycharm but has not been tested.
 
 **NOTE:** System tests also use the python `unittest` framework, running all tests in the repository will take considerably longer than running only the unit tests.
+
 
 System Tests
 ------------
@@ -102,6 +102,8 @@ At the time of writing system testing does not cover the application exhaustivel
 System tests are located in the `system-tests` directory of the repository. A custom System Testing Framework has been constructed which runs the algorithm and outputs the results to output directories named `sys_test_output` which are ignored by the git repository.  The framework should be self-documenting and will not be described here in detail.
 
 The System Test Framework is based on the standard python `unittest` library (note that this will need to be installed during setup for Python 2.7). System Tests can be run in the same manner as unit tests but may require the `PYTHONPATH` variable to be added if you are not using Pycharm.
+
+Travis does not run system tests due to lack of pip support for the used openCV version. This can be changed when the code is upgraded to use openCV v3.
 
 The base `SystemTest` class extends `unittest.TestCase` - each `test_` method in a unit test class should cause the application to run once using the method `run_crystal_matching_test(test_name, cmd_line_args)`.  This will generate an output directory which contains the stdout and stderr in file form as well as the config directory and any file system output from the application itself.  The parent class `SystemTest` provides a series of helper methods which are primarily aimed at rapid testing of content in the output directory (including stdout).
 
