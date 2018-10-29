@@ -5,7 +5,7 @@ Changes merged into master
 --------------------------
 | Jira Task | Type | Description |
 |-----------|------|-------------|
-
+|VMXI-511   |Patch | Update docs  |
 
 Change Types:
 * Major - Backward incompatible change
