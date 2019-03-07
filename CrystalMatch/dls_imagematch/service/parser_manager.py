@@ -1,6 +1,4 @@
-from pkg_resources import require
-require("numpy==1.11.1")
-require("scipy==0.19.1")
+
 
 import argparse
 import logging
@@ -221,7 +219,8 @@ class ParserManager:
                 log.info("Directory created: " + directory)
             except OSError:
                 log.error("Could not create find/create directory, path may be invalid: " + directory)
-                exit(1)
+                raise OSError("Could not create find/create directory, path may be invalid:")
+
 
     @staticmethod
     def _check_is_file(path):
@@ -229,7 +228,7 @@ class ParserManager:
             log = logging.getLogger(".".join([__name__]))
             log.addFilter(logconfig.ThreadContextFilter())
             log.error("Could not find the file, file may not been saved: " + path)
-            exit(1)
+            raise OSError("Could not find the file, file may not been saved")
 
     @staticmethod
     def _sort_files_according_to_names(focusing_path):

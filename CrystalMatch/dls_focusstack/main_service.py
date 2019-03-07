@@ -1,10 +1,5 @@
-from pkg_resources import require
-
 from CrystalMatch.dls_imagematch import logconfig
 
-require('pygelf==0.3.1')
-require("numpy==1.11.1")
-require("scipy==0.19.1")
 import argparse
 import logging
 

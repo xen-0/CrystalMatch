@@ -1,12 +1,8 @@
-from pkg_resources import require
-require('pygelf==0.3.1')
-require("numpy==1.11.1")
-require("scipy==0.19.1")
-
 import logging
 import logging.handlers
 import time
 import os
+import pygelf
 
 from CrystalMatch.dls_imagematch.service.parser_manager import ParserManager
 from CrystalMatch.dls_imagematch.service.service import CrystalMatch

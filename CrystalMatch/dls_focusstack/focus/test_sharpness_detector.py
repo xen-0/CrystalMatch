@@ -1,6 +1,4 @@
-from pkg_resources import require
-require("numpy==1.11.1")
-require("mock==1.0.1")
+
 from unittest import TestCase
 
 from CrystalMatch.dls_focusstack.focus.sharpness_detector import SharpnessDetector

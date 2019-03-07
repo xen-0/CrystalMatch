@@ -11,6 +11,7 @@ import logging.handlers
 import getpass
 import threading
 import version
+import pygelf
 
 MAXBYTES = 1048576
 BACKUPCOUNT = 20
