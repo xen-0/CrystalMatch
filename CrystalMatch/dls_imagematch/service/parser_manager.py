@@ -137,8 +137,10 @@ class ParserManager:
         return selected_points
 
     def get_focused_image(self):
+        focusing_used=False
         focusing_path = abspath(self.get_args().beamline_stack_path)
         if "." not in focusing_path:
+            focusing_used = True
             files = self._sort_files_according_to_names(focusing_path)
             # Run focusstack
             stacker = FocusStack(files, self.get_args().config)
@@ -147,7 +149,7 @@ class ParserManager:
             self.images_to_stack = stacker.get_fft_images_to_stack()
         else:
             focused_image = Image(cv2.imread(focusing_path))
-        return focused_image
+        return focused_image, focusing_used
 
     def get_fft_images_to_stack(self):
         return self.images_to_stack
