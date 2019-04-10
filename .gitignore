@@ -9,6 +9,8 @@ test-output
 sys_test_output
 /dist
 
+/build
+
 /CrystalMatch/logs
 
 venv*
